@@ -1465,11 +1465,12 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                         ${event.eventKind != "activity" ? statusBadge:""}${escapeHtml(event.title)}
                     </div>
                     <div class="dashboard-today-subtitle ${getStatusLabel(status) == "PAST"?"text-black-50":""}">
+                        ${event.eventType == "SYS-TRAINING" ? `<h5 class="font-weight-semi-bold text-primary font-16">School System Training</h5>`:``}
                         ${
                             /*${USER_ROLE == "STUDENT" ? getEventSubtitle(event):event.eventTitle+' '+`<b class="${getStatusLabel(status) == "PAST"?"text-black-50":"text-dark"}">${getEventSubtitle(event)}</b>`}${getStatusLabel(status) == "PAST" && (event.eventKind != "assignment" && event.eventKind != "activity") ?`&nbsp;<label class="m-0 font-weight-semi-bold" style="color:${getDisplayStatusColor(getEventDisplayStatus(event), event.eventKind, event.courseId)}">${joinStatusLabel}</label>`:""} */''
                         }
                         ${USER_ROLE == "STUDENT" ? getEventSubtitle(event):`<b class="${getStatusLabel(status) == "PAST"?"text-black-50":"text-dark"}">${getEventSubtitle(event)}</b>`}${getStatusLabel(status) == "PAST" && (event.eventKind != "assignment" && event.eventKind != "activity") ?`&nbsp;<label class="m-0 font-weight-semi-bold" style="color:${getDisplayStatusColor(getEventDisplayStatus(event), event.eventKind, event.courseId)}">${joinStatusLabel}</label>`:""}
-                        ${(event.category !="BATCH" && event.category == "CLASS" && event.eventType != "CUSTOM" && event.eventType != "PTM") ? `<span class="full font-weight-semi-bold ${getStatusLabel(status) == "PAST"?"text-black-50":"text-dark"}">${USER_ROLE == "TEACHER" ? `Student Name: ${event.origName}`:`Teacher Name: ${event.salutation}&nbsp;${event.origName}`} </span>`:``}
+                        ${(event.category !="BATCH" && event.category == "CLASS" && event.eventType != "CUSTOM" && event.eventType != "PTM") ? `<span class="full font-weight-semi-bold ${getStatusLabel(status) == "PAST"?"text-black-50":"text-dark"}">${USER_ROLE == "TEACHER" ? `Student Name: ${event.origName}`:`${event.eventType == "SYS-TRAINING" ? `Admin Name: ${event.salutation}&nbsp;${event.origName}`:``}`} </span>`:``}
                     </div>
                 </div>
             </div>`;

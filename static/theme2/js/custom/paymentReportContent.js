@@ -193,7 +193,7 @@ function cardDetailsSummary(data){
 										</span>
 									</h6>
 									<h5 class="mb-1 font-16">
-										<span class="font-weight-bold text-primary student-name-${item.userId}" studentname="${profile.faName || ''}" studentgrade="${item.gradeName}">${item.studentName}&nbsp;&nbsp;
+										<span class="font-weight-bold text-primary student-name-${item.userId}" studentname="${profile.faName || ''}" studentgrade="${item.gradeName}" parentname="${profile.guardianName || ''}">${item.studentName}&nbsp;&nbsp;
 											<a href='javascript:void(0)' onclick="callSchoolInneraction('profile-view', '${param}', '', '8')" data-toggle="tooltip" data-placement="top" data-original-title="view profile"><i class='fa fa-eye'></i>&nbsp;</a>${whatsappButton}
 										</span>
 									</h5>
@@ -347,7 +347,7 @@ function cardDetails(data){
 										</span>
 									</h6>
 										<h5 class="mb-1 font-16">
-											<span class="font-weight-bold text-primary student-name-${item.userId}" studentname="${item.updateProfileStudentDTO.faName}" studentgrade="${item.gradeName}">${item.studentName}&nbsp;&nbsp;
+											<span class="font-weight-bold text-primary student-name-${item.userId}" studentname="${item.updateProfileStudentDTO.faName}" studentgrade="${item.gradeName}" parentname="${item.updateProfileStudentDTO.guardianName || ''}">${item.studentName}&nbsp;&nbsp;
 												${/*<a href='javascript:void(0)' onclick='getAsPost(\"/dashboard/profile-view-content?userId=${item.userId}&moduleId=8&studentStandardId=${item.studentStandardId}&actionType=1a\")' data-toggle="tooltip" data-placement="top" data-original-title="view profile"><i class='fa fa-eye'></i>&nbsp;</a>*/''}
 												<a href='javascript:void(0)' onclick="callSchoolInneraction('profile-view', '${param}', '', '8')" data-toggle="tooltip" data-placement="top" data-original-title="view profile"><i class='fa fa-eye'></i>&nbsp;</a>${whatsappButton}
 											</span>
@@ -1454,6 +1454,7 @@ function swatiBroadcastSendMobileModal(data){
 													</th>
 													<th style='width:70px;' class="text-primary">S. No.</th>
 													<th class="px-1 text-primary">Name</th>
+													<th class="px-1 text-primary">Parent Name</th>
 													<th class="rounded-top-right-5 text-primary">Phone Number</th>
 												</tr>
 											</thead>
@@ -1462,6 +1463,7 @@ function swatiBroadcastSendMobileModal(data){
 												var userId = $(checkbox).val(); 
 												var name = $(".student-name-" + userId).attr("studentname") || '';
 												var grade = $(".student-name-" + userId).attr("studentgrade") || '';
+												var parentName = $(".student-name-" + userId).attr("parentname") || '';
 
 												var phoneSet = new Set();
 												$(".parent-phone-" + userId + ", .parent-phone-alt-" + userId +
@@ -1498,9 +1500,11 @@ function swatiBroadcastSendMobileModal(data){
 																<td class="font-weight-bold">
 																	<input type="hidden" name="name" value="${name}" class="name">
 																	<input type="hidden" name="grade" value="${grade}" class="grade">
+																	<input type="hidden" name="parentName" value="${parentName}" class="parentName">
 																	${name}
 																	<span class="stmsg" id="esmsg_${userId}"></span>
 																</td>
+																<td class="font-weight-bold">${parentName || '-'}</td>
 																<td>
 																	${phones.map(p => `
 																		<input type="hidden" name="mobileNo" value="+${p}" class="mobileNo">
@@ -2066,6 +2070,7 @@ function getSelectedUsersData() {
         var userId = $(this).val();   // <-- this is leadId
         var name = row.find("input.name").val() || '';
         var grade = row.find("input.grade").val() || '';
+        var parentName = row.find("input.parentName").val() || '';
 
         // collect hidden mobile numbers in this row
 
@@ -2076,6 +2081,7 @@ function getSelectedUsersData() {
 					userId: userId,  
 					name: name,
 					grade:grade,
+					parentName: parentName,
 					mobileNo: num
 				});
             }

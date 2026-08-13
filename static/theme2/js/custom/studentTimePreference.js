@@ -26,7 +26,11 @@ function openStudentSystemTrainingPopupSafe(){
     var attempt = 0;
     function tryOpen(){
         attempt++;
-        if(window.__studentWelcomePopupFlowActive || $("#studentDashboardWelcomePopup").hasClass("show")){
+        // Also wait for the BATCH re-enrollment reminder modal to finish/close before opening the
+        // System Training popup - showing both at once causes a Bootstrap modal/backdrop collision
+        // and the training popup ends up not visibly appearing. Harmless for non-batch since that
+        // modal is only ever shown for BATCH students (showBatchReEnrollmentPopUp).
+        if(window.__studentWelcomePopupFlowActive || $("#studentDashboardWelcomePopup").hasClass("show") || $("#batchReEnrollmentModal").hasClass("show")){
             if(attempt < maxAttempts){
                 window.setTimeout(tryOpen, 200);
             }
@@ -297,7 +301,86 @@ function studentSystemTrainingShowHide(data){
         return false;
     }
     if(data['registrationType'] == 'BATCH'){
-
+        // BATCH: popup is gated purely by the BATCH-specific school setting (no academic-year check -
+        // that never applies to BATCH), and only shows the System Training info/reschedule content.
+        if(data['showSystemTrainingSelectionModelBatch'] != 'Y' || data['systemTrainingStatus'] == "Skipped"){
+            $("#timePreferencePopup").modal("hide");
+            $("#timePreferencePopup").addClass("d-none");
+            return false;
+        }
+        // Never interrupt a BATCH student who already has a valid semester start date on their
+        // Student Standard - System Training for BATCH must only surface before that date exists.
+        if(data['semesterStartDate'] != null && data['semesterStartDate'] != '' && data['semesterStartDate'] != undefined){
+            $("#timePreferencePopup").modal("hide");
+            $("#timePreferencePopup").addClass("d-none");
+            return false;
+        }
+        // NOTE: unlike the check above (which already confirmed showSystemTrainingSelectionModelBatch
+        // == 'Y' and status isn't Skipped), we deliberately do NOT additionally hide based on
+        // enrollmentType here. This used to unconditionally hide the popup for any migration-type
+        // enrollment (NEXT_GRADE, COMPLETE_GRADES, IMPROVE_GRADES, REPEAT_GRADE), which is exactly
+        // why System Training never showed for BATCH students going through migration. Migration
+        // students should see it too, same as non-batch (non-batch only hides for migration types
+        // when the setting is 'N' - see the equivalent check further below for non-batch).
+        // Same video/modal-size treatment as the one-to-one popup below - identical condition,
+        // so BATCH gets the same look (video thumbnail + modal-xl when a video is configured).
+        if(data.videoUrl == "N"){
+            $("#timePreferencePopup .modal-dialog").removeClass("modal-xl");
+            $("#timePreferencePopup .modal-dialog").addClass("modal-lg");
+            $("#thumbnailFrameDiv").hide()
+            $("#timePreferenceDiv").removeClass("col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12");
+            $("#timePreferenceDiv").addClass("col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12");
+        }else{
+            if(data.vedioWatchedStatus != null && data.vedioWatchedStatus != undefined && data.vedioWatchedStatus == 'Y'){
+                flagWatchVideo = true;
+            }else{
+                flagWatchVideo = false;
+            }
+            $("#timePreferencePopup .modal-dialog").addClass("modal-xl");
+            $("#timePreferencePopup .modal-dialog").removeClass("modal-lg");
+            $("#thumbnailFrameDiv").show()
+            $("#timePreferenceDiv").addClass("col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12");
+            $("#timePreferenceDiv").removeClass("col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12");
+        }
+        $("#closeButton").hide();
+        $("#enrollmentType").val(data['enrollmentType']);
+        $("#regstrationType").val(data['registrationType']);
+        if(data['orientationAcceptanceStatus']=='A'){
+            var msgHtmlBatch = "";
+            if(data['orientStatus']!='COMPLETED'){
+                $("#timePreferencePopup").removeClass("d-none");
+            }else{
+                $("#timePreferencePopup").modal("hide");
+                $("#timePreferencePopup").addClass("d-none");
+                return false;
+            }
+            $("#orientAndSemesterChangeSpanHeading").text("School System Training");
+            if(data['orientStatus']=='RESCHEDULE'){
+                msgHtmlBatch = msgHtmlBatch +"<div class='p-2 border rounded-10' style='border-color: #007fff !important;'><p class='mb-2 text-primary font-weight-semi-bold' style='font-size:18px'>Your school System Training has been rescheduled. </p><p class='mb-0 text-primary font-weight-semi-bold' style='font-size:18px'>Please click below and select another date for the training.</p><p class='mt-3 mb-0'><a href='"+data.rescheduleOrientationUrl+"' class='btn btn-success font-size-lg py-1 px-5' target='_blank'>Reschedule</a></p></div>";
+            }else{
+                msgHtmlBatch+="<div class='p-2 border rounded-10' style='border-color: #007fff !important;'> <p class='mb-3 text-primary font-weight-semi-bold' style='font-size:18px'>Your School System Training is on "+data['orientationdateTimeInStudentTimeZone']+".</p><p class='mt-3 mb-1'><a  href='javascript:void(0);' onclick='classDetailsOnModal(\""+data.joinOrientationUrl+"\");' class='btn btn-success font-size-lg py-1 px-3'>Join</a></p></div>";
+                msgHtmlBatch+="<p class='mb-0 mt-2 text-primary font-weight-semi-bold' style='font-size:16px'>If you wish to reschedule,  please <a href='"+data.rescheduleOrientationUrl+"' class='text-primary' style='text-decoration:underline' target='_blank'>click here</a></p>";
+            }
+            $("#thankyouClassesMsg").html(msgHtmlBatch);
+            $("#thankyouClassesMsg").show();
+            $("#sartDateWrapper, .timeSlotWrapper").hide();
+            $("#studentTimeSkipPrev").hide();
+            $("#studentTimeSkipNext").hide();
+            $('#startTimeAndEndTimeWrapper').show();
+            $('#hideAllData').hide();
+            $("#studentTimeSave").hide();
+            $("#closeButton").show();
+            $("#studentTimeSave").text("Confirm");
+        }else{
+            $('#orientationDateWrapper').show();
+            $('#orientationTimeWrapper').show();
+            $('#orientationAcceptanceStatusDiv').hide();
+        }
+        // Actually trigger the popup to become visible (mirrors the non-batch path below).
+        // Without this call the modal HTML above is built/populated but Bootstrap's
+        // modal("show") is never invoked, so removing "d-none" alone never makes it appear -
+        // this was the root cause of the BATCH popup not showing at all.
+        showStudentDashboardWelcomeThenSystemTraining();
     }else{
         if(data.videoUrl == "N"){
             $("#timePreferencePopup .modal-dialog").removeClass("modal-xl");

@@ -64,6 +64,52 @@ function ensurePaymentReportCommunicationLogLoaded(studentStandardId, userId){
 	}
 }
 
+function bindPaymentReportStudentSelectionEvents(){
+	$("#selectStudentAll").off('click.paymentReportSelect').on('click.paymentReportSelect', function () {
+		var studentnew = $("#studentIdMove").val();
+		var chkAll = this;
+		var chkRows = $("#studentPaymentReportTable").find(".checkStudent");
+		chkRows.each(function () {
+			$(this)[0].checked = chkAll.checked;
+		});
+		var studentNo = '';
+		$.each($("input[name='student-move-another']:checked"), function(){
+			if(studentnew.indexOf($(this).val()) == -1){
+				studentNo = studentNo + ',' + $(this).val();
+			}
+		});
+		studentnew = studentnew + studentNo;
+		$("#studentIdMove").val(studentnew);
+		if(!$("#selectStudentAll").is(":checked")){
+			$("#studentIdMove").val('');
+		}
+	});
+
+	// Delegated so checkboxes still work after loadPaymentReportTab replaces the row.
+	$("#studentPaymentReportTable").off('click.paymentReportSelect', '.checkStudent')
+		.on('click.paymentReportSelect', '.checkStudent', function () {
+		var studentnew = $("#studentIdMove").val() || '';
+		var chkAll = $("#selectStudentAll");
+		chkAll.prop('checked', true);
+		$("#studentPaymentReportTable .checkStudent").each(function () {
+			if (!$(this).is(":checked")) {
+				chkAll.prop('checked', false);
+				if(studentnew.indexOf($(this).val()) != -1){
+					studentnew = studentnew.replace(","+$(this).val(), '');
+				}
+			}
+		});
+		var studentNo = '';
+		$.each($("input[name='student-move-another']:checked"), function(){
+			if(studentnew.indexOf($(this).val()) == -1){
+				studentNo = studentNo + ',' + $(this).val();
+			}
+		});
+		studentnew = studentnew + studentNo;
+		$("#studentIdMove").val(studentnew);
+	});
+}
+
 function initializePaymentReportFullRow(studentStandardId, userId, tabKey){
 	var $row = $("#payment-report-row-" + studentStandardId);
 	$row.find(".re-leadstatus").select2({
@@ -71,6 +117,7 @@ function initializePaymentReportFullRow(studentStandardId, userId, tabKey){
 	});
 	bindPaymentReportAccordions($row);
 	bindPaymentReportTabEvents();
+	bindPaymentReportStudentSelectionEvents();
 	$('[data-toggle="tooltip"]').tooltip({
 		html: true
 	});
@@ -119,6 +166,10 @@ function loadPaymentReportTab(tabKey, studentStandardId, userId){
 			$row.replaceWith(cardDetails({reports:[report]}));
 			if(isChecked){
 				$("#student-" + userId).prop('checked', true);
+				var studentIds = $("#studentIdMove").val() || '';
+				if(studentIds.indexOf(String(userId)) == -1){
+					$("#studentIdMove").val(studentIds + ',' + userId);
+				}
 			}
 			initializePaymentReportFullRow(studentStandardId, userId, tabKey);
 			$("#payment-report-tab-" + tabKey + "-" + studentStandardId).tab('show');
@@ -315,52 +366,8 @@ function getPaymentReportData(formId, forCountOnly, type, callFrom){
 				}
 			}
 			$("body").append(getWatiTemplatesHtml());
-			$("#selectStudentAllDiv").attr("class","block")
-			$("#selectStudentAll").off('click').on('click', function () {
-				var studentnew = $("#studentIdMove").val();
-				var chkAll = this;
-				let chkRows = $("#studentPaymentReportTable").find(".checkStudent");
-				chkRows.each(function () {
-					$(this)[0].checked = chkAll.checked;
-				});
-				var studentNo='';
-				$.each($("input[name='student-move-another']:checked"), function(){
-					if(studentnew.indexOf($(this).val()) != -1){
-					}else{
-						studentNo = studentNo+','+$(this).val();
-					}
-				});
-				studentnew = studentnew + studentNo;
-				$("#studentIdMove").val(studentnew);
-				if($("#selectStudentAll").is(":checked")){}
-				else{
-					$("#studentIdMove").val('');
-				}
-			});
-			$(".checkStudent").off('click').on('click', function () {
-				var studentnew = $("#studentIdMove").val();
-				var chkAll = $("#selectStudentAll");
-				chkAll.attr("checked", "checked");
-				$("#studentPaymentReportTable .checkStudent").each(function () {
-					if (!$(this).is(":checked")) {
-						chkAll.prop('checked', false);
-						chkAll.removeAttr("checked", "checked");
-						if(studentnew.indexOf($(this).val()) != -1){
-							studentnew = studentnew.replace(","+$(this).val(), '')
-						}
-						return;
-					}
-				});
-				var studentNo='';
-				$.each($("input[name='student-move-another']:checked"), function(){
-					if(studentnew.indexOf($(this).val()) != -1){
-					}else{
-						studentNo = studentNo+','+$(this).val();
-					}  
-				});
-				studentnew = studentnew + studentNo;
-				$("#studentIdMove").val(studentnew);
-			});
+			$("#selectStudentAllDiv").attr("class","block");
+			bindPaymentReportStudentSelectionEvents();
 			$('[data-toggle="tooltip"]').tooltip({
 				html: true
 			});
@@ -815,7 +822,8 @@ var GUPSHUP_PARAM_FIELD_OPTIONS = [
 	{ value: 'name', label: 'Name' },
 	{ value: 'grade', label: 'Grade' },
 	{ value: 'phone', label: 'Phone' },
-	{ value: 'counsellorName', label: 'Counsellor Name' }
+	{ value: 'counsellorName', label: 'Counsellor Name' },
+	{ value: 'parentName', label: 'Parent Name' }
 ];
 
 function getSelectedWhatsappBroadcastTemplateParamCount(templateData) {
@@ -842,7 +850,7 @@ function renderGupshupParamMapping(selectedTemplate) {
 		$container.empty();
 		return;
 	}
-	var defaults = ['name', 'grade', 'counsellorName', 'phone'];
+	var defaults = ['name', 'grade', 'counsellorName', 'phone', 'parentName'];
 	var html = '';
 	for (var i = 0; i < paramCount; i++) {
 		var def = defaults[i] || 'name';
@@ -1453,8 +1461,26 @@ function openSuccessFailedWatiMessages(resp_data,indexSF,templateName) {
 	usrPopDataOnResend.html(successFailedWatiMessagesModal(resp_data));
 
 	//console.log( JSON.stringify(usrPopDataOnResend.html()));
-	$("#failedWatiTableDiv").slideDown();
-	$("#successWatiTableDiv").slideUp();
+	var failedCount = (typeof fData !== 'undefined' && fData) ? fData.length : 0;
+	// Prefer failed when any exist (actionable for resend); otherwise open success.
+	var openFailed = failedCount > 0;
+
+	if (openFailed) {
+		$("#failedWatiTableDiv").show();
+		$("#successWatiTableDiv").hide();
+		$("#failedWatiDiv").css("cursor", "default");
+		$("#successWatiDiv").css("cursor", "pointer");
+		$("#chevron_failed").removeClass("fa-chevron-down").addClass("fa-chevron-up");
+		$("#chevron_success").removeClass("fa-chevron-up").addClass("fa-chevron-down");
+	} else {
+		$("#successWatiTableDiv").show();
+		$("#failedWatiTableDiv").hide();
+		$("#successWatiDiv").css("cursor", "default");
+		$("#failedWatiDiv").css("cursor", "pointer");
+		$("#chevron_success").removeClass("fa-chevron-down").addClass("fa-chevron-up");
+		$("#chevron_failed").removeClass("fa-chevron-up").addClass("fa-chevron-down");
+	}
+
 	$("#successWatiTable").dataTable();
 
 	//if($("#successFailedWatiMessagesModal").length < 1) {
@@ -1475,13 +1501,7 @@ function openSuccessFailedWatiMessages(resp_data,indexSF,templateName) {
         // ]
     });
 
-	$("#successWatiDiv").css("cursor", "pointer");
-	$("#failedWatiDiv").css("cursor", "default");
-
-	$("#chevron_failed").removeClass("fa-chevron-up").addClass("fa-chevron-down");
-	$("#chevron_success").removeClass("fa-chevron-down").addClass("fa-chevron-up");
-
-	$("#successWatiDiv").click(function() {
+	$("#successWatiDiv").off("click").on("click", function() {
 		$("#successWatiTableDiv").slideDown(500);
 		$("#failedWatiTableDiv").slideUp(500);
 		$("#failedWatiDiv").css("cursor", "pointer");
@@ -1491,7 +1511,7 @@ function openSuccessFailedWatiMessages(resp_data,indexSF,templateName) {
 		$("#chevron_failed").removeClass("fa-chevron-up").addClass("fa-chevron-down");
 	});
 
-	$("#failedWatiDiv").click(function() {
+	$("#failedWatiDiv").off("click").on("click", function() {
 		$("#failedWatiTableDiv").slideDown(500);
 		$("#successWatiTableDiv").slideUp(500);
 		$("#successWatiDiv").css("cursor", "pointer");
