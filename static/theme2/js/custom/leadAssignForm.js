@@ -78,12 +78,42 @@ function getLeadAssignUser(objectRights) {
 								}
 								initializeLeadRuleEditors(assignUserList);
 							}
+							applyScheduledEventLeadAssignRestriction();
 					}, 600);	
                     
                 }
                 
 			}
 	   });
+   }
+
+   /**
+    * When the logged-in user is NOT allowed (present in the
+    * SCHEDULED_EVENT_RECORDINGS_ACCESS_USERS setting), lock down the whole Lead
+    * Assign Form: disable every input, toggle, select and button on the page,
+    * keeping ONLY the "getAvailability" (calendar) action clickable.
+    * Re-invoked after every table render so it also covers freshly built rows.
+    */
+   function applyScheduledEventLeadAssignRestriction(){
+	if(!isScheduledEventRecordingUserNotAllowed()){
+		return;
+	}
+	var $scope = $('#dashboardContentInHTML');
+	if($scope.length === 0){
+		return;
+	}
+	// Disable all form fields and native buttons within the page scope.
+	$scope.find('input, select, textarea, button').prop('disabled', true);
+	// Prevent interaction with select2 enhanced widgets (their container is a sibling).
+	$scope.find('.select2-container').css({'pointer-events':'none','opacity':'0.6'});
+	// Neutralise anchor-based action buttons, EXCEPT the getAvailability calendar button.
+	$scope.find('a').each(function(){
+		var onclick = ($(this).attr('onclick') || '');
+		if(onclick.indexOf('getAvailability') !== -1){
+			return; // keep availability button clickable
+		}
+		$(this).addClass('disabled').css({'pointer-events':'none','opacity':'0.6'});
+	});
    }
 
 

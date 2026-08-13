@@ -1,0 +1,1 @@
+function isScheduledEventRecordingUserNotAllowed(){var e=getSettingsByTypeAndKey("CONFIGURATION","SCHEDULED_EVENT_RECORDINGS_ACCESS_USERS"),t=JSON.parse(e),a=t&&t.data&&t.data.metaValue?t.data.metaValue:"";if(""==a)return!1;var n=a.split(",").map((function(e){return $.trim(e)})),r=!1;return $.each(n,(function(e,t){t==USER_ID&&(r=!0)})),r}
