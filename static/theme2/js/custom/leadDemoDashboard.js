@@ -98,6 +98,17 @@ function bindLeadDemoDashboardEvents() {
         fetchLeadDemoDashboardAll();
     });
 
+    // Academic Counselor applies immediately on selection (no Search click needed). select2's programmatic
+    // updates use the namespaced 'change.select2', so this plain 'change' handler only fires on real user picks.
+    $('#lddCounselorFilter').off('change').on('change', function () {
+        LEAD_DEMO_DASHBOARD_STATE.counselor = parseInt($(this).val(), 10) || 0;
+        LEAD_DEMO_DASHBOARD_STATE.leadPage = 0;
+        LEAD_DEMO_DASHBOARD_STATE.demoPage = 0;
+        LEAD_DEMO_DASHBOARD_STATE.agingPage = 0;
+        resetLeadDemoDashboardAiInsights();
+        fetchLeadDemoDashboardAll();
+    });
+
     $('#lddResetBtn').off('click').on('click', function () {
         LEAD_DEMO_DASHBOARD_STATE.range = 'today';
         LEAD_DEMO_DASHBOARD_STATE.campaign = '';
@@ -1241,13 +1252,15 @@ function renderLeadDemoDashboardResponseHealth(data) {
             + '<div class="text-muted" style="font-size:11px; text-transform:uppercase; letter-spacing:.03em; margin-bottom:6px;">Oldest Pending Leads (not yet contacted) '
                 + '<span style="text-transform:none; font-weight:400;">&mdash; ' + agingTotalCount + ' not-yet-contacted lead(s) total</span></div>'
             + '<div class="table-responsive"><table class="table table-sm table-bordered" style="font-size:12px;">'
-                + '<thead><tr class="bg-primary text-white"><th>Lead</th><th>Campaign | Country</th><th>Academic Counselor</th><th>Waiting</th></tr></thead>'
+                + '<thead><tr class="bg-primary text-white"><th>S.No.</th><th>Lead</th><th>Campaign | Country</th><th>Academic Counselor</th><th>Type</th><th>Waiting</th></tr></thead>'
                 + '<tbody>'
-                + data.agingLeads.map(function (l) {
+                + data.agingLeads.map(function (l, i) {
                     return '<tr>'
+                        + '<td>' + ((LEAD_DEMO_DASHBOARD_STATE.agingPage * agingPageSize) + i + 1) + '</td>'
                         + '<td>' + (l.leadName || 'N/A') + '<div>' + getLeadDemoDashboardLeadNoLink(l.leadNo) + '</div></td>'
                         + '<td>' + (l.campaign || 'N/A') + '<div class="text-muted">' + (l.country || 'N/A') + '</div></td>'
                         + '<td>' + (l.counselorName || '—') + '</td>'
+                        + '<td>' + (l.hasDemo ? '<span class="ldd-badge ldd-b-green">Demo</span>' : '<span class="ldd-badge ldd-b-gray">No Demo</span>') + '</td>'
                         + '<td class="ldd-resp-slow">' + (l.waitTime || '—') + '</td>'
                     + '</tr>';
                 }).join('')

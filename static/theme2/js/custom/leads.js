@@ -5962,13 +5962,14 @@ function sendWatiNotificationToUser(indexNo,templateName,leadID, d_status) {
 	request['templateId']=selectedTemplate && selectedTemplate.templateId ? selectedTemplate.templateId : "";
 	request['templateParamCount']=getSelectedWhatsappBroadcastTemplateParamCount(selectedTemplate);
 	request['provider']=providerMeta.key;
-	if (providerMeta.key === 'GUPSHUP') {
-		var mapping = collectGupshupParamMapping(getSelectedWhatsappBroadcastTemplateParamCount(selectedTemplate));
-		if (mapping === null) {
-			showMessageTheme2(0, 'Please map all template placeholders before sending','',false);
-			return false;
-		}
-		request['paramMapping'] = mapping;
+	var mapping = collectGupshupParamMapping(getSelectedWhatsappBroadcastTemplateParamCount(selectedTemplate));
+	if (mapping === null) {
+		showMessageTheme2(0, 'Please map all template placeholders before sending','',false);
+		return false;
+	}
+	request['paramMapping'] = mapping;
+	if (selectedTemplate && Array.isArray(selectedTemplate.customParams)) {
+		request['templateParamNames'] = selectedTemplate.customParams.map(function(p) { return p.paramName || ''; });
 	}
 	//request['broadcastName']="broadcastName";
 	//request['userData']="userData";
@@ -7857,7 +7858,8 @@ function getSelectedWhatsappBroadcastTemplate(indexNo) {
 }
 
 var GUPSHUP_PARAM_FIELD_OPTIONS = [
-	{ value: 'name', label: 'Name' },
+	{ value: 'firstName', label: 'First Name' },
+	{ value: 'fullName', label: 'Full Name' },
 	{ value: 'grade', label: 'Grade' },
 	{ value: 'phone', label: 'Phone' },
 	{ value: 'counsellorName', label: 'Counsellor Name' }
@@ -7869,15 +7871,15 @@ function renderGupshupParamMapping(selectedTemplate) {
 	if (!$wrap.length || !$container.length) { return; }
 	var providerMeta = getCurrentWhatsappBroadcastProviderMeta();
 	var paramCount = getSelectedWhatsappBroadcastTemplateParamCount(selectedTemplate);
-	if (!providerMeta || providerMeta.key !== 'GUPSHUP' || paramCount <= 0) {
+	if (!providerMeta || paramCount <= 0) {
 		$wrap.hide();
 		$container.empty();
 		return;
 	}
-	var defaults = ['name', 'grade', 'counsellorName', 'phone'];
+	var defaults = ['fullName', 'grade', 'counsellorName', 'phone'];
 	var html = '';
 	for (var i = 0; i < paramCount; i++) {
-		var def = defaults[i] || 'name';
+		var def = defaults[i] || 'fullName';
 		html += '<div class="d-flex align-items-center" style="gap:4px;">';
 		html += '<span style="font-size:13px;">{{' + (i + 1) + '}} &rarr;</span>';
 		html += '<select class="form-control form-control-sm gupshup-param-map" data-index="' + i + '" style="width:auto;font-size:13px;">';

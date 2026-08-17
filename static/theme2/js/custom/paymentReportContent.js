@@ -68,7 +68,7 @@ function paymentReport(){
 					+'<div class="search full mr-auto" style="max-width:450px">'
 						+'<input type="text" id="studentName"  placeholder="Search by Student Name, Email, Country/ City or Student-Id" class="form-control border-0 text-primary" style="background: #f0f9ff;"/>'
 					+'</div>'
-					+'<button class=" btn btn-primary  text-white  btn-full-mobile mr-2" onclick="getWatiBroadcastTemplates()">Wati Broadcast</button>'
+					+'<button class=" btn btn-primary  text-white  btn-full-mobile mr-2" onclick="getWatiBroadcastTemplates(\'WATI\')">Wati Broadcast</button>'
 					+'<button class=" btn btn-success text-white  btn-full-mobile mr-2" onclick="getWatiBroadcastTemplates(\'GUPSHUP\')">Gupshup Broadcast</button>'
 					+'<button class=" btn btn-primary  text-white  btn-full-mobile mr-2" onclick="getWatiLogsFilterRecords()">Broadcast Logs</button>'
 					+'<button class=" btn btn-focus text-white btn-full-mobile mr-2" onclick="getEmailBroadcastTemplates()">Email Broadcast</button>'
@@ -1323,21 +1323,9 @@ function swatiBroadcastContentModal(data){
 																</a>
 															</td>
 															<td class="text-center">`;
-																if(element.customParams == null || element.customParams == undefined ||  element.customParams.length==0){ //console.log('only those not having parameters');
-																	html+=`<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="sendWatiNotification(\'`+templateName+`\',`+index+`)">
-																		Select<i class="pe-7s-paper-plane font-size-lg ml-1"></i>
-																	</a>`;
-																}else if(element.customParams.length==1 && element.customParams[0].paramName=='name'){ //console.log('only 1 name');
-																	html+=`<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="sendWatiNotification(\'`+templateName+`\',`+index+`)">
-																		Select<i class="pe-7s-paper-plane font-size-lg ml-1"></i>
-																	</a>`;
-																}else if(element.customParams.length==2  && (element.customParams[0].paramName=='name' || element.customParams[0].paramName=='grade')){ //console.log('only name and grade');
-																	html+=`<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="sendWatiNotification(\'`+templateName+`\',`+index+`)">
-																		Select<i class="pe-7s-paper-plane font-size-lg ml-1"></i>
-																	</a>`;
-																}else{
-																	//console.log('other more data');
-																}
+																html+=`<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="sendWatiNotification(\'`+templateName+`\',`+index+`)">
+																	Select<i class="pe-7s-paper-plane font-size-lg ml-1"></i>
+																</a>`;
 															html+=`</td>
 														</tr>`;
 													});
@@ -1649,28 +1637,9 @@ function customWatiTemplatesList(tdata){
 																	</a>
 																</td>
 																<td style="vertical-align: middle !important;" class="text-center">`;
-																	if(element.customParams == null || element.customParams == undefined ||  element.customParams.length==0){ 
-																		html+=`<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="sendWatiNotification(\'`+templateName+`\',`+index+`)">
-																			Select<i class="pe-7s-paper-plane font-size-lg ml-1"></i>
-																		</a>`;
-																	}else if((element.customParams.length>0 && element.customParams.length<3) && (element.customParams.some(cpdata => cpdata['paramName'] == 'name') || element.customParams.some(cpdata => cpdata['paramName'] == 'grade'))){ 
-																		html+=`<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="sendWatiNotification(\'`+templateName+`\',`+index+`)">
-																			Select<i class="pe-7s-paper-plane font-size-lg ml-1"></i>
-																		</a>`;
-																	}else if(element.customParams.length==1 && element.customParams[0].paramName=='name'){ 
-																		html+=`<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="sendWatiNotification(\'`+templateName+`\',`+index+`)">
-																			Select<i class="pe-7s-paper-plane font-size-lg ml-1"></i>
-																		</a>`;
-																	}else if(element.customParams.length==1  && (element.customParams[0].paramName=='name' || element.customParams[0].paramName=='grade')){ 
-																		html+=`<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="sendWatiNotification(\'`+templateName+`\',`+index+`)">
-																			Select<i class="pe-7s-paper-plane font-size-lg ml-1"></i>
-																		</a>`;
-																	}else if(element.customParams.length==1  && (element.customParams[0].paramName=='grade')){ 
-																		html+=`<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="sendWatiNotification(\'`+templateName+`\',`+index+`)">
-																			Select<i class="pe-7s-paper-plane font-size-lg ml-1"></i>
-																		</a>`;
-																	}else{
-																	}
+																	html+=`<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="sendWatiNotification(\'`+templateName+`\',`+index+`)">
+																		Select<i class="pe-7s-paper-plane font-size-lg ml-1"></i>
+																	</a>`;
 																html+=`</td>
 															</tr>`;
 														srNo++;
