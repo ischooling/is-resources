@@ -2,9 +2,13 @@
    Student Feedback (Received) — page template
    Data comes from studentFeedbackReceived.js:
      - SUMMARY → POST teacher-evaluation/rating/student-feedback
+                 (profile, periods, summary + rating distribution, first page)
      - LIST    → POST teacher-evaluation/rating/student-feedback/list
-   Profile header + period selector + anonymity notice + slim summary bar +
-   filter bar (parameter/question/rating/sort/search) + anonymous feedback cards.
+                 (date-filtered + paginated feedback responses)
+     - DETAIL  → POST teacher-evaluation/rating/student-feedback/detail
+                 (per-question ratings + comments for one response — modal)
+   Feedback is anonymous: only the overall rating and submitted DATE are shown
+   in the list; the modal reveals each question's rating and comment.
    ========================================================================== */
 
 function getStudentFeedbackReceivedPageContent(title) {
@@ -41,84 +45,40 @@ function getStudentFeedbackReceivedPageContent(title) {
     </div>
 
     <!-- ====================== ANONYMITY NOTICE ====================== -->
-    <div class="d-flex align-items-center mb-3" style="gap:10px;background:#e8f0fe;border:1px solid #bbdefb;border-radius:10px;padding:12px 16px">
-        <i class="fa fa-eye-slash" style="font-size:18px;color:#1565c0;flex-shrink:0"></i>
+    <div class="d-flex align-items-start mb-3" style="gap:10px;background:#e6f4ea;border:1px solid #b7e0c4;border-radius:10px;padding:12px 16px">
+        <i class="fa fa-eye-slash" style="font-size:18px;color:#1e8a3c;flex-shrink:0;margin-top:1px"></i>
         <div style="font-size:12px;color:#1a1a2e;line-height:1.5">
             <strong>Student identities are kept private.</strong> Feedback is shown anonymously — you can see the rating, the question, the comment and the date it was submitted, but never who wrote it or the exact time. This keeps feedback honest and protects your students.
         </div>
     </div>
 
-    <!-- ====================== SLIM SUMMARY BAR ====================== -->
-    <div class="card mb-3" style="border:1px solid #e8eaed">
-        <div class="card-body py-2 d-flex align-items-center flex-wrap" style="gap:20px">
-            <div class="d-flex align-items-center" style="gap:8px">
-                <i class="fa fa-star" style="font-size:18px;color:#1565c0"></i>
-                <div><span style="font-size:16px;font-weight:700" id="sfrMiniAvg">0.0</span> <span style="font-size:11px;color:#5f6368;text-transform:uppercase;letter-spacing:.4px">Avg rating</span></div>
-                <span id="sfrMiniStars" style="line-height:1"></span>
-            </div>
-            <div style="width:1px;height:26px;background:#e8eaed"></div>
-            <div class="d-flex align-items-center" style="gap:8px">
-                <i class="fa fa-comments" style="font-size:18px;color:#1565c0"></i>
-                <div><span style="font-size:16px;font-weight:700" id="sfrMiniCount">0</span> <span style="font-size:11px;color:#5f6368;text-transform:uppercase;letter-spacing:.4px">Responses</span></div>
-            </div>
-            <div style="width:1px;height:26px;background:#e8eaed"></div>
-            <div class="d-flex align-items-center" style="gap:8px">
-                <i class="fa fa-thumbs-up" style="font-size:18px;color:#1565c0"></i>
-                <div><span style="font-size:16px;font-weight:700" id="sfrMiniPos">0%</span> <span style="font-size:11px;color:#5f6368;text-transform:uppercase;letter-spacing:.4px">Rated 4&#9733; &amp; above</span></div>
-            </div>
-        </div>
-    </div>
+    <!-- ====================== OVERVIEW (avg + distribution) ====================== -->
+    <div class="row" id="sfrOverview"></div>
 
-    <!-- ====================== FILTER BAR ====================== -->
-    <div class="card shadow-sm mb-3">
-        <div class="card-body">
-            <div class="d-flex align-items-center mb-2" style="gap:7px">
-                <i class="fa fa-sliders text-primary"></i>
-                <span class="font-weight-bold text-uppercase" style="font-size:12px;letter-spacing:.4px">Filter feedback</span>
+    <!-- ====================== SECTION HEAD + DATE FILTER ====================== -->
+    <div class="d-flex align-items-center justify-content-between flex-wrap mb-2" style="gap:12px">
+        <h5 class="font-weight-bold text-primary mb-0" style="font-size:16px">All feedback comments</h5>
+        <div class="d-flex align-items-end flex-wrap" style="gap:8px">
+            <div class="form-group custom-field mb-0 is-filled" style="flex:0 0 170px;max-width:170px">
+                <select class="form-control" id="sfrRange">
+                    <option value="all">Full period</option>
+                    <option value="today">Today</option>
+                    <option value="yesterday">Yesterday</option>
+                    <option value="month">This month</option>
+                    <option value="custom">Custom range</option>
+                </select>
+                <label class="font-weight-bold mb-1">Date range</label>
             </div>
-            <div class="row align-items-end">
-                <div class="col-md-3 mb-2">
-                    <div class="form-group custom-field mb-0 is-filled">
-                        <select class="form-control" id="sfrParam"></select>
-                        <label class="font-weight-bold mb-1">Parameter</label>
-                    </div>
+            <div id="sfrCustomRange" class="d-none align-items-end" style="gap:8px">
+                <div class="form-group custom-field mb-0" style="flex:0 0 150px;max-width:150px">
+                    <input type="text" class="form-control" id="sfrStartDate" placeholder=" " autocomplete="off" onkeydown="return false" style="background:#fff;cursor:pointer">
+                    <label class="font-weight-bold mb-1">From</label>
                 </div>
-                <div class="col-md-3 mb-2">
-                    <div class="form-group custom-field mb-0 is-filled">
-                        <select class="form-control" id="sfrQuestion"></select>
-                        <label class="font-weight-bold mb-1">Question</label>
-                    </div>
+                <div class="form-group custom-field mb-0" style="flex:0 0 150px;max-width:150px">
+                    <input type="text" class="form-control" id="sfrEndDate" placeholder=" " autocomplete="off" onkeydown="return false" style="background:#fff;cursor:pointer">
+                    <label class="font-weight-bold mb-1">To</label>
                 </div>
-                <div class="col-md-2 mb-2">
-                    <div class="form-group custom-field mb-0 is-filled">
-                        <select class="form-control" id="sfrRating">
-                            <option value="all">All ratings</option>
-                            <option value="pos">Positive (4&#9733; &amp; above)</option>
-                            <option value="neg">Needs attention (3&#9733; &amp; below)</option>
-                        </select>
-                        <label class="font-weight-bold mb-1">Rating</label>
-                    </div>
-                </div>
-                <div class="col-md-2 mb-2">
-                    <div class="form-group custom-field mb-0 is-filled">
-                        <select class="form-control" id="sfrSort">
-                            <option value="recent">Most recent</option>
-                            <option value="highest">Highest rated</option>
-                            <option value="lowest">Lowest rated</option>
-                        </select>
-                        <label class="font-weight-bold mb-1">Sort by</label>
-                    </div>
-                </div>
-                <div class="col-md-2 mb-2">
-                    <div class="form-group custom-field mb-0">
-                        <input type="text" class="form-control" id="sfrSearch" placeholder="Search comment" autocomplete="off">
-                        <label class="font-weight-bold mb-1">Search Comment</label>
-                    </div>
-                </div>
-                <div class="col-12 col-md-auto mb-2 ml-md-auto text-md-right">
-                    <button class="btn btn-success btn-lg mr-2" onclick="applyStudentFeedbackFilter()"><i class="fa fa-search mr-1"></i>Search</button>
-                    <button class="btn btn-danger btn-lg" onclick="resetStudentFeedbackFilter()"><i class="fa fa-refresh mr-1"></i>Reset</button>
-                </div>
+                <button class="btn btn-success d-flex align-items-center justify-content-center px-4 mb-0" style="height:48px" onclick="applyStudentFeedbackDateRange()"><i class="fa fa-search"></i></button>
             </div>
         </div>
     </div>
@@ -128,7 +88,32 @@ function getStudentFeedbackReceivedPageContent(title) {
     <div class="row" id="sfrGrid"></div>
 
     <div class="text-center mt-3" id="sfrLoadMoreWrap" style="display:none">
-        <button class="btn btn-outline-primary" id="sfrLoadMoreBtn" onclick="loadMoreStudentFeedback()">Load more feedback</button>
+        <button class="btn btn-outline-primary" id="sfrLoadMoreBtn" onclick="loadMoreStudentFeedback()">Load more</button>
+    </div>
+
+    <!-- ====================== FEEDBACK DETAIL MODAL ====================== -->
+    <div class="modal fade" id="sfrDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable shadow-none" role="document">
+            <div class="modal-content shadow-none">
+                <div class="modal-header py-2 bg-primary text-white">
+                    <h5 class="modal-title"><i class="fa fa-comments mr-2"></i>Feedback Details</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"><i class="fa fa-times"></i></span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex align-items-center justify-content-center flex-wrap mb-3" style="gap:10px;background:#f4f6fb;border-radius:10px;padding:12px">
+                        <span class="text-uppercase font-weight-bold" style="font-size:12px;letter-spacing:.4px;color:#5f6368">Overall rating</span>
+                        <span id="sfrDetailStars"></span>
+                        <span class="font-weight-bold" id="sfrDetailScore" style="font-size:13px"></span>
+                    </div>
+                    <div id="sfrDetailItems"></div>
+                    <p class="d-flex align-items-center justify-content-center text-muted mt-2 mb-0" style="gap:6px;font-size:12px">
+                        <i class="fa fa-user-circle-o"></i> Identity hidden to protect student privacy
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 
     </div>

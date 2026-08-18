@@ -1,71 +1,126 @@
 /* ============================================================================
    Student Feedback (Received) — logged-in teacher's own student feedback
      - SUMMARY → POST teacher-evaluation/rating/student-feedback
-                 (profile, periods, summary, parameter/question options + first page)
+                 (profile, periods, summary + ratingDistribution, first page)
      - LIST    → POST teacher-evaluation/rating/student-feedback/list
-                 (filtered + paginated feedback entries, drives Search & Load more)
-   Feedback is anonymous: only rating, question, comment and submitted DATE are shown.
+                 (date-filtered + paginated feedback responses; Load more)
+     - DETAIL  → POST teacher-evaluation/rating/student-feedback/detail
+                 (per-question ratings + comments for one response; modal)
+   Feedback is anonymous: the list shows only the overall rating + submitted
+   DATE; the modal reveals each question's rating and comment.
    ========================================================================== */
 
 var sfrState = {
     userId:         null,
-    role:           'Teacher',
     periods:        [],
     selectedPeriod: null,
     summary:        {},
-    parameters:     [],
-    questions:      [],
     limit:          6,
     nextOffset:     0,
     hasMore:        false,
     totalCount:     0,
     loadedCount:    0,
-    loading:        false
+    loading:        false,
+    activeRange:    'all'
 };
 
 // ─── On load ────────────────────────────────────────────────────────────────
 
 function studentFeedbackReceivedOnLoad() {
     sfrState.userId = (typeof USER_ID !== 'undefined') ? USER_ID : null;
+    sfrState.activeRange = 'all';
     initStudentFeedbackFilters();
     loadStudentFeedbackSummary(true);
 }
 
 function initStudentFeedbackFilters() {
-    $('#sfrPeriodId, #sfrParam, #sfrQuestion, #sfrRating, #sfrSort').select2({
+    $('#sfrPeriodId, #sfrRange').select2({
         theme: 'bootstrap4',
         minimumResultsForSearch: Infinity,
         width: '100%'
     });
 
-    // Period switch → reload the whole summary for that period
+    initStudentFeedbackDatepickers();
+
+    // Period switch → reset date range to full period, reload everything
     $('#sfrPeriodId').on('change', function () {
         var pid = parseInt($(this).val()) || null;
         if (pid && (!sfrState.selectedPeriod || sfrState.selectedPeriod.id != pid)) {
             sfrState.selectedPeriod = (sfrState.periods || []).find(function (p) { return p.id == pid; }) || sfrState.selectedPeriod;
+            resetStudentFeedbackDateRange();
             loadStudentFeedbackSummary(false);
         }
     });
 
-    // Parameter change only rebuilds the (dependent) question dropdown — it does
-    // NOT re-filter. Filters apply only when Search is clicked / Enter is pressed.
-    $('#sfrParam').on('change', function () {
-        populateStudentFeedbackQuestionDropdown();
-    });
-
-    $('#sfrSearch').on('keypress', function (e) {
-        if (e.which === 13) applyStudentFeedbackFilter();
+    // Date-range switch → reload overview + comments for that range
+    $('#sfrRange').on('change', function () {
+        sfrState.activeRange = $(this).val() || 'all';
+        var isCustom = sfrState.activeRange === 'custom';
+        $('#sfrCustomRange').toggleClass('d-none', !isCustom).toggleClass('d-flex', isCustom);
+        if (!isCustom) loadStudentFeedbackSummary(false);
     });
 }
 
+// ─── Custom-range datepickers (display "Jul 28, 2026", value read as yyyy-mm-dd)
+
+function initStudentFeedbackDatepickers() {
+    var $s = $('#sfrStartDate'), $e = $('#sfrEndDate');
+    if (!$s.length || typeof $s.datepicker !== 'function') return;
+
+    $s.datepicker('destroy');
+    $e.datepicker('destroy');
+
+    var options = { format: 'M dd, yyyy', autoclose: true, todayHighlight: true, orientation: 'bottom auto' };
+    $s.datepicker(options);
+    $e.datepicker(options);
+
+    // Picking "From" always clears "To" and forces it to be >= "From"
+    $s.off('changeDate.sfr').on('changeDate.sfr', function (ev) {
+        var start = ev.date || $s.datepicker('getDate');
+        $e.datepicker('clearDates');
+        $e.datepicker('setStartDate', start || null);
+        sfrRefreshField($s);
+        sfrRefreshField($e);
+    });
+    $e.off('changeDate.sfr').on('changeDate.sfr', function () { sfrRefreshField($e); });
+
+    applyStudentFeedbackPickerBounds();
+}
+
+// keep both pickers within the selected evaluation period
+function applyStudentFeedbackPickerBounds() {
+    var p = sfrState.selectedPeriod;
+    var $s = $('#sfrStartDate'), $e = $('#sfrEndDate');
+    if (!p || !$s.length || typeof $s.datepicker !== 'function') return;
+
+    var start = sfrParseYmd(p.startDate);
+    var end   = sfrParseYmd(p.endDate);
+    $s.datepicker('setStartDate', start || null).datepicker('setEndDate', end || null);
+    var curStart = $s.datepicker('getDate');
+    $e.datepicker('setStartDate', curStart || start || null).datepicker('setEndDate', end || null);
+}
+
+// re-sync the floating-label "filled" state after a programmatic value change
+function sfrRefreshField($el) {
+    if (typeof refreshCustomFieldState === 'function') {
+        refreshCustomFieldState($el.closest('.custom-field'));
+    }
+}
+
 // ─── Star / colour helpers (0–2.5 red · 2.6–3.74 yellow · 3.75–5 green) ──────
-// Same tiers as trStarColor / tmrStarColor used across the evaluation module.
 
 function sfrStarColor(rating) {
     var r = Number(rating) || 0;
     if (r < 2.6) return '#d93025';
     if (r < 3.75) return '#fbbc04';
     return '#1e8a3c';
+}
+
+// distribution band colours — strong (green) · average (amber) · needs (red)
+function sfrBandColor(key) {
+    if (key === 'strong') return '#1e8a3c';
+    if (key === 'average') return '#fbbc04';
+    return '#d93025';
 }
 
 // fractional fill — 4.8 renders as 4 full stars + one 80%-filled star:
@@ -80,11 +135,13 @@ function sfrStarsHtml(rating, fontSize) {
         greyRow  += '<i class="fa fa-star" style="color:#e0e0e0"></i>';
         colorRow += '<i class="fa fa-star" style="color:' + color + '"></i>';
     }
-    return '<span style="position:relative;display:inline-block;line-height:1;font-size:' + size + 'px;letter-spacing:2px;vertical-align:middle">' +
+    return '<span style="position:relative;display:inline-block;line-height:1;font-size:' + size + 'px;vertical-align:middle">' +
                '<span style="white-space:nowrap">' + greyRow + '</span>' +
                '<span style="position:absolute;top:0;left:0;width:' + pct + '%;overflow:hidden;white-space:nowrap">' + colorRow + '</span>' +
            '</span>';
 }
+
+// ─── Date helpers ────────────────────────────────────────────────────────────
 
 function sfrParseYmd(ymd) {
     if (!ymd) return null;
@@ -99,6 +156,46 @@ function sfrFmtDate(ymd) {
     return d ? changeDateFormat(d, 'MMM DD, YYYY') : '—';
 }
 
+function sfrIsoDate(d) {
+    var m = String(d.getMonth() + 1).padStart(2, '0');
+    var day = String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '-' + m + '-' + day;
+}
+
+// Resolve the active date-range dropdown to {startDate, endDate} for the list API
+function resolveStudentFeedbackDateRange() {
+    var period = sfrState.selectedPeriod || {};
+    var full = { startDate: period.startDate || null, endDate: period.endDate || null };
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    switch (sfrState.activeRange) {
+        case 'today':
+            return { startDate: sfrIsoDate(today), endDate: sfrIsoDate(today) };
+        case 'yesterday':
+            var y = new Date(today);
+            y.setDate(y.getDate() - 1);
+            return { startDate: sfrIsoDate(y), endDate: sfrIsoDate(y) };
+        case 'month':
+            var first = new Date(today.getFullYear(), today.getMonth(), 1);
+            var last = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            return { startDate: sfrIsoDate(first), endDate: sfrIsoDate(last) };
+        case 'custom':
+            var cs = $('#sfrStartDate').datepicker('getDate');
+            var ce = $('#sfrEndDate').datepicker('getDate');
+            return {
+                startDate: cs ? sfrIsoDate(cs) : full.startDate,
+                endDate:   ce ? sfrIsoDate(ce) : full.endDate
+            };
+        default:
+            return full;
+    }
+}
+
+function applyStudentFeedbackDateRange() {
+    loadStudentFeedbackSummary(false);
+}
+
 function sfrEscape(s) {
     return String(s == null ? '' : s)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -109,16 +206,16 @@ function sfrIsSuccess(response) {
     return response && (response.status === '1' || response.statusCode === 'SUCCESS');
 }
 
-// ─── API: summary (profile + options + first page) ──────────────────────────
+// ─── API: summary (profile + overview + first page) ──────────────────────────
 
 async function loadStudentFeedbackSummary(isInitial) {
     var period = sfrState.selectedPeriod;
+    var range = resolveStudentFeedbackDateRange();
     var payload = {
-        userId:          sfrState.userId,
-        periodId:        period ? period.id : null,
-        roleUnderReview: sfrState.role,
-        startDate:       period ? period.startDate : null,
-        endDate:         period ? period.endDate : null
+        userId:    sfrState.userId,
+        periodId:  period ? period.id : null,
+        startDate: range.startDate,
+        endDate:   range.endDate
     };
     try {
         var response = await callCommonAjax({
@@ -133,8 +230,6 @@ async function loadStudentFeedbackSummary(isInitial) {
             sfrState.periods        = d.periods || [];
             sfrState.selectedPeriod = d.selectedPeriod || sfrState.selectedPeriod;
             sfrState.summary        = d.summary || {};
-            sfrState.parameters     = d.parameters || [];
-            sfrState.questions      = d.questions || [];
 
             renderStudentFeedbackProfile(d.profile || {});
 
@@ -143,14 +238,12 @@ async function loadStudentFeedbackSummary(isInitial) {
                 populateStudentFeedbackPeriodSelect(sfrState.periods, sfrState.selectedPeriod ? sfrState.selectedPeriod.id : null);
             }
 
-            renderStudentFeedbackMini(sfrState.summary);
+            renderStudentFeedbackOverview(sfrState.summary);
 
-            // fresh summary → filters back to defaults, rebuild option lists
-            resetStudentFeedbackFilterFields();
-            populateStudentFeedbackParamDropdown();
-            populateStudentFeedbackQuestionDropdown();
+            // keep the custom-range pickers limited to the selected period
+            applyStudentFeedbackPickerBounds();
 
-            // the summary call already returns the first (unfiltered) page
+            // the summary call already returns the first page for the active range
             var pg = d.pagination || {};
             sfrState.totalCount  = pg.totalCount != null ? pg.totalCount : (d.feedbackEntries || []).length;
             sfrState.loadedCount = (d.feedbackEntries || []).length;
@@ -183,7 +276,7 @@ function populateStudentFeedbackPeriodSelect(periods, selectedId) {
     }
 }
 
-// ─── Profile header + slim summary ──────────────────────────────────────────
+// ─── Profile header ──────────────────────────────────────────────────────────
 
 function renderStudentFeedbackProfile(profile) {
     var fullName = profile.userFullName || ((typeof USER_FULL_NAME !== 'undefined' && USER_FULL_NAME) ? USER_FULL_NAME : '');
@@ -206,60 +299,102 @@ function renderStudentFeedbackProfile(profile) {
     }
 }
 
-function renderStudentFeedbackMini(summary) {
+// ─── Overview: average rating card + rating distribution donut ────────────────
+
+function renderStudentFeedbackOverview(summary) {
     var avg = summary.averageRating != null ? Number(summary.averageRating) : 0;
-    $('#sfrMiniAvg').text(avg.toFixed(1));
-    $('#sfrMiniStars').html(sfrStarsHtml(avg));
-    $('#sfrMiniCount').text(summary.responseCount != null ? summary.responseCount : 0);
-    $('#sfrMiniPos').text((summary.positivePercentage != null ? Math.round(summary.positivePercentage) : 0) + '%');
+    var total = summary.responseCount != null ? summary.responseCount : 0;
+    var dist = summary.ratingDistribution || [];
+
+    var slices = dist.map(function (b) {
+        return {
+            key:   b.key,
+            label: b.label,
+            count: b.count || 0,
+            pct:   b.percentage != null ? Math.round(b.percentage) : 0,
+            color: sfrBandColor(b.key)
+        };
+    });
+
+    var legend = slices.map(function (s) {
+        return '' +
+        '<div class="mb-2">' +
+            '<div class="d-flex align-items-center mb-1" style="gap:8px;font-size:12.5px">' +
+                '<span style="width:10px;height:10px;border-radius:3px;background:' + s.color + ';flex-shrink:0"></span>' +
+                '<span style="flex:1;font-weight:600;color:#5f6368">' + sfrEscape(s.label) + '</span>' +
+                '<span style="font-weight:700;color:#1a1a2e">' + s.count +
+                    ' <span style="color:#98a2b3;font-weight:600;font-size:11.5px">(' + s.pct + '%)</span></span>' +
+            '</div>' +
+            '<div style="height:6px;border-radius:4px;background:#f0f2f5;overflow:hidden">' +
+                '<div style="height:100%;border-radius:4px;width:' + s.pct + '%;background:' + s.color + '"></div>' +
+            '</div>' +
+        '</div>';
+    }).join('');
+
+    var avgLabel = summary.averageRatingLabel || (avg.toFixed(1) + '/5');
+
+    var avgCard =
+        '<div class="col-lg-4 col-md-5 mb-3 d-flex">' +
+            '<div class="card w-100" style="border:1px solid #e8eaed;border-top:3px solid var(--pc,#007fff)">' +
+                '<div class="card-body">' +
+                    '<div class="text-uppercase font-weight-bold mb-2" style="font-size:11px;letter-spacing:.4px;color:#5f6368">Average rating</div>' +
+                    '<div style="font-size:34px;font-weight:700;color:#1a1a2e;line-height:1">' + avg.toFixed(1) +
+                        '<span style="font-size:15px;color:#5f6368;font-weight:700"> / 5</span></div>' +
+                    '<div class="mt-2">' + sfrStarsHtml(avg, 16) + '</div>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+
+    var distCard =
+        '<div class="col-lg-8 col-md-7 mb-3 d-flex">' +
+            '<div class="card w-100" style="border:1px solid #e8eaed;border-top:3px solid var(--pc,#007fff)">' +
+                '<div class="card-body">' +
+                    '<div class="text-uppercase font-weight-bold mb-2" style="font-size:11px;letter-spacing:.4px;color:#5f6368">Rating distribution</div>' +
+                    '<div class="d-flex align-items-center flex-wrap" style="gap:24px">' +
+                        sfrDonutSvg(slices, total) +
+                        '<div style="flex:1;min-width:220px">' + (legend || '<span class="text-muted small">No responses yet.</span>') + '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+
+    $('#sfrOverview').html(avgCard + distCard);
 }
 
-// ─── Filter dropdown population ──────────────────────────────────────────────
+// donut: one rounded arc per non-empty band, sized by share of the total
+function sfrDonutSvg(slices, total) {
+    var size = 150, cx = size / 2, cy = size / 2, r = 58, strokeW = 18;
+    var circumference = 2 * Math.PI * r;
+    var active = slices.filter(function (s) { return s.count > 0; });
+    var gap = active.length > 1 ? 3 : 0;
+    var offset = 0;
+    var segs = '';
 
-function populateStudentFeedbackParamDropdown() {
-    var $el = $('#sfrParam');
-    if ($el.hasClass('select2-hidden-accessible')) $el.select2('destroy');
+    if (!total || !active.length) {
+        segs = '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="#e8eaed" stroke-width="' + strokeW + '"/>';
+    } else {
+        active.forEach(function (s) {
+            var rawLen = (s.count / total) * circumference;
+            var len = Math.max(rawLen - gap, 0);
+            var dash = len + ' ' + (circumference - len);
+            segs += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + s.color + '" stroke-width="' + strokeW +
+                    '" stroke-linecap="round" stroke-dasharray="' + dash + '" stroke-dashoffset="' + (-offset) +
+                    '" transform="rotate(-90 ' + cx + ' ' + cy + ')"/>';
+            offset += rawLen;
+        });
+    }
 
-    var total = 0;
-    (sfrState.parameters || []).forEach(function (p) { total += (p.count || 0); });
-    if (!total && sfrState.summary && sfrState.summary.responseCount != null) total = sfrState.summary.responseCount;
-
-    var html = '<option value="all">All parameters</option>';
-    (sfrState.parameters || []).forEach(function (p) {
-        html += '<option value="' + p.parameterId + '">' + sfrEscape(p.parameterName) + ' (' + (p.count || 0) + ')</option>';
-    });
-    $el.html(html).val('all');
-    $el.select2({ theme: 'bootstrap4', minimumResultsForSearch: Infinity, width: '100%' });
-    if (typeof refreshCustomFieldState === 'function') refreshCustomFieldState($el.closest('.custom-field'));
-}
-
-// Question dropdown depends on the selected parameter; always resets to "All questions"
-function populateStudentFeedbackQuestionDropdown() {
-    var $el = $('#sfrQuestion');
-    if ($el.hasClass('select2-hidden-accessible')) $el.select2('destroy');
-
-    var paramVal = $('#sfrParam').val();
-    var list = (sfrState.questions || []).filter(function (q) {
-        return paramVal === 'all' || String(q.parameterId) === String(paramVal);
-    });
-
-    var html = '<option value="all">All questions</option>';
-    list.forEach(function (q) {
-        var lbl = (paramVal === 'all' && q.parameterName)
-            ? (q.parameterName + ' — ' + q.questionText)
-            : q.questionText;
-        html += '<option value="' + q.questionId + '">' + sfrEscape(lbl) + ' (' + (q.count || 0) + ')</option>';
-    });
-    $el.html(html).val('all');
-    $el.select2({ theme: 'bootstrap4', minimumResultsForSearch: Infinity, width: '100%' });
-    if (typeof refreshCustomFieldState === 'function') refreshCustomFieldState($el.closest('.custom-field'));
+    return '' +
+    '<div style="position:relative;flex-shrink:0;width:' + size + 'px;height:' + size + 'px">' +
+        '<svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '">' + segs + '</svg>' +
+        '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none">' +
+            '<div style="font-size:24px;font-weight:700;color:#1a1a2e;line-height:1">' + total + '</div>' +
+            '<div style="font-size:10px;font-weight:700;color:#98a2b3;text-transform:uppercase;letter-spacing:.4px;margin-top:2px">Total</div>' +
+        '</div>' +
+    '</div>';
 }
 
 // ─── API: filtered / paginated list ─────────────────────────────────────────
-
-function applyStudentFeedbackFilter() {
-    loadStudentFeedbackList(true);
-}
 
 function loadMoreStudentFeedback() {
     loadStudentFeedbackList(false);
@@ -271,23 +406,16 @@ async function loadStudentFeedbackList(reset) {
 
     if (reset) sfrState.nextOffset = 0;
 
-    var period   = sfrState.selectedPeriod;
-    var paramVal = $('#sfrParam').val();
-    var qVal     = $('#sfrQuestion').val();
+    var period = sfrState.selectedPeriod;
+    var range = resolveStudentFeedbackDateRange();
 
     var payload = {
-        userId:          sfrState.userId,
-        periodId:        period ? period.id : null,
-        roleUnderReview: sfrState.role,
-        startDate:       period ? period.startDate : null,
-        endDate:         period ? period.endDate : null,
-        parameterId:     (paramVal && paramVal !== 'all') ? parseInt(paramVal, 10) : null,
-        questionId:      (qVal && qVal !== 'all') ? parseInt(qVal, 10) : null,
-        ratingType:      $('#sfrRating').val() || 'all',
-        sortBy:          $('#sfrSort').val() || 'recent',
-        search:          ($('#sfrSearch').val() || '').trim(),
-        offset:          reset ? 0 : sfrState.nextOffset,
-        limit:           sfrState.limit
+        userId:    sfrState.userId,
+        periodId:  period ? period.id : null,
+        startDate: range.startDate,
+        endDate:   range.endDate,
+        offset:    reset ? 0 : sfrState.nextOffset,
+        limit:     sfrState.limit
     };
 
     var $btn = $('#sfrLoadMoreBtn');
@@ -323,50 +451,34 @@ async function loadStudentFeedbackList(reset) {
         showMessageTheme2(0, 'Failed to load feedback.');
     } finally {
         sfrState.loading = false;
-        $btn.prop('disabled', false).text('Load more feedback');
+        $btn.prop('disabled', false).text('Load more');
         customLoader(false);
     }
 }
 
-// ─── Renderers: feedback cards + footer ──────────────────────────────────────
+// ─── Renderers: feedback response cards + footer ─────────────────────────────
 
 function studentFeedbackCardHtml(f) {
-    var rating  = Number(f.ratingValue) || 0;
-    var hasComment = f.comment && String(f.comment).trim();
-    var comment = hasComment
-        ? '<div style="font-size:13px;color:#3c4043;line-height:1.6;background:#fafafa;border-left:3px solid #1565c0;border-radius:0 8px 8px 0;padding:10px 14px">' + sfrEscape(f.comment) + '</div>'
-        : '<div style="font-size:13px;color:#9aa0a6;font-style:italic;background:#fafafa;border-left:3px solid #dadce0;border-radius:0 8px 8px 0;padding:10px 14px">Rated without a written comment.</div>';
+    var rating = Number(f.overallRating) || 0;
+    var score = f.overallRatingLabel || (rating.toFixed(1) + '/5');
+    var color = sfrStarColor(rating);
 
     return '' +
     '<div class="col-lg-6 mb-3 d-flex">' +
-        '<div class="card w-100" style="border:1px solid #e8eaed">' +
-            '<div class="card-body p-3 d-flex flex-column">' +
-                '<div class="d-flex align-items-center mb-2" style="gap:12px">' +
-                    '<div class="rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;background:#e8f0fe;flex-shrink:0">' +
-                        '<i class="fa fa-user" style="color:#1565c0"></i>' +
+        '<div class="card w-100 sfr-card" style="border:1px solid #e8eaed;cursor:pointer" onclick="openStudentFeedbackDetail(' + f.feedbackResponseId + ')">' +
+            '<div class="card-body p-3 d-flex align-items-center justify-content-between" style="gap:12px">' +
+                '<div>' +
+                    '<div class="font-weight-bold" style="font-size:13px;color:#1a1a2e">' +
+                        '<i class="fa fa-calendar-o text-muted mr-1"></i>' + sfrFmtDate(f.submittedDate) +
                     '</div>' +
-                    '<div>' +
-                        '<div class="font-weight-bold d-flex align-items-center" style="font-size:13px;gap:6px">' +
-                            sfrEscape(f.anonymousLabel || 'Anonymous Student') +
-                            '<i class="fa fa-lock text-muted" style="font-size:12px" title="Identity hidden"></i>' +
-                        '</div>' +
-                        '<div class="text-muted d-flex align-items-center mt-1" style="font-size:11px;gap:4px">' +
-                            '<i class="fa fa-calendar-o"></i>' + sfrFmtDate(f.submittedDate) +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="ml-auto text-right" style="flex-shrink:0">' +
-                        '<div>' + sfrStarsHtml(rating) + '</div>' +
-                        '<div class="text-muted mt-1" style="font-size:11px">' + rating.toFixed(1) + ' / 5</div>' +
+                    '<div class="mt-1" style="font-size:12px;font-weight:700;color:var(--pc,#007fff)">' +
+                        'View feedback details <i class="fa fa-arrow-right" style="font-size:10px"></i>' +
                     '</div>' +
                 '</div>' +
-                (f.parameterName
-                    ? '<span class="d-inline-flex align-items-center align-self-start text-uppercase font-weight-bold mb-2" style="gap:5px;background:#f1f3f4;color:#3c4043;font-size:10px;padding:3px 10px;border-radius:20px;letter-spacing:.3px"><i class="fa fa-tag"></i>' + sfrEscape(f.parameterName) + '</span>'
-                    : '') +
-                '<div class="d-flex align-items-start mb-2" style="gap:6px;font-size:12px;color:#1565c0;font-weight:600;line-height:1.45">' +
-                    '<i class="fa fa-question-circle" style="margin-top:1px;flex-shrink:0"></i>' +
-                    '<span>' + sfrEscape(f.questionText || '') + '</span>' +
+                '<div class="d-inline-flex align-items-center flex-shrink-0" style="gap:8px;background:#f4f6fb;border:1px solid #e8eaed;border-radius:20px;padding:6px 12px">' +
+                    sfrStarsHtml(rating, 14) +
+                    '<span style="font-size:13px;font-weight:700;color:' + color + '">' + sfrEscape(score) + '</span>' +
                 '</div>' +
-                comment +
             '</div>' +
         '</div>' +
     '</div>';
@@ -376,7 +488,7 @@ function renderStudentFeedbackCards(entries, append) {
     var $grid = $('#sfrGrid');
     if (!append) {
         if (!entries || !entries.length) {
-            $grid.html('<div class="col-12 text-center text-muted py-5"><i class="fa fa-search fa-2x mb-2 d-block"></i>No feedback matches your filters.</div>');
+            $grid.html('<div class="col-12 text-center text-muted py-5"><i class="fa fa-comments-o fa-2x mb-2 d-block"></i>No feedback in this period.</div>');
             return;
         }
         $grid.html(entries.map(studentFeedbackCardHtml).join(''));
@@ -387,28 +499,95 @@ function renderStudentFeedbackCards(entries, append) {
 
 function updateStudentFeedbackFooter() {
     if (sfrState.totalCount > 0) {
-        $('#sfrResultCount').html('Showing <strong>' + sfrState.loadedCount + '</strong> of <strong>' + sfrState.totalCount + '</strong> feedback entries');
+        $('#sfrResultCount').html('Showing <strong>' + sfrState.loadedCount + '</strong> of <strong>' + sfrState.totalCount + '</strong> feedback responses');
     } else {
         $('#sfrResultCount').text('');
     }
     $('#sfrLoadMoreWrap').toggle(!!sfrState.hasMore);
 }
 
-// ─── Reset ───────────────────────────────────────────────────────────────────
+// ─── API: single response detail (modal) ─────────────────────────────────────
 
-// resets only the field values/UI (no reload) — used on fresh summary loads
-function resetStudentFeedbackFilterFields() {
-    $('#sfrRating').val('all');
-    $('#sfrSort').val('recent');
-    $('#sfrSearch').val('');
-    if ($('#sfrRating').hasClass('select2-hidden-accessible')) $('#sfrRating').trigger('change.select2');
-    if ($('#sfrSort').hasClass('select2-hidden-accessible'))   $('#sfrSort').trigger('change.select2');
+async function openStudentFeedbackDetail(feedbackResponseId) {
+    if (!feedbackResponseId) return;
+    var period = sfrState.selectedPeriod;
+    var payload = {
+        userId:             sfrState.userId,
+        periodId:           period ? period.id : null,
+        feedbackResponseId: feedbackResponseId
+    };
+
+    $('#sfrDetailStars').html('');
+    $('#sfrDetailScore').text('');
+    $('#sfrDetailItems').html('<div class="text-center text-muted py-4"><i class="fa fa-spinner fa-spin fa-2x"></i></div>');
+    $('#sfrDetailModal').modal('show');
+
+    try {
+        var response = await callCommonAjax({
+            method: 'POST',
+            url: APP_BASE_URL + API_VERSION + 'teacher-evaluation/rating/student-feedback/detail',
+            body: payload,
+            global: false,
+            showMessage: false
+        });
+        if (sfrIsSuccess(response) && response.details) {
+            renderStudentFeedbackDetail(response.details);
+        } else {
+            $('#sfrDetailItems').html('<div class="text-center text-danger py-4">' +
+                sfrEscape((response && response.message) ? response.message : 'Failed to load feedback details.') + '</div>');
+        }
+    } catch (e) {
+        $('#sfrDetailItems').html('<div class="text-center text-danger py-4">Failed to load feedback details.</div>');
+    }
 }
 
-function resetStudentFeedbackFilter() {
-    $('#sfrParam').val('all');
-    if ($('#sfrParam').hasClass('select2-hidden-accessible')) $('#sfrParam').trigger('change.select2');
-    populateStudentFeedbackQuestionDropdown();
-    resetStudentFeedbackFilterFields();
-    applyStudentFeedbackFilter();
+function renderStudentFeedbackDetail(detail) {
+    var rating = Number(detail.overallRating) || 0;
+    var score = detail.overallRatingLabel || (rating.toFixed(1) + '/5');
+    $('#sfrDetailStars').html(sfrStarsHtml(rating, 16));
+    $('#sfrDetailScore').css('color', sfrStarColor(rating)).text(score);
+
+    var items = detail.items || [];
+    if (!items.length) {
+        $('#sfrDetailItems').html('<div class="text-center text-muted py-4">No questions in this response.</div>');
+        return;
+    }
+
+    $('#sfrDetailItems').html(items.map(function (it, idx) {
+        var r = Number(it.ratingValue) || 0;
+        var lbl = it.ratingLabel || (r.toFixed(1) + '/5');
+        var seq = it.sequenceNo != null ? it.sequenceNo : (idx + 1);
+        var hasComment = it.comment && String(it.comment).trim();
+        var comment = hasComment
+            ? '<div style="font-size:13px;color:#3c4043;line-height:1.55;background:#f4f6fb;border:1px solid #e8eaed;border-radius:8px;padding:9px 12px">' + sfrEscape(it.comment) + '</div>'
+            : '';
+
+        return '' +
+        '<div style="border:1px solid #e8eaed;border-radius:10px;padding:12px 14px;margin-bottom:10px">' +
+            '<div class="font-weight-bold' + (hasComment ? ' mb-2' : '') + '" style="font-size:13.5px;color:#1a1a2e">' + seq + '. ' + sfrEscape(it.questionText || '') + '</div>' +
+            '<div class="d-flex align-items-center' + (hasComment ? ' mb-2' : '') + '" style="gap:8px">' +
+                sfrStarsHtml(r, 14) +
+                '<span style="font-size:12.5px;font-weight:700;color:' + sfrStarColor(r) + '">' + sfrEscape(lbl) + '</span>' +
+            '</div>' +
+            comment +
+        '</div>';
+    }).join(''));
+}
+
+// ─── Reset ───────────────────────────────────────────────────────────────────
+
+function resetStudentFeedbackDateRange() {
+    sfrState.activeRange = 'all';
+    var $s = $('#sfrStartDate'), $e = $('#sfrEndDate');
+    if ($s.length && typeof $s.datepicker === 'function') {
+        $s.datepicker('clearDates');
+        $e.datepicker('clearDates');
+    } else {
+        $s.val(''); $e.val('');
+    }
+    sfrRefreshField($s);
+    sfrRefreshField($e);
+    $('#sfrCustomRange').removeClass('d-flex').addClass('d-none');
+    $('#sfrRange').val('all');
+    if ($('#sfrRange').hasClass('select2-hidden-accessible')) $('#sfrRange').trigger('change.select2');
 }

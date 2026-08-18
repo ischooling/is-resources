@@ -173,7 +173,7 @@ function tmrStarsHtml(rating) {
         greyRow  += '<i class="fa fa-star" style="color:#e0e0e0"></i>';
         colorRow += `<i class="fa fa-star" style="color:${color}"></i>`;
     }
-    return `<span style="position:relative;display:inline-block;line-height:1;font-size:16px;letter-spacing:2px"><span style="white-space:nowrap">${greyRow}</span><span style="position:absolute;top:0;left:0;width:${pct}%;overflow:hidden;white-space:nowrap">${colorRow}</span></span>`;
+    return `<span style="position:relative;display:inline-block;line-height:1;font-size:16px;vertical-align:middle"><span style="white-space:nowrap">${greyRow}</span><span style="position:absolute;top:0;left:0;width:${pct}%;overflow:hidden;white-space:nowrap">${colorRow}</span></span>`;
 }
 
 // same ranges as trDetailStatusMeta (teacherRating.js), relabeled:
@@ -231,13 +231,11 @@ function renderTmrFeedbackSections(d) {
             rows = `<tr><td colspan="4" class="text-center text-muted" style="padding:16px;font-size:13px">No parameters available.</td></tr>`;
         }
 
-        // trend graph temporarily hidden — re-enable when needed
-        // var trendBlock = `
-        //                 <div style="flex:1;min-width:220px">
-        //                     <div id="tmrTrendChart${i}"></div>
-        //                     <div class="text-center" style="font-size:11px;color:#5f6368">Rating trend across months</div>
-        //                 </div>`;
-        var trendBlock = '';
+        var trendBlock = `
+                        <div style="flex:1;min-width:220px">
+                            <div id="tmrTrendChart${i}"></div>
+                            <div class="text-center" style="font-size:11px;color:#5f6368">Rating trend across months</div>
+                        </div>`;
 
         // info bar temporarily hidden — re-enable when needed
         // var infoBar = s.infoMessage ? `
@@ -294,8 +292,7 @@ function renderTmrFeedbackSections(d) {
         </div>
         <div class="row">${cards}</div>`);
 
-    // trend graph temporarily hidden — re-enable when needed
-    // sections.forEach(function (x, i) { tmrRenderTrendChart(x.s, i, x.pal); });
+    sections.forEach(function (x, i) { tmrRenderTrendChart(x.s, i, x.pal); });
 }
 
 function tmrRenderTrendChart(section, idx, pal) {

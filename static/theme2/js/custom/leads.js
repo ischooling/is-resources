@@ -7862,7 +7862,10 @@ var GUPSHUP_PARAM_FIELD_OPTIONS = [
 	{ value: 'fullName', label: 'Full Name' },
 	{ value: 'grade', label: 'Grade' },
 	{ value: 'phone', label: 'Phone' },
-	{ value: 'counsellorName', label: 'Counsellor Name' }
+	{ value: 'counsellorName', label: 'Counsellor Name' },
+	{ value: 'demoDate', label: 'Demo Date' },
+	{ value: 'demoTime', label: 'Demo Time' },
+	{ value: 'demoDateTime', label: 'Demo Date & Time' }
 ];
 
 function renderGupshupParamMapping(selectedTemplate) {
