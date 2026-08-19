@@ -314,6 +314,8 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 		renderMeetingTimeDashboard('Lead Demo Calendar',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
 	}else if(pageNo=='lead-demo-report'){
 		renderLeadDemoReportDashboard('Lead Demo Report',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
+	}else if(pageNo=='lead-demo-report-country'){
+		renderLeadDemoReportCountryDashboard('Lead & Demo Report',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
 	}else if(pageNo=='lead-assign-form'){
 		renderLeadAssignDashboard('Lead Assign Form',roleAndModule,SCHOOL_ID,USER_ID,USER_ROLE);
 	}else if(pageNo=='referral-and-links'){
