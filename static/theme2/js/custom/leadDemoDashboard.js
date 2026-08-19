@@ -2,7 +2,8 @@ var LEAD_DEMO_DASHBOARD_STATE = {
     range: 'today',
     campaign: '',
     country: 0,
-    demoStatus: '',
+    counselor: 0,
+    demoStatus: 'CURRENT',
     contacted: '',
     searchText: '',
     leadPage: 0,
@@ -21,12 +22,13 @@ var LEAD_DEMO_DASHBOARD_AI_PRIORITY_ENABLED = true;
 var LEAD_DEMO_DASHBOARD_AI_LAST_FETCH_TIME = 0;
 var LEAD_DEMO_DASHBOARD_AI_PRIORITY_MIN_INTERVAL_MS = 20 * 60 * 1000; // matches backend's 20-min AI cache TTL
 var LEAD_DEMO_DASHBOARD_AUTO_REFRESH_TIMER = null;
+var LEAD_DEMO_DASHBOARD_LEAD_LIST_REFRESH_TIMER = null;
 
 function renderLeadDemoDashboard(title, roleAndModule, schoolId, userId, userRole) {
     ROLE_MODULE = roleAndModule;
     $('#dashboardContentInHTML').html(getLeadDemoDashboardContent(title));
     LEAD_DEMO_DASHBOARD_STATE = {
-        range: 'today', campaign: '', country: 0, demoStatus: '',
+        range: 'today', campaign: '', country: 0, counselor: 0, demoStatus: 'CURRENT',
         contacted: '', searchText: '', leadPage: 0, demoPage: 0, agingPage: 0, pageSize: 10,
         leadShowAll: false, demoShowAll: false
     };
@@ -39,6 +41,7 @@ function renderLeadDemoDashboard(title, roleAndModule, schoolId, userId, userRol
     initLeadDemoDashboardFilters();
     bindLeadDemoDashboardEvents();
     setLeadDemoDashboardAutoRefreshTimer(600);
+    setLeadDemoDashboardLeadListRefreshTimer();
     fetchLeadDemoDashboardAll();
 }
 
@@ -59,9 +62,14 @@ function initLeadDemoDashboardFilters() {
         $('#lddCountryFilter option[value=""]').text('All Countries');
     }, 1500);
 
+    // Academic Counselor — reuse the same assign-user list function the Lead Demo Report page uses (leads.js);
+    // it clears the select, adds "Select Assign" (value 0 = all), then appends each counselor "Name - (email)".
+    callLeadAssignUserList('leadDemoDashboardFilterForm', 'B2C', 'lddCounselorFilter', true, true, USER_ID);
+
     $('#lddDateRange').select2({ theme: 'bootstrap4', minimumResultsForSearch: Infinity, width: '100%' });
     $('#lddCampaignFilter').select2({ theme: 'bootstrap4', width: '100%' });
     $('#lddCountryFilter').select2({ theme: 'bootstrap4', width: '100%' });
+    $('#lddCounselorFilter').select2({ theme: 'bootstrap4', width: '100%' });
 
     $('#lddStartDate, #lddEndDate').datepicker({
         autoclose: true,
@@ -91,6 +99,18 @@ function bindLeadDemoDashboardEvents() {
     $('#lddSearchBtn').off('click').on('click', function () {
         LEAD_DEMO_DASHBOARD_STATE.campaign = $('#lddCampaignFilter').val() || '';
         LEAD_DEMO_DASHBOARD_STATE.country = parseInt($('#lddCountryFilter').val(), 10) || 0;
+        LEAD_DEMO_DASHBOARD_STATE.counselor = parseInt($('#lddCounselorFilter').val(), 10) || 0;
+        LEAD_DEMO_DASHBOARD_STATE.leadPage = 0;
+        LEAD_DEMO_DASHBOARD_STATE.demoPage = 0;
+        LEAD_DEMO_DASHBOARD_STATE.agingPage = 0;
+        resetLeadDemoDashboardAiInsights();
+        fetchLeadDemoDashboardAll();
+    });
+
+    // Academic Counselor applies immediately on selection (no Search click needed). select2's programmatic
+    // updates use the namespaced 'change.select2', so this plain 'change' handler only fires on real user picks.
+    $('#lddCounselorFilter').off('change').on('change', function () {
+        LEAD_DEMO_DASHBOARD_STATE.counselor = parseInt($(this).val(), 10) || 0;
         LEAD_DEMO_DASHBOARD_STATE.leadPage = 0;
         LEAD_DEMO_DASHBOARD_STATE.demoPage = 0;
         LEAD_DEMO_DASHBOARD_STATE.agingPage = 0;
@@ -113,7 +133,8 @@ function bindLeadDemoDashboardEvents() {
         LEAD_DEMO_DASHBOARD_STATE.range = 'today';
         LEAD_DEMO_DASHBOARD_STATE.campaign = '';
         LEAD_DEMO_DASHBOARD_STATE.country = 0;
-        LEAD_DEMO_DASHBOARD_STATE.demoStatus = '';
+        LEAD_DEMO_DASHBOARD_STATE.counselor = 0;
+        LEAD_DEMO_DASHBOARD_STATE.demoStatus = 'CURRENT';
         LEAD_DEMO_DASHBOARD_STATE.contacted = '';
         LEAD_DEMO_DASHBOARD_STATE.searchText = '';
         LEAD_DEMO_DASHBOARD_STATE.leadPage = 0;
@@ -128,12 +149,13 @@ function bindLeadDemoDashboardEvents() {
         $('#lddEndDate').datepicker('setDate', today);
         $('#lddCampaignFilter').val('').trigger('change.select2');
         $('#lddCountryFilter').val('0').trigger('change.select2');
+        $('#lddCounselorFilter').val('0').trigger('change.select2');
         $('#lddLeadSearch').val('');
         $('#lddContactFilter').val('');
         $('#lddLeadShowAll').prop('checked', false);
         $('#lddDemoShowAll').prop('checked', false);
         $('#lddDemoChips .ldd-chip').removeClass('active');
-        $('#lddDemoChips .ldd-chip[data-status=""]').addClass('active');
+        $('#lddDemoChips .ldd-chip[data-status="CURRENT"]').addClass('active');
         $('#lddAutoRefresh').val('600');
         setLeadDemoDashboardAutoRefreshTimer(600);
         $('#lddAiPriorityToggle').prop('checked', true);
@@ -344,6 +366,7 @@ function getLeadDemoDashboardRequestParams(section) {
         userId: USER_ID,
         campaign: LEAD_DEMO_DASHBOARD_STATE.campaign,
         country: LEAD_DEMO_DASHBOARD_STATE.country,
+        counselor: LEAD_DEMO_DASHBOARD_STATE.counselor,
         demoStatus: '',
         contacted: '',
         searchText: '',
@@ -402,10 +425,28 @@ function setLeadDemoDashboardAutoRefreshTimer(seconds) {
     }
 }
 
+// The Lead List always refreshes on its own fixed 1-minute cadence — independent of the Auto-refresh
+// dropdown above — so newly-created leads surface quickly. Runs silently (no spinner) and only re-fetches
+// the Lead List section, leaving the rest of the dashboard untouched.
+function setLeadDemoDashboardLeadListRefreshTimer() {
+    if (LEAD_DEMO_DASHBOARD_LEAD_LIST_REFRESH_TIMER) {
+        window.clearInterval(LEAD_DEMO_DASHBOARD_LEAD_LIST_REFRESH_TIMER);
+        LEAD_DEMO_DASHBOARD_LEAD_LIST_REFRESH_TIMER = null;
+    }
+    LEAD_DEMO_DASHBOARD_LEAD_LIST_REFRESH_TIMER = window.setInterval(function () {
+        fetchLeadDemoDashboardSection('leadList', true);
+    }, 60 * 1000);
+}
+
 // silent=true runs the section fetch without the page-wide loader — used for the background
 // AI-priority refresh so the list data shows first and the AI columns fill in later without the
 // loader spinning a second time.
 function fetchLeadDemoDashboardSection(section, silent) {
+    // global:false keeps every section OFF the shared full-page overlay; instead each section shows its own
+    // small spinner (skipped for silent background refreshes, which quietly update already-rendered data).
+    if (!silent) {
+        showLeadDemoDashboardSectionLoading(section);
+    }
     $.ajax({
         type: 'POST',
         contentType: APPLICATION_JSON_VALUE,
@@ -413,13 +454,14 @@ function fetchLeadDemoDashboardSection(section, silent) {
         data: JSON.stringify(getLeadDemoDashboardRequestParams(section)),
         dataType: 'json',
         cache: false,
-        global: !silent,
+        global: false,
         timeout: 600000,
         success: function (data) {
             if (!data || data.status === '0' || data.status === '2' || data.status === '3') {
                 if (data && data.status === '3') {
                     redirectLoginPage();
                 } else {
+                    if (!silent) { showLeadDemoDashboardSectionError(section); }
                     showMessageTheme2(0, (data && data.message) ? data.message : 'Data not found', '', true);
                 }
                 return;
@@ -427,9 +469,54 @@ function fetchLeadDemoDashboardSection(section, silent) {
             renderLeadDemoDashboardSection(section, data.data || {});
         },
         error: function () {
+            if (!silent) { showLeadDemoDashboardSectionError(section); }
             showMessageTheme2(0, 'Unable to fetch dashboard data (' + section + ').', '', true);
         }
     });
+}
+
+// Per-section loading spinner / error — each dashboard section fills independently, so the page never
+// blocks behind the slowest one. "colspan=100" spans any table width without hard-coding column counts.
+function leadDemoDashboardSectionSpinnerRow() {
+    return '<tr><td colspan="100" class="text-center" style="padding:16px;"><span class="ldd-mini-spin"></span> <span class="text-muted" style="font-size:12px;">Loading…</span></td></tr>';
+}
+function leadDemoDashboardSectionSpinnerBlock() {
+    return '<div class="text-center" style="padding:16px;"><span class="ldd-mini-spin"></span> <span class="text-muted" style="font-size:12px;">Loading…</span></div>';
+}
+function showLeadDemoDashboardSectionLoading(section) {
+    switch (section) {
+        case 'kpis':
+            $('#lddKpiLeads,#lddKpiNotContacted,#lddKpiDemos,#lddKpiRunning,#lddKpiAwaiting,#lddKpiCompleted,#lddKpiNoShow').html('<span class="ldd-mini-spin"></span>');
+            break;
+        case 'demoBoard': $('#lddDemoBoard').html(leadDemoDashboardSectionSpinnerBlock()); break;
+        case 'leadList': $('#lddLeadTableBody').html(leadDemoDashboardSectionSpinnerRow()); break;
+        case 'demoList':
+            $('#lddDemoTableBody').html(leadDemoDashboardSectionSpinnerRow());
+            $('#lddDemoFilteredHeatmap').html(leadDemoDashboardSectionSpinnerBlock());
+            break;
+        case 'campaignPerf': $('#lddCampaignTableBody').html(leadDemoDashboardSectionSpinnerRow()); break;
+        case 'countryPerf': $('#lddCountryTableBody').html(leadDemoDashboardSectionSpinnerRow()); break;
+        case 'charts': $('#lddTrendChart').html(leadDemoDashboardSectionSpinnerBlock()); break;
+        case 'counselorPerf': $('#lddCounselorTableBody').html(leadDemoDashboardSectionSpinnerRow()); break;
+        case 'responseHealth': $('#lddResponseHealthBody').html(leadDemoDashboardSectionSpinnerBlock()); break;
+    }
+}
+function showLeadDemoDashboardSectionError(section) {
+    var rowErr = '<tr><td colspan="100" class="text-center text-danger" style="padding:12px; font-size:12px;">Unable to load — please retry.</td></tr>';
+    var blockErr = '<div class="text-center text-danger" style="padding:12px; font-size:12px;">Unable to load — please retry.</div>';
+    switch (section) {
+        case 'demoBoard': $('#lddDemoBoard').html(blockErr); break;
+        case 'leadList': $('#lddLeadTableBody').html(rowErr); break;
+        case 'demoList': $('#lddDemoTableBody').html(rowErr); break;
+        case 'campaignPerf': $('#lddCampaignTableBody').html(rowErr); break;
+        case 'countryPerf': $('#lddCountryTableBody').html(rowErr); break;
+        case 'charts': $('#lddTrendChart').html(blockErr); break;
+        case 'counselorPerf': $('#lddCounselorTableBody').html(rowErr); break;
+        case 'responseHealth': $('#lddResponseHealthBody').html(blockErr); break;
+        case 'kpis':
+            $('#lddKpiLeads,#lddKpiNotContacted,#lddKpiDemos,#lddKpiRunning,#lddKpiAwaiting,#lddKpiCompleted,#lddKpiNoShow').text('—');
+            break;
+    }
 }
 
 function renderLeadDemoDashboardSection(section, data) {
@@ -646,17 +733,49 @@ function renderLeadDemoDashboardBoard(demos) {
         $('#lddDemoBoard').html('<p class="text-muted">No demo found for this filter</p>');
         return;
     }
+    // Show the (status-relevant) board cards in chronological order — earliest scheduled time first —
+    // so the times read in order instead of being grouped by status. demoTime is "YYYY-MM-DD HH:mm:ss"
+    // (assignTimeZone-local), which sorts chronologically as a plain string.
+    var sorted = demos.slice().sort(function (a, b) {
+        return String(a.demoTime || '').localeCompare(String(b.demoTime || ''));
+    });
     var html = '';
-    $.each(demos, function (_, demo) {
+    $.each(sorted, function (_, demo) {
         var border = demo.status === 'RUNNING' ? 'border-color:#0f766e;' : '';
         html += '<div class="ldd-demo-card" style="' + border + '">'
             + getLeadDemoDashboardStatusBadge(demo.status)
             + '<p class="ldd-dc-title">' + (demo.leadName || 'N/A') + '</p>'
             + '<p class="ldd-dc-meta">' + getLeadDemoDashboardFormattedDateTime(demo.demoTime) + ' · ' + (demo.country || 'N/A') + ' · ' + (demo.counselorName || 'N/A') + '</p>'
-            + '<p class="ldd-dc-info">' + getLeadDemoDashboardJoinOrderText(demo) + '</p>'
+            + '<p class="ldd-dc-info" style="' + getLeadDemoDashboardBoardHostColor(demo.status) + '">' + getLeadDemoDashboardBoardHostLine(demo) + '</p>'
         + '</div>';
     });
     $('#lddDemoBoard').html(html);
+}
+
+// Host-join line for a board card: the actual join order/time once the host has joined, otherwise a clear
+// "Host not joined yet" (Awaiting) or "Not started" (Upcoming) instead of a bare dash.
+function getLeadDemoDashboardBoardHostLine(demo) {
+    var joinText = getLeadDemoDashboardJoinOrderText(demo);
+    if (joinText !== '—') {
+        return joinText;
+    }
+    if (demo.status === 'UPCOMING') {
+        return 'Not started';
+    }
+    if (demo.status === 'AWAITING') {
+        return 'Host not joined yet';
+    }
+    return '—';
+}
+
+function getLeadDemoDashboardBoardHostColor(status) {
+    if (status === 'RUNNING') {
+        return 'color:#0f766e;';
+    }
+    if (status === 'AWAITING') {
+        return 'color:#6d28d9;';
+    }
+    return '';
 }
 
 // Shown only when an AI-generated per-lead reason is available (after "Analyze with AI")
@@ -778,7 +897,9 @@ function renderLeadDemoDashboardLeadList(leads, totalCount) {
             // label) is the genuine signal; treat leads without it like not-contacted for the
             // "best time to contact" hint.
             var noRealFollowup = contacted && !lead.hasRealFollowup;
-            html += '<tr>'
+            // Highlight the 5 latest leads (top of the first page) so freshly-arrived leads stand out.
+            var latestClass = (state.leadPage === 0 && index < 5) ? ' class="ldd-row-latest"' : '';
+            html += '<tr' + latestClass + '>'
                 + '<td>' + ((state.leadPage * state.pageSize) + index + 1) + '</td>'
                 + '<td style="white-space:nowrap;">' + getLeadDemoDashboardFormattedDateTime(lead.createdDate) + getLeadDemoDashboardDuplicateHint(lead) + '</td>'
                 + '<td>' + (lead.leadName || 'N/A') + '</td>'

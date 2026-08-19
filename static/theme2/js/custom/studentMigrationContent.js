@@ -7,6 +7,7 @@ highSchoolGrade.push(7);
 var GRADE_FEE_DONE;
 var PROGRESSION_DISCOUNT=0;
 var TAKE_INDIVIDUAL_COURSE=false;
+var PERMOTED_GRADE=null;
 const discountTimeLimitSettings = getSettingsByTypeAndKey('CONFIGURATION','DISCOUNT_TIME_LIMIT');
 var discountTimeLimitDays = JSON.parse(discountTimeLimitSettings).data.metaValue;
 var SIGNUPTYPE;
@@ -155,42 +156,46 @@ function migrationDetailsOptionContent(data) {
 			+'<div class="col-xl-9 col-lg-9 col-md-12 col-12 mb-3 mb-xl-0">'
 				+'<div class="card rounded-15 shadow-lg" style="margin:0;">'
 					+'<div class="row">'
-						+'<div class="card-body student-report">'
+						+'<div class="card-body student-report pt-1">'
 							+'<div class="row">'
-								+'<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 report-head mb-1">'
+								+'<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 report-head mt-0">'
 									if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0 && data.pageNumberToDisplay == 1){
 										// html+='<h2 class="text-primary font-weight-bold text-center">Congratulations!</h2>'
 										// setTimeout(fireConfetti, 1000);
 										// setTimeout(fireConfetti, 3000);
 									}
 									// html+='<h4 class="text-center font-weight-semi-bold mb-3">'+data.name+'!</h4>'
-									if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
-										html+='<p class="mb-0 font-18 text-center">'
-											// +'You have successfully completed <b>'+studentCredit.currentGrade+'</b> with <b>'+parseInt(studentCredit.totalStringCredit)+' Credits</b>'
-											// +'<img data-emoji="🎉" alt="🎉" aria-label="🎉" draggable="false" src="https://fonts.gstatic.com/s/e/notoemoji/17.0/1f389/72.png" style="width:25px" loading="lazy">&nbsp;<span class="font-weight-semi-bold">'+studentCredit.currentGrade+' Completed!</span>'
-											// +'<span class="font-weight-semi-bold d-inline-block p-1 px-3 rounded-20 bg-light-success border-success border text-success font-14">'+studentCredit.currentGrade+' - Promoted</span>'
-											+'<span class="font-weight-semi-bold d-inline-block mb-4 px-4 rounded-20 bg-light-success border-success border font-20 text-dark font-weight-bold">Promoted</span>'
-										+'</p>'
-									}else{
-										html+='<p class="font-18 text-center mb-2">'
-											// +'You have earned <b>'+parseInt(studentCredit.totalStringCredit)+' Credits</b> in <b>'+studentCredit.currentGrade+'</b>'
-											+'<span class="font-weight-semi-bold d-inline-block p-1 px-3 rounded-20 bg-light-warning border-warning border text-gray font-14">Not Promoted</span>'
-										+'</p>'
-									}
+									// if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
+									// 	html+='<p class="mb-0 font-18 text-center">'
+									// 		// +'You have successfully completed <b>'+studentCredit.currentGrade+'</b> with <b>'+parseInt(studentCredit.totalStringCredit)+' Credits</b>'
+									// 		// +'<img data-emoji="🎉" alt="🎉" aria-label="🎉" draggable="false" src="https://fonts.gstatic.com/s/e/notoemoji/17.0/1f389/72.png" style="width:25px" loading="lazy">&nbsp;<span class="font-weight-semi-bold">'+studentCredit.currentGrade+' Completed!</span>'
+									// 		// +'<span class="font-weight-semi-bold d-inline-block p-1 px-3 rounded-20 bg-light-success border-success border text-success font-14">'+studentCredit.currentGrade+' - Promoted</span>'
+									// 		+'<span class="font-weight-semi-bold d-inline-block mb-4 px-4 rounded-20 bg-light-success border-success border font-20 text-dark font-weight-bold">Promoted</span>'
+									// 	+'</p>'
+									// }else{
+									// 	html+='<p class="font-18 text-center mb-2">'
+									// 		// +'You have earned <b>'+parseInt(studentCredit.totalStringCredit)+' Credits</b> in <b>'+studentCredit.currentGrade+'</b>'
+									// 		+'<span class="font-weight-semi-bold d-inline-block p-1 px-3 rounded-20 bg-light-warning border-warning border text-gray font-14">Not Promoted</span>'
+									// 	+'</p>'
+									// }
 								html+='</div>'
 								+'<div class="mx-auto mb-2">'
 								if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
 									// html+='<img class="p-3 bg-light-success border border-success" src="'+PATH_FOLDER_IMAGE2+'passed-badge.png" alt="passed_badge" style="width: 130px; height: 130px; object-fit: contain; border-radius: 100px;" />'
 									// html+='<img src="'+PATH_FOLDER_IMAGE2+'pass_icon.png" alt="passed_badge" style="width: 100px; height: 100px; object-fit: contain;" />'
-									html+='<h4 class="font-weight-bold font-26">Very well done!</h4>';
+									//html+='<h4 class="font-weight-bold font-26">Very well done!</h4>';
 								}
 								html+='</div>'
-								
+								console.log("data",data);
+								PERMOTED_GRADE= studentCredit.nextGrade;
 								if(data.registrationType!="ONE_TO_ONE_FLEX"){
 									if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
-										html+='<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 required-credits mt-0 mb-3">'
-											+'<h6 class="text-center font-18 font-weight-semi-bold">';
-												html+='You are successfully promoted to <span class="font-weight-semi-bold">'+studentCredit.nextGrade+'!</span>'
+										html+='<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 required-credits mt-0 mb-4">'
+											+'<h6 class="text-center font-26 font-weight-bold mb-3">';
+												html+='Congratulations, Dear '+data.name+'!</span>'
+											+'</h6>'
+											+'<h6 class="text-center font-20 font-weight-semi-bold mt-4">';
+												html+='You have been <b class="text-black">promoted</b> to <span class="font-weight-semi-bold">'+studentCredit.nextGrade+'</span>'
 											+'</h6>'
 										+'</div>';
 									}else{
@@ -315,7 +320,7 @@ function migrationDetailsOptionContent(data) {
 															
 															html+=
 															'<div class="col text-center mt-2">'
-																+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15" href="javascript:void(0);"'
+																+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg px-2 py-1 rounded-15 mt-5" href="javascript:void(0);"'
 																if($.inArray(migrationOption.nextGradeId, [9,10,19,20,21])>=0){
 																	html+='onclick="callForStudentNextSession(' + migrationOption.nextGradeId + ',\'REGISTRATION_NEXT_GRADE\',\'' + migrationOption.learningProgram + '\');"';
 																}else{
@@ -332,7 +337,7 @@ function migrationDetailsOptionContent(data) {
 																html+='>'
 																
 																// html+='Continue in '+studentCredit.nextGrade+'</a>'
-																html+='Re-Enroll Today Before Too Late</a>'
+																html+='Re-Enroll Today</a>'
 															+'</div>';
 														});
 													}
@@ -1748,10 +1753,10 @@ function openStudentPaymentModalSafely(){
 	}, 0);
 }
 
-async function renderPaymentMode(){
+async function renderPaymentMode(data){
 	console.log("Modal open function called")
 	$("#studentPaymentModal").remove();
-	$("body").append(await getPaymentModeContent());
+	$("body").append(await getPaymentModeContent(data));
 	if(SHOW_PAYMENT_OPTION == 'Y'){
 		openStudentPaymentModalSafely();
 	}
@@ -1779,13 +1784,15 @@ function repeatGradeClick(enrollmentBy, enrollmentType, standardId, registration
 async function getPaymentModeContent(cdrDTO){
 	var html=
 	'<div class="modal fade max-size-modal" id="studentPaymentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">'
-		+'<div class="modal-dialog modal-md" role="document" style="max-width:550px">'
+		+'<div class="modal-dialog modal-md modal-dialog-centered box-shadow-none" role="document" style="max-width:550px">'
 			+'<div class="modal-content rounded-20">'
-				+'<div class="modal-header py-2 rounded-10 bg-white text-dark">'
-					+'<h5 class="modal-title payment-option-modal-title" style=" margin-left: 10px;">Payment Option</h5>'
-					+'<button type="button" class="close opacity-10" aria-label="Close" data-dismiss="modal"><span aria-hidden="true" class="text-white d-inline-block bg-red ">&times;</span></button>'
+				+'<div class="modal-header py-2 rounded-top-left-10 rounded-top-right-10 bg-white text-dark" style="height:32px">'
+					+'<h5 class="modal-title text-white flex-grow-1 text-center" style=" margin-left: 10px;"><span class="payment-option-modal-title text-center">Payment Option Available</span>'
+						// +'<p class="font-12 m-0">You have to choose from '+getPaymentOptionCount(cdrDTO)+' option</p>'
+					+'</h5>'
+					+'<button type="button" class="close opacity-10 close-top-right" aria-label="Close" data-dismiss="modal"><span aria-hidden="true" class="text-white d-inline-block bg-red ">&times;</span></button>'
 				+'</div>'
-				+'<div class="modal-body pt-1" style="display:inline-block;width:100%;">'
+				+'<div class="modal-body" style="display:inline-block;width:100%;">'
 					+skeletonFeeDetails()
 				+'</div>'
 			+'</div>'
@@ -1800,15 +1807,15 @@ async function paymentModalContentWithData(cdrDTO){
 	`<div class="col-md-12 col-sm-12 col-xs-12 p-0 feeDetailsContentDiv">
 		<div class="label-floating feePayMode">
 			<div class="col-md-12 col-sm-12 col-xs-12 p-0">
-				<div class="text-dark mb-2 font-weight-semi-bold">You have to choose from ${getPaymentOptionCount(cdrDTO)} option</div>
+				${/*<div class="text-dark mb-2 font-weight-semi-bold">You have to choose from ${getPaymentOptionCount(cdrDTO)} option</div>*/''}
 				<div class="payment-item flex-column">`;
 				if(cdrDTO.bookASeatOpted == 1 && cdrDTO.enrollmentFee != null && cdrDTO.enrollmentFee.enrollmentFee>0 && !cdrDTO.bookAnEnrollmentPaidStatus){
 					html+=
 					`<div class="radio radio-payment-option white-txt-color my-0 mb-2" style="height:inherit">
 						<input id="pay-registration" value="1" type="radio" name="payModeCheckboxes">
-						<label for="pay-registration" class="payment-card border rounded-10 d-flex align-items-center justify-content-between w-100 px-3 py-1" style="min-height:inherit" onclick="displayScholorshipDetails(\'dtl-registration\');">
+						<label for="pay-registration" class="payment-card border rounded-10 d-flex align-items-center justify-content-between w-100 px-3 py-1 border-dark" style="min-height:inherit" onclick="displayScholorshipDetails(\'dtl-registration\');">
 							<div class="d-flex align-items-center">
-								<span class="circle border ml-0 checkbox-border" style="top:inherit"></span>
+								<span class="circle border ml-0 checkbox-border border-dark" style="top:inherit;"></span>
 								<span class="check" style="top:inherit"></span>
 								<div class="ml-3" id="payFive"> 
 									<b class="text-dark d-block ml-2 font-weight-semi-bold"> Reserve an Enrollment Seat</b>
@@ -1816,7 +1823,7 @@ async function paymentModalContentWithData(cdrDTO){
 							</div>
 							<div class="text-right">
 								<div class="d-flex align-items-center justify-content-end text-dark">
-									<div class="font-weight-bold font-20 amount">${cdrDTO.enrollmentFee.enrollmentFeeString}</div>
+									<div class="font-weight-bold font-14 amount">${cdrDTO.enrollmentFee.enrollmentFeeString}</div>
 								</div>
 							</div>
 						</label>
@@ -1826,22 +1833,22 @@ async function paymentModalContentWithData(cdrDTO){
 					html+=
 					`<div class="radio radio-payment-option white-txt-color my-0 mb-2" style="height:inherit">
 						<input id="pay-one" value="1" type="radio" name="payModeCheckboxes">
-						<label for="pay-one" class="payment-card border rounded-10 d-flex align-items-center justify-content-between w-100 px-3 py-1" style="min-height:inherit" onclick="displayScholorshipDetails(\'dtl-one\');">
+						<label for="pay-one" class="payment-card border rounded-10 d-flex align-items-center justify-content-between w-100 px-3 py-1 border-dark" style="min-height:inherit" onclick="displayScholorshipDetails(\'dtl-one\');">
 							<div class="d-flex align-items-center">
-								<span class="circle border ml-0 checkbox-border" style="top:inherit"></span>
+								<span class="circle border ml-0 checkbox-border border-dark" style="top:inherit"></span>
 								<span class="check" style="top:inherit"></span>
 								<div class="ml-3" id="payOne">`;
 									if(cdrDTO.oneTimePayment.paymentOptionDiscount > 0){
-										html+=`<div class="text-dark d-block ml-2 font-weight-semi-bold">Pay one time & <b class="text-success font-weight-semi-bold">save ${cdrDTO.oneTimePayment.paymentOptionDiscountString}</b></div>`;
+										html+=`<div class="text-dark d-block ml-2 font-weight-semi-bold">Pay in Full & <b class="text-success font-weight-semi-bold">Save ${cdrDTO.oneTimePayment.paymentOptionDiscountString}</b></div>`;
 									}else{
-										html+=`<b class="text-dark d-block ml-2">Pay one time</b>`;
+										html+=`<b class="text-dark d-block ml-2">Pay in Full</b>`;
 									}
-									html+=`<div class="text-muted small ml-2 font-12">Best value option</div>
+									html+=`<div class="text-dark small ml-2 font-12">Best value option</div>
 								</div>
 							</div>
 							<div class="text-right">
 								<div class="d-flex align-items-center justify-content-end text-dark">
-									<div class="font-weight-bold font-20 amount">${cdrDTO.oneTimePayment.payableFeeString}</div>`;
+									<div class="font-weight-bold font-14 amount">${cdrDTO.oneTimePayment.payableFeeString}</div>`;
 									// if(cdrDTO.oneTimePayment.paymentOptionDiscount > 0){
 									// 	html+=`<div class="badge ml-2 bg-success rounded-20 font-normal text-capitalize text-white">Save ${cdrDTO.oneTimePayment.youSave.totalEntityFeeString}</div>`;
 									// }
@@ -1857,9 +1864,9 @@ async function paymentModalContentWithData(cdrDTO){
 					html+=
 					`<div class="radio radio-payment-option white-txt-color my-0 mb-2" style="height:inherit">
 						<input id="pay-three" value="2" type="radio" name="payModeCheckboxes">
-						<label for="pay-three" class="payment-card border rounded-10 d-flex align-items-center justify-content-between w-100 px-3 py-1" style="min-height:inherit" onclick="displayScholorshipDetails(\'dtl-three\');">
+						<label for="pay-three" class="payment-card border rounded-10 d-flex align-items-center justify-content-between w-100 px-3 py-1 border-dark" style="min-height:inherit" onclick="displayScholorshipDetails(\'dtl-three\');">
 							<div class="d-flex align-items-center">
-								<span class="circle border ml-0 checkbox-border" style="top:inherit"></span>
+								<span class="circle border ml-0 checkbox-border border-dark" style="top:inherit"></span>
 								<span class="check" style="top:inherit"></span>
 								<div class="ml-3">
 									<b class="text-dark d-block ml-2 font-weight-semi-bold">
@@ -1873,14 +1880,14 @@ async function paymentModalContentWithData(cdrDTO){
 										*/''}
 										Pay in easy installments
 									</b>
-									<div class="text-muted small ml-2 font-12">Flexible payment plan</div>
+									<div class="text-dark small ml-2 font-12">Flexible payment plan</div>
 								</div>
 							</div>
 							<div class="text-right">
 								<div class="d-flex align-items-center justify-content-end text-dark">
-									<div class="font-weight-bold font-20 amount">${cdrDTO.monthlyFeeDetails.payableFeeString}</div>
+									<div class="font-weight-bold font-14 amount">${cdrDTO.monthlyFeeDetails.payableFeeString}</div>
 								</div>
-								<div class="text-muted small ml-2 font-12">Monthly payments available</div>
+								<div class="text-dark small ml-2 font-12">Monthly payments available</div>
 							</div>
 						</label>
 					</div>`;
@@ -1907,11 +1914,11 @@ async function paymentModalContentWithData(cdrDTO){
 						<div class="scholarship-details">`;
 							if(cdrDTO.oneTimePayment!=null){
 								html+=
-								`<div class="w-100 p-2 pb-3 rounded-10 border annual-course-fee-details" style="display: none;background-color:#F9FAFB;">
-									<h5 class="text-dark font-weight-semi-bold font-16 mb-2 font-16">Fee Breakdown</h5>
+								`<div class="w-100 p-2 px-3 rounded-10 border annual-course-fee-details" style="display: none;background-color:#F9FAFB;">
+									${/*<h5 class="text-dark font-weight-semi-bold font-16 mb-2 font-16">Fee Breakdown</h5> */''}
 									<div class="d-flex flex-wrap">
-										<span class="text-muted">${(parseInt($('#gradeId').val()) == 20) ? 'Course Fee + Enrollment Fee' : 'Course Fee'}</span>
-										<span class="font-weight-semi-bold text-dark ml-auto d-inline-block">${cdrDTO.courseFeeString}</span>
+										<span class="text-dark font-weight-semi-bold">${(parseInt($('#gradeId').val()) == 20) ? 'Course Fee + Enrollment Fee' : `Fee for ${PERMOTED_GRADE}`}</span>
+										<span class="font-weight-bold text-dark ml-auto d-inline-block font-14">${cdrDTO.courseFeeString}</span>
 									</div>`;
 									if(cdrDTO.oneTimePayment!='' && (cdrDTO.feeAlreayPaid!=null && cdrDTO.feeAlreayPaid.totalEntityFee>0)){
 										html+=`<hr class="my-1" />
@@ -1921,11 +1928,11 @@ async function paymentModalContentWithData(cdrDTO){
 							} 
 							if(cdrDTO.monthlyFeeDetails!=null &&  cdrDTO.monthlyFeeDetails!=''){
 								html+=
-								`<div class="w-100 bg-light p-2 pb-3 rounded-10 border installment3-course-fee-details" id="installment3-course-fee-details" style="display: none;">
-									<h5 class="text-dark font-weight-semi-bold font-16 mb-2 font-16">Fee Breakdown</h5>
+								`<div class="w-100 bg-light p-2 px-3 rounded-10 border installment3-course-fee-details" id="installment3-course-fee-details" style="display: none;">
+									${/*<h5 class="text-dark font-weight-semi-bold font-16 mb-2 font-16">Fee Breakdown</h5>*/''}
 									<div class="d-flex flex-wrap">
-										<span class="text-muted">${(parseInt($('#gradeId').val()) == 20) ? 'Course Fee + Enrollment Fee' : 'Course Fee'}</span>
-										<span class="font-weight-semi-bold text-dark ml-auto d-inline-block">${cdrDTO.courseFeeString}</span>
+										<span class="text-dark font-weight-semi-bold">${(parseInt($('#gradeId').val()) == 20) ? 'Course Fee + Enrollment Fee' : `Fee for ${PERMOTED_GRADE}`}</span>
+										<span class="font-weight-bold text-dark ml-auto d-inline-block font-14">${cdrDTO.courseFeeString}</span>
 									</div>`;
 									if(cdrDTO.monthlyFeeDetails!=null &&  cdrDTO.monthlyFeeDetails!=''){
 										html+=`<hr class="my-1" />
@@ -1947,41 +1954,46 @@ async function paymentModalContentWithData(cdrDTO){
 									if(cdrDTO.oneTimePayment!='' && cdrDTO.oneTimePayment.paymentOptionDiscount > 0){
 										html+=
 										`<div class="w-100 annual-course-fee-details" id="annual-course-fee-details" style="display:none">
-											<div class="w-100 p-2 rounded-10 border border-success mt-2" style="background-color:#F0FDF4;">
-												<h5 class="text-dark font-weight-semi-bold font-16 mb-2">Fee Discount</h5>`;
+											<div class="w-100 p-2 rounded-10 border border-success mt-2 pr-3" style="background-color:#F0FDF4;">`;
 													if(cdrDTO.oneTimePayment.youSave != null){
 														if(cdrDTO.oneTimePayment.youSave.description!=null && cdrDTO.oneTimePayment.youSave.description.length>0){
 															$.each(cdrDTO.oneTimePayment.youSave.entityDescriptions, function(k, item) {
 																html+=
 																`<div class="d-flex flex-wrap my-1">
-																	<span class="text-dark">${parseInt(k)+1}. ${item.entityDescription}</span>
-																	<span class="font-weight-semi-bold text-dark ml-auto d-inline-block">-${item.entityFee}</span>
+																	<span class="text-dark font-weight-semi-bold">${parseInt(k)+1}. ${item.entityDescription.startsWith('Scholarship')?(item.entityDescriptionWithoutCode == undefined ? "Scholarship Discount":item.entityDescriptionWithoutCode):item.entityDescription}</span>
+																	<span class="font-weight-bold text-dark ml-auto d-inline-block font-14">-${item.entityFee}</span>
 																</div>`;
 															});
 															// $.each(cdrDTO.oneTimePayment.youSave.entityFees, function(k, fee) {
-															// 	html+=`<span class="font-weight-semi-bold text-dark ml-auto d-inline-block">${fee}</span>`;
+															// 	html+=`<span class="font-weight-bold text-dark ml-auto d-inline-block font-14">${fee}</span>`;
 															// });
 														}
 													}
-													html+=`<hr class="mb-0"/>
+													html+=`
 														<div class="d-flex flex-wrap my-1">
-															<span class="text-dark font-16 font-weight-bold">Total Discount</span>
-															<span class="font-18 font-weight-bold text-dark ml-auto d-inline-block">-${cdrDTO.oneTimePayment.youSave.totalEntityFeeString}</span>
-														</div>`
-													console.log(cdrDTO)
+															<div class="font-weight-bold text-dark ml-auto d-inline-block font-14">
+																<span class="text-dark font-16 font-weight-bold d-inline-block mr-3">You Save</span> 
+																-${cdrDTO.oneTimePayment.youSave.totalEntityFeeString}
+															</div>
+														</div>
+														<hr class="mb-0"/>
+														<div class="d-flex flex-wrap my-1 align-items-center">
+															<span class="text-dark font-16 font-weight-semi-bold">Payable Fee</span>
+															<span class="font-14 font-weight-bold text-dark ml-auto d-inline-block">${cdrDTO.oneTimePayment.payableFeeString}</span>
+														</div>`;
 											html+=`</div>
-											<div class="full">
+											${/*<div class="full">
 												<div class="d-flex flex-wrap my-1">
 													<span class="text-dark font-16 font-weight-semi-bold">Payable Fee</span>
-													<span class="font-24 font-weight-bold text-dark ml-auto d-inline-block">${cdrDTO.oneTimePayment.payableFeeString}</span>
+													<span class="font-14 font-weight-bold text-dark ml-auto d-inline-block">${cdrDTO.oneTimePayment.payableFeeString}</span>
 												</div>
-											</div>
+											</div> */''}
 										</div>
 										${/*
 											<table id="annual-course-fee-details" class="table table-bordered table-striped without_h_scroll" style="display: none;">
 												<thead class="theme-bg primary-bg white-txt-color">
 													<tr>
-														<th style="width: 60%;">Fee Description</th>
+														<th style="width: 60%;">Fee Schedule</th>
 														<th style="width: 20%;text-align:center"><span class="previewPaymentOption"></span> Fee (${cdrDTO.currencyIsoCode})</th>
 														<th style="width: 20%; text-align:center">Total Fee</th>
 													</tr>
@@ -2005,13 +2017,13 @@ async function paymentModalContentWithData(cdrDTO){
 																	html+=
 																	`<div class="d-flex flex-wrap my-1">
 																		<span class="text-dark">${parseInt(k)+1}. ${item.entityDescription}</span>
-																		<span class="font-weight-semi-bold text-dark ml-auto d-inline-block">-${item.entityFee}</span>
+																		<span class="font-weight-bold text-dark ml-auto d-inline-block font-14">-${item.entityFee}</span>
 																	</div>`;
 																});
 																html+=`<hr class="mb-0"/>
 																<div class="d-flex flex-wrap my-1">
-																	<span class="text-dark font-16 font-weight-bold">Total Discount</span>
-																	<span class="font-18 font-weight-bold text-dark ml-auto d-inline-block">-${cdrDTO.monthlyFeeDetails.youSave.totalEntityFeeString}</span>
+																	<span class="text-dark font-20 font-weight-boldm d-inline-block mr-3">You Save</span>
+																	<span class="font-14 font-weight-bold text-dark ml-auto d-inline-block">-${cdrDTO.monthlyFeeDetails.youSave.totalEntityFeeString}</span>
 																</div>`;
 															}
 														}
@@ -2019,22 +2031,24 @@ async function paymentModalContentWithData(cdrDTO){
 												<div class="full">
 													<div class="d-flex flex-wrap my-1">
 														<span class="text-dark font-16 font-weight-semi-bold">Payable Fee</span>
-														<span class="font-24 font-weight-bold text-dark ml-auto d-inline-block">${cdrDTO.monthlyFeeDetails.payableFeeString}</span>
+														<span class="font-14 font-weight-bold text-dark ml-auto d-inline-block">${cdrDTO.monthlyFeeDetails.payableFeeString}</span>
 													</div>
 												</div>
 											</div>`;
 										}
 										html+=
 										`<div class="full installment3-course-fee-details mt-2" style="display:none">
-											<table class="table table-bordered table-striped without_h_scroll border-radius-table">
-												<thead>
-													<tr>
-														<th colspan="3" class="font-18 font-weight-bold text-dark bg-light">Fee Schedule</th>
-													</tr>
-												</thead>
+											<table class="table table-bordered table-striped without_h_scroll border-radius-table mb-0">
+												${/*
+													<thead>
+														<tr>
+															<th colspan="3" class="font-18 font-weight-bold text-dark bg-light">Fee Schedule</th>
+														</tr>
+													</thead>	
+												*/''}
 												<tbody>
 													<tr>
-														<td class="theme-bg primary-bg white-txt-color">Fee Description</td>
+														<td class="theme-bg primary-bg white-txt-color">Fee Schedule</td>
 														<td class="theme-bg primary-bg white-txt-color" style="text-align:center"><span class="previewPaymentOption"></span>Total Fee</td>
 														<td class="theme-bg primary-bg white-txt-color" style="text-align:center">Paying Now</td>
 													</tr>
@@ -2048,7 +2062,7 @@ async function paymentModalContentWithData(cdrDTO){
 										`<table id="custom-course-fee-details" class="table table-bordered table-striped without_h_scroll" style="display: none;">
 											<thead class="theme-bg primary-bg white-txt-color">
 												<tr>
-													<th>Fee Description</th>
+													<th>Fee Schedule</th>
 													<th style="text-align:center"><span class="previewPaymentOption"></span> Fee ${cdrDTO.currencyIsoCode}</th>
 													<th style="text-align:center">Total Fee</th>
 												</tr>
@@ -2062,14 +2076,19 @@ async function paymentModalContentWithData(cdrDTO){
 								</div>
 							</div>
 						</div>
-						<div>
-							<p class="py-1 rounded bg-light text-center thank_trusting font-12 font-weight-normal ${cdrDTO.oneTimePayment.paymentOptionDiscount > 0 ? "":"mt-2"}" style="display:none"><i class="fa fa-heart text-primary"></i>&nbsp;Thank you so much for trusting and choosing <b class="text-primary">${SCHOOL_NAME}</b></p>
+						<div class="mt-0">
+							<p class="mb-2 text-center"><b>Note:</b> All fees mentioned above are in US Dollars</p>
 						</div>
+						${/*
+							<div>
+								<p class="py-1 rounded bg-light text-center thank_trusting font-12 font-weight-normal ${cdrDTO.oneTimePayment.paymentOptionDiscount > 0 ? "":"mt-2"}" style="display:none"><i class="fa fa-heart text-primary"></i>&nbsp;Thank you so much for trusting and choosing <b class="text-primary">${SCHOOL_NAME}</b></p>
+							</div>	
+						*/''}
 					</div>
 					<div class="col-md-12 col-sm-12 col-xs-12">
 						<div class="row">
 							<div class="col-12 text-center thank_trusting" style="display:none">
-								<button type="button" class="btn btn-lg theme-bg primary-bg white-txt-color font-18" onclick="choosePaymentOption();">Continue <i class="fa fa-arrow-right"></i></button>
+								<button type="button" class="btn btn-lg theme-bg primary-bg white-txt-color font-18 py-0 px-1" onclick="choosePaymentOption();">Continue to payment</button>
 							</div>
 						</div>
 					</div>
@@ -2311,7 +2330,7 @@ function feePaymentReview(data){
 			+'<table class="table-style">'
 				+'<thead>'
 					+'<tr>'
-						+'<th class="th">Fee Description</th>'
+						+'<th class="th">Fee Schedule</th>'
 						+'<th class="th" style="text-align:center;">Fee ('+data.currencyIsoCode+')</th>'
 						+'<th class="th" style="text-align:center;">Total Fee</th>'
 					+'</tr>'
@@ -2369,7 +2388,7 @@ function feePaymentReview(data){
 						</thead>
 						<tbody>
 							<tr class="bg-primary text-white">
-								<th>Fee Description</th>
+								<th>Fee Schedule</th>
 								<th style="text-align:center"><span class="previewPaymentOption"></span>Total Fee</th>`;
 								// if(signupCourse.payMode == 'a_partially' || signupCourse.payMode == 'a_installment' || signupCourse.payMode == 'a_annually'){
 									html+=`<th style="text-align:center">Status</th>`;
@@ -2460,7 +2479,7 @@ function feePaymentReview1(data){
 							</thead>
 							<tbody>
 								<tr class="bg-primary text-white">
-									<td>Fee Description</td>
+									<td>Fee Schedule</td>
 									<td style="text-align:left"><span class="previewPaymentOption"></span>Total Fee</td>`;
 									// if(signupCourse.payMode == 'a_partially' || signupCourse.payMode == 'a_installment' || signupCourse.payMode == 'a_annually'){
 										html+=`<td style="text-align:left">Status</td>`;
@@ -2489,7 +2508,7 @@ function getBookAnEnrollmentTable(cdrDTO){
 		`<div class="full">
 			<div class="d-flex flex-wrap my-1">
 				<span class="text-dark font-16 font-weight-semi-bold">Payable Fee</span>
-				<span class="font-24 font-weight-bold text-dark ml-auto d-inline-block">${cdrDTO.enrollmentFee.enrollmentFeeString}</span>
+				<span class="font-14 font-weight-bold text-dark ml-auto d-inline-block">${cdrDTO.enrollmentFee.enrollmentFeeString}</span>
 			</div>
 		</div>`;
 	return html;
@@ -2596,9 +2615,11 @@ function commonPaymentTable(cdrDTO, prefix){
 	// }
 	html+=
 	`<div class="border rounded-15 p-2 mb-2" style="background:#f9fafb">
-		<div>
-			<h5 class="font-weight-semi-bold font-16 mb-2">Fee Breakdown</h5>
-		</div>
+		${/*
+			<div>
+				<h5 class="font-weight-semi-bold font-16 mb-2">Fee Breakdown</h5>
+			</div>	
+		*/''}
 		<div class="d-flex">
 			<span>Course Fee</span>
 			<span class="d-inline-flex ml-auto">${cdrDTO.courseFeeString}</span>
@@ -2710,7 +2731,7 @@ function getAnnualPaymentTable(cdrDTO, overridePayableFeeStr){
 					</div>
 					<hr class="m-0"/>
 					<div class="d-flex align-items-center mt-1">
-						<h5 class="font-weight-bold font-18 mb-0 text-dark">Total Discount</h5>
+						<h5 class="font-weight-bold font-18 mb-0 text-dark">You Save</h5>
 						<span class="d-inline-flex my-1 font-weight-bold font-18 text-right text-dark ml-auto">-${cdrDTO.oneTimePayment.youSave.totalEntityFeeString}</span>
 					</div>
 				</div>`;
@@ -2752,7 +2773,7 @@ function getMonthlyPaymentTable(cdrDTO){
 					</div>
 					<hr class="m-0"/>
 					<div class="d-flex align-items-center mt-1">
-						<h5 class="font-weight-bold font-18 mb-0 text-dark">Total Discount</h5>
+						<h5 class="font-weight-bold font-18 mb-0 text-dark">You Save</h5>
 						<span class="d-inline-flex my-1 font-weight-bold font-18 text-right text-dark ml-auto">-${cdrDTO.monthlyFeeDetails.youSave.totalEntityFeeString}</span>
 					</div>
 				</div>`;
@@ -2776,10 +2797,10 @@ function monthlyFeeShchedule(cdrDTO){
 		$.each(cdrDTO.monthlyFeeDetails.monthlyFees, function(k, monthlyFee) {
 			html+=
 			'<tr>'
-				+'<td>'
+				+'<td class="bhagat">'
 					+monthlyFee.paymentLabel
 				+'</td>'
-				+'<td style="text-align:right"><b>'+monthlyFee.amountString+'</b></td>'
+				+'<td style="text-align:right">'+monthlyFee.amountString+'</td>'
 				+'<td style="text-align:right"><b>';
 				if(k==0){
 					html+=monthlyFee.amountString;
@@ -2828,6 +2849,9 @@ function getCustomizedPaymentTable(data){
 			<div class="d-flex align-items-center">
 				<h5 class="font-weight-bold font-16 my-2 text-dark">Payable Fee</h5>
 				<span class="d-inline-flex my-1 font-weight-bold font-20 text-right text-dark ml-auto">${paymentDetails.totalPayableAmountString}</span>
+			</div>
+			<div>
+				<p class="mb-2 text-center"><b>Note:</b> All fees mentioned above are in US Dollars</p>
 			</div>`;
 		}
 	}
@@ -2904,7 +2928,7 @@ function getAdvancePaymentTable(cdrDTO){
 					</div>
 					<hr class="m-0"/>
 					<div class="d-flex align-items-center mt-1">
-						<h5 class="font-weight-bold font-18 mb-0 text-dark">Total Discount</h5>
+						<h5 class="font-weight-bold font-18 mb-0 text-dark">You Save</h5>
 						<span class="d-inline-flex my-1 font-weight-bold font-18 text-right text-dark ml-auto">-${cdrDTO.advanceFeeDetails.youSave.totalEntityFeeString}</span>
 					</div>
 				</div>`;

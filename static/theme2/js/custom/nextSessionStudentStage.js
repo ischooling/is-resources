@@ -359,7 +359,7 @@ function showSpecificContentNew(tabId, liId) {
 	//	$('#'+tabId).parent().parent().next().find('#'+tabId+'C').find('#'+liId+' .a-content').show()
 }
 function displayScholorshipDetails(radioId){
-	$(".payment-option-modal-title").text('Payment Details');
+	$(".payment-option-modal-title").text('Payment Option Available');
 	$(".thank_trusting").show();
 	var payMode='annually';
 	if(radioId=='dtl-one'){
@@ -673,12 +673,13 @@ function callForPaymentModeSelection(formId, callFrom) {
 				if(GRADE_FEE_DONE){
 					showMessageTheme2(1, data['message'], '', true);
 				}
-				await renderPaymentMode();
+				await renderPaymentMode(data);
 				showSkeleton(true, "fee-details-modal");
 				await paymentModalContentWithData(data);
 				$(".step-feeDetails-skeleton").hide();
 				$(".feeDetailsContentDiv").show();
 				$('#payMode').val(data.paymentMode);
+				selectPaymentmentMethod();
 				$(".radio-payment-option input:radio[name=payModeCheckboxes]").unbind().bind("change", function(){
 					radioBtnChecked();
 				});
@@ -700,6 +701,7 @@ function radioBtnChecked() {
 	$($radios).parent().find(".checkbox-border").addClass("primary-border-color");
 	$($radios).parent().find(".check").addClass("bg-primary");
 	$(".amount").removeClass("text-primary");
+	$('.payment-item input:radio[name=payModeCheckboxes]:not(:checked)').parent().find(".checkbox-border").removeClass("primary-border-color");
 	// $($radios).parent().find(".amount").addClass("text-primary");
 };
 

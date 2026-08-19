@@ -5861,10 +5861,16 @@ border-top-right-radius:.3rem
 .modal-header .close {
 	position: relative;
 	padding:1rem 1rem;
-	margin:-1rem -1rem -1rem auto;
+	margin:-1.3rem -1rem -1rem auto;
 	opacity: 1;
 	color:#fff!important;
 	z-index:0;
+}
+.modal-header .close.close-top-right{
+	margin: -1.8rem -1.4rem -1rem auto;
+}
+.modal-header .close.close-top-right:not(.close-with-red-color):after{
+	border-top-right-radius: 10px;
 }
 .modal-header .close span{position: relative;z-index: 2;}
 .modal-header .close:not(.close-with-red-color):after{
@@ -32251,6 +32257,7 @@ table td.child ul li{white-space: normal;}
 .form-control-placeholder {position: absolute;left: 0; top: 0;padding: 7px 0 0 13px;transition: all 200ms;opacity: 0.5;}
 .form-control:focus + .form-control-placeholder, .form-control:valid + .form-control-placeholder {font-size: 13px;transform: translate3d(0, -115%, 0);opacity: 1;padding-left: 0}
 .form-control-placeholder.focused{font-size: 13px;transform: translate3d(0, -115%, 0);opacity: 1;padding-left: 0}	
+/* .checkbox-border{border-color:var(--pc) !important} */
 .radio-payment-option label{
 	/* padding:10px 0 !important; */
 	width:100%;
