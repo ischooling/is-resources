@@ -44,7 +44,7 @@ function getLeadDemoReportCountryContent(title) {
                     + '<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12 mb-2">'
                         + '<div class="custom-field mb-0">'
                             + '<select class="form-control" id="leadDemoReportCountryCounselorId"></select>'
-                            + '<label class="text-primary m-0" for="leadDemoReportCountryCounselorId">Academic Counselor</label>'
+                            + '<label class="text-primary m-0" for="leadDemoReportCountryCounselorId">Academic Expert</label>'
                         + '</div>'
                     + '</div>'
 
@@ -69,34 +69,53 @@ function getLeadDemoReportCountryContent(title) {
         // ── Summary Cards ─────────────────────────────────────────────────
         + '<div class="row mb-3">'
             + '<div class="col-xl col-lg col-md-3 col-sm-6 col-12 mb-2">'
-                + '<div class="card text-center py-3 px-2" style="border-radius:8px;border:none;background:#e8f0fe;">'
+                + '<div class="card text-center py-2 px-2" style="border-radius:8px;border:none;background:#e8f0fe;">'
                     + '<div style="color:#3d5af1;font-size:11px;font-weight:500;">Total Lead</div>'
-                    + '<div id="ldrcCardTotalLead" style="color:#3d5af1;font-size:26px;font-weight:700;">0</div>'
+                    + '<div id="ldrcCardTotalLead" style="color:#3d5af1;font-size:22px;font-weight:700;">0</div>'
                 + '</div>'
             + '</div>'
             + '<div class="col-xl col-lg col-md-3 col-sm-6 col-12 mb-2">'
-                + '<div class="card text-center py-3 px-2" style="border-radius:8px;border:none;background:#fff3e0;">'
-                    + '<div style="color:#e65100;font-size:11px;font-weight:500;">Demo Book</div>'
-                    + '<div id="ldrcCardDemoBook" style="color:#e65100;font-size:26px;font-weight:700;">0</div>'
+                + '<div class="card text-center py-2 px-2" style="border-radius:8px;border:none;background:#eaf6ee;">'
+                    + '<div style="color:#2e7d32;font-size:11px;font-weight:500;">Demo Scheduled</div>'
+                    + '<div id="ldrcCardDemoSchedule" style="color:#2e7d32;font-size:22px;font-weight:700;">0</div>'
                 + '</div>'
             + '</div>'
             + '<div class="col-xl col-lg col-md-3 col-sm-6 col-12 mb-2">'
-                + '<div class="card text-center py-3 px-2" style="border-radius:8px;border:none;background:#eaf6ee;">'
-                    + '<div style="color:#2e7d32;font-size:11px;font-weight:500;">Demo Complete</div>'
-                    + '<div id="ldrcCardDemoComplete" style="color:#2e7d32;font-size:26px;font-weight:700;">0</div>'
+                + '<div class="card text-center py-2 px-2" style="border-radius:8px;border:none;background:#ede7f6;">'
+                    + '<div style="color:#4527a0;font-size:11px;font-weight:500;">Lead &rarr; Demo</div>'
+                    + '<div id="ldrcCardLeadToDemo" style="color:#4527a0;font-size:22px;font-weight:700;">0%</div>'
                 + '</div>'
             + '</div>'
             + '<div class="col-xl col-lg col-md-3 col-sm-6 col-12 mb-2">'
-                + '<div class="card text-center py-3 px-2" style="border-radius:8px;border:none;background:#ede7f6;">'
+                + '<div class="card text-center py-2 px-2" style="border-radius:8px;border:none;background:#eaf6ee;">'
+                    + '<div style="color:#2e7d32;font-size:11px;font-weight:500;">Demo Completed</div>'
+                    + '<div id="ldrcCardDemoComplete" style="color:#2e7d32;font-size:22px;font-weight:700;">0</div>'
+                + '</div>'
+            + '</div>'
+            + '<div class="col-xl col-lg col-md-3 col-sm-6 col-12 mb-2">'
+                + '<div class="card text-center py-2 px-2" style="border-radius:8px;border:none;background:#eaf6ee;">'
+                    + '<div style="color:#2e7d32;font-size:11px;font-weight:500;">No Show</div>'
+                    + '<div id="ldrcCardDemoNoShow" style="color:#2e7d32;font-size:22px;font-weight:700;">0</div>'
+                + '</div>'
+            + '</div>'
+            + '<div class="col-xl col-lg col-md-3 col-sm-6 col-12 mb-2">'
+                + '<div class="card text-center py-2 px-2" style="border-radius:8px;border:none;background:#fdeaea;">'
+                    + '<div style="color:#c62828;font-size:11px;font-weight:500;">Demo Completed</div>'
+                    + '<div id="ldrcCardNotEnrolled" style="color:#c62828;font-size:22px;font-weight:700;">0</div>'
+                    + '<div style="color:#c62828;font-size:10px;opacity:0.75;">Not Enrolled</div>'
+                + '</div>'
+            + '</div>'
+            + '<div class="col-xl col-lg col-md-3 col-sm-6 col-12 mb-2">'
+                + '<div class="card text-center py-2 px-2" style="border-radius:8px;border:none;background:#ede7f6;">'
                     + '<div style="color:#4527a0;font-size:11px;font-weight:500;">Enrolled</div>'
-                    + '<div id="ldrcCardEnrolled" style="color:#4527a0;font-size:26px;font-weight:700;">0</div>'
+                    + '<div id="ldrcCardEnrolled" style="color:#4527a0;font-size:22px;font-weight:700;">0</div>'
                 + '</div>'
             + '</div>'
+            
             + '<div class="col-xl col-lg col-md-3 col-sm-6 col-12 mb-2">'
-                + '<div class="card text-center py-3 px-2" style="border-radius:8px;border:none;background:#e0f7fa;">'
-                    + '<div style="color:#00695c;font-size:11px;font-weight:500;">Conversion Rate</div>'
-                    + '<div id="ldrcCardConversionRate" style="color:#00695c;font-size:26px;font-weight:700;">0%</div>'
-                    + '<div style="color:#00695c;font-size:10px;opacity:0.75;">(Enrolled &divide; Total Lead) &times; 100</div>'
+                + '<div class="card text-center py-2 px-2" style="border-radius:8px;border:none;background:#eaf6ee;">'
+                    + '<div style="color:#2e7d32;font-size:11px;font-weight:500;">Demo &rarr; Convert</div>'
+                    + '<div id="ldrcCardDemoToConvert" style="color:#2e7d32;font-size:22px;font-weight:700;">0%</div>'
                 + '</div>'
             + '</div>'
         + '</div>'
@@ -104,14 +123,6 @@ function getLeadDemoReportCountryContent(title) {
         // ── Table Card ────────────────────────────────────────────────────
         + '<div class="main-card mb-3 card">'
             + '<div class="card-body">'
-                + '<div class="d-flex justify-content-end align-items-center flex-wrap mb-2" style="gap:10px;">'
-                    + '<button type="button" class="btn btn-outline-primary px-3 py-2" id="leadDemoReportCountryExportCsv"><i class="fa fa-download"></i> CSV</button>'
-                    + '<button type="button" class="btn btn-outline-primary px-3 py-2" id="leadDemoReportCountryExportExcel"><i class="fa fa-file-excel"></i> Excel</button>'
-                    + '<div id="leadDemoReportCountryCountLabel" class="d-inline-flex align-items-center text-dark border rounded px-2 py-1" style="font-size:18px; font-weight:500;">'
-                        + '<span class="mr-1">Total:</span>'
-                        + '<span id="leadDemoReportCountryCountValue" class="font-weight-bold text-primary" style="font-size:20px;">0</span>'
-                    + '</div>'
-                + '</div>'
                 + '<div class="table-responsive mt-2">'
                     + '<table class="table table-bordered table-hover" id="leadDemoReportCountryTable" style="width:100%;font-size:12px;">'
                         + '<thead>'
@@ -119,14 +130,15 @@ function getLeadDemoReportCountryContent(title) {
                                 + '<th>S.No.</th>'
                                 + '<th>Country</th>'
                                 + '<th class="text-center">Total Lead</th>'
-                                + '<th class="text-center">Demo Book</th>'
-                                + '<th class="text-center">Demo Complete</th>'
+                                + '<th class="text-center">Demo Scheduled</th>'
+                                + '<th class="text-center">Demo Completed</th>'
+                                + '<th class="text-center">No Show</th>'
                                 + '<th class="text-center">Enrolled</th>'
                                 + '<th class="text-center">Conversion Rate</th>'
                             + '</tr>'
                         + '</thead>'
                         + '<tbody id="leadDemoReportCountryTableBody">'
-                            + '<tr><td colspan="7" class="text-center">No records found</td></tr>'
+                            + '<tr><td colspan="8" class="text-center">No records found</td></tr>'
                         + '</tbody>'
                     + '</table>'
                 + '</div>'
@@ -134,18 +146,33 @@ function getLeadDemoReportCountryContent(title) {
         + '</div>';
 }
 
-function getLeadDemoReportCountryConversionRate(item) {
-    var totalLead = item.totalLead || 0;
-    var enrolled = item.enrolled || 0;
-    if (!totalLead) {
-        return '0%';
-    }
-    return ((enrolled * 100) / totalLead).toFixed(1) + '%';
+// Aggregate-level formulas for the 3 summary cards above — mirrors the "Lead & Demo Dashboard" page's
+// Lead→Demo / Lead→Convert / Demo→Convert KPI tiles, computed here from this report's own totals
+// (data.totalLead / demoSchedule / demoComplete / enrolled) instead of a per-country breakdown.
+function getLeadDemoReportCountryLeadToDemoRate(data) {
+    var totalLead = data.totalLead || 0;
+    var demoSchedule = data.demoSchedule || 0;
+    var rate = totalLead ? (demoSchedule * 100) / totalLead : 0;
+    return rate.toFixed(1) + '%';
+}
+
+function getLeadDemoReportCountryLeadToConvertRate(data) {
+    var totalLead = data.totalLead || 0;
+    var enrolled = data.enrolled || 0;
+    var rate = totalLead ? (enrolled * 100) / totalLead : 0;
+    return rate.toFixed(1) + '%';
+}
+
+function getLeadDemoReportCountryDemoToConvertRate(data) {
+    var demoComplete = data.demoComplete || 0;
+    var enrolled = data.enrolled || 0;
+    var rate = demoComplete ? (enrolled * 100) / demoComplete : 0;
+    return rate.toFixed(1) + '%';
 }
 
 function getLeadDemoReportCountryRowHtml(reportRows, linkDateRange) {
     if (!reportRows || reportRows.length === 0) {
-        return '<tr><td colspan="7" class="text-center">No records found</td></tr>';
+        return '<tr><td colspan="8" class="text-center">No records found</td></tr>';
     }
     linkDateRange = linkDateRange || {};
     var rowHtml = '';
@@ -158,10 +185,11 @@ function getLeadDemoReportCountryRowHtml(reportRows, linkDateRange) {
             + '<td>' + (index + 1) + '</td>'
             + '<td>' + (item.country || 'Unknown') + '</td>'
             + '<td class="text-center"><a href="javascript:void(0)" onclick="' + totalLeadLink + '">' + (item.totalLead || 0) + '</a></td>'
-            + '<td class="text-center">' + (item.demoBook || 0) + '</td>'
-            + '<td class="text-center">' + (item.demoComplete || 0) + '</td>'
-            + '<td class="text-center"><b>' + (item.enrolled || 0) + '</b></td>'
-            + '<td class="text-center">' + getLeadDemoReportCountryConversionRate(item) + '</td>'
+            + '<td class="text-center" style="background:#eaf6ee;color:#2e7d32;font-weight:600;">' + (item.demoSchedule || 0) + '</td>'
+            + '<td class="text-center" style="background:#eaf6ee;color:#2e7d32;font-weight:600;">' + (item.demoComplete || 0) + '</td>'
+            + '<td class="text-center" style="background:#eaf6ee;color:#2e7d32;font-weight:600;">' + (item.noShow || 0) + '</td>'
+            + '<td class="text-center" style="background:#ede7f6;color:#4527a0;"><b>' + (item.enrolled || 0) + '</b></td>'
+            + '<td class="text-center">' + getLeadDemoReportCountryDemoToConvertRate(item) + '</td>'
         + '</tr>';
     });
     return rowHtml;

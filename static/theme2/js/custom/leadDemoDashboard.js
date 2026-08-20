@@ -82,6 +82,15 @@ function initLeadDemoDashboardFilters() {
 }
 
 function bindLeadDemoDashboardEvents() {
+    // Delegated (not .off/.on on a fixed selector) since these icons live inside content re-rendered
+    // per section — a plain .on would stop firing once that section's HTML gets replaced.
+    $(document).off('click.lddRefresh').on('click.lddRefresh', '.ldd-section-refresh', function () {
+        var section = $(this).data('section');
+        if (section) {
+            fetchLeadDemoDashboardSection(section);
+        }
+    });
+
     $('#lddDateRange').off('change.lddr').on('change.lddr', function () {
         LEAD_DEMO_DASHBOARD_STATE.range = $(this).val();
         if (LEAD_DEMO_DASHBOARD_STATE.range === 'custom') {
@@ -555,7 +564,7 @@ function getLeadDemoDashboardStatusBadge(status) {
     var map = {
         UPCOMING: { cls: 'ldd-b-gray', label: 'Upcoming' },
         RUNNING: { cls: 'ldd-b-blue', label: 'Running' },
-        AWAITING: { cls: 'ldd-b-purple', label: 'Awaiting' },
+        AWAITING: { cls: 'ldd-b-purple', label: 'Schedule' },
         COMPLETED: { cls: 'ldd-b-green', label: 'Completed' },
         NO_SHOW: { cls: 'ldd-b-amber', label: 'No-Show' },
         CANCELLED: { cls: 'ldd-b-red', label: 'Cancelled' },
@@ -744,28 +753,12 @@ function renderLeadDemoDashboardBoard(demos) {
         var border = demo.status === 'RUNNING' ? 'border-color:#0f766e;' : '';
         html += '<div class="ldd-demo-card" style="' + border + '">'
             + getLeadDemoDashboardStatusBadge(demo.status)
-            + '<p class="ldd-dc-title">' + (demo.leadName || 'N/A') + '</p>'
-            + '<p class="ldd-dc-meta">' + getLeadDemoDashboardFormattedDateTime(demo.demoTime) + ' · ' + (demo.country || 'N/A') + ' · ' + (demo.counselorName || 'N/A') + '</p>'
-            + '<p class="ldd-dc-info" style="' + getLeadDemoDashboardBoardHostColor(demo.status) + '">' + getLeadDemoDashboardBoardHostLine(demo) + '</p>'
+            + '<p class="ldd-dc-title">' + (demo.leadName ? 'Parent - ' + demo.leadName : 'N/A') + '</p>'
+            + '<p class="ldd-dc-meta">' + getLeadDemoDashboardFormattedDateTime(demo.demoTime) + ' · ' + (demo.country || 'N/A') + '</p>'
+            + '<p class="ldd-dc-info" style="' + getLeadDemoDashboardBoardHostColor(demo.status) + '">Host: ' + (demo.counselorName || 'N/A') + '</p>'
         + '</div>';
     });
     $('#lddDemoBoard').html(html);
-}
-
-// Host-join line for a board card: the actual join order/time once the host has joined, otherwise a clear
-// "Host not joined yet" (Awaiting) or "Not started" (Upcoming) instead of a bare dash.
-function getLeadDemoDashboardBoardHostLine(demo) {
-    var joinText = getLeadDemoDashboardJoinOrderText(demo);
-    if (joinText !== '—') {
-        return joinText;
-    }
-    if (demo.status === 'UPCOMING') {
-        return 'Not started';
-    }
-    if (demo.status === 'AWAITING') {
-        return 'Host not joined yet';
-    }
-    return '—';
 }
 
 function getLeadDemoDashboardBoardHostColor(status) {
@@ -1326,7 +1319,15 @@ function getLeadDemoDashboardMissedConvertibleDetail(missedLeads) {
     return '<div style="padding:8px 4px;">'
         + '<div class="text-muted" style="font-size:11px; text-transform:uppercase; letter-spacing:.03em; margin-bottom:6px;">Missed Convertible Leads</div>'
         + '<table class="table table-sm table-borderless" style="font-size:12px; margin-bottom:0;">'
-            + '<thead><tr class="text-muted"><th>Lead</th><th>Convertibility</th><th>Rules Breached</th></tr></thead>'
+            + '<thead><tr class="text-muted"><th>Lead</th><th>Convertibility</th><th style="position:relative;">Rules Breached '
+                + '<a href="javascript:void(0);" style="font-size:11px;" onclick="toggleLeadDemoDashboardReasonPopover(this)"><i class="fa fa-info-circle text-muted"></i></a>'
+                + '<div class="ldd-reason-popover" style="display:none; font-weight:400; text-transform:none; text-align:left; max-width:260px;">'
+                    + '<b>Slow First Response</b> &mdash; more than 2h from lead creation to first contact.<br>'
+                    + '<b>Insufficient Persistence</b> &mdash; fewer than 3 follow-ups since assigned to this counselor.<br>'
+                    + '<b>Follow-up Gap Breach</b> &mdash; 7+ days since last contact (from whichever is later of last contact or assignment date).<br>'
+                    + '<b>Post-Demo Silence</b> &mdash; demo attended while this counselor already owned the lead, with zero follow-up after.'
+                + '</div>'
+            + '</th></tr></thead>'
             + '<tbody>' + rows + '</tbody>'
         + '</table>'
     + '</div>';
@@ -1373,7 +1374,7 @@ function renderLeadDemoDashboardResponseHealth(data) {
             + '<div class="text-muted" style="font-size:11px; text-transform:uppercase; letter-spacing:.03em; margin-bottom:6px;">Oldest Pending Leads (not yet contacted) '
                 + '<span style="text-transform:none; font-weight:400;">&mdash; ' + agingTotalCount + ' not-yet-contacted lead(s) total</span></div>'
             + '<div class="table-responsive"><table class="table table-sm table-bordered" style="font-size:12px;">'
-                + '<thead><tr class="bg-primary text-white"><th>S.No.</th><th>Lead</th><th>Campaign | Country</th><th>Academic Counselor</th><th>Type</th><th>Waiting</th></tr></thead>'
+                + '<thead><tr class="bg-primary text-white"><th>S.No.</th><th>Lead</th><th>Campaign | Country</th><th>Academic Expert</th><th>Type</th><th>Waiting</th></tr></thead>'
                 + '<tbody>'
                 + data.agingLeads.map(function (l, i) {
                     return '<tr>'
@@ -1415,6 +1416,12 @@ function destroyLeadDemoDashboardChart(key) {
 
 function renderLeadDemoDashboardCharts(charts) {
     if (typeof ApexCharts === 'undefined') {
+        return;
+    }
+    // This fetch can resolve after the user has already navigated away (SPA route change tore down
+    // #dashboardContentInHTML) or after auto-refresh keeps firing on a torn-down page — mounting into a
+    // container that's no longer in the DOM is what throws ApexCharts' "Element not found".
+    if ($('#lddTrendChart').length === 0) {
         return;
     }
     var hourly = !!charts.hourlyView;

@@ -1,7 +1,3 @@
-var LEAD_DEMO_REPORT_COUNTRY_STATE = {
-    rows: []
-};
-
 function renderLeadDemoReportCountryDashboard(title, roleAndModule, schoolId, userId, userRole) {
     ROLE_MODULE = roleAndModule;
     $('#dashboardContentInHTML').html(getLeadDemoReportCountryContent(title));
@@ -36,7 +32,7 @@ function getLeadDemoReportCountryDateRange(rangeType) {
 function initLeadDemoReportCountryFilters() {
     var today = new Date();
     // Same helper used by the existing (counselor-wise) Lead Demo Report page's Academic Counselor filter.
-    $('#leadDemoReportCountryCounselorId').html('<option value="">All Academic Counselor</option>');
+    $('#leadDemoReportCountryCounselorId').html('<option value="">All Academic Expert</option>');
     callLeadAssignUserList('leadDemoReportCountryFilterForm', 'B2C', 'leadDemoReportCountryCounselorId', true, true, USER_ID);
     $('#leadDemoReportCountryCounselorId').select2({ theme: 'bootstrap4' });
 
@@ -85,14 +81,6 @@ function bindLeadDemoReportCountryEvents() {
         }
         $('#leadDemoReportCountryCountryId').val('').trigger('change');
         fetchLeadDemoReportCountryData();
-    });
-
-    $('#leadDemoReportCountryExportCsv').off('click').on('click', function () {
-        downloadLeadDemoReportCountryCsv(LEAD_DEMO_REPORT_COUNTRY_STATE.rows);
-    });
-
-    $('#leadDemoReportCountryExportExcel').off('click').on('click', function () {
-        downloadLeadDemoReportCountryExcel(LEAD_DEMO_REPORT_COUNTRY_STATE.rows);
     });
 }
 
@@ -162,7 +150,7 @@ function fetchLeadDemoReportCountryData() {
             }
             applyLeadDemoReportCountryCounselorLock(data);
             var reportData = data.data || [];
-            LEAD_DEMO_REPORT_COUNTRY_STATE.rows = renderLeadDemoReportCountryTable(reportData);
+            renderLeadDemoReportCountryTable(reportData);
             renderLeadDemoReportCountrySummaryCards(data);
         },
         error: function () {
@@ -191,19 +179,29 @@ function applyLeadDemoReportCountryCounselorLock(data) {
     $counselorEl.data('lockApplied', !!data.restrictToOwnCounselor);
 }
 
+function getLeadDemoReportCountryNotEnrolled(data) {
+    var totalLead = Number(data && data.totalLead) || 0;
+    var enrolled = Number(data && data.enrolled) || 0;
+    return Math.max(totalLead - enrolled, 0);
+}
+
 function renderLeadDemoReportCountrySummaryCards(data) {
     $('#ldrcCardTotalLead').text(data.totalLead || 0);
-    $('#ldrcCardDemoBook').text(data.demoBook || 0);
+    $('#ldrcCardDemoSchedule').text(data.demoSchedule || 0);
     $('#ldrcCardDemoComplete').text(data.demoComplete || 0);
+    $('#ldrcCardDemoNoShow').text(data.noShow || 0);
     $('#ldrcCardEnrolled').text(data.enrolled || 0);
-    $('#ldrcCardConversionRate').text(getLeadDemoReportCountryConversionRate(data));
+    $('#ldrcCardNotEnrolled').text(getLeadDemoReportCountryNotEnrolled(data));
+    $('#ldrcCardLeadToDemo').text(getLeadDemoReportCountryLeadToDemoRate(data));
+    $('#ldrcCardLeadToConvert').text(getLeadDemoReportCountryLeadToConvertRate(data));
+    $('#ldrcCardDemoToConvert').text(getLeadDemoReportCountryDemoToConvertRate(data));
 }
 
 function renderLeadDemoReportCountryTable(reportData) {
     // Drop rows where every metric is 0 — a country with nothing to show for the selected filters is
     // just noise in this list, not something worth a row.
     var nonZeroData = (reportData || []).filter(function (item) {
-        return (item.totalLead || 0) || (item.demoBook || 0) || (item.demoComplete || 0) || (item.enrolled || 0);
+        return (item.totalLead || 0) || (item.demoBook || 0) || (item.demoSchedule || 0) || (item.demoComplete || 0) || (item.noShow || 0) || (item.enrolled || 0);
     });
 
     // Pre-sort here (highest Total Lead first) instead of relying only on DataTable's `order` option,
@@ -221,7 +219,6 @@ function renderLeadDemoReportCountryTable(reportData) {
     }
 
     $('#leadDemoReportCountryTableBody').html(getLeadDemoReportCountryRowHtml(sortedData, getLeadDemoReportCountryLinkDateRange()));
-    $('#leadDemoReportCountryCountValue').text(sortedData.length);
 
     if (sortedData.length) {
         $('#leadDemoReportCountryTable').DataTable({
@@ -231,54 +228,4 @@ function renderLeadDemoReportCountryTable(reportData) {
         });
     }
     return sortedData;
-}
-
-function sanitizeLeadDemoReportCountryCsvValue(value) {
-    var parsedValue = value || '';
-    return '"' + String(parsedValue).replace(/"/g, '""') + '"';
-}
-
-function downloadLeadDemoReportCountryCsv(rows) {
-    var header = ['Country', 'Total Lead', 'Demo Book', 'Demo Complete', 'Enrolled', 'Conversion Rate'];
-    var csv = [header.join(',')];
-    $.each(rows || [], function (_, item) {
-        csv.push([
-            sanitizeLeadDemoReportCountryCsvValue(item.country),
-            item.totalLead || 0,
-            item.demoBook || 0,
-            item.demoComplete || 0,
-            item.enrolled || 0,
-            sanitizeLeadDemoReportCountryCsvValue(getLeadDemoReportCountryConversionRate(item))
-        ].join(','));
-    });
-    var blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    var link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'lead-demo-report-country.csv';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-
-function downloadLeadDemoReportCountryExcel(rows) {
-    var html = '<table border="1"><tr>'
-        + '<th>Country</th><th>Total Lead</th><th>Demo Book</th><th>Demo Complete</th><th>Enrolled</th><th>Conversion Rate</th></tr>';
-    $.each(rows || [], function (_, item) {
-        html += '<tr>'
-            + '<td>' + (item.country || 'Unknown') + '</td>'
-            + '<td>' + (item.totalLead || 0) + '</td>'
-            + '<td>' + (item.demoBook || 0) + '</td>'
-            + '<td>' + (item.demoComplete || 0) + '</td>'
-            + '<td>' + (item.enrolled || 0) + '</td>'
-            + '<td>' + getLeadDemoReportCountryConversionRate(item) + '</td>'
-            + '</tr>';
-    });
-    html += '</table>';
-    var blob = new Blob([html], { type: 'application/vnd.ms-excel' });
-    var link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'lead-demo-report-country.xls';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
 }

@@ -17,9 +17,13 @@ async function renderCounselorDashboard(title, roleAndModule, schoolId, userId, 
 	}else{
 		//callB2CDashboardLead(moduleId,'B2C');
 		//LEAD_CATEGORY="B2C";
-		$('#counselor-demo-meeting-list').DataTable(); 
-		$('#followup-leads-list').DataTable(); 
-	
+		$('#counselor-demo-meeting-list').DataTable();
+		$('#followup-leads-list').DataTable();
+
+		if(typeof renderLeadDemoCalendarDashboard === 'function'){
+			renderLeadDemoCalendarDashboard('leadCalendarDashboardContainer');
+		}
+
 		var data = getCounselorDashboardDetailsData(userId);
 		//if(data.length>0){
 			$("#chartContentDiv").html(counselorDashboardLPContent(data));
@@ -247,6 +251,9 @@ function dashboardCounselorContent(title, roleAndModule, schoolId, userId, role,
 						+getAccountManagerDetailsContent(data)
 					html+=`</div>
 				</div>
+				<div class="mb-3">`
+					+getLeadDemoCalendarDashboardContent()
+				html+=`</div>
 				<div class="mb-3 card border rounded-10">
 					<div class="card-body">`
 						+getStatsDetailsContent(dataReview)
@@ -487,6 +494,10 @@ function getStatsDetailsContent(data){
 		</div>
 	</div>`;
     return html;
+}
+
+function getLeadDemoCalendarDashboardContent(){
+	return `<div id="leadCalendarDashboardContainer" class="mb-3"></div>`;
 }
 
 function getCounselorChartContent(commissionRate){
