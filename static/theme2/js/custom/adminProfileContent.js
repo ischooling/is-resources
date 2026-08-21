@@ -91,7 +91,7 @@ async function renderProfilePage(arg0){
 function getProfilePageContent(data, callFrom, arg0){
     var html=
         `<div class="main-card mb-3 p-3">
-            <div class="card">
+            <div class="card" id="withdrawalProfileCard">
                 <div class="card-body p-0 pb-4">
                     <div class="profile-head bg-primary p-4 rounded-top">`;
                         if(callFrom=='callFrom=admin'){
@@ -242,17 +242,88 @@ function getProfilePageContent(data, callFrom, arg0){
                                 <div class="col-12 text-right save-proifle-btn-row" style="display:none">
                                     <a href="javascript:void(0)" class="btn btn-pill btn-outline-primary cancelEditProfileBtn" style="display:none" onclick="cancelEditProfilePage()">Cancel</a>
                                     <a href="javascript:void(0)" class="btn btn-outline-success btn-pill" onclick="saveProfileDetails('profilePageFromTag', \'${arg0}\')">Save</a>    
-                                </div>    
-                            </div>
+                                </div>`
+                                if(typeof USER_ROLE !== "undefined" && USER_ROLE == "PARENT"){
+                                    html+=`<div class="col-12 text-right mt-2">
+                                    <a href="javascript:void(0)" class="btn btn-pill btn-outline-primary float-right"  onclick="openWithdrawalRequest()">Withdrawal Request</a>
+                                </div>`;
+                                }
+                            html+=`</div>
                         </div>
                     </form>
                 </div>`
                 if(USER_ROLE == "B2B_PARTNER"){
                     html+=`<div id="bankDetailsWrapper"></div>`;
                 }
-            html+=`</div>    
+            html+=`</div>`;
+            if(typeof USER_ROLE !== "undefined" && USER_ROLE == "PARENT"){
+                html+=`<div class="card mt-3 d-none" id="withdrawalRequestSection"><div class="card-body wd-scope" id="withdrawalRequestBody"></div></div>`;
+            }
+            html+=`</div>`;
+    return html;
+}
+
+function getAdminProfilePageHeader(callFrom) {
+    var html =
+        `<div class="app-page-title mb-3 py-2">
+            <div class="page-title-wrapper">
+                <div class="page-title-heading">
+                    <div class="page-title-icon">
+                        <i class="fa fa-user text-primary"></i>
+                    </div>
+                    <div>Profile</div>
+                </div>`;
+                if(callFrom=='callFrom=admin'){
+                    html += `<div class="page-title-actions">
+                        <a href="javascript:void(0);" onclick="backToMain(\'manageProfileParentContent\');" class="btn btn-dark rounded"><i class="fa fa-arrow-left mr-1" aria-hidden="true"></i>Back</a>
+                    </div>`;
+                }
+            html += `</div>
         </div>`;
     return html;
+}
+
+/* ==========================================================================
+   Withdrawal Request — parent entry (profile link -> child cards -> form)
+   ========================================================================== */
+function adminProfileSectionSwitching(){
+    var profileWrapper = $("#profilePageView");
+    profileWrapper.find(".profile-selection-list-anchor").off("click.adminProfile").on("click.adminProfile", function(e){
+        e.preventDefault();
+        var target = $(this).attr("href");
+        profileWrapper.find(".profile-selection-list-anchor").removeClass("bg-light");
+        $(this).addClass("bg-light");
+        profileWrapper.find(".profile-section").addClass("d-none");
+        profileWrapper.find(target).removeClass("d-none");
+    });
+    profileWrapper.find(".profile-section").addClass("d-none");
+    profileWrapper.find("#personal_information").removeClass("d-none");
+    profileWrapper.find('.profile-selection-list-anchor[href="#personal_information"]').addClass("bg-light");
+}
+
+function adminProfileAdjustLayout(){
+    var profileWrapper = $("#profilePageView");
+    var rightSection = profileWrapper.find(".profile-right-section");
+    if(rightSection.length < 1){
+        return;
+    }
+    function setAdminProfileRightSectionHeight(){
+        if($(window).outerWidth() > 991){
+            var footerHeight = $(".app-footer").outerHeight() || 0;
+            var rightSectionTop = rightSection.offset().top - $(window).scrollTop();
+            var availableHeight = Math.max(320, $(window).height() - rightSectionTop - footerHeight - 16);
+            rightSection.css({"height": availableHeight + "px"}).removeClass("mb-4");
+        }else{
+            rightSection.css({"height": "inherit"}).addClass("mb-4");
+        }
+    }
+    if($(window).outerWidth() > 991){
+        $("html, body").animate({ scrollTop: 0 }, 600, setAdminProfileRightSectionHeight);
+    }
+    setAdminProfileRightSectionHeight();
+    $(window).off("resize.adminProfileLayout").on("resize.adminProfileLayout", function(){
+        setAdminProfileRightSectionHeight();
+    });
 }
 
 function cropperImageModalContent(){

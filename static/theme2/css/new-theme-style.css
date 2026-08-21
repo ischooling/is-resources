@@ -31773,7 +31773,7 @@ table td.child ul li{white-space: normal;}
 
 /* profile modal css */
 /*.select2-container--bootstrap4{width: 100% !important;}*/
-.error-msg{position: absolute;right: 0;top: 0;color:#ff0909;}
+.error-msg:not(.form-control-field){position: absolute;right: 0;top: 0;color:#ff0909;}
 .school-logo-thumb{height: 60px !important;padding: 45px 0;margin:35px 0 }
 .full{width: 100% !important;display: inline-block;}
 .profile-modal-body{position: relative;}

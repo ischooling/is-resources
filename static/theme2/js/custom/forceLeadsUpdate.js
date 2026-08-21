@@ -41,6 +41,10 @@ function getAllCallbackForUpdateRemark(userId) {
 
 function getAllDemoForUpdateStatus(userId) {
 	var responseData={};
+	//don't call API if Update Demo Status modal is hidden via setting
+	if(JSON.parse(getSettingsByTypeAndKey("CONFIGURATION","UPDATE_DEMO_SATUS_MODAL_HIDE_SHOW")).data.metaValue != "true"){
+		return responseData;
+	}
 	var data={};
 	data['userId']=userId;
 	$.ajax({
@@ -72,6 +76,10 @@ function getAllDemoForUpdateStatus(userId) {
 
 function getAllLeadForUpdateRemark(userId) {
 	var responseData={};
+	//don't call API if Update Lead Remark modal is hidden via setting
+	if(JSON.parse(getSettingsByTypeAndKey("CONFIGURATION","UPDATE_LEAD_REMARK_MODAL_HIDE_SHOW")).data.metaValue != "true"){
+		return responseData;
+	}
 	var data={};
 	data['userId']=userId;
 	$.ajax({
@@ -103,6 +111,10 @@ function getAllLeadForUpdateRemark(userId) {
 
 function getAllDemosForUpdateRemark(userId) {
 	var responseData={};
+	//don't call API if Update Demo Remark modal is hidden via setting
+	if(JSON.parse(getSettingsByTypeAndKey("CONFIGURATION","UPDATE_DEMO_REMARK_MODAL_HIDE_SHOW")).data.metaValue != "true"){
+		return responseData;
+	}
 	var data={};
 	data['userId']=userId;
 	$.ajax({

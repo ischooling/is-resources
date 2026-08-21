@@ -111,6 +111,7 @@ const contentHandlers = {
     'partner-school-payment': () => initPartnerSchoolPayment(),
     'graduation-ceremony-attendees': () => initGraduationCeremonyAttendees(),
     'sms-error-log': () => renderSmsErrorLog('SMS Error Log', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'withdrawal-requests': () => renderWithdrawalRequests('Withdrawal Requests', roleAndModule),
     'manage-cron': () => renderManageCron('Manage CRON', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'manage-motivational-quotes': () => renderMotivationalQuotesDashboard('Motivational Quotes', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'event-discount': () => initEventDiscount(),

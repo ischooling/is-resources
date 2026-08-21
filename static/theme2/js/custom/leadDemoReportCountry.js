@@ -180,9 +180,9 @@ function applyLeadDemoReportCountryCounselorLock(data) {
 }
 
 function getLeadDemoReportCountryNotEnrolled(data) {
-    var totalLead = Number(data && data.totalLead) || 0;
+    var demoComplete = Number(data && data.demoComplete) || 0;
     var enrolled = Number(data && data.enrolled) || 0;
-    return Math.max(totalLead - enrolled, 0);
+    return Math.max(demoComplete - enrolled, 0);
 }
 
 function renderLeadDemoReportCountrySummaryCards(data) {

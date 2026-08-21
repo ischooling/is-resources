@@ -621,14 +621,6 @@ position:relative;
 .custom-field-scope .custom-field select::-ms-expand{
     display:none;
 }
-
-/* DEFENSIVE: force-center the label when field is empty AND not interactive.
-   Excludes:
-     - .has-value / .is-filled / .active (JS-driven filled states)
-     - :focus-within (any descendant focused, covers both <select>:focus and select2 search input)
-     - select2 open dropdown / multi-select chip present
-     - input with non-empty value attribute (avoids flicker before JS runs)
-     - input/textarea currently NOT showing placeholder (covers runtime values set via .val()) */
 .custom-field-scope .custom-field:not(.has-value):not(.is-filled):not(.active):not(:focus-within):not(:has(.select2-container--open)):not(:has(.select2-selection--multiple .select2-selection__choice)):not(:has(input[value]:not([value=""]))):not(:has(input:not(:placeholder-shown))):not(:has(textarea:not(:placeholder-shown))) label:not(.error-msg){
     top:48% !important;
     transform:translateY(-50%) !important;
@@ -647,16 +639,6 @@ position:relative;
     border-color:var(--custom-field-default) !important;
 }
 
-/* ============================================================
-   Z-INDEX STACKING for OPEN select2 dropdowns. Three tiers:
-     - default floated label:                  5 (low)
-     - own field's label when its own OPEN:    1000000 (above its container)
-     - dropdown PANEL (.select2-dropdown):     1000001 (above everything)
-   DO NOT bump .select2-container--open itself — its closed field box
-   would then cover the label's bottom half and break the notch effect.
-   Keep label > container, panel > label.
-   The label rule uses 'label' (not '> label') so it works whether the
-   <label> is a direct child of .custom-field or nested one level deeper. */
 .custom-field-scope .custom-field:has(.select2-container--open) label:not(.error-msg){
     z-index:1000000 !important;
 }
@@ -667,29 +649,14 @@ body > .select2-container--open .select2-dropdown,
     z-index:1000001 !important;
 }
 
-/* SEPARATE DIAL CODE variant of intl-tel-input (initialized with
-   separateDialCode:true) — the flag container shows the flag + "+XX" dial
-   code, making it ~84px wide instead of the ~46px of the plain variant.
-   Two fixes needed:
-     1. Visually unify the flag/dial container with the input so they read as
-        a single field (iti's default rgba(0,0,0,.05) background creates a
-        seam). Drop the background, add a clean border-right that recolors
-        with focus.
-     2. Move the floating placeholder label past the dial-code block so it
-        doesn't overlap the "+XX" text when the field is empty. */
 .custom-field-scope .custom-field .iti--separate-dial-code .iti__selected-flag{
     background-color:transparent !important;
     border-right:1px solid var(--custom-field-default);
     border-radius:6px 0 0 6px !important;
     padding:0 8px 0 14px;
 }
-/* Reset the generic .iti input padding-left (120px, sized for the plain
-   variant). In separate-dial-code mode the flag+code block is ~84px, so
-   120px leaves a visible gap between the dial code and the typed number.
-   syncHoldPhoneInputPadding may override per-instance, but a CSS baseline
-   keeps the layout correct even before/without that JS running. */
 .custom-field-scope .custom-field .iti--separate-dial-code > input{
-    padding-left:90px !important;
+    padding-left:105px !important;
 }
 .custom-field-scope .custom-field:has(.iti--separate-dial-code input:focus) .iti__selected-flag,
 .custom-field-scope .custom-field.has-value:has(.iti--separate-dial-code) .iti__selected-flag,
@@ -698,7 +665,7 @@ body > .select2-container--open .select2-dropdown,
     border-right-color:var(--custom-field-active);
 }
 .custom-field-scope .custom-field:has(.iti--separate-dial-code) label:not(.error-msg){
-    left:90px;
+    left:105px;
 }
 .custom-field-scope .custom-field.has-value:has(.iti--separate-dial-code) label:not(.error-msg),
 .custom-field-scope .custom-field.is-filled:has(.iti--separate-dial-code) label:not(.error-msg),

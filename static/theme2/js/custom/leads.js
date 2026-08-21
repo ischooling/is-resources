@@ -4715,10 +4715,16 @@ function getPartnerLeadById(formId, leadId, modalId, partnerDefaultSettings) {
 							$("#"+formId+" #cityId").val(leadDemo.leadStudentDetailDTO.city).trigger("change");
 							$("#"+formId+" #cityId").attr("disabled","disabled");
 							$("#"+formId+" #partnerType").val(leadDemo.leadModifyDTO.partnerTypeId);
+							// Refresh the floating-label/has-value state so the selected value becomes visible.
+							// (Set via .val() without a change event, so the custom-field otherwise stays transparent.)
+							refreshCustomFieldState($("#"+formId+" #partnerType").closest(".custom-field"));
 							$("#"+formId+" #originalTimezone").val(leadDemo.leadModifyDTO.originalPartnerTimzone).trigger('change');
 						}, 1000);
 						var originalPartnerType = leadDemo.leadStudentDetailDTO.originalPartnerType;
 						$("#"+formId+" #originalPartnerType").val(originalPartnerType);
+						// Refresh the floating-label/has-value state so the selected value becomes visible without
+						// firing a change event (which would run updateFieldsBasedOnPartnerType and reset dependent fields).
+						refreshCustomFieldState($("#"+formId+" #originalPartnerType").closest(".custom-field"));
 						if(originalPartnerType != null && originalPartnerType != ''){
 							$("#"+formId+" #originalPartnerType").attr('disabled', true);
 						}else{

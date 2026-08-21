@@ -54,9 +54,39 @@ async function renderStudentProfilePage(extraParam) {
         $("#dashboardContentInHTMLAdditional").html(getProfilePageHeader() + html).show();
         checkJoinedSports(data[4]);
         profileViewPageLoadEvent(data);
+        if (USER_ROLE == "STUDENT" && typeof openWithdrawalRequestForStudent === "function") {
+            initStudentWithdrawalSection();
+        }
         setTimeout(function () {
             SAVE_BLUK_PROFILE_DATA = [];
         }, 2000)
+    }
+}
+
+/**
+ * Shows the student's own "Withdrawal Requests" section only when the student has no
+ * parent account (checked server-side via PARENT_STUDENT_MAPPING); otherwise the parent
+ * handles it and the tab/section are removed.
+ */
+async function initStudentWithdrawalSection() {
+    try {
+        var resp = await callCommonAjax({
+            method: "POST",
+            url: APP_BASE_URL + SCHOOL_UUID + "/dashboard/student/withdrawal-eligibility",
+            body: {},
+            global: false,
+            showMessage: false
+        });
+        if (resp && resp.status === "3") { redirectLoginPage(); return; }
+        if (resp && resp.status === "1" && resp.selfEligible === true) {
+            openWithdrawalRequestForStudent(USER_ID);
+        } else {
+            $(".wd-student-nav").remove();
+            $("#withdrawal_request_information").remove();
+        }
+    } catch (e) {
+        $(".wd-student-nav").remove();
+        $("#withdrawal_request_information").remove();
     }
 }
 
@@ -134,6 +164,19 @@ function getStudentProfilePageContent(data) {
     }
     html += `<div class="full profile-section" id="studentEmailDIV"></div>`
     html += `<div class="full profile-section" id="zoomRegistrationDIV"></div>`
+    if (USER_ROLE == "STUDENT") {
+        html += `<div class="card profile-section wd-student-section" id="withdrawal_request_information">
+            <div class="card-body">
+                <div class="col-12 p-0 mb-2">
+                    <h5 class="text-dark font-weight-semi-bold d-flex align-items-center">
+                        <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px"><i class="fa fa-sign-out font-12"></i></span>
+                        <span class="flex-grow-1">7. Withdrawal Request</span>
+                    </h5>
+                </div>
+                <div class="wd-scope" id="withdrawalRequestBody"></div>
+            </div>
+        </div>`;
+    }
     // html+=communicationLogInformation(data)
     html += `
                     </div>
@@ -252,7 +295,7 @@ function profileSectionTabs() {
                     </a>
                 </li>`: ``
         }
-            <li class="bg-white border border-top-left-rounded ${SHOW_STUDENT_REGISTRATION_SECTION ? '' : 'rounded-bottom-left-10 rounded-bottom-right-10'} overflow-hidden">
+            <li class="bg-white border border-top-left-rounded ${SHOW_STUDENT_REGISTRATION_SECTION || USER_ROLE == "STUDENT" ? '' : 'rounded-bottom-left-10 rounded-bottom-right-10'} overflow-hidden">
                 <a href="#studentEmailDIV" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
                     <div class="text-dark font-weight-bold flex-grow-1">${USER_ROLE == "STUDENT" ? '6' : emailIndex}. Student School Email Account</div>
                     <div class="widget-content-wrapper flex-fill circle-percentage text-right">
@@ -267,7 +310,7 @@ function profileSectionTabs() {
                 </a>
             </li>
             ${SHOW_STUDENT_REGISTRATION_SECTION ?
-                `<li class="bg-white border border-top-left-rounded rounded-bottom-left-10 rounded-bottom-right-10 overflow-hidden">
+                `<li class="bg-white border border-top-left-rounded ${USER_ROLE == "STUDENT" ? '' : 'rounded-bottom-left-10 rounded-bottom-right-10'} overflow-hidden">
                     <a href="#zoomRegistrationDIV" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
                         <div class="text-dark font-weight-bold flex-grow-1">${USER_ROLE == "STUDENT" ? '6' : registrationIndex}. Enable Registration</div>
                         <div class="widget-content-wrapper flex-fill circle-percentage text-right">
@@ -282,8 +325,14 @@ function profileSectionTabs() {
                     </a>
                 </li>`
                 : ``}
-            
-        </ul>   
+            ${USER_ROLE == "STUDENT" ?
+                `<li class="bg-white border border-top-left-rounded rounded-bottom-left-10 rounded-bottom-right-10 overflow-hidden wd-student-nav">
+                    <a href="#withdrawal_request_information" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
+                        <div class="text-dark font-weight-bold flex-grow-1">7. Withdrawal Request</div>
+                    </a>
+                </li>`
+                : ``}
+        </ul>
     </div>`;
     return html;
 }
