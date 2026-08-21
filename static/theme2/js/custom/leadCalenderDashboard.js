@@ -38,7 +38,23 @@
         suppressDatepickerEvent: false,
         clockTimer: null,
         activeRefreshTimer: null,
-        lastLiveKey: ""
+        lastLiveKey: "",
+        // Raw, as-is /timeavailability/get-slots-to-book-event response for the currently fetched
+        // date — normalized "available to book" slots (userId:null -> every counselor), shown on
+        // the calendar alongside the /dashboard/school-demo-list meetings, not filtered further.
+        availableSlots: [],
+        // ADMIN-DASHBOARD-SPACIAL-RIGHTS flag off the latest /timeavailability/get-slots-to-book-event
+        // response (same flag as each meeting's .searchUser — see isMyMeeting). false means that
+        // response was built across EVERY counselor, so getAvailableSlotsForSelectedDate() merges
+        // same-time slots into one card listing every counselor instead of one card per counselor.
+        // Defaults to true (today's existing per-counselor behaviour) until a response says otherwise.
+        slotsSearchUser: true,
+        // Set once the first /dashboard/school-demo-list or /timeavailability/get-slots-to-book-event
+        // response comes back with searchUser === false (backend couldn't filter to just this
+        // counselor). Once set, fetchAndRenderLeadCalendar skips calling BOTH APIs on every later
+        // navigation (prev/next/today/week/month/date-picker) instead of re-hitting them just to
+        // hide the widget again — see the early-exit guard at the top of that function.
+        hiddenForNonSearchUser: false
     };
 
     // How often to check for a live-status change (a demo starting/ending) while the
@@ -219,19 +235,50 @@
         });
     }
 
-    // Client-side safety net for "only my leads": the backend (ReportUtil.getReportTotalSchoolDemo)
-    // now filters by the logged-in counselor's userId too, but that requires a Java restart to be
-    // live, and depends on the SQL LEFT JOIN (U.ID via M.SCHOOL_PERSON_ID) actually resolving a
-    // userId. Filter again here so this dashboard never shows another counselor's records even if
-    // the backend hasn't picked up the fix yet, or a record's userId comes back null.
+    // Normalizes one raw slot from /timeavailability/get-slots-to-book-event's "slotList" (a flat
+    // array here — see fetchAndRenderLeadCalendar, which flattens the API's array-of-arrays) into
+    // the shape renderAvailableSlotCard()/groupBySelectedDate-style filtering expects. Shown as-is,
+    // no filtering beyond picking the fields needed to place it on the calendar.
+    function normalizeAvailableSlot(item) {
+        var tz = getLeadTimezone();
+        var startMoment = (item.meetDate && item.startTime)
+            ? moment.tz(item.meetDate + " " + item.startTime, "YYYY-MM-DD hh:mm A", tz)
+            : null;
+        var endMoment = (item.meetEndDate && item.endTime)
+            ? moment.tz(item.meetEndDate + " " + item.endTime, "YYYY-MM-DD hh:mm A", tz)
+            : null;
+        if (startMoment && !startMoment.isValid()) { startMoment = null; }
+        if (endMoment && !endMoment.isValid()) { endMoment = null; }
+        return $.extend({}, item, {
+            id: "slot-" + (item.meetingDateId || "") + "-" + (item.adminUserId || ""),
+            localStartMoment: startMoment,
+            localEndMoment: endMoment,
+            localDateKey: startMoment ? startMoment.format("YYYY-MM-DD") : "",
+            displayTime: startMoment && endMoment ? startMoment.format("hh:mm A") + " - " + endMoment.format("hh:mm A") : "",
+            counselorName: String(item.counselorName || "").trim()
+        });
+    }
+
+    // Client-side safety net for "only my leads": /dashboard/school-demo-list's response is shown
+    // as-is otherwise (no other filtering) — this only decides ownership. If item.userId matches the
+    // logged-in USER_ID, it's mine. If it DOESN'T match (or is missing), don't exclude it outright —
+    // also check assignName against USER_FULL_NAME before hiding it, since the userId on some rows
+    // may not have resolved correctly server-side.
     function isMyMeeting(item) {
-        if (item.userId != null && typeof USER_ID !== "undefined" && USER_ID != null) {
-            return Number(item.userId) === Number(USER_ID);
-        }
+        // searchUser === false means the backend already returned every counselor's data
+        // (ADMIN-DASHBOARD-SPACIAL-RIGHTS, see ReportUtil.getReportTotalSchoolDemo) — don't narrow
+        // that down to "my meetings" client-side, show it all as-is. searchUser === true means the
+        // backend already filtered to the logged-in counselor, so this ownership check still applies
+        // as an extra safety net (behaviour unchanged in that case).
+        if (item.searchUser === false) { return true; }
+        var userIdMatches = item.userId != null && typeof USER_ID !== "undefined" && USER_ID != null
+            && Number(item.userId) === Number(USER_ID);
+        if (userIdMatches) { return true; }
         if (typeof USER_FULL_NAME !== "undefined" && USER_FULL_NAME) {
             return String(item.assignName || "").trim().toLowerCase() === String(USER_FULL_NAME).trim().toLowerCase();
         }
-        // Can't determine ownership (no userId, no USER_FULL_NAME) — don't hide data outright.
+        // Can't determine ownership (userId didn't match/was missing, no USER_FULL_NAME to fall
+        // back on) — don't hide data outright.
         return true;
     }
 
@@ -252,6 +299,50 @@
             return l - r;
         });
         return meetings;
+    }
+
+    // Available-to-book slots (from /timeavailability/get-slots-to-book-event, fetched once per day
+    // across the active view's range — see fetchAndRenderLeadCalendar) for one particular
+    // "YYYY-MM-DD" date, shown as-is alongside the demo meetings — no status/ownership filtering.
+    // Shared by the "today" list (getAvailableSlotsForSelectedDate) and the week/month grids, which
+    // look this up per day cell.
+    function getMergedAvailableSlotsForDateKey(dateKey) {
+        var slots = leadCalendarState.availableSlots.filter(function(slot) {
+            return slot.localDateKey === dateKey;
+        });
+        // searchUser === false -> this response was built across every counselor (see slotsSearchUser),
+        // so the same time slot shows up once per counselor — collapse those into a single card per
+        // time slot, with every counselor's name comma-separated, instead of one block each.
+        // searchUser === true -> left exactly as-is (a counselor only ever sees their own slots there).
+        if (leadCalendarState.slotsSearchUser === false) {
+            var mergedByTime = {};
+            var mergedOrder = [];
+            slots.forEach(function(slot) {
+                var timeKey = (slot.localStartMoment ? slot.localStartMoment.valueOf() : slot.displayTime) + "|" +
+                    (slot.localEndMoment ? slot.localEndMoment.valueOf() : "");
+                if (!mergedByTime[timeKey]) {
+                    mergedByTime[timeKey] = $.extend({}, slot, { counselorNames: [] });
+                    mergedOrder.push(mergedByTime[timeKey]);
+                }
+                if (slot.counselorName && mergedByTime[timeKey].counselorNames.indexOf(slot.counselorName) === -1) {
+                    mergedByTime[timeKey].counselorNames.push(slot.counselorName);
+                }
+            });
+            slots = mergedOrder.map(function(merged) {
+                return $.extend({}, merged, { counselorName: merged.counselorNames.join(", ") });
+            });
+        }
+        slots.sort(function(left, right) {
+            var l = left.localStartMoment ? left.localStartMoment.valueOf() : Number.MAX_SAFE_INTEGER;
+            var r = right.localStartMoment ? right.localStartMoment.valueOf() : Number.MAX_SAFE_INTEGER;
+            return l - r;
+        });
+        return slots;
+    }
+
+    function getAvailableSlotsForSelectedDate() {
+        var selectedKey = leadCalendarState.selectedDate || moment().tz(getLeadTimezone()).format("YYYY-MM-DD");
+        return getMergedAvailableSlotsForDateKey(selectedKey);
     }
 
     function getTodaySummaryGroups() {
@@ -318,6 +409,7 @@
                                             var meta = STATUS_META[key];
                                             return `<div class="lead-cal-leg-item" style="color:${meta.color};"><div class="lead-cal-leg-box" style="border-color:${meta.color};"></div>${meta.label}</div>`;
                                         }).join("")}
+                                        <div class="lead-cal-leg-item" style="color:${AVAILABLE_SLOT_COLOR};"><div class="lead-cal-leg-box" style="border-color:${AVAILABLE_SLOT_COLOR};"></div>Available Slot</div>
                                     </div>
                                 </div>
                                 <div class="lead-cal-layout">
@@ -403,6 +495,7 @@
                 .lead-cal-today-empty { padding: 42px; text-align: center; color: #9aa0a6; font-size: 14px; }
                 @keyframes leadCalendarPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
                 .lead-cal-today-event.is-live { animation: leadCalendarPulse 1.4s ease-in-out infinite; }
+                .lead-cal-slot-event { border-style: dashed; opacity: 0.9; }
                 #leadCalendarDatepicker > .datepicker table tr td.active, #leadCalendarDatepicker > .datepicker table tr td.active:hover, #leadCalendarDatepicker > .datepicker table tr td.active:focus { background: var(--pc) !important; color: #fff !important; }
                 #leadCalendarDatepicker > .datepicker td, #leadCalendarDatepicker > .datepicker th:not(.datepicker-switch) { width: 36px; height: 36px; line-height: 36px; text-align: center; }
                 /* ── Week view ── */
@@ -433,6 +526,8 @@
                 .lead-cal-month-cell .daynum { font-size: 12px; font-weight: 600; }
                 .lead-cal-month-cell.is-today .daynum { color: var(--pc); }
                 .lead-cal-month-count { margin-top: auto; font-size: 10px; font-weight: 700; border-radius: 10px; padding: 2px 6px; align-self: flex-start; color: #fff; }
+                .lead-cal-month-count + .lead-cal-month-count { margin-top: 2px; }
+                .lead-cal-month-slot-counselor { font-size: 9px; color: #0d8a5f; margin-top: 2px; line-height: 1.2; word-break: break-word; }
                 @media (max-width: 990px) {
                     .lead-cal-new { height: auto; min-height: 520px; }
                     .lead-cal-topbar, .lead-cal-legend-strip { flex-wrap: wrap; height: auto; padding: 10px; justify-content: flex-start; }
@@ -466,7 +561,7 @@
                 .lead-cal-modal-close-btn { border: 0; background: #f1f3f4; color: #3c4043; font-size: 13px; font-weight: 500; padding: 9px 24px; border-radius: 24px; cursor: pointer; }
                 .lead-cal-modal-close-btn:hover { background: #e4e7ec; }
                 .lead-cal-modal-join-btn { border: 0; color: #fff; font-size: 13px; font-weight: 600; padding: 9px 24px; border-radius: 24px; cursor: pointer; margin-right: 8px; }
-                .lead-cal-modal-join-btn:hover { opacity: 0.9; }
+                .lead-cal-modal-join-btn:hover { opacity: 0.9; color: #fff; }
             </style>`);
     }
 
@@ -514,6 +609,15 @@
         if (meeting.hostJoins || meeting.attendeeJoins) {
             joinInfo = `<span class="ml-2">Host Joined: <b>${meeting.hostJoins}</b> &nbsp; Attendee Joined: <b>${meeting.attendeeJoins}</b></span>`;
         }
+        // "System Training" meetings aren't tied to a real lead, so there's no Lead No to show for them.
+        var isSystemTraining = String(meeting.meetingFrom || "").trim() === "System Training";
+        var leadNoLine = isSystemTraining ? "" : `Lead No: ${escapeHtml(meeting.leadNo || "-")} <br/>`;
+        // searchUser === false -> this card is one of MANY counselors' meetings (backend didn't
+        // filter by user, see isMyMeeting), so show whose meeting it is. searchUser === true -> the
+        // backend already scoped this to the logged-in counselor, so leave the card as-is (no name).
+        var assignNameLine = meeting.searchUser === false && meeting.assignName
+            ? `Assigned To: ${escapeHtml(meeting.assignName)} <br/>`
+            : "";
         return `
             <div class="lead-cal-today-event ${isLive ? "is-live" : ""}" data-lead-meeting-id="${meeting.id}" style="border-color:${meeting.statusColor} !important;">
                 <div class="lead-cal-today-content">
@@ -523,9 +627,35 @@
                          ${escapeHtml(meeting.title)}
                     </div>
                     <div class="lead-cal-today-subtitle">
-                        <b>${escapeHtml(meeting.displayTime)}</b> &nbsp;|&nbsp; Lead No: ${escapeHtml(meeting.leadNo || "-")} <br/>
+                        <b>${escapeHtml(meeting.displayTime)}</b> ${leadNoLine ? "&nbsp;|&nbsp; " + leadNoLine : "<br/>"}
+                        ${assignNameLine}
                         Source: ${escapeHtml(meeting.meetingFrom || "-")}<br/>
                         ${joinInfo}
+                    </div>
+                </div>
+            </div>`;
+    }
+
+    // "AVAILABLE SLOT" cards — /timeavailability/get-slots-to-book-event data, shown as-is
+    // alongside the booked demo/lead meetings on the "today" list view (see renderLeadTodayView).
+    // Not clickable/bookable here — purely informational, so no click handler is attached.
+    var AVAILABLE_SLOT_COLOR = "#0d8a5f";
+    function renderAvailableSlotCard(slot) {
+        // Only shown when slotsSearchUser === false — that's when getAvailableSlotsForSelectedDate()
+        // merges several counselors' same-time slots into this one card, so the comma-separated
+        // counselorName is the only way to tell whose slots they are. Left off otherwise (as-is).
+        var counselorLine = (leadCalendarState.slotsSearchUser === false && slot.counselorName)
+            ? `<b>Counselor's: ${escapeHtml(slot.counselorName)}</b><br/>`
+            : "";
+        return `
+            <div class="lead-cal-today-event lead-cal-slot-event" data-lead-slot-id="${slot.id}" style="border-color:${AVAILABLE_SLOT_COLOR} !important;">
+                <div class="lead-cal-today-content">
+                    <div class="lead-cal-today-title font-weight-semi-bold" style="color:${AVAILABLE_SLOT_COLOR};">
+                        <span class="lead-cal-today-badge d-block" style="background:${AVAILABLE_SLOT_COLOR};width:fit-content;margin:4px auto 0;">AVAILABLE SLOT</span>
+                    </div>
+                    <div class="lead-cal-today-subtitle">
+                        <b>${escapeHtml(slot.displayTime)}</b><br/>
+                        ${counselorLine}
                     </div>
                 </div>
             </div>`;
@@ -564,13 +694,22 @@
 
     function openLeadMeetingModal(meeting) {
         $("#leadCalMeetingModalOverlay").remove();
+        // "System Training" meetings aren't tied to a real lead, so there's no Lead No to show for them.
+        var isSystemTraining = String(meeting.meetingFrom || "").trim() === "System Training";
+        var leadNoField = isSystemTraining ? "" : `<div class="lead-cal-modal-field"><span class="lead-cal-modal-label">Lead No</span><span class="lead-cal-modal-value">${escapeHtml(meeting.leadNo || "-")}</span></div>`;
+        // Same searchUser === false rule as renderMeetingCard — only show whose meeting it is when
+        // this record wasn't already scoped to the logged-in counselor.
+        var assignNameField = meeting.searchUser === false && meeting.assignName
+            ? `<div class="lead-cal-modal-field"><span class="lead-cal-modal-label">Assigned To</span><span class="lead-cal-modal-value">${escapeHtml(meeting.assignName)}</span></div>`
+            : "";
         var html = `
             <div class="lead-cal-modal-overlay" id="leadCalMeetingModalOverlay">
                 <div class="lead-cal-modal">
                     <div class="lead-cal-modal-strip" style="background:${meeting.statusColor};"></div>
                     <div class="lead-cal-modal-body">
                         <h4 class="lead-cal-modal-title" style="color:${meeting.statusColor};">${escapeHtml(meeting.title)}</h4>
-                        <div class="lead-cal-modal-field"><span class="lead-cal-modal-label">Lead No</span><span class="lead-cal-modal-value">${escapeHtml(meeting.leadNo || "-")}</span></div>
+                        ${leadNoField}
+                        ${assignNameField}
                         <div class="lead-cal-modal-field"><span class="lead-cal-modal-label">Date &amp; Time</span><span class="lead-cal-modal-value">${escapeHtml(meeting.demoDate || "-")} &nbsp;•&nbsp; ${escapeHtml(meeting.displayTime || "-")}</span></div>
                         <div class="lead-cal-modal-field"><span class="lead-cal-modal-label">Status</span><span class="lead-cal-modal-value font-weight-semi-bold" style="color:${meeting.statusColor};">${escapeHtml(meeting.statusLabel)}</span></div>
                         <div class="lead-cal-modal-subheading">Meeting Join Details</div>
@@ -666,15 +805,28 @@
         $("#leadCalendarTitle").text(selected.format("dddd, MMMM D, YYYY"));
 
         var meetings = groupBySelectedDate();
+        var availableSlots = getAvailableSlotsForSelectedDate();
         var isToday = selected.isSame(moment().tz(getLeadTimezone()), "day");
-        var html = meetings.length
+
+        // Merge booked demos and available slots into ONE list, sorted by start time, so they
+        // render in actual chronological sequence (e.g. a 12:00-12:30 "Demo Booked" followed by a
+        // 12:30-01:00 "AVAILABLE SLOT" shows in that order) instead of all demos first, then all
+        // slots. Items with no parseable start time sort last, after everything with a time.
+        var combinedItems = meetings.map(function(meeting) {
+            return { sortKey: meeting.localStartMoment ? meeting.localStartMoment.valueOf() : Number.MAX_SAFE_INTEGER, html: renderMeetingCard(meeting) };
+        }).concat(availableSlots.map(function(slot) {
+            return { sortKey: slot.localStartMoment ? slot.localStartMoment.valueOf() : Number.MAX_SAFE_INTEGER, html: renderAvailableSlotCard(slot) };
+        }));
+        combinedItems.sort(function(left, right) { return left.sortKey - right.sortKey; });
+
+        var html = combinedItems.length
             ? `<div class="lead-cal-today-group">
                     <div class="lead-cal-today-date ${isToday ? "is-today" : ""}">
                         <span class="lead-cal-today-dow">${selected.format("ddd").toUpperCase()}</span>
                         <span class="lead-cal-today-day">${selected.format("D")}</span>
                     </div>
                     <div class="lead-cal-today-items">
-                        ${meetings.map(renderMeetingCard).join("")}
+                        ${combinedItems.map(function(item) { return item.html; }).join("")}
                     </div>
                 </div>`
             : '<div class="lead-cal-today-empty">No demo/lead meetings found for this day.</div>';
@@ -688,6 +840,18 @@
         return `
             <div class="lead-cal-week-chip" data-lead-meeting-id="${meeting.id}" style="border-color:${meeting.statusColor};color:${meeting.statusColor};">
                 <span class="t">${escapeHtml(meeting.title)}</span>${escapeHtml(meeting.displayTime || "")}
+            </div>`;
+    }
+
+    // Same bold "Counselor: ..." rule as renderAvailableSlotCard — only present when
+    // slotsSearchUser === false merged this slot's counselorName from several counselors.
+    function renderWeekSlotChip(slot) {
+        var counselorLine = (leadCalendarState.slotsSearchUser === false && slot.counselorName)
+            ? `<br/><b>Counselor: ${escapeHtml(slot.counselorName)}</b>`
+            : "";
+        return `
+            <div class="lead-cal-week-chip lead-cal-week-slot-chip" data-lead-slot-id="${slot.id}" style="border-color:${AVAILABLE_SLOT_COLOR};color:${AVAILABLE_SLOT_COLOR};">
+                <span class="t">AVAILABLE SLOT</span>${escapeHtml(slot.displayTime || "")}${counselorLine}
             </div>`;
     }
 
@@ -709,12 +873,17 @@
         var colsHtml = days.map(function(day) {
             var dayKey = day.format("YYYY-MM-DD");
             var isToday = dayKey === todayKey;
-            var dayMeetings = leadCalendarState.filteredMeetings.filter(function(m) { return m.localDateKey === dayKey; })
-                .sort(function(left, right) {
-                    var l = left.localStartMoment ? left.localStartMoment.valueOf() : Number.MAX_SAFE_INTEGER;
-                    var r = right.localStartMoment ? right.localStartMoment.valueOf() : Number.MAX_SAFE_INTEGER;
-                    return l - r;
-                });
+            var dayMeetings = leadCalendarState.filteredMeetings.filter(function(m) { return m.localDateKey === dayKey; });
+            var daySlots = getMergedAvailableSlotsForDateKey(dayKey);
+            // Same merge-by-start-time as renderLeadTodayView — a 12:00-12:30 "Demo Booked" followed
+            // by a 12:30-01:00 "AVAILABLE SLOT" should render in that order, not all demos first.
+            var dayItems = dayMeetings.map(function(meeting) {
+                return { sortKey: meeting.localStartMoment ? meeting.localStartMoment.valueOf() : Number.MAX_SAFE_INTEGER, html: renderWeekChip(meeting) };
+            }).concat(daySlots.map(function(slot) {
+                return { sortKey: slot.localStartMoment ? slot.localStartMoment.valueOf() : Number.MAX_SAFE_INTEGER, html: renderWeekSlotChip(slot) };
+            }));
+            dayItems.sort(function(left, right) { return left.sortKey - right.sortKey; });
+            var dayItemsHtml = dayItems.map(function(item) { return item.html; }).join("");
             return `
                 <div class="lead-cal-week-day-col ${isToday ? "is-today" : ""}" data-lead-week-day="${dayKey}">
                     <div class="lead-cal-week-day-head">
@@ -722,7 +891,7 @@
                         <span class="daynum">${day.format("D")}</span>
                     </div>
                     <div class="lead-cal-week-day-body">
-                        ${dayMeetings.length ? dayMeetings.map(renderWeekChip).join("") : '<div class="lead-cal-week-empty">No demos</div>'}
+                        ${dayItemsHtml || '<div class="lead-cal-week-empty">No demos</div>'}
                     </div>
                 </div>`;
         }).join("");
@@ -755,10 +924,16 @@
                 var isOutside = cursor.month() !== selected.month();
                 var isToday = dayKey === todayKey;
                 var dayMeetings = leadCalendarState.filteredMeetings.filter(function(m) { return m.localDateKey === dayKey; });
+                var daySlots = getMergedAvailableSlotsForDateKey(dayKey);
+                var slotCounselorLine = (leadCalendarState.slotsSearchUser === false)
+                    ? daySlots.filter(function(s) { return s.counselorName; }).map(function(s) { return s.counselorName; })
+                    : [];
                 rowHtml += `
                     <div class="lead-cal-month-cell ${isOutside ? "is-outside" : ""} ${isToday ? "is-today" : ""}" data-lead-month-day="${dayKey}">
                         <span class="daynum">${cursor.format("D")}</span>
                         ${dayMeetings.length ? `<span class="lead-cal-month-count" style="background:var(--pc);">${dayMeetings.length} demo${dayMeetings.length > 1 ? "s" : ""}</span>` : ""}
+                        ${daySlots.length ? `<span class="lead-cal-month-count" style="background:${AVAILABLE_SLOT_COLOR};">${daySlots.length} slot${daySlots.length > 1 ? "s" : ""}</span>` : ""}
+                        ${slotCounselorLine.length ? `<div class="lead-cal-month-slot-counselor"><b>Counselor: ${escapeHtml(slotCounselorLine.join(", "))}</b></div>` : ""}
                     </div>`;
                 cursor.add(1, "day");
             }
@@ -950,6 +1125,47 @@
         });
     }
 
+    // ── Data fetch — POST to /timeavailability/get-slots-to-book-event, same "available slots to
+    // book a demo" call the public booking widget uses (leadDemoContent.js:callFreeSlotsForCounselor),
+    // but with userId:null so the backend returns every counselor's free slots for visitDate, not
+    // just one counselor's — see TimeAvailabilityApiUtil.getFreeSlotOfCounselorDateWise. The backend
+    // controller takes a Payload DTO ({"payload": "<base64(encodeURI(json))>"} ), decoded server-side
+    // via AesUtil.decode — but that wrapping is done for EVERY APPLICATION_JSON_VALUE ajax call
+    // automatically by the global $.ajaxSetup({beforeSend...}) in jquery.commonFunction.js (it
+    // base64+encodeURI's settings.data and re-stuffs it into {"payload": ...} before the request
+    // goes out). So the body sent here must be the PLAIN request JSON — wrapping it again ourselves
+    // double-encodes it and the backend's single decode then fails, returning the generic "technical
+    // glitch" response. dayId is accepted by the endpoint but unused server-side for this call; sent
+    // anyway to match the shape the app's other callers use. Resolves to {slotList: []} on failure
+    // instead of rejecting, so a slots-API hiccup never breaks the demo-list half of the calendar.
+    function fetchAvailableSlots(dateKey) {
+        var requestBody = {
+            timezone: getLeadTimezone(),
+            visitDate: dateKey,
+            dayId: moment(dateKey, "YYYY-MM-DD").day() + 1,
+            eventId: 5,
+            userId: USER_ID,
+        };
+        return new Promise(function(resolve) {
+            $.ajax({
+                type: "POST",
+                contentType: APPLICATION_JSON_VALUE,
+                url: getURLForHTML("timeavailability", "get-slots-to-book-event"),
+                data: JSON.stringify(requestBody),
+                dataType: "json",
+                cache: false,
+                timeout: 600000,
+                success: function(data) {
+                    resolve(data || {});
+                },
+                error: function(error) {
+                    console.warn("Unable to load available slots (get-slots-to-book-event)", error);
+                    resolve({ slotList: [] });
+                }
+            });
+        });
+    }
+
     // Resolves the [start, end] fetch window ("YYYY-MM-DD" moments) for the active view around
     // dateKey — a single day for Today, the containing week for Week, and the containing month's
     // full display grid (including the leading/trailing days from adjacent months) for Month.
@@ -964,23 +1180,90 @@
         return { start: m.clone(), end: m.clone() };
     }
 
+    // True when the page already told us (via BaseController#updateModel /
+    // CommonCustomScript.jsp — same ADMIN-DASHBOARD-SPACIAL-RIGHTS email-list check the backend
+    // itself runs) that this user's searchUser will come back false. Checking this BEFORE ever
+    // calling /dashboard/school-demo-list or /timeavailability/get-slots-to-book-event means a
+    // special-rights user never triggers either API just to have the widget hidden afterwards.
+    function isKnownNonSearchUser() {
+        return typeof ADMIN_DASHBOARD_SPECIAL_RIGHTS !== "undefined" && ADMIN_DASHBOARD_SPECIAL_RIGHTS === true;
+    }
+
     function fetchAndRenderLeadCalendar(dateKey) {
         dateKey = dateKey || moment().tz(getLeadTimezone()).format("YYYY-MM-DD");
         leadCalendarState.selectedDate = dateKey;
+        // Known up front (page-level flag) OR already established (from an earlier response) that
+        // this user gets searchUser === false — the widget stays hidden, so don't hit
+        // /dashboard/school-demo-list or /timeavailability/get-slots-to-book-event at all.
+        if (isKnownNonSearchUser() || leadCalendarState.hiddenForNonSearchUser) {
+            leadCalendarState.hiddenForNonSearchUser = true;
+            $(LEAD_CAL_CONTAINER).hide();
+            return;
+        }
         var body = $(LEAD_CAL_SELECTOR);
         if (body.length) {
             body.html('<div class="lead-cal-today-empty">Loading demo meetings...</div>');
         }
         var range = getRangeForView(leadCalendarState.viewName, dateKey);
+        // /timeavailability/get-slots-to-book-event only ever answers for a single visitDate, so to
+        // cover Week/Month views (which show every day in `range`, not just `dateKey`) it's called
+        // once per day in the visible range and the results are merged below — otherwise only the
+        // single selected day would ever have slots to show, and every other day cell in Week/Month
+        // would look "empty" even when slots exist for it.
+        var slotDateKeys = [];
+        var cursor = range.start.clone();
+        while (cursor.isSameOrBefore(range.end, "day")) {
+            slotDateKeys.push(cursor.format("YYYY-MM-DD"));
+            cursor.add(1, "day");
+        }
+        // Check searchUser FIRST, off /dashboard/school-demo-list alone, before ever calling
+        // /timeavailability/get-slots-to-book-event. StudentEnrolledStatusResponse now carries a
+        // top-level searchUser (see StudentEnrolledStatusResponse#searchUser /
+        // ReportUtil.getReportTotalSchoolDemo) that's reliable even when studentEnrolledList is
+        // empty, unlike reading it off list[0]. Only when that comes back true do we go on to fetch
+        // available slots (one call per day in range) — when it's false the slots call for this
+        // user would just be more of the same "every counselor" data we're already hiding, so it's
+        // skipped outright.
         fetchLeadDemoList(range.start.format("YYYY-MM-DD"), range.end.format("YYYY-MM-DD")).then(function(data) {
             var list = data.studentEnrolledList || [];
             // Buffers ride on the response itself (same for every row) — see getJoinWindow().
             leadCalendarState.pastClassBufferCounselor = toValidMinutes(data.pastClassBufferCounselor);
             leadCalendarState.futureClassBufferCounselor = toValidMinutes(data.futureClassBufferCounselor);
+            if (data.searchUser === false) {
+                // Remember this so every later navigation short-circuits at the top of this
+                // function instead of hitting either API again just to hide the widget.
+                leadCalendarState.hiddenForNonSearchUser = true;
+                if (leadCalendarState.activeRefreshTimer) {
+                    clearInterval(leadCalendarState.activeRefreshTimer);
+                    leadCalendarState.activeRefreshTimer = null;
+                }
+                $(LEAD_CAL_CONTAINER).hide();
+                return;
+            }
+            // isMyMeeting only excludes a row when BOTH userId and assignName fail to match the
+            // logged-in counselor — everything else is shown as-is.
             leadCalendarState.masterMeetings = list.map(normalizeMeeting).filter(isMyMeeting);
-            leadCalendarState.loaded = true;
-            refreshUIOnly();
-            startActiveRefresh();
+            return Promise.all(slotDateKeys.map(fetchAvailableSlots)).then(function(slotsDataList) {
+                // Each entry in slotsDataList is one day's {slotList, searchUser} response (see
+                // slotDateKeys above) — slotList itself is an array of arrays (one sub-array per
+                // counselor), so flatten both levels before normalizing.
+                var allSlots = [];
+                var slotsSearchUser = true;
+                slotsDataList.forEach(function(slotsData) {
+                    var slotList = slotsData.slotList || [];
+                    allSlots = allSlots.concat([].concat.apply([], slotList));
+                    // searchUser === false from ANY day means that day's response already covers
+                    // every counselor — keep the merge-by-time-slot behaviour on for the whole range.
+                    if (slotsData.searchUser === false) { slotsSearchUser = false; }
+                });
+                leadCalendarState.availableSlots = allSlots.map(normalizeAvailableSlot);
+                // Drives the same-time-slot merge in getMergedAvailableSlotsForDateKey().
+                leadCalendarState.slotsSearchUser = slotsSearchUser;
+                $(LEAD_CAL_CONTAINER).show();
+                leadCalendarState.loaded = true;
+                refreshUIOnly();
+                startActiveRefresh();
+            });
         }).catch(function(error) {
             console.warn("Unable to load lead/demo calendar", error);
             if (body.length) {
@@ -997,6 +1280,15 @@
             container = $(LEAD_CAL_CONTAINER);
         }
         if (!container.length) { return; }
+
+        // Known up front that this user gets searchUser === false — don't even build the shell or
+        // call fetchAndRenderLeadCalendar, so /dashboard/school-demo-list and
+        // /timeavailability/get-slots-to-book-event never get hit in the first place.
+        if (isKnownNonSearchUser()) {
+            leadCalendarState.hiddenForNonSearchUser = true;
+            container.hide();
+            return;
+        }
 
         injectLeadCalendarStyles();
         container.html(buildLeadCalendarShell());

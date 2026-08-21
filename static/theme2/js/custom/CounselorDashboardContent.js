@@ -235,7 +235,8 @@ function dashboardCounselorContent(title, roleAndModule, schoolId, userId, role,
 							<span class="float-right font-14 ml-3">${data.cityName} | ${data.countryName}</span>    
 						</div>
 						<div>
-							<a href="javascript:void(0)" class="bg-white text-primary rounded-10 font-weight-semi-bold py-0 px-2 d-inline-flex align-items-center mt-1 text-decoration-none" onclick="copyURL('copyCode1','copy-msg-1')">${data.schoolServiceLinks.referralCode} <i class="fa fa-copy float-right ml-3"></i></a>    
+							<style>.referral-code-chip{color:#fff !important;}.referral-code-chip:hover,.referral-code-chip:focus{color:#fff !important;}</style>
+							<a href="javascript:void(0)" class="referral-code-chip rounded-10 font-weight-semi-bold py-0 px-2 d-inline-flex align-items-center mt-1 text-decoration-none" style="background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.6);" onclick="copyURL('copyCode1','copy-msg-1')">${data.schoolServiceLinks.referralCode} <i class="fa fa-copy float-right ml-3"></i></a>    
 							<b class="copy-msg-1 text-white ml-1" style="color:#fff !important"></b>
 							<div style="top:18px;left:0;position:absolute;">
 								<input type="text" id="copyCode1" value="${data.schoolServiceLinks.referralCode}" style="opacity:0;height:0px">
@@ -245,13 +246,25 @@ function dashboardCounselorContent(title, roleAndModule, schoolId, userId, role,
 				</div>
 			</div>
 	
-			<div class="main-card mb-3">
-				<div class="mb-3 card border rounded-10">
+			<div class="main-card mb-3">`
+			// Name/Email/WhatsApp account-manager strip — visible only for USER_ROLE 'B2B_PARTNER'
+			// for now; kept commented (not removed) for every other role in case this gets opened
+			// up again later.
+			if(USER_ROLE=='B2B_PARTNER'){
+				html+=`<div class="mb-3 card border rounded-10">
 					<div class="card-body">`
 						+getAccountManagerDetailsContent(data)
 					html+=`</div>
-				</div>
-				<div class="mb-3">`
+				</div>`;
+			}
+			// else{
+			// 	html+=`<div class="mb-3 card border rounded-10">
+			// 		<div class="card-body">`
+			// 			+getAccountManagerDetailsContent(data)
+			// 		html+=`</div>
+			// 	</div>`;
+			// }
+			html+=`<div class="mb-3">`
 					+getLeadDemoCalendarDashboardContent()
 				html+=`</div>
 				<div class="mb-3 card border rounded-10">

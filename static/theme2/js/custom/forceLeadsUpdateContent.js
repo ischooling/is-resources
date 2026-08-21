@@ -169,6 +169,7 @@ function closeModal(modalId) {
 		$("#"+modalId).modal('hide')
 }
 
+
 function forceDemoUpdateModalContent(data){
 	var newThemeflag = tt=="theme2"?true:false;
 	var html=
@@ -180,14 +181,14 @@ function forceDemoUpdateModalContent(data){
 						html+=
 						`<h5 class="modal-title text-white">Update Demo Status (<span class="demoTotalCount">${data.details.demoDetails.demoCount}</span>)</h5>`;
 						if(!data.details.showUpdateDemoPopupStatus){
-							html+=`<button type="button" class="close text-white" onclick="closeModal('demoDetailsModal')"><span aria-hidden="true">&times;</span></button>`;
+							html+=`<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>`;
 						}
 						
 					}else{
 						html+=
 						`<h5 class="modal-title" style="color:#fff;">Update Demo Status (<span class="demoTotalCount">${data.details.demoDetails.demoCount}</span>)</h5>`;
 						if(!data.details.showUpdateDemoPopupStatus){
-							html+=`<button type="button" class="close text-white" onclick="closeModal('demoDetailsModal')" >
+							html+=`<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
 								<span aria-hidden="true">&times;</span>
 							</button>`;
 						}
@@ -316,14 +317,14 @@ function forceLeadUpdateModalContent(data){
 						html+=
 						`<h5 class="modal-title text-white">Update Lead Remark (<span class="leadTotalCount">${data.details.leadDetails.leadCount}</span>)</h5>`;
 						if(data.details.showLeadRemarkPopupStatus){
-							html+=`<button type="button" class="close text-white" onclick="closeModal('leadDetailsModal')"><span aria-hidden="true">&times;</span></button>`;
+							html+=`<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>`;
 						}
 						
 					}else{
 						html+=
 						`<h5 class="modal-title" style="color:#fff;">Update Lead Remark (<span class="leadTotalCount">${data.details.leadDetails.leadCount}</span>)</h5>`;
 						if(data.details.showLeadRemarkPopupStatus){
-							html+=`<button type="button" class="close text-white" onclick="closeModal('leadDetailsModal')">
+							html+=`<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
 								<span aria-hidden="true">&times;</span>
 							</button>`;
 						}
@@ -442,14 +443,14 @@ function forceDemo2UpdateModalContent(data){
 						html+=
 						`<h5 class="modal-title text-white">Update Demo Remark (<span class="demo2TotalCount">${data.details.demoDetails.demoCount}</span>)</h5>`;
 						if(data.details.showDemoRemarkPopupStatus){
-							html+=`<button type="button" class="close text-white" onclick="closeModal('demo2DetailsModal')"><span aria-hidden="true">&times;</span></button>`;
+							html+=`<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>`;
 						}
 						
 					}else{
 						html+=
 						`<h5 class="modal-title" style="color:#fff;">Update Demo Remark (<span class="demo2TotalCount">${data.details.demoDetails.demoCount}</span>)</h5>`;
 						if(data.details.showDemoRemarkPopupStatus){
-							html+=`<button type="button" class="close text-white" onclick="closeModal('demo2DetailsModal')">
+							html+=`<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
 								<span aria-hidden="true">&times;</span>
 							</button>`;
 						}
@@ -603,8 +604,7 @@ function forceCallbackUpdateModalContent(data){
 					</div>
 				</div>
 				<div class="modal-footer text-right">
-				
-					<a href="javascript:void(0)" class="btn btn-success btn-sm" onclick="closeModal('callbackDetailsModal')"> Ok </a>
+					<a href="javascript:void(0)" class="btn btn-success btn-sm" data-dismiss="modal"> Ok </a>
 				</div>
 			</div>
 		</div>

@@ -5689,43 +5689,175 @@ $(".show-password").on("click", function () {
   }
 });
 // Open modal: adjust z-index
-$(document).on("shown.bs.modal", ".modal", function () {
-    const modal = $(this);
-    const openModals = $(".modal.show").not(this);
+var modalOpenCount = 0;
 
-    const baseZIndex = 1040;
-    const zIndex = baseZIndex + openModals.length * 10 + 10;
-    modal.css("z-index", zIndex);
+// $(document).on("show.bs.modal", function (e) {
+//     console.log("SHOW EVENT FIRED");
+//     console.log("ID:", e.target.id);
+// });
 
-    // Adjust backdrop
-    setTimeout(() => {
-        const backdrop = $(".modal-backdrop").not(".modal-stack").last();
-        backdrop.css("z-index", zIndex - 10).addClass("modal-stack");
+// $(document).on("shown.bs.modal", function (e) {
+//     console.log("SHOWN EVENT FIRED");
+//     console.log("ID:", e.target.id);
+// });
+
+// var modalOpenCount=0;
+// $(document).on("shown.bs.modal", ".modal", function () {
+//   // console.log("Count", modalOpenCount++);
+//   console.log("modal id",  $(this).attr("id"));
+//   // console.log("ID:", e.target.id);
+//     const modal = $(this);
+//     const openModals = $(".modal.show").not(this);
+
+//     const baseZIndex = 1040;
+//     const zIndex = baseZIndex + openModals.length * 10 + 10;
+//     modal.css("z-index", zIndex);
+
+//     // Adjust backdrop
+//     setTimeout(() => {
+//         const backdrop = $(".modal-backdrop").not(".modal-stack").last();
+//         backdrop.css("z-index", zIndex - 10).addClass("modal-stack");
+//     }, 0);
+// });
+
+// // Close modal: keep remaining backdrops
+// $(document).on("hidden.bs.modal", ".modal", function () {
+//   ///debugger
+//   alert($(this).attr("id"));
+//     const openModals = $(".modal.show"); // remaining modals
+//     console.log("openModals", openModals.length)
+//     if (openModals.length > 0) {
+//         // Adjust top modal and backdrop z-index
+//         const topModal = openModals.last();
+//         const newZIndex = 1040 + (openModals.length - 1) * 10 + 10;
+//         topModal.css("z-index", newZIndex);
+
+//         const topBackdrop = $(".modal-backdrop.modal-stack").last();
+//         topBackdrop.css("z-index", newZIndex - 10);
+
+//         if (!$("body").hasClass("modal-open")) {
+//             $("body").addClass("modal-open");
+//         }
+//     } else {
+//         // No modals open, remove modal-open class
+//         $("body").removeClass("modal-open");
+//         $(".modal-backdrop").remove()
+//     }
+// });
+
+
+var modalOpenCount = 0;
+
+$(document).on("show.bs.modal", ".modal", function (e) {
+
+    var $modal = $(this);
+
+    // Current modal se pehle jitne modals open hain
+    var openModalCount = $(".modal.show").length;
+
+    // Bootstrap default:
+    // modal backdrop = 1040
+    // modal         = 1050
+    //
+    // Stack:
+    // modal 1 = 1050
+    // backdrop 2 = 1059
+    // modal 2 = 1060
+    // backdrop 3 = 1069
+    // modal 3 = 1070
+
+    var modalZIndex = 1050 + (openModalCount * 10);
+    var backdropZIndex = modalZIndex - 1;
+
+    console.log(
+        "SHOW:",
+        $modal.attr("id"),
+        "openModalCount:",
+        openModalCount,
+        "modalZIndex:",
+        modalZIndex,
+        "backdropZIndex:",
+        backdropZIndex
+    );
+
+    $modal.css("z-index", modalZIndex);
+
+    // Bootstrap backdrop show hone ke baad create karta hai
+    setTimeout(function () {
+
+        var $backdrop = $(".modal-backdrop")
+            .not(".modal-stack")
+            .last();
+
+        if ($backdrop.length) {
+
+            $backdrop
+                .css("z-index", backdropZIndex)
+                .addClass("modal-stack");
+
+            console.log(
+                "BACKDROP:",
+                $modal.attr("id"),
+                backdropZIndex
+            );
+        }
+
     }, 0);
 });
 
-// Close modal: keep remaining backdrops
+
 $(document).on("hidden.bs.modal", ".modal", function () {
-    const openModals = $(".modal.show"); // remaining modals
 
-    if (openModals.length > 0) {
-        // Adjust top modal and backdrop z-index
-        const topModal = openModals.last();
-        const newZIndex = 1040 + (openModals.length - 1) * 10 + 10;
-        topModal.css("z-index", newZIndex);
+  var $modal = $(this);
 
-        const topBackdrop = $(".modal-backdrop.modal-stack").last();
-        topBackdrop.css("z-index", newZIndex - 10);
+  console.log(
+      "HIDDEN:",
+      $modal.attr("id")
+  );
 
-        if (!$("body").hasClass("modal-open")) {
-            $("body").addClass("modal-open");
-        }
-    } else {
-        // No modals open, remove modal-open class
-        $("body").removeClass("modal-open");
-        $(".modal-backdrop").remove()
-    }
+  // Reset modal z-index
+  $modal.css("z-index", "");
+
+  var $openModals = $(".modal.show");
+
+  console.log(
+      "Remaining modals:",
+      $openModals.length
+  );
+
+  if ($openModals.length > 0) {
+
+      // Body ko scroll-lock mein rakho
+      $("body").addClass("modal-open");
+
+      // Remaining modals ko properly re-stack karo
+      $openModals.each(function(index) {
+
+          var zIndex = 1050 + (index * 10);
+
+          $(this).css("z-index", zIndex);
+
+      });
+
+      // Existing backdrops ko re-stack karo
+      $(".modal-backdrop").each(function(index) {
+
+          var zIndex = 1049 + (index * 10);
+
+          $(this).css("z-index", zIndex);
+
+      });
+
+  } else {
+
+      // Koi modal remaining nahi hai
+      $("body").removeClass("modal-open");
+
+      // Bootstrap normally backdrop remove karega.
+      // Yahan manually remove mat karo.
+  }
 });
+
 
 
 
