@@ -5688,106 +5688,79 @@ $(".show-password").on("click", function () {
     $(this).find("i").toggleClass("fa-eye fa-eye-slash");
   }
 });
-// Open modal: adjust z-index
-var modalOpenCount = 0;
 
-// $(document).on("show.bs.modal", function (e) {
-//     console.log("SHOW EVENT FIRED");
-//     console.log("ID:", e.target.id);
-// });
+// -------------------------------------------------------------------------
+// Stacked / nested Bootstrap 4.6.2 modal z-index management
+// -------------------------------------------------------------------------
+// Bootstrap gives every .modal the same z-index (1050) and every
+// .modal-backdrop the same z-index (1040), so stacking two modals lets the
+// second backdrop cover the first modal. On top of that, several screens
+// (e.g. showBookClassConfirmationModal) call `.modal("hide")` on one modal
+// and `.modal("show")` on the next in the SAME tick. Bootstrap removes the
+// ".show" class from the outgoing modal synchronously, but only removes its
+// backdrop ~300ms later after the fade transition. So counting ".modal.show"
+// at show time under-counts and places the new modal *below* that lingering
+// backdrop (the reported "modal 1050 / backdrop 1059" bug).
+//
+// Fix: instead of counting classes, measure the highest z-index of any modal
+// still ON SCREEN (".show" OR still ":visible" while fading out) and stack the
+// new modal one STEP above it. Each backdrop is then pinned exactly one below
+// its own modal so the modal is always visible/clickable above its overlay,
+// while that overlay still covers everything beneath it in the stack.
+//
+//   1st modal: 1050   1st backdrop: 1049
+//   2nd modal: 1060   2nd backdrop: 1059
+//   3rd modal: 1070   3rd backdrop: 1069
+// -------------------------------------------------------------------------
 
-// $(document).on("shown.bs.modal", function (e) {
-//     console.log("SHOWN EVENT FIRED");
-//     console.log("ID:", e.target.id);
-// });
+var MODAL_BASE_ZINDEX = 1050; // Bootstrap's default .modal z-index
+var MODAL_ZINDEX_STEP = 10;   // gap between stacked modals
 
-// var modalOpenCount=0;
-// $(document).on("shown.bs.modal", ".modal", function () {
-//   // console.log("Count", modalOpenCount++);
-//   console.log("modal id",  $(this).attr("id"));
-//   // console.log("ID:", e.target.id);
-//     const modal = $(this);
-//     const openModals = $(".modal.show").not(this);
-
-//     const baseZIndex = 1040;
-//     const zIndex = baseZIndex + openModals.length * 10 + 10;
-//     modal.css("z-index", zIndex);
-
-//     // Adjust backdrop
-//     setTimeout(() => {
-//         const backdrop = $(".modal-backdrop").not(".modal-stack").last();
-//         backdrop.css("z-index", zIndex - 10).addClass("modal-stack");
-//     }, 0);
-// });
-
-// // Close modal: keep remaining backdrops
-// $(document).on("hidden.bs.modal", ".modal", function () {
-//   ///debugger
-//   alert($(this).attr("id"));
-//     const openModals = $(".modal.show"); // remaining modals
-//     console.log("openModals", openModals.length)
-//     if (openModals.length > 0) {
-//         // Adjust top modal and backdrop z-index
-//         const topModal = openModals.last();
-//         const newZIndex = 1040 + (openModals.length - 1) * 10 + 10;
-//         topModal.css("z-index", newZIndex);
-
-//         const topBackdrop = $(".modal-backdrop.modal-stack").last();
-//         topBackdrop.css("z-index", newZIndex - 10);
-
-//         if (!$("body").hasClass("modal-open")) {
-//             $("body").addClass("modal-open");
-//         }
-//     } else {
-//         // No modals open, remove modal-open class
-//         $("body").removeClass("modal-open");
-//         $(".modal-backdrop").remove()
-//     }
-// });
-
-
-var modalOpenCount = 0;
-
-$(document).on("show.bs.modal", ".modal", function (e) {
+$(document).on("show.bs.modal", ".modal", function () {
 
     var $modal = $(this);
 
-    // Current modal se pehle jitne modals open hain
-    var openModalCount = $(".modal.show").length;
+    // Highest z-index among OTHER modals that are still on screen. We include
+    // ":visible" modals that no longer have ".show" because an outgoing modal
+    // stays display:block (and its backdrop stays in the DOM) during its fade.
+    // Start one step below the base so the very first modal lands on the base.
+    var highestModalZIndex = MODAL_BASE_ZINDEX - MODAL_ZINDEX_STEP;
 
-    // Bootstrap default:
-    // modal backdrop = 1040
-    // modal         = 1050
-    //
-    // Stack:
-    // modal 1 = 1050
-    // backdrop 2 = 1059
-    // modal 2 = 1060
-    // backdrop 3 = 1069
-    // modal 3 = 1070
+    $(".modal").not($modal).each(function () {
 
-    var modalZIndex = 1050 + (openModalCount * 10);
+        var $other = $(this);
+
+        if ($other.hasClass("show") || $other.is(":visible")) {
+
+            var otherZIndex = parseInt($other.css("z-index"), 10);
+
+            if (!isNaN(otherZIndex) && otherZIndex > highestModalZIndex) {
+                highestModalZIndex = otherZIndex;
+            }
+
+        }
+
+    });
+
+    var modalZIndex = highestModalZIndex + MODAL_ZINDEX_STEP;
+    // Backdrop must always be exactly ONE below its own modal: high enough to
+    // cover the modal underneath it, but never above the modal it belongs to.
     var backdropZIndex = modalZIndex - 1;
-
-    console.log(
-        "SHOW:",
-        $modal.attr("id"),
-        "openModalCount:",
-        openModalCount,
-        "modalZIndex:",
-        modalZIndex,
-        "backdropZIndex:",
-        backdropZIndex
-    );
 
     $modal.css("z-index", modalZIndex);
 
-    // Bootstrap backdrop show hone ke baad create karta hai
+    // Bootstrap injects this modal's backdrop AFTER the show.bs.modal event,
+    // so defer to the next tick to grab and position it.
     setTimeout(function () {
 
-        var $backdrop = $(".modal-backdrop")
-            .not(".modal-stack")
-            .last();
+        // Backdrops we have already positioned carry the ".modal-stack" marker.
+        // Anything still un-stacked is a freshly created backdrop; the last one
+        // belongs to this modal. Any earlier un-stacked backdrops are orphans
+        // left by an interrupted transition, so drop them to avoid duplicates.
+        var $unstacked = $(".modal-backdrop").not(".modal-stack");
+        var $backdrop = $unstacked.last();
+
+        $unstacked.not($backdrop).remove();
 
         if ($backdrop.length) {
 
@@ -5795,95 +5768,60 @@ $(document).on("show.bs.modal", ".modal", function (e) {
                 .css("z-index", backdropZIndex)
                 .addClass("modal-stack");
 
-            console.log(
-                "BACKDROP:",
-                $modal.attr("id"),
-                backdropZIndex
-            );
         }
 
     }, 0);
+
 });
 
 
 $(document).on("hidden.bs.modal", ".modal", function () {
 
-  var $modal = $(this);
+    var $modal = $(this);
 
-  console.log(
-      "HIDDEN:",
-      $modal.attr("id")
-  );
+    // Release the inline z-index we assigned to the modal that just closed.
+    $modal.css("z-index", "");
 
-  // Reset modal z-index
-  $modal.css("z-index", "");
+    // Remaining modals (the one that closed no longer has ".show").
+    var $openModals = $(".modal.show");
+    var openModalCount = $openModals.length;
 
-  var $openModals = $(".modal.show");
+    if (openModalCount > 0) {
 
-  console.log(
-      "Remaining modals:",
-      $openModals.length
-  );
+        // Bootstrap 4 removes "modal-open" from <body> whenever ANY modal
+        // closes, even if others remain. Re-add it so the page stays locked
+        // while at least one modal is still open.
+        $("body").addClass("modal-open");
 
-  if ($openModals.length > 0) {
+        // Guard against orphan/duplicate backdrops: there must never be more
+        // backdrops than open modals. Remove the oldest extras so each modal
+        // lines up with exactly one backdrop.
+        var $backdrops = $(".modal-backdrop");
+        while ($backdrops.length > openModalCount) {
+            $backdrops.first().remove();
+            $backdrops = $(".modal-backdrop");
+        }
 
-      // Body ko scroll-lock mein rakho
-      $("body").addClass("modal-open");
+        // Re-stack the survivors from bottom to top so the sequence stays
+        // contiguous (1050/1049, 1060/1059, ...).
+        $openModals.each(function (index) {
+            $(this).css("z-index", MODAL_BASE_ZINDEX + (index * MODAL_ZINDEX_STEP));
+        });
 
-      // Remaining modals ko properly re-stack karo
-      $openModals.each(function(index) {
+        $backdrops.each(function (index) {
+            // Each backdrop sits one below its matching modal.
+            $(this).css("z-index", (MODAL_BASE_ZINDEX - 1) + (index * MODAL_ZINDEX_STEP));
+        });
 
-          var zIndex = 1050 + (index * 10);
+    } else {
 
-          $(this).css("z-index", zIndex);
+        // Nothing left open: clean up any leftover backdrop and unlock the body.
+        $(".modal-backdrop").remove();
+        $("body").removeClass("modal-open");
 
-      });
+    }
 
-      // Existing backdrops ko re-stack karo
-      $(".modal-backdrop").each(function(index) {
-
-          var zIndex = 1049 + (index * 10);
-
-          $(this).css("z-index", zIndex);
-
-      });
-
-  } else {
-
-      // Koi modal remaining nahi hai
-      $("body").removeClass("modal-open");
-
-      // Bootstrap normally backdrop remove karega.
-      // Yahan manually remove mat karo.
-  }
 });
-
-
-
-
-// $(document).on("hidden.bs.modal", ".modal", function () {
-//   var modalShow;
-//   if(signupPage != 0){modalShow=".modal.in"}else{modalShow=".modal.show"}
-//   // Check if there are still open modals
-//   if ($(modalShow).length === 0 && $(".modal.in").length === 0) {
-//     // Remove leftover backdrop(s)
-//     $(".modal-backdrop").remove();
-//     $("body").removeClass("modal-open");
-//   } else {
-//     // Adjust z-index of the last open modal and its backdrop
-//     const topModal = $(modalShow).last();
-//     const newZIndex = 1050 + ($(modalShow).length - 1) * 20;
-//     topModal.css("z-index", newZIndex);
-//     $(".modal-backdrop")
-//       .last()
-//       .css("z-index", newZIndex - 10);
-//     if(!$("body").hasClass("modal-open")){
-//       $("body").addClass("modal-open");
-//     }
-//   }
-// });
-
-
 
 
 
