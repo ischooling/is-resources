@@ -955,6 +955,7 @@ function getLeadAdvanceSearchPopup(objRights) {
   html += '<option value="A">Demo By Link</option>';
   html += '<option value="AG">Demo By Agent</option>';
   html += '<option value="AC">Demo By Chat</option>';
+  html += '<option value="CA">Demo By Calendly</option>';
   html += '</select>';
   html += '<label for="leadDemoBookType">Demo Book type</label>';
   html += '</div>';

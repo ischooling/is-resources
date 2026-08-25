@@ -167,6 +167,7 @@ function getAiEmailDraftContent(title) {
                         + '</tbody>'
                     + '</table>'
                 + '</div>'
+                + '<div class="text-center mt-2" id="aiEmailDraftPagination"></div>'
             + '</div>'
         + '</div>'
 

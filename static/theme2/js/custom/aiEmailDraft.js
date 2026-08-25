@@ -1,8 +1,11 @@
 var AI_EMAIL_DRAFT_STATE = {
     drafts: {},        // leadId -> draft object (in-session edits)
-    allData: [],       // raw API response array
+    allData: [],       // raw API response array (current page only — 10 leads)
     sortField: 'followUpDueDate',
-    sortDir: 'asc'
+    sortDir: 'asc',
+    page: 1,
+    totalPages: 1,
+    totalRecords: 0
 };
 
 // ── Entry point ────────────────────────────────────────────────────────────────
@@ -85,6 +88,7 @@ async function initAiEmailDraftFilters() {
 
 function bindAiEmailDraftEvents() {
     $('#aiEmailDraftGenerateBtn').off('click').on('click', function () {
+        AI_EMAIL_DRAFT_STATE.page = 1;
         fetchAiEmailDrafts();
     });
 
@@ -106,8 +110,12 @@ function bindAiEmailDraftEvents() {
         }
         AI_EMAIL_DRAFT_STATE.drafts = {};
         AI_EMAIL_DRAFT_STATE.allData = [];
+        AI_EMAIL_DRAFT_STATE.page = 1;
+        AI_EMAIL_DRAFT_STATE.totalPages = 1;
+        AI_EMAIL_DRAFT_STATE.totalRecords = 0;
         renderAiEmailDraftTable([]);
         updateAiEmailDraftCards([]);
+        $('#aiEmailDraftPagination').html('');
     });
 
     $('#aedSortPriority').off('click').on('click', function () {
@@ -201,7 +209,8 @@ function fetchAiEmailDrafts(singleLeadId, forcedLanguage) {
         schoolId: SCHOOL_ID,
         dateType:  dateType,
         dataType:  'DEMO',
-        userId:   USER_ID
+        userId:   USER_ID,
+        page:     singleLeadId ? 1 : (AI_EMAIL_DRAFT_STATE.page || 1)
     };
     if (dateType === 'CUSTOM') {
         params.startDate = ($('#aiEmailDraftFromDate').val() || '') + ' 00:00';
@@ -251,6 +260,12 @@ function fetchAiEmailDrafts(singleLeadId, forcedLanguage) {
             if (!singleLeadId && rows.length > 0 && rows[0].counselorCounts) {
                 renderCounselorCountBoxes(rows[0].counselorCounts);
             }
+            if (!singleLeadId) {
+                AI_EMAIL_DRAFT_STATE.page         = (rows.length > 0 && rows[0].currentPage) || 1;
+                AI_EMAIL_DRAFT_STATE.totalPages   = (rows.length > 0 && rows[0].totalPages)  || 1;
+                AI_EMAIL_DRAFT_STATE.totalRecords = (rows.length > 0 && rows[0].totalRecords) || 0;
+                renderAiEmailDraftPagination();
+            }
             if (singleLeadId) {
                 var fresh = AI_EMAIL_DRAFT_STATE.drafts[singleLeadId];
                 if (fresh) openAiEmailDraftModal(fresh);
@@ -264,6 +279,30 @@ function fetchAiEmailDrafts(singleLeadId, forcedLanguage) {
             $('#aiEmailDraftGenerateBtn').prop('disabled', false).html('<i class="fa fa-magic mr-1"></i> Generate Drafts');
         }
     });
+}
+
+// ── Pagination (10 leads per page — see AiEmailDraftUtil.getLeadsTimeLine) ──────
+
+function renderAiEmailDraftPagination() {
+    var page  = AI_EMAIL_DRAFT_STATE.page || 1;
+    var total = AI_EMAIL_DRAFT_STATE.totalPages || 1;
+    var records = AI_EMAIL_DRAFT_STATE.totalRecords || 0;
+    if (records === 0) {
+        $('#aiEmailDraftPagination').html('');
+        return;
+    }
+    var html = '<div class="text-muted mb-1" style="font-size:12px;">Page ' + page + ' of ' + total + ' &middot; ' + records + ' lead(s)</div>'
+        + '<button type="button" class="btn btn-sm btn-outline-secondary" id="aiEmailDraftPrevPage" style="margin-right:6px;" ' + (page <= 1 ? 'disabled' : '') + '><i class="fa fa-chevron-left"></i> Prev</button>'
+        + '<button type="button" class="btn btn-sm btn-outline-secondary" id="aiEmailDraftNextPage" ' + (page >= total ? 'disabled' : '') + '>Next <i class="fa fa-chevron-right"></i></button>';
+    $('#aiEmailDraftPagination').html(html);
+    $('#aiEmailDraftPrevPage').off('click').on('click', function () { changeAiEmailDraftPage(page - 1); });
+    $('#aiEmailDraftNextPage').off('click').on('click', function () { changeAiEmailDraftPage(page + 1); });
+}
+
+function changeAiEmailDraftPage(newPage) {
+    if (newPage < 1 || newPage > (AI_EMAIL_DRAFT_STATE.totalPages || 1)) return;
+    AI_EMAIL_DRAFT_STATE.page = newPage;
+    fetchAiEmailDrafts();
 }
 
 // ── Render table ───────────────────────────────────────────────────────────────
