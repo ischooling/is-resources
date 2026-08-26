@@ -1137,12 +1137,12 @@ function getRequestForStudentTimePreference(){
 	teacherAssign['studentStandardId']=$("#studentStandardId").val();
 	teacherAssign['userRole'] = 'STUDENT';
 	teacherAssign['saveType'] =$("#saveType").val();
-	var startDate=changeDateFormat(new Date(getSystemTrainingDateApiValue()),"mm-dd-yyyy");
+	var startDate=changeDateFormat(moment(getSystemTrainingDateApiValue(), ["MMM DD, YYYY", "MM-DD-YYYY", "YYYY-MM-DD"]).toDate(),"mm-dd-yyyy");
 	teacherAssignTime['startDate']=getSystemTrainingDateApiValue();
 	var enrollmentType = $("#enrollmentType").val();
 	if(enrollmentType !='REGISTRATION_FRESH' && enrollmentType !='REGISTRATION_FLEX_COURSE'){
 		if($("#saveType").val()=='SKIP'){
-			startDate=changeDateFormat(new Date($('#chooseDateToStartSemster').val()),"mm-dd-yyyy");
+			startDate=changeDateFormat(moment($('#chooseDateToStartSemster').val(), ["ddd, MMM DD, YYYY", "MMM DD, YYYY", "MM-DD-YYYY", "YYYY-MM-DD"]).toDate(),"mm-dd-yyyy");
 			teacherAssignTime['startDate']=$('#chooseDateToStartSemster').val();
 		}
 	}
@@ -1242,7 +1242,8 @@ function showContentByStep(academicYearSelectedType, systemTrainingSelectedType,
 			if(startSemsterStartDate == ""){
 				var semesterStartDate = changeDateFormat(new Date(),"mm-dd-yyyy");
 			}else{
-				var semesterStartDate = changeDateFormat(new Date(startSemsterStartDate),"mm-dd-yyyy");
+				var parsedSemDate = moment(startSemsterStartDate, ["MMM DD, YYYY", "MM-DD-YYYY", "YYYY-MM-DD"]).toDate();
+				var semesterStartDate = changeDateFormat(parsedSemDate,"mm-dd-yyyy");
 			}
 			var activeNumberOfDaysForSystemTraining = $("#activeNumberOfDaysForSystemTraining").val();
 			var semesterStartDate = semesterStartDate.split("-");
@@ -1298,7 +1299,7 @@ function showContentByStep(academicYearSelectedType, systemTrainingSelectedType,
 			$("#saveType").val("ORIENT")
 			$(".school-system-training-step").show()
 			$(".academic-step, .moveToDashboard-step").hide()
-			var semesterStartDate = changeDateFormat(new Date(startSemsterStartDate),"mm-dd-yyyy");;
+			var semesterStartDate = changeDateFormat(moment(startSemsterStartDate, ["MMM DD, YYYY", "MM-DD-YYYY", "YYYY-MM-DD"]).toDate(),"mm-dd-yyyy");;
 			var activeNumberOfDaysForSystemTraining = $("#activeNumberOfDaysForSystemTraining").val();
 			var semesterStartDate = semesterStartDate.split("-");
 			var systrainingStartDate = new Date(parseInt(semesterStartDate[2]), parseInt(semesterStartDate[0])-1, parseInt(semesterStartDate[1]));
