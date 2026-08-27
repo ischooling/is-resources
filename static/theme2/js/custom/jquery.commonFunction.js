@@ -5748,7 +5748,7 @@ $(document).on("show.bs.modal", ".modal", function () {
     var backdropZIndex = modalZIndex - 1;
 
     $modal.css("z-index", modalZIndex);
-
+    $modal.addClass("modal-zindex-adjusted"); 
     // Bootstrap injects this modal's backdrop AFTER the show.bs.modal event,
     // so defer to the next tick to grab and position it.
     setTimeout(function () {
@@ -5826,12 +5826,22 @@ $(document).on("hidden.bs.modal", ".modal", function () {
         });
 
         $($sortedModals).each(function (index) {
+          
+          if (!$(this).hasClass("modal-zindex-adjusted")) {
             $(this).css("z-index", MODAL_BASE_ZINDEX + (index * MODAL_ZINDEX_STEP));
+          }
+            
         });
 
         $($sortedBackdrops).each(function (index) {
+            if (!$(this).hasClass("modal-stack")) {
+                $(this).addClass("modal-stack");
+                $(this).css("z-index", (MODAL_BASE_ZINDEX - 1) + (index * MODAL_ZINDEX_STEP));
+            }
+            
+            
             // Each backdrop sits one below its matching modal.
-            $(this).css("z-index", (MODAL_BASE_ZINDEX - 1) + (index * MODAL_ZINDEX_STEP));
+            
         });
 
     } else {
