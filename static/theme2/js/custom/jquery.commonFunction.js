@@ -5804,11 +5804,32 @@ $(document).on("hidden.bs.modal", ".modal", function () {
 
         // Re-stack the survivors from bottom to top so the sequence stays
         // contiguous (1050/1049, 1060/1059, ...).
-        $openModals.each(function (index) {
+        //
+        // IMPORTANT: don't reindex by DOM/document order. `.modal-backdrop`
+        // elements are always appended to <body> in the order they were
+        // OPENED, but `.modal` elements live wherever their markup happens
+        // to sit in the page - that position has nothing to do with when
+        // they were opened. Reindexing both collections by document order
+        // silently pairs the wrong modal with the wrong backdrop whenever a
+        // modal that isn't the topmost one in the DOM is the one that just
+        // closed, landing a backdrop ABOVE a modal it doesn't belong to
+        // (the modal then looks "faded"/stuck and stops receiving clicks).
+        // Sorting by the z-index we ourselves assigned recovers the true
+        // open order for both collections, so index N always refers to the
+        // same stack position in each.
+        var $sortedModals = $openModals.toArray().sort(function (a, b) {
+            return (parseInt($(a).css("z-index"), 10) || 0) - (parseInt($(b).css("z-index"), 10) || 0);
+        });
+
+        var $sortedBackdrops = $backdrops.toArray().sort(function (a, b) {
+            return (parseInt($(a).css("z-index"), 10) || 0) - (parseInt($(b).css("z-index"), 10) || 0);
+        });
+
+        $($sortedModals).each(function (index) {
             $(this).css("z-index", MODAL_BASE_ZINDEX + (index * MODAL_ZINDEX_STEP));
         });
 
-        $backdrops.each(function (index) {
+        $($sortedBackdrops).each(function (index) {
             // Each backdrop sits one below its matching modal.
             $(this).css("z-index", (MODAL_BASE_ZINDEX - 1) + (index * MODAL_ZINDEX_STEP));
         });

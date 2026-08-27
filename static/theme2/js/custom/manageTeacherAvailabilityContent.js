@@ -279,23 +279,27 @@ $("#subjectId").select2({
 	$("#timeAvailableDateFrom").val(dateFrom)
 	$("#timeAvailableDateTo").val(dateFrom)
 
-	$(document).on('show.bs.modal', '.modal', function (e) {
-	   if ($(e.target).hasClass('datepicker') || $(e.target).closest('.modal').length === 0) {
-		   return;
-	   }
-	   var zIndex = 1050 + $('.right-slide-modal:visible').length * 20;
-	   var modalEle = $(this);
-	   customModalShow(modalEle, zIndex);
-	   setTimeout(function(){
-		   //$('.slick-slider-time-availiblity').slick('setPosition');
-	   },500);
-   });
+	// Disabled: z-index/backdrop stacking for modals is now handled centrally by
+	// jquery.commonFunction.js (show.bs.modal / hidden.bs.modal on document).
+	// This local hack was conflicting with that common fix and causing the
+	// modal to appear faded/unclickable (same issue fixed elsewhere, e.g. leadsPartner.js).
+	// $(document).on('show.bs.modal', '.modal', function (e) {
+	//    if ($(e.target).hasClass('datepicker') || $(e.target).closest('.modal').length === 0) {
+	// 	   return;
+	//    }
+	//    var zIndex = 1050 + $('.right-slide-modal:visible').length * 20;
+	//    var modalEle = $(this);
+	//    customModalShow(modalEle, zIndex);
+	//    setTimeout(function(){
+	// 	   //$('.slick-slider-time-availiblity').slick('setPosition');
+	//    },500);
+   // });
 
-   
-   $(document).on('hidden.bs.modal', '.modal', function () {
-	   var index =$(this).css('z-index')-1;
-	   $("body").find('.'+index).remove();
-   });
+
+   // $(document).on('hidden.bs.modal', '.modal', function () {
+	//    var index =$(this).css('z-index')-1;
+	//    $("body").find('.'+index).remove();
+   // });
 
      $("#teacherTimeSearch").on('click',function(){
 		$("#totalTeacher").text("0");

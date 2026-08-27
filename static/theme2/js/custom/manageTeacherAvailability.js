@@ -1,10 +1,14 @@
 var slickSiderRender = false;
-function customModalShow(src, zIndex, ){
-	$(src).css('z-index', zIndex);
-	$(src).find('.modal-dialog').css('margin-top', 46 * $('.right-slide-modal:visible').length); // Adjust margin-top dynamically
-	$(src).find(".modal-content").css("height", 'calc(100% - ' + (60 * $('.right-slide-modal:visible').length) + 'px)');
-	$('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack '+(zIndex-1));
-}
+// Disabled: z-index/backdrop stacking for modals is now handled centrally by
+// jquery.commonFunction.js (show.bs.modal / hidden.bs.modal on document).
+// This local hack was conflicting with that common fix and causing the
+// modal to appear faded/unclickable (same issue fixed elsewhere, e.g. leadsPartner.js).
+// function customModalShow(src, zIndex, ){
+// 	$(src).css('z-index', zIndex);
+// 	$(src).find('.modal-dialog').css('margin-top', 46 * $('.right-slide-modal:visible').length); // Adjust margin-top dynamically
+// 	$(src).find(".modal-content").css("height", 'calc(100% - ' + (60 * $('.right-slide-modal:visible').length) + 'px)');
+// 	$('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack '+(zIndex-1));
+// }
 function scrollMoreAvailability(){
 	$('#availiblityModal .modal-body').animate({scrollTop:0},500);
 	$(".blink-btn").addClass("blink");
