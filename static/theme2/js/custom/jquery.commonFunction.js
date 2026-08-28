@@ -5752,7 +5752,6 @@ $(document).on("show.bs.modal", ".modal", function () {
     // Bootstrap injects this modal's backdrop AFTER the show.bs.modal event,
     // so defer to the next tick to grab and position it.
     setTimeout(function () {
-
         // Backdrops we have already positioned carry the ".modal-stack" marker.
         // Anything still un-stacked is a freshly created backdrop; the last one
         // belongs to this modal. Any earlier un-stacked backdrops are orphans

@@ -680,7 +680,6 @@ function getHtmlTeacherSalary(teacherReports){
 	salCalHtml+="<table class=\"table table-bordered nowrap row-height-small\">";
 	salCalHtml+="<tbody>"
 	salCalHtml+="<tr><td class=\"metric-label\">Salary Agreed</td><td class=\"metric-value\">"+teacherReports.payout.agreedPayout+"</td></tr>";
-	salCalHtml+="<tr><td class=\"metric-label\">Salary per day</td><td class=\"metric-value\">"+teacherReports.payoutPerday+"</td></tr>";
 	salCalHtml+="<tr><td class=\"metric-label\">Salary per hour</td><td class=\"metric-value\">"+teacherReports.payoutPerhrs+"</td></tr>";
 	salCalHtml+="<tr><td class=\"metric-label\">Salary (Till now)</td><td class=\"metric-value\">"+teacherReports.currentsal+"</td></tr>";
 	salCalHtml+="<tr><td class=\"metric-label\">Total Accepted Hours till now<br/>(Class+Admin)</td><td class=\"metric-value\">"+teacherReports.total_accept_hours+"</td></tr>";
