@@ -1424,9 +1424,12 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
 
     function renderCustomTodayEvent(event) {
         //  
+
+        
         if(event.eventKind=="activity"){
             //  completed
         }
+        
         var status = getEventStatus(event);
         var color = getEventBorder(event.eventKind, event.courseId);
         var colorCode = getEventTextColor(event.eventKind, event.courseId);
@@ -1476,7 +1479,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                                 `<span class="full font-weight-semi-bold ${getStatusLabel(status) == "PAST"?"text-black-50":"text-dark"}">
                                     ${USER_ROLE == "TEACHER" ? `Student Name: ${event.origName}`:`${event.eventType == "SYS-TRAINING" ? `Admin Name: ${event.salutation}&nbsp;${event.origName}`:`${(event.category == "BATCH" || event.category == "CLASS" || event.eventType == "CUSTOM")? `<span class="full font-weight-semi-bold ${getStatusLabel(status) == "PAST"?"text-black-50":"text-dark"}">${USER_ROLE == "STUDENT" ? `Teacher Name:&nbsp;${event.salutation}.&nbsp;${event.origName}`:``}</span>`:``}`}`} 
                                 </span>`:
-                            `${(event.category == "BATCH" || event.category == "CLASS" || event.eventType == "CUSTOM") && event.eventType != "PTM" ? `<span class="full font-weight-semi-bold ${getStatusLabel(status) == "PAST"?"text-black-50":"text-dark"}">${USER_ROLE == "STUDENT" ? `Teacher Name:&nbsp;${event.salutation}.&nbsp;${event.origName}`:`Student Name:&nbsp;${event.origName}`}</span>`:``}`
+                            `${(event.category == "BATCH" || event.category == "CLASS" || event.eventType == "CUSTOM") && event.eventType != "PTM" ? `<span class="full font-weight-semi-bold ${getStatusLabel(status) == "PAST"?"text-black-50":"text-dark"}">${USER_ROLE == "STUDENT" ? `Teacher Name:&nbsp;${event.salutation}.&nbsp;${event.origName}`:`${event.category != "BATCH"? `Student Name:&nbsp;${event.origName}`:``}`}</span>`:``}`
                         }
                         
                     </div>
@@ -2367,15 +2370,19 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                     <button type="button" class="btn btn-outline-dark font-size-lg" data-dismiss="modal">No</button>
                     <a id="classJoinWaring" href="javascript:void(0)" class="btn btn-primary font-size-lg" onclick="classDetailsOnModal('` +jfmUrl +`', '` +eventKind +`', '` +courseId +`', '` +eventType +`')"> Start Class</a>
                 </div>
+                
             </div>`;
         return html;
         }
         var html =
         `<div id="classJoinWaringDiv">
             <div id="classWaringMessage" class="full text-center my-4">
-                <h5>The class ` + response.className + ` is scheduled for ` + convertDatetimeWithFormat(response.classDate, response.classTimezone, USER_TIMEZONE, DISPLAY_DATE_AND_TIME) + `.</h5>
+                <h5>The class is scheduled for ` + convertDatetimeWithFormat(response.classDate, response.classTimezone, USER_TIMEZONE, DISPLAY_DATE_AND_TIME) + `.</h5>
                 <h5>You can start the class on ` + convertDatetimeWithFormat(response.canJoindateStart, response.classTimezone, USER_TIMEZONE, DISPLAY_DATE_AND_TIME) + `.</h5>
             </div>
+            ${eventType != "BATCH"? `<div class="full"> <h5 class="text-center font-18">Student Name:&nbsp;${response.subjectName}</h5> </div>`:``}
+            
+            <div class="full"> <h5 class="text-center font-18">Course Name:&nbsp;${eventType != "BATCH"?`${response.className}`:`${response.subjectName}`}</h5> </div>
         </div>
         <div class="full text-right mt-3">
             <button type="button" class="btn btn-pill btn-light px-3" data-dismiss="modal">Close</button>
