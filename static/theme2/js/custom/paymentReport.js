@@ -878,6 +878,101 @@ function collectGupshupParamMapping(paramCount) {
 	return mapping;
 }
 
+var EMAIL_PARAM_FIELD_OPTIONS = [
+	{ value: 'firstName', label: 'First Name' },
+	{ value: 'fullName', label: 'Full Name' },
+	{ value: 'grade', label: 'Grade' },
+	{ value: 'phone', label: 'Phone' },
+	{ value: 'counsellorName', label: 'Counsellor Name' },
+	{ value: 'parentName', label: 'Parent Name' }
+];
+
+function getSelectedEmailBroadcastTemplate(indexNo) {
+	if(!emailTemplateContent || !emailTemplateContent.responseBody || !Array.isArray(emailTemplateContent.responseBody.templates)) {
+		return null;
+	}
+	if(indexNo == null || indexNo === "" || isNaN(Number(indexNo))) {
+		return null;
+	}
+	return emailTemplateContent.responseBody.templates[Number(indexNo)] || null;
+}
+
+function getSelectedEmailBroadcastTemplateParamCount(templateData) {
+	return getSelectedWhatsappBroadcastTemplateParamCount(templateData);
+}
+
+function getDefaultEmailFieldForParam(paramName) {
+	if (!paramName) { return 'fullName'; }
+	switch (String(paramName).toUpperCase()) {
+		case 'FIRSTNAME': return 'firstName';
+		case 'FULL_NAME': return 'fullName';
+		case 'GRADE': return 'grade';
+		case 'CONTACT_NUMBER': return 'phone';
+		case 'SALUTATION': return 'firstName';
+		default: return 'fullName';
+	}
+}
+
+function renderEmailParamMapping(selectedTemplate) {
+	var $wrap = $('#emailParamMappingWrap');
+	var $container = $('#emailParamMapping');
+	if (!$wrap.length || !$container.length) { return; }
+	var paramCount = getSelectedEmailBroadcastTemplateParamCount(selectedTemplate);
+	if (paramCount <= 0) {
+		$wrap.hide();
+		$container.empty();
+		return;
+	}
+	var defaults = ['fullName', 'grade', 'counsellorName', 'phone', 'parentName'];
+	var html = '';
+	for (var i = 0; i < paramCount; i++) {
+		var customParam = (selectedTemplate.customParams && selectedTemplate.customParams[i]) ? selectedTemplate.customParams[i] : null;
+		var paramName = customParam ? customParam.paramName : String(i + 1);
+		var paramLabel = (customParam && customParam.paramDisplay) ? customParam.paramDisplay : paramName;
+		var def = defaults[i] || getDefaultEmailFieldForParam(paramName);
+		html += '<div class="d-flex align-items-center" style="gap:4px;">';
+		html += '<span style="font-size:13px;">{{ ' + paramLabel + ' }} &rarr;</span>';
+		html += '<select class="form-control form-control-sm email-param-map" data-index="' + i + '" style="width:auto;font-size:13px;">';
+		$.each(EMAIL_PARAM_FIELD_OPTIONS, function(_, opt) {
+			html += '<option value="' + opt.value + '"' + (opt.value === def ? ' selected' : '') + '>' + opt.label + '</option>';
+		});
+		html += '</select></div>';
+	}
+	$container.html(html);
+	$wrap.show();
+}
+
+function collectEmailParamMapping(paramCount) {
+	var mapping = [];
+	var allowed = $.map(EMAIL_PARAM_FIELD_OPTIONS, function(o) { return o.value; });
+	for (var i = 0; i < paramCount; i++) {
+		var val = $('.email-param-map[data-index="' + i + '"]').val();
+		if (!val || $.inArray(val, allowed) === -1) { return null; }
+		mapping.push(val);
+	}
+	return mapping;
+}
+
+function buildEmailRecipientPayload(user) {
+	var fullName = user.name || user.fullName || '';
+	return {
+		email: user.email,
+		grade: user.grade || '',
+		fullName: fullName,
+		name: fullName,
+		phone: user.phoneNumber || user.phone || user.mobileNo || '',
+		phoneNumber: user.phoneNumber || user.phone || '',
+		mobileNo: user.mobileNo || '',
+		firstName: fullName ? fullName.split(' ')[0] : '',
+		leadId: user.leadId,
+		counsellorName: user.counsellorName || '',
+		parentName: user.parentName || '',
+		demoDate: user.demoDate || '',
+		demoTime: user.demoTime || '',
+		demoDateTime: user.demoDateTime || ''
+	};
+}
+
 function getWatiBroadcastTemplates(){
 	var providerArg = arguments.length > 0 ? arguments[0] : null;
 	var providerMeta = getStudentBroadcastProviderMeta(providerArg);
@@ -1637,21 +1732,27 @@ function sendEmailNotificationToUser(indexNo,templateName, subject, leadID, d_st
 	filteredEmailContent.users = filteredEmailContent.users.filter(function(user) {
 		return selectedLeadIds.includes(user.leadId);
 	});
+	var selectedTemplate = getSelectedEmailBroadcastTemplate(indexNo);
+	var paramCount = getSelectedEmailBroadcastTemplateParamCount(selectedTemplate);
+	var mapping = collectEmailParamMapping(paramCount);
+	if (paramCount > 0 && mapping === null) {
+		showMessageTheme2(0, 'Please map all template placeholders before sending','',false);
+		return false;
+	}
 
 	var request={}
 	request['userId']=USER_ID;
 	request['templateId']=templateId;
 	request['studentList']=true;
 	request['sendBestTime']= $("input[name='mailBroadcastTime']:checked").val() == "now"? false: true;
-	request['recipientsUserDetails'] = filteredEmailContent.users.map(user => ({
-		email: user.email,
-		grade: user.grade,
-		fullName: user.name,
-		phone: user.phoneNumber,
-		firstName: user.name.split(' ')[0],
-		leadId: user.leadId,
-
-	}));
+	request['templateParamCount']=paramCount;
+	request['paramMapping']=mapping || [];
+	if (selectedTemplate && Array.isArray(selectedTemplate.customParams)) {
+		request['templateParamNames'] = selectedTemplate.customParams.map(function(p) { return p.paramName || ''; });
+	}
+	request['recipientsUserDetails'] = filteredEmailContent.users.map(function(user) {
+		return buildEmailRecipientPayload(user);
+	});
 	request['templateSubject']=subject;
 	$.ajax({
 		type : "POST",

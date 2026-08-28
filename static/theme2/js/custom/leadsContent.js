@@ -1606,6 +1606,10 @@ function emailBroadcastSendModal(data){
 								</div>
 							</div>
 							<div class="modal-body pt-1">
+								<div id="emailParamMappingWrap" class="full mb-2" style="display:none;">
+									<div class="font-weight-bold mb-1" style="font-size:13px;">Map template placeholders:</div>
+									<div id="emailParamMapping" class="d-flex flex-wrap" style="gap:8px;"></div>
+								</div>
 								<form id="sendEmailBroadcastMessage" class="full d-flex flex-column" action="javascript:void(0);">
 									<div class="full mb-1 mt-1 table-responsive" style='max-height: 500px;overflow-y: auto;'>
 										<table id="emailBroadcastSendTable" class="table" style="font-size:14px;min-width:450px;">
@@ -1641,6 +1645,10 @@ function emailBroadcastSendModal(data){
 																		data-mobile="` + value.mobileNo + `"
 																		data-phone="` + value.phoneNumber + `"
 																		data-isdcode="` + value.isdCode + `"
+																		data-counsellorname="` + (value.counsellorName || '') + `"
+																		data-demodate="` + (value.demoDate || '') + `"
+																		data-demotime="` + (value.demoTime || '') + `"
+																		data-demodatetime="` + (value.demoDateTime || '') + `"
 																		class="custom-control-input checkToSendEmail"
 																	>
 																	<label id="label_email_`+value.leadId+`" class="custom-control-label" for="`+value.leadId+`"></label>

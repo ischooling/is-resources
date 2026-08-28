@@ -2755,6 +2755,10 @@ function emailBroadcastSendModal(data){
 								</div>
 							</div>
 							<div class="modal-body pt-1">
+								<div id="emailParamMappingWrap" class="full mb-2" style="display:none;">
+									<div class="font-weight-bold mb-1" style="font-size:13px;">Map template placeholders:</div>
+									<div id="emailParamMapping" class="d-flex flex-wrap" style="gap:8px;"></div>
+								</div>
 								<form id="sendEmailBroadcastMessage" class="full d-flex flex-column" action="javascript:void(0);">
 									<div class="full mb-1 mt-1 table-responsive" style='max-height: 500px;overflow-y: auto;'>
 										<table id="emailBroadcastSendTable" class="table" style="font-size:14px;min-width:450px;">
@@ -2776,6 +2780,7 @@ function emailBroadcastSendModal(data){
                                                 var userId = $(checkbox).val(); 
                                                 var name = $(".student-name-" + userId).attr("studentname") || '';
                                                 var grade = $(".student-name-" + userId).attr("studentgrade") || '';
+                                                var parentName = $(".student-name-" + userId).attr("parentname") || '';
 												var num1 = $(".parent-phone-" + userId ).attr("number")?.trim();
 												var num2 = $(".student-phone-" + userId).attr("number")?.trim();
 												var isd = $(".student-phone-" + userId).attr("isdnumber")?.trim();
@@ -2804,6 +2809,7 @@ function emailBroadcastSendModal(data){
 																		data-parentemail="` + emails[1] + `"
 																		data-name="` + name + `"
 																		data-grade="` + grade + `"
+																		data-parentname="` + parentName + `"
 																		data-leadVerifiedStatus="Y"
 																		data-mobile="` + num1 + `"
 																		data-phone="` + num2 + `"
@@ -3150,6 +3156,9 @@ function sendEmailNotification(templateName, subject, index, templateId){
 	$('#viewMethodCallingEmail').html('<a href="javascript:void(0)" class="btn btn-primary btn-sm rounded-circle" onclick="viewEmailTemplate('+boolval+','+index+', `'+templateName+'`);" > <i class="fa fa-eye text-white"></i> </a>');
 	$('#confirm_btn_data_email').html('<a id="confirm_btn_email" class="btn btn-primary mr-2" href="javascript:void(0);" >SEND</a>');
 	$('#selectionCountEmail').html('<span>Selected- </span><span id="selectedCountEmail">0</span> / <span id="totalCountEmail">0</span>');
+	if (typeof renderEmailParamMapping === 'function' && typeof getSelectedEmailBroadcastTemplate === 'function') {
+		renderEmailParamMapping(getSelectedEmailBroadcastTemplate(index));
+	}
 	$("#emailBroadcastSendModal").modal("show");
 	$("#customEmailTemplatesList").modal("hide");
 
@@ -3185,6 +3194,7 @@ function sendEmailNotification(templateName, subject, index, templateId){
 				let mobileNo = $(this).data("mobile") || '';
 				let phoneNumber = $(this).data("phone") || '';
 				let isdCode = $(this).data("isdcode") || '';
+				let parentName = $(this).data("parentname") || '';
 
 				const isValidEmail = (str) => str && str.includes("@") && str.includes(".");
 
@@ -3197,6 +3207,7 @@ function sendEmailNotification(templateName, subject, index, templateId){
 					mobileNo: mobileNo,
 					phoneNumber: phoneNumber,
 					isdCode: isdCode,
+					parentName: parentName,
 				});
 
 				if (isValidEmail(email) && isValidEmail(parentemail)) {
