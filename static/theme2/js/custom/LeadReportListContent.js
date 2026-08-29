@@ -15,6 +15,10 @@ function initializeLeadReportDatepickers() {
 		"#dataSchoolDemoEndDate",
 		"#daywiseStartDate",
 		"#daywiseEndDate",
+		"#eaStartDate",
+		"#eaEndDate",
+		"#targetStartDate",
+		"#targetEndDate",
 		"#dataLeadCampaignStartDate",
 		"#dataLeadCampaignEndDate",
 		"#dataReviewStartDate",
@@ -383,6 +387,10 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 		});
 	}
 
+	if(objectRights.permissioncolumn=='Y' && $("#tab-content-10").length){
+		initEnrollmentAnalyticsTab();
+	}
+
 	if($("#searchLeadCampaignType").length){
 		callLeadCampaignList("DAY",'','','','');
 		$("#searchLeadCampaignEmail").on("keydown", function(e){
@@ -596,7 +604,15 @@ function getReportsTab(objRight){
 				<a role="tab" class="nav-link" id="tab-9" data-toggle="tab" href="#tab-content-9">
 					<span>Counselor Review</span>
 				</a>
-			</li>
+			</li>`;
+			if(objRight.permissioncolumn=='Y'){
+				html+=`<li class="nav-item">
+					<a role="tab" class="nav-link" id="tab-10" data-toggle="tab" href="#tab-content-10">
+						<span>Enrollment Analytics</span>
+					</a>
+				</li>`;
+			}
+			html+=`
 		</ul>
 		<div class="tab-content p-3 border">`;
 		if(objRight.permissioncolumn=='Y'){
@@ -648,8 +664,15 @@ function getReportsTab(objRight){
 				<div class="tabs-animation">`
 					html+=getCounselorReviewList(objRight);
 				html+=`</div>
-			</div>
-			
+			</div>`;
+			if(objRight.permissioncolumn=='Y'){
+				html+=`<div class="tab-pane tabs-animation fade show " id="tab-content-10" role="tabpanel">
+					<div class="tabs-animation">`
+						html+=getEnrollmentAnalytics(objRight);
+					html+=`</div>
+				</div>`;
+			}
+			html+=`
 		</div>
 		</form>	`;
 		return html;
