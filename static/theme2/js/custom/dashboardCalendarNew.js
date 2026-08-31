@@ -271,7 +271,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
         var storedCourse = stored.courses && stored.courses[courseId] ? stored.courses[courseId] : {};
         if (!studentCalendarState.courses[courseId]) {
             var colorIndex = Object.keys(studentCalendarState.courses).length % defaultCoursePalette.length;
-            var defaultColor = courseId === "ACTIVITY" ? "#0d2a64" : defaultCoursePalette[colorIndex];
+            var defaultColor = courseId === "ACTIVITY" ? "#2267f0" : defaultCoursePalette[colorIndex];
             studentCalendarState.courses[courseId] = {
                 id: courseId,
                 label: label || "Classes",
@@ -293,7 +293,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
             return "#1b5e20";
         }
         if (eventType === "activity") {
-            return "#0d2a64";
+            return "#2267f0";
         }
         if (eventType === "assignment") {
             return "#f4b400";
@@ -319,7 +319,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
             return "#1b5e20";
         }
         if (eventType === "activity") {
-            return "#0d2a64";
+            return "#2267f0";
         }
         return getCourseColor(courseId);
     }
@@ -752,25 +752,25 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                                         </div>
                                     </div>
                                     <div class="nav-pill">
-                                        <button type="button" id="dashboardCalendarPrev" aria-label="Previous">&lsaquo;</button>
+                                        <button type="button" id="dashboardCalendarPrev" aria-label="Previous" data-toggle="tooltip" data-placement="auto" title="Previous">&lsaquo;</button>
                                         <span class="nav-view-label" id="dashboardCalendarViewLabel">Day</span>
-                                        <button type="button" id="dashboardCalendarNext" aria-label="Next">&rsaquo;</button>
+                                        <button type="button" id="dashboardCalendarNext" aria-label="Next" data-toggle="tooltip" data-placement="auto" title="Next">&rsaquo;</button>
                                     </div>
                                     ${/*<button type="button" class="today-btn" id="dashboardCalendarToday">Today</button>*/''}
                                     <span class="topbar-month" id="dashboardCalendarTitle"></span>
                                     <div class="spacer"></div>
                                     <div class="view-pill">
-                                        <button type="button" class="vp-btn active" data-view="today">Today</button>
-                                        <button type="button" class="vp-btn" data-view="agendaWeek">Week</button>
-                                        <button type="button" class="vp-btn" data-view="month">Month</button>
+                                        <button type="button" class="vp-btn active" data-view="today" data-toggle="tooltip" data-placement="auto" title="Today View">Today</button>
+                                        <button type="button" class="vp-btn" data-view="agendaWeek" data-toggle="tooltip" data-placement="auto" title="Weekly View">Week</button>
+                                        <button type="button" class="vp-btn" data-view="month" data-toggle="tooltip" data-placement="auto" title="Monthly View">Month</button>
                                     </div>
                                 </div>
                                 <div class="legend-strip">
                                     <div class="mx-auto d-inline-flex align-items-center gap-10 flex-wrap">
                                         <span>Legend:</span>
                                         ${USER_ROLE != "TEACHER" ? `<div class="leg-item"><div class="leg-box"></div>Assignment</div>`:``}
-                                        <div class="leg-item"><div class="leg-box btn-dashed"></div>Live Class</div>
-                                        <div class="leg-item" style="color:#0d2a64;"><div class="leg-box school-event"></div>School Activity</div>
+                                        <div class="leg-item"><div class="leg-box btn-dashed"></div>Class</div>
+                                        <div class="leg-item" style="color:#2267f0;"><div class="leg-box school-event"></div>School Activity</div>
                                         <div class="leg-item" style="color:#1b5e20;"><div class="leg-box holiday"></div>Holiday</div>
                                     </div>
                                 </div>
@@ -849,22 +849,34 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                 .clock-pill .clock-tod.tod-pop { animation: clockTodPop 0.3s ease; }
                 @keyframes clockTodPop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
                 .nav-pill { display: flex; align-items: center; gap: 2px; background: #f1f3f4; border-radius: 24px; padding: 3px 5px; }
-                .nav-pill button { border: 0; background: transparent; cursor: pointer; border-radius: 50%; width: 28px; height: 28px; font-size: 18px; color: #5f6368; display: flex; align-items: center; justify-content: center; box-shadow: none; }
+                .nav-pill button { border: 0; background: transparent; cursor: pointer; border-radius: 50%; width: 28px; height: 28px; font-size: 18px; color: #171717; display: flex; align-items: center; justify-content: center; box-shadow: none; }
                 .nav-pill button:hover { background: #e0e0e0; }
                 .nav-view-label { min-width: 46px; text-align: center; font-size: 12px; font-weight: 600; color: var(--pc); white-space: nowrap; padding: 0 4px; }
                 .today-btn { border: 0; border-radius: 24px; background: #e8f0fe; padding: 6px 16px; font-size: 12px; cursor: pointer; color: var(--pc); font-weight: 500; box-shadow: none; }
                 .topbar-month { font-family: "Google Sans", Arial, sans-serif; font-size: 15px; font-weight: 400; color: #202124; white-space: nowrap; }
                 .spacer { flex: 1; }
-                .view-pill { display: flex; background: #f1f3f4; border-radius: 24px; padding: 3px; gap: 2px; }
-                .vp-btn { border: 0; background: transparent; border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 500; cursor: pointer; color: #5f6368; box-shadow: none; }
-                .vp-btn.active { background: #fff; color: var(--pc); box-shadow: 0 1px 4px rgba(60,64,67,0.2); }
+                .view-pill { display: flex; background: #e3f2e3; border-radius: 24px; padding: 3px; gap: 2px; }
+                .vp-btn { border: 0; background: transparent; border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 500; cursor: pointer; color: #171717; box-shadow: none; }
+                .vp-btn.active { background: green; color: #fff; box-shadow: 0 1px 4px rgba(60,64,67,0.2); }
                 .legend-strip { display: flex; align-items: center; justify-content: flex-end; gap: 14px; padding: 5px 16px; background: #fff; border-bottom: 1px solid #e8eaed; flex-shrink: 0; }
-                .legend-strip span { font-size: 10px; font-weight: 700; color: #9aa0a6; text-transform: uppercase; letter-spacing: 0.8px; }
-                .leg-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #5f6368; }
-                .leg-box { width: 15px; height: 15px; border-radius: 3px; flex-shrink: 0; border: 2px solid #888; }
-                .leg-box.school-event { background: #e7ebf4; border-color: #0d2a64; }
-                .leg-box.holiday { background: #e6f4ea; border-color: #1b5e20; }
+                .legend-strip span { font-size: 10px; font-weight: 700; color: #5f6368; text-transform: uppercase; letter-spacing: 0.8px; }
+                .leg-item { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #5f6368; font-weight:700;}
+                .leg-box { width: 20px; height: 20px; border-radius: 3px; flex-shrink: 0; border: 3px solid #888; }
+                .leg-box.school-event { background: #e7ebf4; border-color: #2267f0;background:#2267f0}
+                .leg-box.holiday { background: #e6f4ea; border-color: #1b5e20;background:#1b5e20 }
                 .leg-box.active-event { background: #fff; border: 2px dashed #e53935; }
+                .leg-box.btn-dashed {
+                    border: 0 !important;
+                    background-image:
+                        repeating-linear-gradient(90deg, #888 0, #888 4px, transparent 4px, transparent 8px),
+                        repeating-linear-gradient(90deg, #888 0, #888 4px, transparent 4px, transparent 8px),
+                        repeating-linear-gradient(0deg, #888 0, #888 4px, transparent 4px, transparent 8px),
+                        repeating-linear-gradient(0deg, #888 0, #888 4px, transparent 4px, transparent 8px);
+                    background-size: 100% 2px, 100% 2px, 2px 100%, 2px 100%;
+                    background-position: 0 0, 0 100%, 0 0, 100% 0;
+                    background-repeat: no-repeat;
+                    animation: legMarchingAnts 0.5s linear infinite;
+                }
                 .dashboard-calendar-layout { display: flex; flex: 1; overflow: hidden; min-height: 0; }
                 .dashboard-calendar-sidebar { width: 300px; padding: 12px; display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; background: #fff; border-right: 1px solid #e8eaed; }
                 .dashboard-calendar-main { flex: 1; overflow-y: auto;  overflow-x: hidden; background: #f8faff; min-width: 0; padding: 0; }
@@ -903,7 +915,18 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                 .dashboard-today-items { flex: 1; display: flex; flex-direction: column; gap: 9px; min-width: 0; }
                 .dashboard-today-event { position: relative; display: flex; align-items: flex-start; gap: 12px; min-height: 50px;  background: #fff; box-shadow: 0 1px 4px rgba(60,64,67,0.07); cursor: pointer; }
                 .dashboard-today-event:hover { box-shadow: 0 4px 12px rgba(60,64,67,0.13);transform: translateY(-1px);}
-                .dashboard-today-event.is-timed-event { border-style: dashed; border-width: 2px; }
+                .dashboard-today-event.is-timed-event {
+                    border: 0 !important;
+                    background-image:
+                        repeating-linear-gradient(90deg, var(--dash-color, #999) 0, var(--dash-color, #999) 8px, transparent 8px, transparent 16px),
+                        repeating-linear-gradient(90deg, var(--dash-color, #999) 0, var(--dash-color, #999) 8px, transparent 8px, transparent 16px),
+                        repeating-linear-gradient(0deg, var(--dash-color, #999) 0, var(--dash-color, #999) 8px, transparent 8px, transparent 16px),
+                        repeating-linear-gradient(0deg, var(--dash-color, #999) 0, var(--dash-color, #999) 8px, transparent 8px, transparent 16px);
+                    background-size: 100% 2px, 100% 2px, 2px 100%, 2px 100%;
+                    background-position: 0 0, 0 100%, 0 0, 100% 0;
+                    background-repeat: no-repeat;
+                    animation: dashboardMarchingAnts 0.6s linear infinite;
+                }
                 .dashboard-today-event.is-timed-event.CLASS_PAST{cursor:pointer}
                 .dashboard-today-dot { width: 11px; height: 11px; border-radius: 50%; margin-top: 4px; flex-shrink: 0;}
                 .dashboard-today-content { min-width: 0; }
@@ -917,6 +940,19 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                 .fc-event.dashboard-calendar-active.is-timed-event, .today-summary-item.dashboard-calendar-active.is-timed-event, .dashboard-today-event.dashboard-calendar-active.is-timed-event { animation: dashboardCalendarPulse 1.4s ease-in-out infinite; border-style: dashed !important; border-width: 2px !important; }
                 /* Any LIVE event (class OR activity) blinks — dashboard-calendar-active is only ever set on a live timed event. Activities keep their own border style; only the pulse is shared. */
                 .fc-event.dashboard-calendar-active, .today-summary-item.dashboard-calendar-active, .dashboard-today-event.dashboard-calendar-active { animation: dashboardCalendarPulse 1.4s ease-in-out infinite; }
+                .dashboard-today-event.dashboard-calendar-active.is-timed-event { border: 0 !important; animation: dashboardMarchingAnts 0.6s linear infinite, dashboardCalendarPulse 1.4s ease-in-out infinite; }
+                #dashboardCalendarTodaySummary .today-summary-item.class  {
+                    border: 0 !important;
+                    background-image:
+                        repeating-linear-gradient(90deg, var(--dash-color, #888) 0, var(--dash-color, #888) 4px, transparent 4px, transparent 8px),
+                        repeating-linear-gradient(90deg, var(--dash-color, #888) 0, var(--dash-color, #888) 4px, transparent 4px, transparent 8px),
+                        repeating-linear-gradient(0deg, var(--dash-color, #888) 0, var(--dash-color, #888) 4px, transparent 4px, transparent 8px),
+                        repeating-linear-gradient(0deg, var(--dash-color, #888) 0, var(--dash-color, #888) 4px, transparent 4px, transparent 8px);
+                    background-size: 100% 2px, 100% 2px, 2px 100%, 2px 100%;
+                    background-position: 0 0, 0 100%, 0 0, 100% 0;
+                    background-repeat: no-repeat;
+                    animation: legMarchingAnts 0.5s linear infinite, dashboardCalendarPulse 1.4s ease-in-out infinite;
+                }
                 .fc-agendaWeek-view .fc-day-header, .fc-agendaWeek-view .fc-day-top { cursor: pointer; }
                 .fc-agendaWeek-view .fc-day-header:hover, .fc-agendaWeek-view .fc-day-top:hover { background: #f1f6ff; }
                 .fc-agendaWeek-view table, .fc-agendaWeek-view td, .fc-agendaWeek-view th { border-color: #e8eaed; }
@@ -945,6 +981,8 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                 .fc-event .event-start-Time, .fc-event .event-end-Time { font-size: 11px; }
                 .fc-scroller.fc-time-grid-container[style]{height:100% !important}
                 @keyframes dashboardCalendarPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+                @keyframes dashboardMarchingAnts { to { background-position: -16px 0, 16px 100%, 0 16px, 100% -16px; } }
+                @keyframes legMarchingAnts { to { background-position: -8px 0, 8px 100%, 0 8px, 100% -8px; } }
                 #dashboardCalendarDatepicker > .datepicker table tr td.active, #dashboardCalendarDatepicker > .datepicker table tr td.active:hover {background-image: none !important;background-color: #007bff !important;color: #fff !important;font-weight: 600;}
                 #dashboardCalendarDatepicker > .datepicker td, #dashboardCalendarDatepicker > .datepicker th:not(.datepicker-switch) {width: 36px;height: 36px;line-height: 36px;text-align: center;}
                 #dashboardCalendarDatepicker > .datepicker th.datepicker-title{border-radius:8px}
@@ -1056,7 +1094,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
         var html = `
             <div class="course-row" data-filter-key="activities">
                 <div class="c-check ${checked ? "on" : ""}" id="chk-sev"
-                     style="border-color:#0d2a64;background:${checked ? "#0d2a64" : "#fff"};">
+                     style="border-color:#2267f0;background:${checked ? "#2267f0" : "#fff"};">
                 </div>
                 <span class="c-label">School Activities</span>
             </div>`;
@@ -1115,11 +1153,12 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
         };
         var html = Object.keys(labels).map(function(key) {
             var events = groups[key];
+            debugger
             return `
                 <div class="today-summary-group">
                     <div class="today-summary-title">${labels[key]}</div>
                     ${events.length ? events.slice(0, 5).map(function(event) {
-                        return `<div class="today-summary-item ${key === "live" ? "dashboard-calendar-active bhagat 2" : ""}" data-summary-event-id="${event.id}" style="border-color:${getEventBorder(event.eventKind, event.courseId)};">${escapeHtml(event.title)}<div class="text-muted">${event.displayTime}</div></div>`;
+                        return `<div class="today-summary-item ${event.category == "CLASS" ? "class":""} ${key === "live" ? "dashboard-calendar-active" : ""}" data-summary-event-id="${event.id}" style="border-color:${getEventBorder(event.eventKind, event.courseId)}; --dash-color:${getEventBorder(event.eventKind, event.courseId)};">${escapeHtml(event.title)}<div class="text-muted">${event.displayTime}</div></div>`;
                     }).join("") : '<div class="text-muted font-12">No Class & School Activity</div>'}
                 </div>`;
         }).join("");
@@ -1445,7 +1484,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
         var statusBadge = isTimedEvent(event) ? buildStatusBadges(event) : "";
         var joinStatusLabel = isTimedEvent(event) ? joinStatus(event) : "";
             /*<div class="dashboard-today-event p-2 rounded-10 ${activeClass} ${dashedClass}" data-today-event-id="${event.id}" style="border-color:${(status == 'live' ? `red`:getEventTextColor(event.eventKind, event.courseId))} !important;">*/
-            var html=`<div class="dashboard-today-event p-2 rounded-10 justify-content-center ${activeClass} ${dashedClass}" data-today-event-id="${event.id}" style="border-color:${(status == 'live' ? colorCode:colorCode)} !important;">
+            var html=`<div class="dashboard-today-event p-2 rounded-10 justify-content-center ${activeClass} ${dashedClass}" data-today-event-id="${event.id}" style="border-color:${(status == 'live' ? colorCode:colorCode)} !important; --dash-color:${colorCode};">
                 
                 <div class="dashboard-today-content text-center">`;
                     if(event.eventKind === "assignment" || event.eventKind === "activity"){
@@ -1574,6 +1613,13 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
     function updateActiveViewLabel() {
         var active = $(".vp-btn.active").attr("data-view") || studentCalendarState.viewName;
         $("#dashboardCalendarViewLabel").text(getViewLabel(active));
+        // Update data-original-title (what the Bootstrap tooltip shows once inited) and
+        // clear the native title attribute so the browser's own tooltip doesn't also show
+        // (which caused a double tooltip).
+        var prevTitle = 'Previous ' + getViewLabel(active);
+        var nextTitle = 'Next ' + getViewLabel(active);
+        $("#dashboardCalendarPrev").attr("data-original-title", prevTitle).attr("title", "");
+        $("#dashboardCalendarNext").attr("data-original-title", nextTitle).attr("title", "");
     }
 
     function updateCalendarTitle(view) {
@@ -1987,6 +2033,9 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                 refreshCalendarFromCurrentView(true);
             }
         });
+        // Init the prev/next tooltips and set their text to the active view (Day/Week/Month).
+        $('#dashboardCalendarPrev, #dashboardCalendarNext').tooltip();
+        updateActiveViewLabel();
     }
 
     function bindWeekHeaderDrilldown() {

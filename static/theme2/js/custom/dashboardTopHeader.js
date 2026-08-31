@@ -491,6 +491,7 @@
 
 	$(document).ready(function () {
 		adjustAppContainerMargin();
+		$('.app-header [data-toggle="tooltip"]').tooltip();
 		var hasNotificationsLink = NOTIFICATION_PAGE_LINKS.some(function (link) {
 			return link === 'notifications' || link === 'parent-notifications';
 		});

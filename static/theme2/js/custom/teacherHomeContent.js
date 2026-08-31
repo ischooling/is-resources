@@ -38,6 +38,7 @@ async function rendereTeacherHomeContent(){
     $("body").append(newsAllListWithDetailsModalCotent()+calendarActivityModal()+viewActivityAttachmentModal());
     callTeacherClassesToUpdateStatus();
     //$('[data-toggle="tooltip"]').tooltip();
+     $('body').find('[data-toggle="tooltip"]').tooltip();
 }
 
 async function renderTeacherDashboard(data){

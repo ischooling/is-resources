@@ -417,6 +417,7 @@ function callUserLoginFun(formId, moduleId, loginType) {
 		cache : false,
 		timeout : 600000,
 		success : function(data) {
+			debugger
 			//console.log(data)
 			localStorage.setItem('welcome',false);
 			if (data.status == '0' || data.status == '2') {

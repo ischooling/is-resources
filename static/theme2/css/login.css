@@ -45,6 +45,7 @@ font-8 {
 .font-30 {
 	font-size: 30px !important;
 }
+#statusMessage{box-shadow: 0 3px 9px rgba(0,0,0,.5);background-color: #fff;width: fit-content;padding:5px 10px;border-radius:6px;font-size: 22px;font-weight: 600;margin: 0 auto;}
 .m-0{margin-bottom: 0;}
 .fa{display:inline-block;font:normal normal normal 14px/1 FontAwesome;font-size:inherit;text-rendering:auto;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 .fa-info-circle:before{content:"\f05a"}.fa-envelope-o:before{content:"\f003"}.fa-lock:before{content:"\f023"}.fa-eye:before{content:"\f06e"}.fa-eye-slash:before{content:"\f070"}.fa-refresh:before{content:"\f021"}.fa-envelope:before{content:"\f0e0"}.fa-user:before{content:"\f007"}.fa-user-o:before{content:"\f2c0"}
@@ -127,7 +128,7 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
 .login .form-group p span a {text-decoration: none;}
 .login .form-group {margin: auto}
 .login .form-group INPUT[TYPE=SUBMIT] {font: bold 15px Arial, Helvetica, sans-serif}
-.login .form-group button {border-radius: 50px;width: 50%;height: 45px;font: bold 15px Arial, Helvetica, sans-serif}
+.login .form-group button {border-radius: 50px;width: 50%;font: bold 15px Arial, Helvetica, sans-serif}
 .login .fa {width: 12px}
 .login-redesign{
  font-family:'Baloo 2', cursive;
@@ -503,9 +504,7 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  align-items:center;
  justify-content:center;
  width:auto;
- min-width:110px;
- min-height:52px;
- padding:0 24px;
+ padding:0 10px;
  border-radius:18px;
  font-family:'Baloo 2', cursive;
  font-size:18px;
@@ -1287,3 +1286,6 @@ input[type=radio]:checked~.white-bg-checked, input[type=checkbox]:checked~.white
  height: 25px !important;
  object-fit: cover;
 }
+
+
+.tooltip-inner{white-space:nowrap;}

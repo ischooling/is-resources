@@ -131,7 +131,7 @@ function cartDetailContent(data, userId){
 
 function cartCountContent(data, userId){
     var html=
-        `<a href="javascript:void(0);" onclick="renderCardDetailsContent(${userId});" class="p-0 mr-2 btn"> 
+        `<a href="javascript:void(0);" onclick="renderCardDetailsContent(${userId});" class="p-0 mr-2 btn" data-toggle="tooltip" data-placement="auto" title="Cart"> 
            <span class="icon-wrapper icon-wrapper-alt rounded-circle"> 
                 <span class="icon-wrapper-bg bg-warning"></span> 
                 <i class="fa fa-shopping-cart text-warning "></i> 

@@ -766,10 +766,10 @@ function weeklyBookClassModal(
                     }">`;
   if (subjectId != 0) {
     html += `<p class="font-dark font-weight-bold m-0 invisible">&nbsp;</p>
-                            <p class="font-dark font-weight-bold m-0">
-                                <span class="bg-success d-inline-block rounded-circle" style="width:8px;height:8px;"></span> Available &nbsp;
-                                <span class="bg-danger d-inline-block rounded-circle" style="width:8px;height:8px;"></span> Booked &nbsp;
-                                <span class="d-inline-block rounded-circle" style="width:8px;height:8px;background:#d6d3d3"></span> Not Available
+                            <p class="font-dark font-weight-bold m-0 d-flex align-items-center gap-5 flex-wrap">
+                                <span class="d-inline-block border" style="width:55px; background:#d7f1d6;color:#06a700;border-color:#06a700 !important;height: 32px;border-radius: 4px;"></span> Available &nbsp;
+                                <span class="d-inline-block border" style="width:55px;background:#ffd6d6;color:#ff0000;border-color:#ff0000 !important;height: 32px;border-radius: 4px;"></span> Booked &nbsp;
+                                <span class="d-inline-block border" style="width:55px; background:#f5f5f5;color:#c0c0c0;border-color:#c0c0c0 !important;height: 32px;border-radius: 4px;"></span> Not Available
                             </p>`;
   }
   html += `<div calss="text-right">`;
@@ -865,12 +865,12 @@ function weeklyBookClassTableBody(
                 );
                 if (isPastDateAndTime) {
                   html += `<div class="d-flex align-items-center justify-content-center ">
-                                                            <div class="border rounded-5 px-2 py-1 mb-1 text-center" style="width:116px; background:#f5f5f5;color:#c0c0c0;border-color:#c0c0c0 !important">${v.displayStartTime}</div>
-                                                        </div>`;
+                            <div class="border rounded-5 px-2 py-1 mb-1 text-center" style="width:116px; background:#f5f5f5;color:#c0c0c0;border-color:#c0c0c0 !important">${v.displayStartTime}</div>
+                        </div>`;
                 } else {
                   html +=
                     `<div class="d-flex align-items-center justify-content-center ">
-                                                            <div class="border rounded-5 px-2 py-1 mb-1 text-center" style="width:116px;` +
+                      <div class="border rounded-5 px-2 py-1 mb-1 text-center" style="width:116px;` +
                     (isPastDate
                       ? "background:#f5f5f5;color:#c0c0c0;border-color:#c0c0c0 !important"
                       : "background:#ffd6d6;color:#ff0000;border-color:#ff0000 !important") +

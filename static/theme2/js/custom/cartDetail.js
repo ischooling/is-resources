@@ -14,6 +14,7 @@ async function getCartCount(userId) {
 	payload['userId'] = userId;
 	var data = await getDashboardDataBasedUrlAndPayload(true, true,'get-cart-count', payload);
 	$("#cartCounts").html(cartCountContent(data, userId));
+	$('#cartCounts [data-toggle="tooltip"]').tooltip();
 }
 async function getCartDetails(userId) {
     var payload = {};
@@ -32,6 +33,7 @@ async function updateCartDetails(userId, type, bookId){
     var data = await getDashboardDataBasedUrlAndPayload(true, true,'update-cart-details', payload);
     $("#dashboardContentInHTML").html(cartHeaderContent(data.details)+cartDetailContent(data.details, userId));
     $("#cartCounts").html(cartCountContent(data.details, userId));
+    $('#cartCounts [data-toggle="tooltip"]').tooltip();
 }
 
 async function addToCartPayment(amount, bookingIds, subjectId){

@@ -275,6 +275,7 @@ async function renderStudentDashboard(data){
     if(data.videoUrl !='N'){
         onYouTubeIframeAPIReady(data.videoUrl)
     }
+    $('body').find('[data-toggle="tooltip"]').tooltip();
 }
 
 function slideMenu(val){
@@ -284,13 +285,14 @@ function slideMenu(val){
 }
 
 function dashboardContent(data) {
+    
     let html = `
     <div class="app-page-title mb-3 py-2 d-lg-none">
         <div class="page-title-wrapper">
             <div class="page-title-actions mt-0 mb-1">
                 <div class="d-inline-block">
                     <label class="switch">
-                        <input class="switch-input redirectLmsUrl" type="checkbox" value="yes" onclick="redirectLms(this, '${data.isPayLmsPaymentPending}');" changeUrl="${data.lmsProviderURL}" />
+                        <input class="switch-input redirectLmsUrl" type="checkbox" value="yes" onclick="redirectLms(this, '${data.isPayLmsPaymentPending}');" changeUrl="${data.lmsProviderURL}" data-toggle="tooltip" data-placement="auto" title="Switch to LMS" />
                         <span class="switch-label" data-on="" data-off="LMS"></span>
                         <span class="switch-handle"></span>
                     </label>

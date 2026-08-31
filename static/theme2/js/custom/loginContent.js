@@ -233,7 +233,7 @@ function loginFormContent(userName, fromSpoof){
                 <input name="password" id="password" class="form-control" autocomplete="off"
                     type="password" maxlength="20" value="" describedby="describedby" placeholder=" ">
                 <label class="control-label" for="password">Password</label>
-                <button type="button" class="login-field-action login-field-toggle" aria-label="Show password" onclick="showPassWord('password', 'icon-change')">
+                <button type="button" class="login-field-action login-field-toggle" aria-label="Show password" onclick="showPassWord('password', 'icon-change')" data-toggle="tooltip" data-placement="auto" title="Show password">
                     <i class="fa fa-eye-slash" id="icon-change"></i>
                 </button>
             </div>
@@ -256,7 +256,7 @@ function loginFormContent(userName, fromSpoof){
                     <div style="display:inline-flex">
                         <img id="captchaImage" alt="Captcha" src="" onerror="this.onerror=null;refreshCaptcha('captchaImage');" loding="lazy" />
                     </div>
-                    <a class="captcha-refresh-btn" href="javascript:void(0);" title="Refresh" onClick="return refreshCaptcha('captchaImage');">
+                    <a class="captcha-refresh-btn" href="javascript:void(0);" onClick="return refreshCaptcha('captchaImage');" data-toggle="tooltip" data-placement="auto" title="Refresh Captcha">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" fill="#fff">
                             <path d="M129.9 292.5C143.2 199.5 223.3 128 320 128C373 128 421 149.5 455.8 184.2C456 184.4 456.2 184.6 456.4 184.8L464 192L416.1 192C398.4 192 384.1 206.3 384.1 224C384.1 241.7 398.4 256 416.1 256L544.1 256C561.8 256 576.1 241.7 576.1 224L576.1 96C576.1 78.3 561.8 64 544.1 64C526.4 64 512.1 78.3 512.1 96L512.1 149.4L500.8 138.7C454.5 92.6 390.5 64 320 64C191 64 84.3 159.4 66.6 283.5C64.1 301 76.2 317.2 93.7 319.7C111.2 322.2 127.4 310 129.9 292.6zM573.4 356.5C575.9 339 563.7 322.8 546.3 320.3C528.9 317.8 512.6 330 510.1 347.4C496.8 440.4 416.7 511.9 320 511.9C267 511.9 219 490.4 184.2 455.7C184 455.5 183.8 455.3 183.6 455.1L176 447.9L223.9 447.9C241.6 447.9 255.9 433.6 255.9 415.9C255.9 398.2 241.6 383.9 223.9 383.9L96 384C87.5 384 79.3 387.4 73.3 393.5C67.3 399.6 63.9 407.7 64 416.3L65 543.3C65.1 561 79.6 575.2 97.3 575C115 574.8 129.2 560.4 129 542.7L128.6 491.2L139.3 501.3C185.6 547.4 249.5 576 320 576C449 576 555.7 480.6 573.4 356.5z"/>
                         </svg>
@@ -265,7 +265,7 @@ function loginFormContent(userName, fromSpoof){
             </div>
 
             <div class="form-group text-center login-actions">
-                <button type="submit" class="btn primary-bg btn-shadow white-txt-color login-submit-btn" id="loginButton">
+                <button type="submit" class="btn primary-bg btn-shadow white-txt-color login-submit-btn" id="loginButton" data-toggle="tooltip" data-placement="auto" title="Click to login">
                     <span>Log in</span>
                 </button>
                 <div class="login-footer-links">
@@ -430,8 +430,10 @@ function serverErrorMessageContent(){
     var html=
         `<div class="modal fade" id="modalMessage" tabindex="-1" role="dialog">
             <div class="modal-dialog modal-notify modal-info" role="document">
-                <div class="modal-content text-center">
-                    <div id="statusMessage" class="modal-body"></div>
+                <div class="modal-content text-center" style="background: transparent;box-shadow: none;border: none;">
+                    <div  class="modal-body">
+                        <div id="statusMessage"></div>
+                    </div>
                 </div>
             </div>
         </div>`;
