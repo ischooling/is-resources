@@ -45,7 +45,7 @@ function dashboardActivityListContent(data){
                                         // console.log('ead.startDateTime1 '+ead.startDateTime);
                                         // console.log('ead.startDateTime1 '+new Date(convertDatetimeWithFormat(ead.startDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)));
                                         // console.log('ead.startDateTime1 '+new Date($("#currentTimeForUser").text()));
-                                        if(new Date(convertDatetimeWithFormat(ead.endDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)).getTime()>new Date($("#currentTimeForUser").text()).getTime()){
+                                        if(getTimeSafe(convertDatetimeWithFormat(ead.endDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER))>getTimeSafe($("#currentTimeForUser").text(), Date.now())){
                                             html+=
                                                 '<li class="myActivityLoop activityCounterLi activity-date-and-time-wrapper" data-activity-index="'+activityType.id+'" data-starttimedate="'+convertDatetimeWithFormat(ead.startDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)+'" data-endtimedate="'+convertDatetimeWithFormat(ead.endDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)+'" data-timeid="'+ead.id+'" data-joiningBefore="'+ead.joiningBefore+'">'
                                                     +'<div class="ongoing-div" style="display:none">'
@@ -92,7 +92,7 @@ function dashboardActivityListContent(data){
                                         // console.log('ead.startDateTime2 '+ead.startDateTime);
                                         // console.log('ead.startDateTime2 '+new Date(convertDatetimeWithFormat(ead.startDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)));
                                         // console.log('ead.startDateTime2 '+new Date($("#currentTimeForUser").text()));
-                                        if(new Date(convertDatetimeWithFormat(ead.endDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)).getTime()>new Date($("#currentTimeForUser").text()).getTime()){
+                                        if(getTimeSafe(convertDatetimeWithFormat(ead.endDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER))>getTimeSafe($("#currentTimeForUser").text(), Date.now())){
                                             html+=
                                             '<li class="sub-menu">'
                                                 +'<a href="javascript:void(0);" class="waves-effect custom-rounded-sub-btn text-white">'+ead.subActivityName
@@ -175,7 +175,7 @@ function dashboardCalendarActivityListContent(info){
                         // console.log('ead.startDateTime1 '+ead.startDateTime);
                         // console.log('ead.startDateTime1 '+new Date(convertDatetimeWithFormat(ead.startDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)));
                         // console.log('ead.startDateTime1 '+new Date($("#currentTimeForUser").text()));
-                        if(new Date(convertDatetimeWithFormat(ead.endDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)).getTime()>new Date($("#currentTimeForUser").text()).getTime()){
+                        if(getTimeSafe(convertDatetimeWithFormat(ead.endDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER))>getTimeSafe($("#currentTimeForUser").text(), Date.now())){
                             html+=
                                 '<li class="myActivityLoop activityCounterLi activity-date-and-time-wrapper" data-activity-index="'+activityType.id+'" data-starttimedate="'+convertDatetimeWithFormat(ead.startDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)+'" data-endtimedate="'+convertDatetimeWithFormat(ead.endDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)+'" data-timeid="'+ead.id+'" data-joiningBefore="'+ead.joiningBefore+'">'
                                     +'<div class="ongoing-div" style="display:none">'
@@ -222,7 +222,7 @@ function dashboardCalendarActivityListContent(info){
                         // console.log('ead.startDateTime2 '+ead.startDateTime);
                         // console.log('ead.startDateTime2 '+new Date(convertDatetimeWithFormat(ead.startDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)));
                         // console.log('ead.startDateTime2 '+new Date($("#currentTimeForUser").text()));
-                        if(new Date(convertDatetimeWithFormat(ead.endDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)).getTime()>new Date($("#currentTimeForUser").text()).getTime()){
+                        if(getTimeSafe(convertDatetimeWithFormat(ead.endDateTime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER))>getTimeSafe($("#currentTimeForUser").text(), Date.now())){
                             html+=
                             '<li class="sub-menu">'
                                 +'<a href="javascript:void(0);" class="waves-effect custom-rounded-sub-btn text-white">'+ead.subActivityName
@@ -365,10 +365,17 @@ function viewActivityContentModal(data){
                         var startTime = convertDatetimeWithFormat(data.startDatetime, BASE_TIMEZONE, USER_TIMEZONE, DISPLAY_TIME_FORMATTER);
                         var endTime = convertDatetimeWithFormat(data.endDatetime, BASE_TIMEZONE, USER_TIMEZONE, DISPLAY_TIME_FORMATTER);
                         var activityDate = convertDatetimeWithFormat(data.startDatetime, BASE_TIMEZONE, USER_TIMEZONE, DISPLAY_DATE_ONLY);
-                        var nowTime = new Date($("#currentTimeForUser").text()).getTime();
-                        var startMs = new Date(convertDatetimeWithFormat(data.startDatetime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)).getTime();
-                        var endMs = new Date(convertDatetimeWithFormat(data.endDatetime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER)).getTime();
-                        var isActive = nowTime >= startMs && nowTime < endMs;
+                        var userCurrentTime = getCurrentDateTimeByUserTimeZone($("#currentTimeForUser").text());
+                        // #currentTimeForUser can be empty on an early/racey render, in which
+                        // case the parser returns null. Fall back to the local clock so we
+                        // never call .getTime() on null.
+                        var nowDate = parseDateTimeSafe(userCurrentTime) || new Date();
+                        var startDate = parseDateTimeSafe(convertDatetimeWithFormat(data.startDatetime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER));
+                        var endDate = parseDateTimeSafe(convertDatetimeWithFormat(data.endDatetime, BASE_TIMEZONE, USER_TIMEZONE, DATETIME_UTC_FORMATTER));
+                        var nowTime = nowDate.getTime();
+                        var startMs = startDate ? startDate.getTime() : NaN;
+                        var endMs = endDate ? endDate.getTime() : NaN;
+                        var isActive = !isNaN(startMs) && !isNaN(endMs) && nowTime >= startMs && nowTime < endMs;
                         html+=
                             `<ul class="full p-0 m-0 list-unstyled">
                                 ${data.startDatetime ? `<li class="d-flex mb-2">

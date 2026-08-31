@@ -46,10 +46,15 @@ async function renderActivity(userId) {
 
 //EXTRA ACTIVITY COUNTER SCRIPT START HERE//
 function makeTimer(myActId, activityStartDateTimeByUserTimezone, currentDate) {
-	var endTime = activityStartDateTimeByUserTimezone;
-	endTime = (Date.parse(endTime) / 1000);
-	var now = currentDate;
-	now = (Date.parse(now) / 1000);
+	// Use the Safari-safe parser: Date.parse on "YYYY-MM-DD HH:mm:ss" returns
+	// NaN in Safari, which produced the bogus countdown (e.g. "20695 Days").
+	var endTimeDate = parseDateTimeSafe(activityStartDateTimeByUserTimezone);
+	var nowDate = parseDateTimeSafe(currentDate);
+	if (!endTimeDate || !nowDate) {
+		return;
+	}
+	var endTime = endTimeDate.getTime() / 1000;
+	var now = nowDate.getTime() / 1000;
 	var timeLeft = endTime - now;
 	var days = Math.floor(timeLeft / 86400);
 	var hours = Math.floor((timeLeft - (days * 86400)) / 3600);
@@ -94,15 +99,47 @@ function getHomePageActivityCounter(activityID){
         userCurrentTime = convertUTCToTimezoneAs(getUTCTime(), DATETIME_FORMATTER, USER_TIMEZONE).format('MMM DD, YYYY hh:mm:ss a');
     }, 1000));
 	$('.myActivityLoop').each(function () {
-		var intervalId = setInterval(function () {
+		var tick = function () {
 			var acivityIndex = $(this).attr('data-activity-index');
 			var timerId = $(this).attr('data-timeid');
-			var activityStartTime = new Date($(this).attr('data-starttimedate'));
-			var activityEndTime = new Date($(this).attr('data-endtimedate'));
+			var activityStartTime = parseDateTimeSafe($(this).attr('data-starttimedate'));
+			var activityEndTime = parseDateTimeSafe($(this).attr('data-endtimedate'));
 			var joiningBefore = parseInt($(this).attr('data-joiningBefore'));
-			var currentDateTimeByUserTimeZone = new Date($("#currentTimeForUser").text());
-			if($("#currentTimeForUser").text() == ""){
-				currentDateTimeByUserTimeZone = new Date(userCurrentTime);
+			// IMPORTANT: activityStartTime/activityEndTime are built from
+			// convertDatetimeWithFormat(..., USER_TIMEZONE) -> a USER-timezone
+			// wall-clock string parsed into a Date via local components. The
+			// "current time" we compare against MUST be the same kind of value
+			// (user-TZ wall-clock), otherwise a machine/user timezone offset
+			// shifts the diff by hours and the Join button flips on/off.
+			//
+			// Resolution order (all user-TZ wall-clock):
+			//   1) #currentTimeForUser (server-synced clock)
+			//   2) userCurrentTime (moment formatted in USER_TIMEZONE, refreshed
+			//      every second at the top of this function)
+			// Only if BOTH are unavailable do we fall back to new Date(); that is
+			// a last resort to keep the timer alive, not the normal path.
+			// Use parseDateTimeSafe (not getCurrentDateTimeByUserTimeZone) to
+			// read the synced clock: #currentTimeForUser is formatted differently
+			// per page -- some use "YYYY-MM-DD hh:mm:ss a", others "MMM DD, YYYY
+			// hh:mm:ss a". getCurrentDateTimeByUserTimeZone only understands the
+			// first, so on pages using the second it returned null and we silently
+			// fell through to a different code path -- which is exactly why the
+			// Join button appeared inconsistently on the same event. parseDateTimeSafe
+			// handles both formats and yields the same user-TZ wall-clock Date.
+			var currentDateTimeByUserTimeZone = null;
+			var syncedClockText = $("#currentTimeForUser").text();
+			if (syncedClockText != "") {
+				currentDateTimeByUserTimeZone = parseDateTimeSafe(syncedClockText);
+			}
+			if (!currentDateTimeByUserTimeZone) {
+				currentDateTimeByUserTimeZone = parseDateTimeSafe(userCurrentTime);
+			}
+			if (!currentDateTimeByUserTimeZone) {
+				currentDateTimeByUserTimeZone = new Date();
+			}
+			// Only a genuinely invalid activity (no start/end) is skipped.
+			if (!activityStartTime || !activityEndTime) {
+				return;
 			}
 			if(activityEndTime >  currentDateTimeByUserTimeZone){
 				if (activityStartTime > currentDateTimeByUserTimeZone) {
@@ -171,15 +208,20 @@ function getHomePageActivityCounter(activityID){
 			}
 
 
-		}.bind(this), 1000);
+		}.bind(this);
+		// Run once immediately so the countdown paints right away instead of
+		// waiting a full second (which left the modal showing empty boxes).
+		tick();
+		var intervalId = setInterval(tick, 1000);
 		ACTIVITY_TIMER_INTERVALS.push(intervalId);
 	});
 }
 //EXTRA ACTIVITY COUNTER SCRIPT END HERE//
 async function renderViewActitifyDetails(activityId, meetingId, getColorCode, occurrenceDate) {
-	var userCurrentTime = new Date($("#currentTimeForUser").text());
-	var userActivityEndTime = new Date($("#activity-end-time-"+activityId).attr('data-endtimedate'));
-	if(userActivityEndTime < userCurrentTime){
+	var userCurrentTime = getCurrentDateTimeByUserTimeZone($("#currentTimeForUser").text())
+	userCurrentTime = parseDateTimeSafe(userCurrentTime);
+	var userActivityEndTime = parseDateTimeSafe($("#activity-end-time-"+activityId).attr('data-endtimedate'));
+	if(userActivityEndTime && userCurrentTime && userActivityEndTime < userCurrentTime){
 		showMessageTheme2(0, "Your activity has been completed.")
 		return false;
 	}
@@ -268,4 +310,80 @@ function viewActivityAttachmentSource(uploadFile, filePath){
 	}
 	$("#viewActivityAttachmentModal #viewActivityAttachmentModalWrapper").html(html);
 	$("#viewActivityAttachmentModal").modal("show");
+}
+
+// Safari-safe datetime parser.
+//
+// Strings like "2026-08-31 12:50:00" (space between date and time, no "T")
+// are NOT valid ISO-8601. Chrome/Firefox parse them leniently, but Safari's
+// Date.parse()/new Date() returns an Invalid Date (NaN), which downstream math
+// turns into nonsense values (e.g. a "20695 Days" countdown). This helper
+// normalizes the input and parses it into a real Date across all browsers.
+//
+// Accepts:
+//   - a Date object (returned as-is)
+//   - "YYYY-MM-DD HH:mm:ss" / "YYYY-MM-DDTHH:mm:ss"
+//   - "YYYY-MM-DD hh:mm:ss am|pm"
+// Returns a Date, or null when it cannot be parsed.
+function parseDateTimeSafe(value) {
+    if (value == null || value === "") {
+        return null;
+    }
+    if (value instanceof Date) {
+        return isNaN(value.getTime()) ? null : value;
+    }
+
+    var str = $.trim(String(value));
+
+    // 12-hour format with am/pm.
+    if (/\b(am|pm)$/i.test(str)) {
+        // "YYYY-MM-DD hh:mm:ss am|pm" -> dedicated component parser.
+        if (/^\d{4}-\d{2}-\d{2}\b/.test(str)) {
+            return getCurrentDateTimeByUserTimeZone(str);
+        }
+        // Other am/pm layouts (e.g. moment's "MMM DD, YYYY hh:mm:ss a").
+        // Parse with moment when available; it is Safari-safe.
+        if (typeof moment === "function") {
+            var m = moment(str, [
+                "MMM DD, YYYY hh:mm:ss a",
+                "MMM DD, YYYY hh:mm a",
+                "MMM D, YYYY hh:mm:ss a",
+                "MMM D, YYYY hh:mm a"
+            ]);
+            if (m.isValid()) {
+                return m.toDate();
+            }
+        }
+    }
+
+    // 24-hour "YYYY-MM-DD HH:mm[:ss]" (space or "T" separator).
+    var parts = str.match(
+        /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/
+    );
+    if (parts) {
+        return new Date(
+            parseInt(parts[1], 10),
+            parseInt(parts[2], 10) - 1,
+            parseInt(parts[3], 10),
+            parseInt(parts[4], 10),
+            parseInt(parts[5], 10),
+            parts[6] ? parseInt(parts[6], 10) : 0
+        );
+    }
+
+    // Fallback: let the engine try (handles full ISO strings with timezone).
+    var fallback = new Date(str);
+    return isNaN(fallback.getTime()) ? null : fallback;
+}
+
+// Epoch-ms for a value using the Safari-safe parser, without throwing when the
+// value is unparseable/empty. Returns `fallback` (default NaN) in that case, so
+// callers can compare inline without ".getTime() of null" crashes. Pass
+// fallback = Date.now() when a missing value should be treated as "now".
+function getTimeSafe(value, fallback) {
+    var d = parseDateTimeSafe(value);
+    if (d) {
+        return d.getTime();
+    }
+    return arguments.length > 1 ? fallback : NaN;
 }

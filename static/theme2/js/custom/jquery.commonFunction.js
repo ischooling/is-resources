@@ -8668,3 +8668,58 @@ function copyScheduleEventInvitation(meetingFor, inviteeMeetingDate, inviteeStar
     +"We look forward to your participation.";
   copyInvitationText(invitationText);
 }
+
+function getCurrentDateTimeByUserTimeZone(currentTime) {
+    currentTime = $.trim(currentTime);
+
+    var parts = currentTime.match(
+        /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}) (am|pm)$/i
+    );
+
+    var currentDateTimeByUserTimeZone = null;
+
+    if (parts) {
+        var year = parseInt(parts[1], 10);
+        var month = parseInt(parts[2], 10) - 1;
+        var day = parseInt(parts[3], 10);
+        var hour = parseInt(parts[4], 10);
+        var minute = parseInt(parts[5], 10);
+        var second = parseInt(parts[6], 10);
+        var ampm = parts[7].toLowerCase();
+
+        if (ampm === "pm" && hour < 12) {
+            hour += 12;
+        }
+
+        if (ampm === "am" && hour === 12) {
+            hour = 0;
+        }
+
+        currentDateTimeByUserTimeZone = new Date(
+            year,
+            month,
+            day,
+            hour,
+            minute,
+            second
+        );
+    }
+
+    // Fallback for the other clock format used on some pages, e.g.
+    // "MMM DD, YYYY hh:mm:ss a" ("Aug 31, 2026 04:50:00 am"). Without this the
+    // function returned null on those pages, causing inconsistent downstream
+    // behaviour (e.g. the activity Join button showing up only sometimes).
+    if (!currentDateTimeByUserTimeZone && currentTime && typeof moment === "function") {
+        var m = moment(currentTime, [
+            "MMM DD, YYYY hh:mm:ss a",
+            "MMM DD, YYYY hh:mm a",
+            "MMM D, YYYY hh:mm:ss a",
+            "MMM D, YYYY hh:mm a"
+        ]);
+        if (m.isValid()) {
+            currentDateTimeByUserTimeZone = m.toDate();
+        }
+    }
+
+    return currentDateTimeByUserTimeZone;
+}
