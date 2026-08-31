@@ -1469,6 +1469,16 @@ var leadCountDetailDTO={};
  }else{
 	leadModifyDetailDTO['onlyLeadDemo'] = "N";
  }
+ if($("#"+formId+" #checkByLeadAdded").is(":checked")){
+	leadModifyDetailDTO['leadAdded'] = "Y";
+ }else{
+	leadModifyDetailDTO['leadAdded'] = "N";
+ }
+ if($("#"+formId+" #checkByDemoAdded").is(":checked")){
+	leadModifyDetailDTO['demoAdded'] = "Y";
+ }else{
+	leadModifyDetailDTO['demoAdded'] = "N";
+ }
  if($("#"+formId+" #checkLeadStatus").is(":checked")){
 	leadModifyDetailDTO['withLeadStatus']="Y";
  }else{

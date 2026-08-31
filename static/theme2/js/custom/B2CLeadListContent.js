@@ -888,11 +888,13 @@ function getLeadAdvanceSearchPopup(objRights) {
   html += '</div>';
   html += '</div>';
   html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 demoAssign">';
+  html += '<input type="checkbox" id="checkByLeadAdded" name="checkByLeadAdded" /> Lead Added by&nbsp;';
+  html += '<input type="checkbox" id="checkByDemoAdded" name="checkByDemoAdded" /> Demo Added by';
   html += '<div class="form-group custom-field mb-2">';
   html += '<select name="leadCreatedBy" id="leadCreatedBy" class="form-control" >';
   html += '<option value="">Select Assign</option>';
   html += '</select>';
-  html += '<label for="leadCreatedBy">Lead Added by</label>';
+  html += '<label for="leadCreatedBy">Select Assign</label>';
   html += '</div>';
   html += '</div>';
   html += '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-1 mt-1 demoAssign">';
