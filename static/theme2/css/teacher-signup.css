@@ -186,7 +186,8 @@ textarea.form-control-field{height: inherit !important;}
 .confirmation_email.show .element {display: block;}
 
 /* modal css */
-.modal .close {color: #fff;height: 36px;width: 35px;background:red;opacity: 1;position: absolute;top: 5px;right: 2px;}
+/* .modal .close {color: #fff;height: 36px;width: 35px;background:red;opacity: 1;position: absolute;right: 20px;display: flex;align-items: center;justify-content: center;} */
+.modal .close {color: #fff;height: 36px;width: 35px;background:red;opacity: 1;position: absolute;right: 3px;display: flex;align-items: center;justify-content: center;margin: 0;top: 3px;}
 .modal p,.modal ul {margin-bottom: 15px;}
 .modal-header {padding: 8px 15px !important;}
 .modal-content {margin-top: 70px !important;}

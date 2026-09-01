@@ -13,8 +13,6 @@ function initializeLeadReportDatepickers() {
 		"#dataStudentEndDate",
 		"#dataSchoolDemoStartDate",
 		"#dataSchoolDemoEndDate",
-		"#daywiseStartDate",
-		"#daywiseEndDate",
 		"#eaStartDate",
 		"#eaEndDate",
 		"#targetStartDate",
@@ -63,6 +61,12 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 	refreshCustomFieldState('#dashboardContentInHTML');
 	initializeLeadReportDatepickers();
 
+	// Lazy tab loading: each tab registers its initial data-load below; the loader runs only when the
+	// tab is first shown (or immediately for the default-active tab). Avoids calling every tab's API on
+	// page load — clicking a tab is what triggers its related API.
+	var tabLoaders = {};
+	var tabLoaded = {};
+
 	// var html ='<div class="app-container app-theme-white body-tabs-shadow fixed-header fixed-sidebar">';
 	// 	html += await dashboardHeaderContent();
 	// 	html +='<div class="app-main  pb-4">'
@@ -82,7 +86,7 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 
 		}).datepicker('setDate', new Date());
 
-		callLeadCounselorsList('leadReportSearch',"DAY",'','','listCounselorTbody', false, 0, 0);
+		tabLoaders['tab-content-1'] = function(){ callLeadCounselorsList('leadReportSearch',"DAY",'','','listCounselorTbody', false, 0, 0); };
 		$("#searchLeadCounselorType").on("change", function(){
 			if($("#searchLeadCounselorType").val()=='CUSTOM'){
 				$(".hidecounselorLead").css({"display":"block"});
@@ -221,10 +225,12 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 	}
 
 	if($("#dataChartStartDate").length){
-		callDaywiseLead("DAY","chart-pie-days",'','');
-		callCampainWise("DAY", "lead-source","chart-lead-source",'','');
-		callDeviceCount("DAY","chart-pie-device",'','','Y');
-		callDeviceCount("DAY","chart-pie-device-demo",'','','N');
+		tabLoaders['tab-content-2'] = function(){
+			callDaywiseLead("DAY","chart-pie-days",'','');
+			callCampainWise("DAY", "lead-source","chart-lead-source",'','');
+			callDeviceCount("DAY","chart-pie-device",'','','Y');
+			callDeviceCount("DAY","chart-pie-device-demo",'','','N');
+		};
 
 		$("#searchtypeTotalLead").on("change", function(){
 			if($("#searchtypeTotalLead").val()=='CUSTOM'){
@@ -258,7 +264,7 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 	}
 
 	if($("#dataStartDate").length){
-		callLeadtimecountry("DAY",'','');
+		tabLoaders['tab-content-3'] = function(){ callLeadtimecountry("DAY",'',''); };
 		$("#searchtype").on("change", function(){
 			if($("#searchtype").val()=='CUSTOM'){
 				$(".hidetimeCountrydate").css({"display":"block"});
@@ -285,7 +291,7 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 	}
 
 	if($("#dataStudentStartDate").length){
-		callLeadEnrolled('',"DAY",'','');
+		tabLoaders['tab-content-5'] = function(){ callLeadEnrolled('',"DAY",'',''); };
 		$("#searchStudenttype").on("change", function(){
 			if($("#searchStudenttype").val()=='CUSTOM'){
 				$(".hidestudentdate").css({"display":"block"});
@@ -312,7 +318,7 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 	}
 
 	if($("#dataSchoolDemoStartDate").length){
-		callLeadDemoList("DAY",'','');
+		tabLoaders['tab-content-6'] = function(){ callLeadDemoList("DAY",'',''); };
 		$("#searchSchoolDemoType").on("change", function(){
 			if($("#searchSchoolDemoType").val()=='CUSTOM'){
 				$(".hideschooldemo").css({"display":"block"});
@@ -338,61 +344,12 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 		});
 	}
 
-	if(objectRights.permissioncolumn=='Y' && $("#daywiseStartDate").length){
-		callEnrollmentListDaywise('Enrollment', 'DAY','','');
-		$("#searchDaywise").on("change", function(){
-			if($("#searchDaywise").val()=='CUSTOM'){
-				$(".hidedaywise").css({"display":"block"});
-			}else{
-				$(".hidedaywise").css({"display":"none"})
-				callEnrollmentListDaywise($("#searchDaywiseReportType").val(), $("#searchDaywise").val(),'','');
-			}
-		});
-
-		$("#searchDaywiseReportType").on("change", function(){
-			var startDate=$("#daywiseStartDate").val();
-			var endDate=$("#daywiseEndDate").val();
-			if(startDate=='' && startDate==undefined){
-			startDate='';
-			}
-			if(endDate=='' && endDate==undefined){
-				endDate='';
-			}
-			callEnrollmentListDaywise($("#searchDaywiseReportType").val(), $("#searchDaywise").val(),startDate,endDate);
-		});
-
-		$("#btnDayWiseSubmit").on("click",function(){
-			var startDate = $("#daywiseStartDate").val();
-			var endDate = $("#daywiseEndDate").val();
-			var searchCountrytype = $("#searchDaywise").val();
-			if(startDate=='' && startDate==undefined){
-				showMessageTheme2(1, 'Please choose start date','',true);
-					return false;
-			}
-			if(endDate=='' && endDate==undefined){
-				showMessageTheme2(1, 'Please choose end date','',true);
-					return false;
-			}
-			var effectiveModeSearch = $("#searchDaywise").val();
-			if (effectiveModeSearch === 'CUSTOM' && startDate && endDate) {
-				var sParts = startDate.split('-');
-				var eParts = endDate.split('-');
-				var sDate = new Date(sParts[2], parseInt(sParts[1]) - 1, sParts[0]);
-				var eDate = new Date(eParts[2], parseInt(eParts[1]) - 1, eParts[0]);
-				if (sDate.getMonth() !== eDate.getMonth() || sDate.getFullYear() !== eDate.getFullYear()) {
-					effectiveModeSearch = 'CUSTOM_MONTH';
-				}
-			}
-			callEnrollmentListDaywise($("#searchDaywiseReportType").val(), effectiveModeSearch, startDate, endDate);
-		});
-	}
-
 	if(objectRights.permissioncolumn=='Y' && $("#tab-content-10").length){
-		initEnrollmentAnalyticsTab();
+		tabLoaders['tab-content-10'] = function(){ initEnrollmentAnalyticsTab(); };
 	}
 
 	if($("#searchLeadCampaignType").length){
-		callLeadCampaignList("DAY",'','','','');
+		tabLoaders['tab-content-8'] = function(){ callLeadCampaignList("DAY",'','','',''); };
 		$("#searchLeadCampaignEmail").on("keydown", function(e){
 			if(e.key === "Enter"){
 				e.preventDefault();
@@ -445,7 +402,7 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 	}
 
 	if($("#searchReviewtype").length){
-		callCounselorReview("CUSTOM","reviewCounselor",'','');
+		tabLoaders['tab-content-9'] = function(){ callCounselorReview("CUSTOM","reviewCounselor",'',''); };
 		$("#searchReviewtype").on("change", function(){
 			if($("#searchReviewtype").val()=='CUSTOM'){
 				$(".hideReviewdate").css({"display":"block"});
@@ -469,6 +426,21 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 			}
 			callCounselorReview(searchReviewtype, 'reviewCounselor', startDate, endDate);
 		});
+	}
+
+	// Fire a tab's registered loader the first time it becomes visible.
+	$('#dashboardContentInHTML').find('a[data-toggle="tab"]').on('shown.bs.tab', function(){
+		var shownTabId = ($(this).attr('href') || '').replace('#','');
+		if(tabLoaders[shownTabId] && !tabLoaded[shownTabId]){
+			tabLoaded[shownTabId] = true;
+			tabLoaders[shownTabId]();
+		}
+	});
+	// Load only the initially-active tab now (Bootstrap does not fire shown.bs.tab for it).
+	var activeTabId = $('#dashboardContentInHTML').find('.tab-pane.active').attr('id');
+	if(activeTabId && tabLoaders[activeTabId] && !tabLoaded[activeTabId]){
+		tabLoaded[activeTabId] = true;
+		tabLoaders[activeTabId]();
 	}
 }
 
@@ -556,8 +528,14 @@ function getReportsTab(objRight){
 		+'<div  class="text-center" id="ErrorMsg"><span class="text-warning" style="font-weight:bold;color:red;" id="errMsg"></span> </div>'
 		+'<ul class="body-tabs body-tabs-layout tabs-animated body-tabs-animated nav">';
 		if(objRight.permissioncolumn=='Y'){
+			// Enrollment Analytics is the first, default-active tab when the user has permission.
 			html+='<li class="nav-item">'
-				+'<a role="tab" class="nav-link active" id="tab-1" data-toggle="tab" href="#tab-content-1">'
+				+'<a role="tab" class="nav-link active" id="tab-10" data-toggle="tab" href="#tab-content-10">'
+					+'<span>Enrollment Analytics</span>'
+				+'</a>'
+			+'</li>'
+			+'<li class="nav-item">'
+				+'<a role="tab" class="nav-link" id="tab-1" data-toggle="tab" href="#tab-content-1">'
 					+'<span>Lead Report</span>'
 				+'</a>'
 			+'</li>'
@@ -588,13 +566,6 @@ function getReportsTab(objRight){
 					<span>School Demo List</span>
 				</a>
 			</li>`;
-			if(objRight.permissioncolumn=='Y'){
-				html+=`<li class="nav-item">
-					<a role="tab" class="nav-link" id="tab-7" data-toggle="tab" href="#tab-content-7">
-						<span>School Enrollment List Day wise</span>
-					</a>
-				</li>`;
-			}
 			html+=`<li class="nav-item">
 				<a role="tab" class="nav-link" id="tab-8" data-toggle="tab" href="#tab-content-8">
 					<span>Lead Detail By Campaign</span>
@@ -605,18 +576,12 @@ function getReportsTab(objRight){
 					<span>Counselor Review</span>
 				</a>
 			</li>`;
-			if(objRight.permissioncolumn=='Y'){
-				html+=`<li class="nav-item">
-					<a role="tab" class="nav-link" id="tab-10" data-toggle="tab" href="#tab-content-10">
-						<span>Enrollment Analytics</span>
-					</a>
-				</li>`;
-			}
+			// (Enrollment Analytics tab is rendered first, above.)
 			html+=`
 		</ul>
 		<div class="tab-content p-3 border">`;
 		if(objRight.permissioncolumn=='Y'){
-			html+='<div class="tab-pane tabs-animation fade show active" id="tab-content-1" role="tabpanel">'
+			html+='<div class="tab-pane tabs-animation fade show " id="tab-content-1" role="tabpanel">'
 				+'<div class="tabs-animation">';
 					html+=getLeadCounselorReportData(objRight);
 				html+=`</div>
@@ -638,7 +603,7 @@ function getReportsTab(objRight){
 					html+=getLeadCountryTime(objRight);
 				html+=`</div>
 			</div>
-			<div class="tab-pane tabs-animation fade show ${USER_ROLE == 'LEAD_AND_DEMO'?'active':''}" id="tab-content-5" role="tabpanel">
+			<div class="tab-pane tabs-animation fade show ${(objRight.permissioncolumn!='Y' && USER_ROLE == 'LEAD_AND_DEMO')?'active':''}" id="tab-content-5" role="tabpanel">
 				<div class="tabs-animation">`
 					html+=getLeadEnrollmentList(objRight);
 				html+=`</div>
@@ -648,13 +613,6 @@ function getReportsTab(objRight){
 					html+=getLeadSchoolDemoList(objRight);
 				html+=`</div>
 			</div>`;
-			if(objRight.permissioncolumn=='Y'){
-				html+=`<div class="tab-pane tabs-animation fade show " id="tab-content-7" role="tabpanel">
-						<div class="tabs-animation">`
-							html+=getLeadEnrollmentYearWise(objRight);
-						html+=`</div>
-					</div>	`;
-			}
 			html+=`<div class="tab-pane tabs-animation fade show " id="tab-content-8" role="tabpanel">
 				<div class="tabs-animation">`
 					html+=getLeadCampaignPriceList(objRight);
@@ -666,7 +624,7 @@ function getReportsTab(objRight){
 				html+=`</div>
 			</div>`;
 			if(objRight.permissioncolumn=='Y'){
-				html+=`<div class="tab-pane tabs-animation fade show " id="tab-content-10" role="tabpanel">
+				html+=`<div class="tab-pane tabs-animation fade show active" id="tab-content-10" role="tabpanel">
 					<div class="tabs-animation">`
 						html+=getEnrollmentAnalytics(objRight);
 					html+=`</div>
@@ -1144,53 +1102,6 @@ function getLeadSchoolDemoList(objRights){
             <tbody id="schoolDemoListTbody"></tbody>
         </table>
     </div>
-</div>`;
-return html;
-}
-
-function getLeadEnrollmentYearWise(objRights){
-	// <option value="ReEnrollment" ${searchtype eq 'ReEnrollment'?'selected':''}>Re-Enrollment</option>
-    // <option value="Campaign" ${searchtype eq 'CAMPAIGN'?'selected':''}>CAMPAIGN</option>
-		var html='';
-		html+=`<div class="row custom-field-scope align-items-center">
-        <div class="col-md-12 col-lg-2 custom-field mb-0">
-            <select class="form-control" id="searchDaywiseReportType" name="searchDaywiseReportType">
-                <option value="Enrollment" ${objRights.searchtype == 'Enrollment'?'selected':''}>Fresh Enrollment</option>
-                <option value="Leads" ${objRights.searchtype == 'Leads'?'selected':''}>Leads</option>
-            </select>
-            <label class="m-0 d-block mb-0">Report Type</label>
-        </div>
-        <div class="col-md-12 col-lg-2 custom-field mb-0">
-            <select class="form-control" id="searchDaywise" name="searchDaywise">
-                <option value="DAY" ${objRights.searchtype == 'DAY'?'selected':''}>Today</option>
-                <option value="WEEK" ${objRights.searchtype == 'WEEK'?'selected':''}>Week</option>
-                <option value="MONTH" ${objRights.searchtype == 'MONTH'?'selected':''}>Month Wise</option>
-                <option value="CUSTOM" ${objRights.searchtype == 'CUSTOM'?'selected':''}>Custom</option>
-            </select>
-            <label class="m-0 d-block mb-0">View Type</label>
-        </div>
-        <div class="col-md-12 col-lg-8 hidedaywise">
-            <div class="d-flex align-items-center flex-nowrap" style="gap:0.5rem">
-                <div class="custom-field mb-0 w-auto">
-                    <input type="text" name="daywiseStartDate" id="daywiseStartDate" class="form-control form-control-sm" placeholder="Start Date" style="width:120px" readonly onkeydown="return false" />
-                    <label class="m-0 d-block mb-0">Start Date</label>
-                </div>
-                <span>To</span>
-                <div class="custom-field mb-0">
-                    <input type="text" name="daywiseEndDate" id="daywiseEndDate" class="form-control form-control-sm" placeholder="End Date" style="width:120px" readonly onkeydown="return false" />
-                    <label class="m-0 d-block mb-0">End Date</label>
-                </div>
-                <button class="btn btn-primary" id="btnDayWiseSubmit">Submit</button>
-            </div>
-        </div>
-    </div>
-<hr/>
-<div class="col-sm-12 col-md-12 col-lg-12 px-0">
-    <div class="mb-3 card">
-        <div class="pt-0 px-0 card-body">
-            <div id="chart-enroll-yearwise"></div>
-        </div>
-    </div>	
 </div>`;
 return html;
 }

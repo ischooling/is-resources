@@ -126,6 +126,7 @@ function signupTeacherStage1OnLoadEvent(signupTeacher){
     $('#teacherDob').datepicker({
         autoclose : true,
         format : 'M dd, yyyy',
+		container: '#datepickerModalView',
         startDate:startDate,
         endDate:endDate
     }).on('change', function(){
@@ -136,8 +137,22 @@ function signupTeacherStage1OnLoadEvent(signupTeacher){
 		}else{
 			validEndInvalidField(true, "teacherDob");
 		}
+		$("#datepickerModal").modal("hide");
 	});
 }
+
+$(document).on('show.bs.modal', function(e) {
+    if(e.target.id == "teacherDob" || e.target.id == "teacherDob"){
+        $("#datepickerModal").modal("show");
+    }
+});
+$(document).on('keyup', function(e) {
+    if (e.key === 'Tab') {
+        if ($.trim($('#datepickerModalView').html()) === '') {
+            $('#datepickerModal').modal('hide');
+        }
+    }
+});
 
 async function callForSignupTeacherBasicDetailsForm(formId) {
 	var flag = false;

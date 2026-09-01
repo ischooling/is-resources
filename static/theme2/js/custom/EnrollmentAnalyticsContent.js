@@ -79,7 +79,7 @@ function getEnrollmentAnalytics(objRights) {
 		+   '</div>'
 		+   '<div class="custom-field mb-0" style="width:160px;">'
 		+     '<select class="form-control" id="eaTrendYears">'
-		+       '<option value="5" selected>Last 5 years</option><option value="4">Last 4 years</option>'
+		+       '<option value="6" selected>Last 6 years</option><option value="5">Last 5 years</option><option value="4">Last 4 years</option>'
 		+       '<option value="3">Last 3 years</option><option value="2">Last 2 years</option>'
 		+     '</select><label class="m-0 d-block mb-0">Years</label>'
 		+   '</div>'

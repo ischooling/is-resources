@@ -54,6 +54,10 @@ async function renderTeacherEnrollmentPage(signupPage, moduleName){
     getFormsValidation();
     addTeacherSignupFieldBackgroundOverride();
     applyTeacherSignupValidationPlacement();
+    if($("#datepickerModal").length>0){
+        $("#datepickerModal").remove();
+    }
+    $("body").append(getDatepickerMobileViewContent());
     if(signupPage >= 6 && signupPage <=7){
         await getStage5Data();
         if(signupPage == 7){
