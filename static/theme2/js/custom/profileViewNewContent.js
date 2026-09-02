@@ -3328,15 +3328,15 @@ function changeLearingProgramGradeModalContent(data) {
                                 ${getLearningProgramContent(SCHOOL_ID)}
                             </select>
                         </div>
-                        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 standardIdWrapper">
-                            <label class="m-0">Grade</label>
-                            <select id="standardId" class="title-select-dropdown-standard form-control"></select>
-                        </div>
                         <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 lmsPlatformWrapper">
                             <label class="m-0">LMS Platform</label>
                             <select id="lmsPlatform" class="title-select-dropdown-lms form-control">
                                 ${getLmsPlatformContent(SCHOOL_ID)}
                             </select>
+                        </div>
+                        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 standardIdWrapper">
+                            <label class="m-0">Grade</label>
+                            <select id="standardId" class="title-select-dropdown-standard form-control"></select>
                         </div>
                     </div>
                 </form>

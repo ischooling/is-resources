@@ -1171,6 +1171,16 @@ async function profileViewPageLoadEvent(data) {
         theme: "bootstrap4",
         dropdowParent: $('#changeLearingProgramGradeModal body')
     });
+    // Group Learning Program -> LMS Platform GR (38), locked; all other programs -> GC (37), locked
+    $(document).on('change', '#studentRegistrationType', function () {
+        var selectedProgram = $(this).val();
+        if (selectedProgram === 'BATCH') {
+            $('#lmsPlatform').val('38').trigger('change');
+        } else {
+            $('#lmsPlatform').val('37').trigger('change');
+        }
+        $('#lmsPlatform').prop('disabled', true).trigger('change.select2');
+    });
     $("#changeLearingProgramGradeModal #standardId").select2({
         theme: "bootstrap4",
         dropdowParent: $('#changeLearingProgramGradeModal body')
