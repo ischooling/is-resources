@@ -442,6 +442,12 @@ async function renderCounselorLeadReportDashboard(title, roleAndModule, SCHOOL_I
 		tabLoaded[activeTabId] = true;
 		tabLoaders[activeTabId]();
 	}
+	// Standalone "Lead Detail By Campaign" page has no tab navigation to activate, so its campaign loader
+	// never fires via the tab logic above — trigger it directly here (same default "DAY" load the tab uses).
+	if(viewMode === 'campaign' && $("#searchLeadCampaignType").length && !tabLoaded['tab-content-8']){
+		tabLoaded['tab-content-8'] = true;
+		callLeadCampaignList("DAY", '', '', '', '');
+	}
 }
 
 async function dashboardHeaderContent(){

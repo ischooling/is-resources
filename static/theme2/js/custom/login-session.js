@@ -77,7 +77,8 @@ function proceedWithUserChangedTimezone(currentTimezoneId, userId){
 			} else {
 				customLoader(false);
 				$("#proceed").prop("disabled", false);
-				window.location = BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/common/login";
+				// Timezone is now the first-priority layer, so after saving it we must
+				additionalLayer();
 			}
 		}
 	});

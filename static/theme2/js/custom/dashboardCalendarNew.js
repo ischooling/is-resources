@@ -1153,7 +1153,6 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
         };
         var html = Object.keys(labels).map(function(key) {
             var events = groups[key];
-            debugger
             return `
                 <div class="today-summary-group">
                     <div class="today-summary-title">${labels[key]}</div>

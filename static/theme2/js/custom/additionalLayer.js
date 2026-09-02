@@ -150,5 +150,6 @@ function getCurrentUserUniqueId() {
 }
 
 function getStudentDashboardUrl() {
-    return BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/dashboard/student/" + getCurrentUserUniqueId();
+    var dashboardPath = (typeof USER_ROLE !== "undefined" && USER_ROLE === "TEACHER") ? "/dashboard/teacher/" : "/dashboard/student/";
+    return BASE_URL + CONTEXT_PATH + SCHOOL_UUID + dashboardPath + getCurrentUserUniqueId();
 }

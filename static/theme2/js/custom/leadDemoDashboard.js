@@ -40,9 +40,53 @@ function renderLeadDemoDashboard(title, roleAndModule, schoolId, userId, userRol
     LEAD_DEMO_DASHBOARD_AI_LAST_FETCH_TIME = 0;
     initLeadDemoDashboardFilters();
     bindLeadDemoDashboardEvents();
-    setLeadDemoDashboardAutoRefreshTimer(600);
+    initLeadDemoDashboardCollapsibles();
+    setLeadDemoDashboardAutoRefreshTimer(3600);
     setLeadDemoDashboardLeadListRefreshTimer();
     fetchLeadDemoDashboardAll();
+}
+
+// Makes every dashboard section collapsible. Each section is identified by its title <h6 class="font-weight-bold m-0">.
+// We resolve that section's header ROW and wrap everything after it into a collapsible body (default COLLAPSED),
+// then toggle on header click. Works for both card sections (header row is the direct child of .card-body) and
+// bare sections (header row is the .d-flex holding the h6). Clicks on controls inside the header (refresh, chips,
+// search box, Show-All, select2) are ignored so they keep working. Idempotent via the 'ldd-collapse-hd' marker.
+function initLeadDemoDashboardCollapsibles() {
+    var $dash = $('#dashboardContentInHTML');
+    $dash.find('h6.font-weight-bold.m-0').each(function () {
+        var $h6 = $(this);
+        var $row;
+        var $cardBody = $h6.closest('.card-body');
+        if ($cardBody.length) {
+            var $chain = $h6.parentsUntil('.card-body');   // ancestors up to (not incl) the card-body
+            $row = $chain.length ? $chain.last() : $h6;      // direct child of card-body that holds the h6 = header row
+        } else {
+            $row = $h6.closest('.d-flex');
+            if (!$row.length) { $row = $h6.parent(); }
+        }
+        if (!$row || !$row.length || $row.hasClass('ldd-collapse-hd')) { return; }
+        // Card sections: nextAll() is naturally bounded by the .card-body it lives in. Bare sections (e.g. the
+        // Demo Board, whose header row + body sit at the top level alongside the other section cards) must stop
+        // at the NEXT section, otherwise nextAll() would swallow every following section into this one.
+        var $body = $cardBody.length ? $row.nextAll() : $row.nextUntil('.card, .main-card, .row');
+        if (!$body.length) { return; }                       // nothing after the header to collapse
+        $body.wrapAll('<div class="ldd-collapse-bd"></div>');   // default EXPANDED (open)
+        $row.addClass('ldd-collapse-hd open');
+        if (!$h6.find('.ldd-chev').length) {
+            $h6.prepend('<span class="ldd-chev">▾</span> ');   // ▾ = open (default); becomes ▸ when collapsed
+        }
+        $row.on('click.lddCollapse', function (e) {
+            // Don't toggle when the click was on an interactive control inside the header row.
+            if ($(e.target).closest('button, a, input, label, select, textarea, .ldd-chip, .ldd-section-refresh, .select2, .select2-container, .ldd-reason-popover').length) {
+                return;
+            }
+            var $wrap = $row.next('.ldd-collapse-bd');
+            var isOpen = $wrap.is(':visible');
+            $wrap.toggle(!isOpen);
+            $row.toggleClass('open', !isOpen);
+            $h6.find('.ldd-chev').first().html(isOpen ? '▸' : '▾');   // ▸ closed, ▾ open
+        });
+    });
 }
 
 function initLeadDemoDashboardFilters() {
@@ -64,12 +108,18 @@ function initLeadDemoDashboardFilters() {
 
     // Academic Counselor — reuse the same assign-user list function the Lead Demo Report page uses (leads.js);
     // it clears the select, adds "Select Assign" (value 0 = all), then appends each counselor "Name - (email)".
-    callLeadAssignUserList('leadDemoDashboardFilterForm', 'B2C', 'lddCounselorFilter', true, true, USER_ID);
+    // callLeadAssignUserList is ASYNC — it fills the <option>s only after its AJAX returns. select2 MUST be
+    // initialised AFTER that, otherwise select2 enhances an empty select and later .html() rewrites its options
+    // underneath it, leaving select2's internal state stale so picking a counselor doesn't register or filter.
+    callLeadAssignUserList('leadDemoDashboardFilterForm', 'B2C', 'lddCounselorFilter', true, true, USER_ID)
+        .then(function () { $('#lddCounselorFilter').select2({ theme: 'bootstrap4', width: '100%' }); })
+        .catch(function () { $('#lddCounselorFilter').select2({ theme: 'bootstrap4', width: '100%' }); });
 
     $('#lddDateRange').select2({ theme: 'bootstrap4', minimumResultsForSearch: Infinity, width: '100%' });
     $('#lddCampaignFilter').select2({ theme: 'bootstrap4', width: '100%' });
     $('#lddCountryFilter').select2({ theme: 'bootstrap4', width: '100%' });
-    $('#lddCounselorFilter').select2({ theme: 'bootstrap4', width: '100%' });
+    // NOTE: #lddCounselorFilter's select2 is initialised in the callLeadAssignUserList(...).then() above,
+    // after its options are populated — do NOT init it here (empty select) or picking a counselor breaks.
 
     $('#lddStartDate, #lddEndDate').datepicker({
         autoclose: true,
@@ -165,8 +215,8 @@ function bindLeadDemoDashboardEvents() {
         $('#lddDemoShowAll').prop('checked', false);
         $('#lddDemoChips .ldd-chip').removeClass('active');
         $('#lddDemoChips .ldd-chip[data-status="CURRENT"]').addClass('active');
-        $('#lddAutoRefresh').val('600');
-        setLeadDemoDashboardAutoRefreshTimer(600);
+        $('#lddAutoRefresh').val('3600');
+        setLeadDemoDashboardAutoRefreshTimer(3600);
         $('#lddAiPriorityToggle').prop('checked', true);
         LEAD_DEMO_DASHBOARD_AI_PRIORITY_ENABLED = true;
         resetLeadDemoDashboardAiInsights();
@@ -534,8 +584,8 @@ function renderLeadDemoDashboardSection(section, data) {
         case 'demoBoard': renderLeadDemoDashboardBoard(data.demos || []); break;
         case 'leadList': renderLeadDemoDashboardLeadList(data.leads || [], data.totalCount || 0); break;
         case 'demoList': renderLeadDemoDashboardDemoList(data.demos || [], data.totalCount || 0, data.counselorHourFiltered || []); break;
-        case 'campaignPerf': renderLeadDemoDashboardGroupTable(data.campaigns || [], 'lddCampaignTableBody'); break;
-        case 'countryPerf': renderLeadDemoDashboardGroupTable(data.countries || [], 'lddCountryTableBody'); break;
+        case 'campaignPerf': renderLeadDemoDashboardGroupTable(data.campaigns || [], 'lddCampaignTableBody', true); break;
+        case 'countryPerf': renderLeadDemoDashboardGroupTable(data.countries || [], 'lddCountryTableBody', true); break;
         case 'charts': renderLeadDemoDashboardCharts(data); break;
         case 'counselorPerf': renderLeadDemoDashboardCounselors(data.counselors || [], data); break;
         case 'responseHealth': renderLeadDemoDashboardResponseHealth(data || {}); break;
@@ -1008,39 +1058,45 @@ function renderLeadDemoDashboardFilteredHeatmap(counselors) {
     leadDemoDashboardBindChartTooltips();
 }
 
-function renderLeadDemoDashboardGroupTable(groups, tbodyId) {
+// withEnrolled=true (Country table) renders two extra columns to match the Lead & Demo Report:
+// Enrolled and Conversion Rate (= Enrolled / Demo Completed). Campaign table keeps the Lead → Demo % column.
+function renderLeadDemoDashboardGroupTable(groups, tbodyId, withEnrolled) {
     var html = '';
-    var totalLeads = 0, totalDemos = 0, totalCompleted = 0, totalNoShow = 0;
+    var totalLeads = 0, totalDemos = 0, totalCompleted = 0, totalNoShow = 0, totalEnrolled = 0;
+    var colspan = withEnrolled ? 7 : 6;
     if (!groups || groups.length === 0) {
-        html = '<tr><td colspan="7" class="text-center">No records found</td></tr>';
+        html = '<tr><td colspan="' + colspan + '" class="text-center">No records found</td></tr>';
     } else {
         $.each(groups, function (index, group) {
             totalLeads += group.totalLeads || 0;
             totalDemos += group.totalDemos || 0;
             totalCompleted += group.completedDemos || 0;
             totalNoShow += group.noShowDemos || 0;
+            totalEnrolled += group.enrolled || 0;
             html += '<tr>'
                 + '<td>' + (index + 1) + '</td>'
                 + '<td title="' + (group.name || '') + '">' + (group.name || 'Unknown') + '</td>'
                 + '<td class="text-center">' + (group.totalLeads || 0) + '</td>'
                 + '<td class="text-center">' + (group.totalDemos || 0) + '</td>'
                 + '<td class="text-center" style="color:#0f766e;">' + (group.completedDemos || 0) + '</td>'
-                + '<td class="text-center" style="color:#b45309;">' + (group.noShowDemos || 0) + '</td>'
-                + '<td><div class="ldd-bar-wrap"><div class="ldd-bar"><div style="width:' + (group.conversionPct || 0) + '%;"></div></div>'
-                    + '<span class="text-muted">' + (group.conversionPct || 0) + '%</span></div></td>'
-            + '</tr>';
+                + '<td class="text-center" style="color:#b45309;">' + (group.noShowDemos || 0) + '</td>';
+            if (withEnrolled) {
+                html += '<td class="text-center" style="color:#6d28d9;">' + (group.enrolled || 0) + '</td>';
+            }
+            html += '</tr>';
         });
     }
     $('#' + tbodyId).html(html);
 
     // "lddCampaignTableBody" -> "lddCampaign", "lddCountryTableBody" -> "lddCountry"
     var idPrefix = tbodyId.replace('TableBody', '');
-    var totalConvPct = totalLeads > 0 ? Math.round((totalDemos * 100) / totalLeads) : 0;
     $('#' + idPrefix + 'TotalLeads').text(totalLeads);
     $('#' + idPrefix + 'TotalDemos').text(totalDemos);
     $('#' + idPrefix + 'TotalCompleted').text(totalCompleted);
     $('#' + idPrefix + 'TotalNoShow').text(totalNoShow);
-    $('#' + idPrefix + 'TotalConvPct').text(totalConvPct + '%');
+    if (withEnrolled) {
+        $('#' + idPrefix + 'TotalEnrolled').text(totalEnrolled);
+    }
 }
 
 function renderLeadDemoDashboardCounselors(counselors, sectionData) {

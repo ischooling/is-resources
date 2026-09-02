@@ -114,6 +114,7 @@ function getLeadDemoReportRequestParams(page) {
         startDate:        startDate,
         endDate:          endDate,
         schoolId:         SCHOOL_ID,
+        userId:           USER_ID,
         demoAssignUserId: $('#leadDemoReportCounselorId').val()  || '',
         status:           $('#leadDemoReportStatus').val()       || '',
         meetingType:      $('#leadDemoReportMeetingType').val()  || '',
