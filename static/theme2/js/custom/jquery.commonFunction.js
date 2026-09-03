@@ -8530,7 +8530,17 @@ function startScriptVersionChecker() {
   if (SCRIPT_VERSION !== SV || CDN_V !== CDN_VERSION) {
     // New version available — stop checking while modal is open.
     vcClearTimer();
+    var cdn_version = getSettingsByTypeAndKey('CONFIGURATION', 'RESOURCES_CDN_URL');
+    cdn_version = JSON.parse(cdn_version);
+    cdn_version = cdn_version.data.metaValue.match(/@([^/]+)\//)[1];
+    $("#new_cdn_version").text(cdn_version);
     $("#newReleaseNotificationModal").modal("show");
+    // AUTO DISPOSE MODAL
+    var dispose_timer = getSettingsByTypeAndKey('CONFIGURATION','RELEASE_NOTIFICATION_AUTO_DISPOSE');
+    var timer = JSON.parse(dispose_timer).data.metaValue.split(",").map(id => id.trim());
+    setTimeout(function(){
+      $("#newReleaseNotificationModal").modal("hide");
+    },timer);
   } else {
     // Up to date — schedule the next routine check.
     vcSchedule(VC_DELAY_REPEAT);
@@ -8545,6 +8555,31 @@ function startScriptVersionChecker() {
 function acceptnNewReleaseRequest() {
   vcClearTimer();
   localStorage.setItem(VC_KEY_POST_RELOAD, 'true');
+
+  // Give the user visible feedback that the update is in progress. The reload
+  // is otherwise instant and silent, so swap the modal body for an "Updating…"
+  // state and let the browser paint it before the page reloads.
+  var $body = $('#newReleaseNotificationModal .modal-body');
+  if ($body.length) {
+    $body.html(
+      '<div class="full py-5 px-3 text-center">' +
+        '<i class="fa fa-spinner fa-spin fa-2x text-primary"></i>' +
+        '<p class="text-center font-weight-bold text-dark font-18 mb-0 mt-3">Updating…</p>' +
+        '<p class="text-center text-black-80 font-16 mb-0" style="line-height:22px">' +
+          'Applying the latest update...<br/>The page will refresh automatically once it’s ready.' +
+        '</p>' +
+      '</div>'
+    );
+    // Double requestAnimationFrame ensures the "Updating…" state is painted
+    // before the (blocking) reload is triggered.
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        setTimeout(function () { location.reload(); }, 600);
+      });
+    });
+    return;
+  }
+
   location.reload();
 }
 

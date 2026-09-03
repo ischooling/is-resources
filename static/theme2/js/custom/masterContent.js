@@ -3415,16 +3415,19 @@ function getNewReleaseNotificationModal(){
 	`<div class="modal fade" id="newReleaseNotificationModal" tabindex="-1" role="dialog" aria-labelledby="newReleaseNotificationModalLabel" aria-modal="true" data-backdrop="static">
 		<div class="modal-dialog modal-lg modal-dialog-scrollable" style="max-width:420px">
 			<div class="modal-content rounded-15 overflow-hidden">
-				<div class="bg-primary py-1"></div>
-				<div class="modal-body pt-1 pb-4">
-					<div class="full">
-						<div class="full  my-4">
-							<h5 class="text-center"><span class="d-inline-block mb-2" style="font-size:55px">🎉</span> <br/>A new version of the system is available.<br/>Please refresh the page to load the latest updates and continue using the system.</h5>
-						</div>
+				<div class="modal-body px-0 py-0">
+					<div class="full mt-4">
+						<h2 class="text-center font-weight-bold font-24">System Update</h2>
 					</div>
-					<div class="full mt-2 text-center">
-						<button type="button" class="btn btn-pill btn-success px-3" onclick="acceptnNewReleaseRequest();">Refresh</button>
-						<button type="button" class="btn btn-pill btn-warning px-3 mr-2" onclick="skipNewReleaseRequest();">Skip</button>
+					<div class="full mt-3 px-3 mb-2">
+						<p class="text-center font-weight-bold text-dark font-18 mb-0">Version <span id="new_cdn_version"></span> is now available.</p>
+						<p class="text-center text-black-80 font-16" style="line-height:22px">Update now to get the latest improvements.<br/>It only takes a few seconds.</p>
+					</div>
+					<div class="full py-2 text-center border-top border-bottom">
+						<a href="javascript:void(0)" class="text-primary font-weight-semi-bold font-20" onclick="acceptnNewReleaseRequest();">Update Now</a>
+					</div>
+					<div class="full py-2 text-center mb-1">
+						<a href="javascript:void(0)" class="text-dancer font-weight-semi-bold font-20" onclick="skipNewReleaseRequest();">Close</a>
 					</div>
 				</div>
 			</div>
