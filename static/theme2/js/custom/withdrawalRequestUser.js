@@ -61,10 +61,9 @@ function withdrawalEnsureStyles(){
         .wd-nf .lab{position:absolute;top:-8px;left:11px;background:#fff;padding:0 6px;font-size:11px;font-weight:700;color:var(--inkf)}
         .wd-nf.filled .lab,.wd-nf.focus .lab{color:var(--isb)}
         .wd-nf .req{color:var(--isr)}
-        .wd-nf input,.wd-nf select,.wd-nf textarea{width:100%;border:0;outline:none;background:transparent;font-size:14.5px;color:var(--ink);padding:2px 0;font-family:inherit}
+        .wd-nf input,.wd-nf select,.wd-nf textarea{width:100%;border:0;outline:none;background:transparent;font-size:14.5px;line-height:20px;color:var(--ink);padding:2px 0;font-family:inherit}
         .wd-nf textarea{resize:vertical;min-height:74px}
-        .wd-nf select{-webkit-appearance:none;appearance:none;cursor:pointer}
-        .wd-nf.sel::after{content:"▾";position:absolute;right:12px;top:50%;transform:translateY(-40%);color:var(--inkf);pointer-events:none}
+        .wd-nf select{-webkit-appearance:auto;-moz-appearance:auto;appearance:auto;cursor:pointer}
         .wd-nf.readonly{background:#F7FAFE}
         .wd-nf.readonly input{color:var(--inks)}
         .wd-grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}

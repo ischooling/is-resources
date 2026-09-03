@@ -57,6 +57,9 @@ function getWithdrawalRequestsPageHtml(title, roleAndModule) {
   }
   .wr-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex: 0 0 auto; }
 
+  /* ---- action buttons — no shadow ---- */
+  #wrTable .btn { box-shadow: none !important; }
+
   /* ---- student avatar ---- */
   .wr-stu-av {
     width: 34px; height: 34px; border-radius: 50%;
@@ -140,6 +143,7 @@ ${getWithdrawalChallengeModalHtml()}
 ${getWithdrawalAddModalHtml()}
 ${getWithdrawalBankDetailsModalHtml()}
 ${getWithdrawalDetailModalHtml()}
+${getWithdrawalRefundReasonModalHtml()}
 ${getWithdrawalRefundConfirmModalHtml()}
 `;
 }
@@ -391,7 +395,7 @@ function getWithdrawalBankDetailsModalHtml() {
    ============================================================ */
 function getWithdrawalDetailModalHtml() {
     return `
-<div class="modal fade" id="wrDetailModal" tabindex="-1" role="dialog">
+<div class="modal fade" id="wrDetailModal" tabindex="-1" role="dialog" data-backdrop="static">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header py-2 bg-white border-bottom">
@@ -401,8 +405,48 @@ function getWithdrawalDetailModalHtml() {
       <div class="modal-body" style="max-height:75vh; overflow-y:auto;">
         <div class="text-center p-4"><i class="fa fa-spinner fa-spin fa-2x"></i></div>
       </div>
-      <div class="modal-footer border-0">
-        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-light btn-sm px-3" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>`;
+}
+
+/* ============================================================
+   REFUND REASON MODAL — shown before confirmation
+   ============================================================ */
+function getWithdrawalRefundReasonModalHtml() {
+    return `
+<div class="modal fade" id="wrRefundReasonModal" tabindex="-1" role="dialog" data-backdrop="static">
+  <div class="modal-dialog modal-md" role="document">
+    <div class="modal-content">
+      <div class="modal-header py-2 bg-white border-bottom">
+        <h5 class="modal-title font-weight-bold">Reason for refund</h5>
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+      </div>
+      <div class="modal-body custom-field-scope">
+        <input type="hidden" id="wrReasonRequestId">
+        <input type="hidden" id="wrReasonUserId">
+        <p class="text-muted font-13 mb-3">Marking this request as refund-initiated will deactivate the student's account.</p>
+
+        <div class="custom-field mt-3">
+          <select class="form-control" id="wrReasonSelect" onchange="wrReasonSelectChanged()">
+            <option value="">✓ Select a reason...</option>
+          </select>
+          <label for="wrReasonSelect">Reason for deactivation</label>
+        </div>
+
+        <div class="custom-field mb-0" id="wrReasonOtherWrap" style="display:none;">
+          <textarea class="form-control font-13" id="wrReasonOther" rows="3" placeholder=" " maxlength="1000"></textarea>
+          <label for="wrReasonOther">Please specify the reason</label>
+        </div>
+
+        <span class="mt-2 d-block text-red font-12">Note: This message will be shown to the user if they try to log in.</span>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-light btn-sm px-3" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm px-3" onclick="confirmRefundReason()">Confirm</button>
       </div>
     </div>
   </div>
@@ -415,27 +459,26 @@ function getWithdrawalDetailModalHtml() {
 function getWithdrawalRefundConfirmModalHtml() {
     return `
 <div class="modal fade" id="wrRefundConfirmModal" tabindex="-1" role="dialog" data-backdrop="static">
-  <div class="modal-dialog modal-dialog-centered modal-md" role="document">
-    <div class="modal-content">
-      <div class="modal-body text-center p-4">
+  <div class="modal-dialog modal-dialog-centered modal-md modal-notify modal-warning" role="document">
+    <div class="modal-content text-center">
+      <div class="modal-header justify-content-center">
+        <p class="heading mb-0">Please confirm</p>
+      </div>
+      <div class="modal-body">
         <input type="hidden" id="wrRefundRequestId">
         <input type="hidden" id="wrRefundUserId">
-        <div class="mb-3">
-          <i class="fa fa-warning" style="font-size:48px;color:#FFA500;"></i>
-        </div>
-        <h5 class="font-weight-bold mb-2">Please confirm</h5>
-        <p class="text-warning font-12 mb-0">
-          <i class="fa fa-warning mr-1"></i>
-          The student's dashboard will be withdrawn
-        </p>
-        <p class="text-muted font-12 mt-2">
-          Confirming this refund will: deactivate the student's account, and 
+        <input type="hidden" id="wrRefundReasonId">
+        <input type="hidden" id="wrRefundOtherReason">
+        <i class="fa fa-exclamation-triangle fa-4x text-warning mb-3" aria-hidden="true"></i>
+        <p class="font-weight-bold text-dark mb-2">The student's dashboard will be withdrawn</p>
+        <p class="text-muted font-13 mb-0">
+          Confirming this refund will: deactivate the student's account, and
           withdraw their dashboard access to all enrolled platforms. This cannot be undone. Continue?
         </p>
       </div>
-      <div class="modal-footer border-0 pt-0 justify-content-center">
-        <button type="button" class="btn btn-light btn-sm px-4" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-danger btn-sm px-4" onclick="confirmWithdrawalRefund()">
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-outline-secondary btn-sm px-4" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-warning btn-sm px-4" onclick="confirmWithdrawalRefund()">
           Yes, initiate refund
         </button>
       </div>

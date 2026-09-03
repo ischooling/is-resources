@@ -244,17 +244,78 @@ function submitWithdrawalStatusUpdate() {
 
 /* --------------------------------------------------------- mark refund */
 function markWithdrawalRefundInitiated(requestId, userId) {
-    $('#wrRefundRequestId').val(requestId);
-    $('#wrRefundUserId').val(userId);
+    $('#wrReasonRequestId').val(requestId);
+    $('#wrReasonUserId').val(userId);
+    $('#wrReasonSelect').val('');
+    $('#wrReasonOther').val('');
+    $('#wrReasonOtherWrap').hide();
+    loadRefundReasons();
+    $('#wrRefundReasonModal').modal('show');
+}
+
+function loadRefundReasons() {
+    var sel = $('#wrReasonSelect');
+    if (sel.find('option').length > 1) return;
+    callCommonAjax({
+        method: 'GET',
+        url: getURLFor('dashboard', 'inactive-reasons'),
+        showMessage: false,
+        global: false
+    }).then(function(res) {
+        if (res && res.reasonsList) {
+            sel.find('option:not(:first)').remove();
+            res.reasonsList.forEach(function(r) {
+                sel.append('<option value="' + r.id + '">' + r.reason + '</option>');
+            });
+        }
+    });
+}
+
+function wrReasonSelectChanged() {
+    var selectedText = $('#wrReasonSelect option:selected').text().trim();
+    if (selectedText.toLowerCase().indexOf('other') === 0) {
+        $('#wrReasonOtherWrap').show();
+        $('#wrReasonOther').focus();
+    } else {
+        $('#wrReasonOtherWrap').hide();
+        $('#wrReasonOther').val('');
+    }
+}
+
+function isWrReasonOther() {
+    return $('#wrReasonSelect option:selected').text().trim().toLowerCase().indexOf('other') === 0;
+}
+
+function confirmRefundReason() {
+    var reasonVal = $('#wrReasonSelect').val();
+    if (!reasonVal) {
+        showMessageTheme2(0, 'Please select a reason.', '', true);
+        return;
+    }
+    var isOther = isWrReasonOther();
+    if (isOther && !$('#wrReasonOther').val().trim()) {
+        showMessageTheme2(0, 'Please specify the reason.', '', true);
+        return;
+    }
+    var inactiveReasonId = reasonVal ? parseInt(reasonVal) : null;
+    var otherReason = isOther ? $('#wrReasonOther').val().trim() : '';
+
+    $('#wrRefundReasonModal').modal('hide');
+    $('#wrRefundRequestId').val($('#wrReasonRequestId').val());
+    $('#wrRefundUserId').val($('#wrReasonUserId').val());
+    $('#wrRefundReasonId').val(inactiveReasonId);
+    $('#wrRefundOtherReason').val(otherReason);
     $('#wrRefundConfirmModal').modal('show');
 }
 
 function confirmWithdrawalRefund() {
     var requestId = $('#wrRefundRequestId').val();
     var userId    = $('#wrRefundUserId').val();
-    
+    var inactiveReasonId = $('#wrRefundReasonId').val() ? parseInt($('#wrRefundReasonId').val()) : null;
+    var otherReason = $('#wrRefundOtherReason').val() || null;
+
     $('#wrRefundConfirmModal').modal('hide');
-    
+
     callCommonAjax({
         method: 'POST',
         url: wrBaseUrl() + 'withdrawal-requests-status',
@@ -262,7 +323,9 @@ function confirmWithdrawalRefund() {
             requestId: parseInt(requestId),
             userId: parseInt(userId),
             status: 'TRANSFERRED',
-            remarks: 'Refund initiated by administration.'
+            remarks: 'Refund initiated by administration.',
+            reasonId: inactiveReasonId,
+            otherReason: otherReason
         },
         showMessage: false,
         global: false

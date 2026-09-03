@@ -348,7 +348,7 @@ function commonEmailAllreadyExistContent(){
                             <a href="${APP_BASE_URL}${SCHOOL_UUID}/common/login" class="primary-txt-color">Login</a> to continue.-> */''}
                         </p>
                         <p class="font-16 text-center mb-0" id="userDeclined" style="padding: 1px 0 1px;">
-                            Your account has been temporarily blocked due to <span id="userDeclinedMessage"></span><br/>For more information please contact the <a href="${APP_BASE_URL}${SCHOOL_UUID}/common/inquiry" id="declined" class="primary-txt-color">support team.</a>
+                            <span id="userDeclinedMessage">
                         </p>
                     </div>
                     <div id="allReadyEmailFooter" class="modal-footer text-center justify-content-center">

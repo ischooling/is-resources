@@ -381,6 +381,7 @@ function buildTeacherInactiveReasonModalHtml(teacherId, controllType, moduleId, 
 						<label>Please specify reason</label>
 						<textarea id="teacherOtherReasonText" class="form-control" maxlength="500" rows="3"></textarea>
 					</div>
+					<span class="mt-2 text-red">Note: This message will be shown to the user if they try to log in.</span>
 					<input type="hidden" id="teacherInactiveTeacherId" value="${teacherId}">
 					<input type="hidden" id="teacherInactiveControllType" value="${controllType}">
 					<input type="hidden" id="teacherInactiveModuleId" value="${moduleId}">

@@ -477,7 +477,8 @@ function etSpoof() {
 function etBindCards() {
 	$('#etCardsRow .et-card').off('click').on('click', function () {
 		var key = $(this).attr('data-et-card');
-		etState.cardKey = etState.cardKey === key ? null : key;
+		// etState.cardKey = etState.cardKey === key ? null : key;
+		etState.cardKey =  key;
 		$('#etCardsRow .et-card').removeClass('et-card-active');
 		if (etState.cardKey) { $(this).addClass('et-card-active'); }
 		etReload();

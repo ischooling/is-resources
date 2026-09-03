@@ -432,7 +432,11 @@ function callUserLoginFun(formId, moduleId, loginType) {
 					$('#allReadyEmail #emailVerify').hide();
 					$('#allReadyEmailFooter').hide();
 					$('#allReadyEmailTitle').text('Access Denied!');
-					$('#allReadyEmail #userDeclinedMessage').text(data.message || 'policy violation.');
+					if(data.message == '' || data.message == "Your account is deactivated"){
+						$('#allReadyEmail #userDeclinedMessage').html("<span>"+data.message+'</span><br/>For more information please contact the <a href="'+APP_BASE_URL+SCHOOL_UUID+'/common/inquiry" id="declined" class="primary-txt-color">support team.</a>' || 'policy violation.');	
+					}else{
+						$('#allReadyEmail #userDeclinedMessage').html("Your account has been blocked due to following reason:<br><span>"+data.message+'</span><br/>For more information please contact the <a href="'+APP_BASE_URL+SCHOOL_UUID+'/common/inquiry" id="declined" class="primary-txt-color">support team.</a>');
+					}
 					$('#allReadyEmail #userDeclined').show();
 					$('#allReadyEmail').modal('toggle');
 				}else{
