@@ -71,6 +71,18 @@ function getEnrollmentAnalytics(objRights) {
 		+       '<option value="Leads">Leads</option>'
 		+     '</select><label class="m-0 d-block mb-0">Report Type</label>'
 		+   '</div>'
+		+   '<div class="custom-field mb-0" style="width:160px;">'
+		+     '<select class="form-control" id="eaGradeMode">'
+		+       '<option value="without" selected>Without Grade</option>'
+		+       '<option value="with">With Grade</option>'
+		+     '</select><label class="m-0 d-block mb-0">Grade Mode</label>'
+		+   '</div>'
+		+   '<div class="custom-field mb-0" style="width:150px;">'
+		+     '<select class="form-control" id="eaRenderType">'
+		+       '<option value="graph" selected>Graph</option>'
+		+       '<option value="matrix">Matrix</option>'
+		+     '</select><label class="m-0 d-block mb-0">Rendering Type</label>'
+		+   '</div>'
 		+   '<div class="custom-field mb-0" style="width:170px;">'
 		+     '<select class="form-control" id="eaViewType">'
 		+       '<option value="DAY">Today</option><option value="WEEK">Week</option>'
@@ -92,6 +104,7 @@ function getEnrollmentAnalytics(objRights) {
 		+   '</div>'
 		+ '</div></div>';
 	html += '<div class="mb-3 card"><div class="pt-0 px-0 card-body"><div id="eaChart"></div>'
+		+ '<div id="eaMatrix" class="px-2 pb-2" style="display:none;overflow-x:auto;"></div>'
 		+ '<div id="eaTargetLegend" class="d-flex justify-content-center flex-wrap px-2 pb-2" style="gap:6px 16px;font-size:12px;"></div>'
 		+ '</div></div>';
 
@@ -129,8 +142,8 @@ function getEnrollmentAnalytics(objRights) {
  * ------------------------------------------------------------------ */
 
 function initEnrollmentAnalyticsTab() {
-	// Section A: year-wise day-wise chart (self-contained — see eaCallDaywise below).
-	eaCallDaywise('Enrollment', 'DAY', '', '');
+	// Section A: year-wise trend (self-contained — see eaReload / eaCallDaywise below).
+	eaReload();
 	$('#eaViewType, #eaTrendYears').off('change').on('change', function () {
 		if ($('#eaViewType').val() === 'CUSTOM') {
 			$('.eaHideCustom').show();
@@ -140,11 +153,12 @@ function initEnrollmentAnalyticsTab() {
 			}
 		} else {
 			$('.eaHideCustom').hide();
-			eaCallDaywise($('#eaReportType').val(), $('#eaViewType').val(), '', '');
+			eaReload();
 		}
 	});
-	$('#eaReportType').off('change').on('change', function () {
-		eaCallDaywise($('#eaReportType').val(), $('#eaViewType').val(), $('#eaStartDate').val() || '', $('#eaEndDate').val() || '');
+	// Report Type, Grade Mode and Rendering Type all re-render the current selection.
+	$('#eaReportType, #eaGradeMode, #eaRenderType').off('change').on('change', function () {
+		eaReload();
 	});
 	$('#eaSubmit').off('click').on('click', function () {
 		var s = $('#eaStartDate').val();
@@ -152,7 +166,7 @@ function initEnrollmentAnalyticsTab() {
 		if (!s) { showMessageTheme2(1, 'Please choose a start date', '', true); return false; }
 		if (!e) { showMessageTheme2(1, 'Please choose an end date', '', true); return false; }
 		// eaResolvePeriod derives CUSTOM vs CUSTOM_MONTH from the dates.
-		eaCallDaywise($('#eaReportType').val(), 'CUSTOM', s, e);
+		eaReload();
 	});
 
 	// Settings: load table + type filter.
@@ -404,6 +418,17 @@ function eaApplyTrend(perYearTotals, opts) {
 	$('#eaTrendPeriod').text(eaPeriodLabel(opts.viewType || opts.modeSearch, opts.startDate, opts.endDate));
 
 	var chartYears = perYearTotals.slice(-opts.nYears);
+
+	if (eaGetRenderType() === 'matrix') {
+		// Matrix rendering: a single row of per-year totals (Without Grade mode).
+		eaShowChartArea(false);
+		$('#eaCompareWrap').hide();
+		eaRenderYearMatrix(chartYears, opts);
+		eaLoadTargetLegend(chartYears, opts);
+		return;
+	}
+	eaShowChartArea(true);
+
 	var series = chartYears.map(function (r) { return { name: String(r.year), data: [r.total] }; });
 	var category = eaPeriodShort(opts.viewType || opts.modeSearch, opts.startDate, opts.endDate);
 	var tooltipWord = opts.tooltipWord;
@@ -453,6 +478,233 @@ function eaApplyTrend(perYearTotals, opts) {
 
 	// Second legend: each year's actual vs its (period pro-rated) target.
 	eaLoadTargetLegend(chartYears, opts);
+}
+
+/* Current Rendering Type ('graph' | 'matrix'); defaults to graph. */
+function eaGetRenderType() { return $('#eaRenderType').val() || 'graph'; }
+
+/* Toggle between the ApexCharts area (#eaChart) and the table area (#eaMatrix). */
+function eaShowChartArea(showChart) {
+	if (showChart) {
+		$('#eaChart').show();
+		$('#eaMatrix').hide().empty();
+	} else {
+		$('#eaChart').hide();
+		if (__eaDaywiseChart) { try { __eaDaywiseChart.destroy(); } catch (e) {} __eaDaywiseChart = null; }
+		$('#eaMatrix').show();
+	}
+}
+
+/* Central dispatcher: routes to With-Grade or Without-Grade, honouring the current dropdowns. */
+function eaReload() {
+	var reportType = $('#eaReportType').val();
+	var viewType = $('#eaViewType').val() || 'DAY';
+	var s = $('#eaStartDate').val() || '';
+	var e = $('#eaEndDate').val() || '';
+	if (viewType === 'CUSTOM' && (!s || !e)) { return; } // wait for the Submit button
+	if ($('#eaGradeMode').val() === 'with') {
+		eaLoadGradeWise(reportType, viewType, s, e);
+	} else {
+		eaCallDaywise(reportType, viewType, s, e);
+	}
+}
+
+/* Without-Grade Matrix: one row of per-year totals (Grade × Year collapses to just years here). */
+function eaRenderYearMatrix(chartYears, opts) {
+	var head = '<tr class="bg-primary text-white">';
+	chartYears.forEach(function (r) { head += '<th class="text-center">' + eaEsc(r.year) + '</th>'; });
+	head += '<th class="text-center">Total</th></tr>';
+	var grand = 0, cells = '';
+	chartYears.forEach(function (r) { grand += (r.total || 0); cells += '<td class="text-center">' + (r.total || 0) + '</td>'; });
+	var body = '<tr>' + cells + '<td class="text-center"><b>' + grand + '</b></td></tr>';
+	var label = opts.labelType || opts.tooltipWord || 'Total';
+	$('#eaMatrix').html(
+		'<div class="mb-2 text-muted" style="font-size:12px;">' + eaEsc(label) + ' — yearly totals for the selected period</div>'
+		+ '<table class="table table-bordered table-striped font-12 mb-0" style="width:100%;"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>'
+	);
+}
+
+/* ------------------------------------------------------------------ *
+ *  With-Grade mode: Grade (K–12) × Year breakdown.
+ *  Fires one get-enrolled-grade-wise request per year (mirroring the
+ *  Compare modal's per-year fan-out) and renders either a grouped bar
+ *  chart (grades on the x-axis, one series per year) or a matrix table.
+ * ------------------------------------------------------------------ */
+
+function eaGradeWordFor(reportType) {
+	if (reportType === 'Leads') { return 'Leads'; }
+	if (reportType === 'ReEnrollment') { return 'Re-Enrollment'; }
+	return 'Enrollment';
+}
+
+function eaLoadGradeWise(reportType, viewType, startDate, endDate) {
+	var nYears = parseInt($('#eaTrendYears').val() || '5', 10);
+	var period = eaResolvePeriod(viewType, startDate, endDate);
+	var latest = new Date().getFullYear();
+	var years = [];
+	for (var y = latest - (nYears - 1); y <= latest; y++) { years.push(y); }
+
+	// Grade mode has no country-compare / target legend.
+	$('#eaCompareWrap').hide();
+	$('#eaTargetLegend').empty();
+	$('#eaTrendPeriod').text(eaPeriodLabel(viewType || period.mode, period.start, period.end));
+
+	var el = document.querySelector('#eaChart');
+	if (el) { el.innerHTML = '<div class="text-center py-4 text-muted"><i class="fa fa-spinner fa-spin mr-2"></i>Loading grade breakdown…</div>'; }
+	$('#eaMatrix').hide().empty();
+
+	var requests = years.map(function (year) {
+		return $.ajax({
+			type: 'POST',
+			contentType: (typeof APPLICATION_JSON_VALUE !== 'undefined' ? APPLICATION_JSON_VALUE : 'application/json'),
+			url: getURLForHTML('dashboard', 'get-enrolled-grade-wise'),
+			data: JSON.stringify(eaBuildDaywiseRequest(reportType, period.mode, period.start, period.end, year)),
+			dataType: 'json',
+			cache: false,
+			timeout: 600000,
+		});
+	});
+
+	Promise.all(requests).then(function (responses) {
+		// Canonical, ordered grade list = first response that returned grades (backend returns all K–12).
+		var gradeOrder = [];
+		responses.forEach(function (data) {
+			if (gradeOrder.length === 0 && data && data.gradeList && data.gradeList.length) {
+				gradeOrder = data.gradeList.map(function (g) { return { standardId: g.standardId, grade: g.grade }; });
+			}
+		});
+		// countByYear[yearIndex][standardId] = count
+		var countByYear = responses.map(function (data) {
+			var m = {};
+			if (data && data.gradeList) {
+				data.gradeList.forEach(function (g) { m[g.standardId] = g.count || 0; });
+			}
+			return m;
+		});
+		if (!gradeOrder.length) {
+			if (el) { el.innerHTML = '<div class="text-center text-muted py-4">No grade data available for the selected period.</div>'; }
+			return;
+		}
+		var meta = { reportType: reportType, word: eaGradeWordFor(reportType), years: years, gradeOrder: gradeOrder, countByYear: countByYear };
+		if (eaGetRenderType() === 'matrix') {
+			eaShowChartArea(false);
+			eaRenderGradeMatrix(meta);
+		} else {
+			eaShowChartArea(true);
+			eaRenderGradeChart(meta);
+		}
+	}).catch(function () {
+		if (el) { el.innerHTML = '<div class="text-center text-danger py-4">Unable to load the grade breakdown. Please try again.</div>'; }
+	});
+}
+
+/* Per-year totals across all grades → the year-over-year % list used in the legend/matrix. */
+function eaGradeYearTotals(meta) {
+	return meta.years.map(function (y, yi) {
+		var s = 0;
+		meta.gradeOrder.forEach(function (g) { s += (meta.countByYear[yi][g.standardId] || 0); });
+		return s;
+	});
+}
+
+/* YoY % for each entry vs the previous one (first is null; previous 0 → null). */
+function eaYoyList(totals) {
+	return totals.map(function (t, i) {
+		if (i === 0) { return null; }
+		var prev = totals[i - 1];
+		return prev > 0 ? (Math.round(((t - prev) * 1000.0) / prev) / 10.0) : null;
+	});
+}
+
+/* Small coloured (▲/▼ %) badge for a YoY value. */
+function eaYoyHtml(yoy) {
+	if (yoy === null || yoy === undefined) { return ''; }
+	var up = yoy >= 0;
+	return '<span style="color:' + (up ? 'var(--success)' : 'var(--danger)') + ';font-size:11px;font-weight:600;"> ('
+		+ (up ? '▲' : '▼') + ' ' + Math.abs(yoy).toFixed(1) + '%)</span>';
+}
+
+function eaRenderGradeChart(meta) {
+	var series = meta.years.map(function (year, yi) {
+		return {
+			name: String(year),
+			data: meta.gradeOrder.map(function (g) { return meta.countByYear[yi][g.standardId] || 0; }),
+		};
+	});
+	var categories = meta.gradeOrder.map(function (g) { return g.grade; });
+	var word = meta.word;
+	// YoY % (total across grades, each year vs the previous) — shown in the legend via eaLegendFormatter.
+	var yoy = eaYoyList(eaGradeYearTotals(meta));
+	__eaLegendYoy = {};
+	meta.years.forEach(function (y, yi) { __eaLegendYoy[String(y)] = yoy[yi]; });
+	var options = {
+		series: series,
+		chart: { height: 380, type: 'bar', toolbar: { show: true } },
+		plotOptions: { bar: { borderRadius: 3, columnWidth: '85%', dataLabels: { position: 'top' } } },
+		dataLabels: { enabled: false },
+		legend: { show: true, position: 'top', formatter: eaLegendFormatter, onItemClick: { toggleDataSeries: false } },
+		xaxis: { categories: categories, title: { text: 'Grade' }, axisTicks: { show: false } },
+		yaxis: { title: { text: word }, labels: { formatter: function (v) { return Math.round(v); } } },
+		tooltip: {
+			shared: true, intersect: false,
+			// Custom tooltip: for the hovered grade, list every year with its value and the
+			// year-over-year % change (vs the previous year) FOR THAT GRADE.
+			custom: function (o) {
+				var series = o.series, idx = o.dataPointIndex, w = o.w;
+				var gradeLabel = (w.globals.labels && w.globals.labels[idx]) || '';
+				var rows = '';
+				for (var si = 0; si < meta.years.length; si++) {
+					var v = (series[si] && series[si][idx] != null) ? series[si][idx] : 0;
+					var prev = si > 0 ? ((series[si - 1] && series[si - 1][idx] != null) ? series[si - 1][idx] : 0) : null;
+					var yoy = (si > 0 && prev > 0) ? (Math.round(((v - prev) * 1000.0) / prev) / 10.0) : null;
+					var color = (w.globals.colors && w.globals.colors[si]) || '#000';
+					rows += '<div style="display:flex;align-items:center;gap:6px;padding:2px 0;">'
+						+ '<span style="width:10px;height:10px;border-radius:50%;background:' + color + ';display:inline-block;"></span>'
+						+ '<span>' + meta.years[si] + ': <b>' + word + ' ' + v + '</b></span>'
+						+ eaYoyHtml(yoy) + '</div>';
+				}
+				return '<div style="padding:6px 10px;font-size:12px;">'
+					+ '<div style="font-weight:600;margin-bottom:4px;">' + gradeLabel + '</div>' + rows + '</div>';
+			},
+		},
+	};
+	var el = document.querySelector('#eaChart');
+	if (el) { el.innerHTML = ''; }
+	if (__eaDaywiseChart) { try { __eaDaywiseChart.destroy(); } catch (e) {} }
+	__eaDaywiseChart = new ApexCharts(el, options);
+	__eaDaywiseChart.render();
+}
+
+function eaRenderGradeMatrix(meta) {
+	var head = '<tr class="bg-primary text-white"><th>Grade</th>';
+	meta.years.forEach(function (y) { head += '<th class="text-center">' + eaEsc(y) + '</th>'; });
+	head += '<th class="text-center">Total</th></tr>';
+
+	var colTotals = meta.years.map(function () { return 0; });
+	var grand = 0;
+	var body = '';
+	meta.gradeOrder.forEach(function (g) {
+		var rowTotal = 0, cells = '';
+		meta.years.forEach(function (y, yi) {
+			var v = meta.countByYear[yi][g.standardId] || 0;
+			rowTotal += v; colTotals[yi] += v;
+			cells += '<td class="text-center">' + v + '</td>';
+		});
+		grand += rowTotal;
+		body += '<tr><td class="font-weight-bold">' + eaEsc(g.grade) + '</td>' + cells
+			+ '<td class="text-center"><b>' + rowTotal + '</b></td></tr>';
+	});
+	// YoY % (each year's column total vs the previous year) — the matrix analogue of the graph legend.
+	var yoy = eaYoyList(colTotals);
+	var foot = '<tr class="bg-light"><th>Total <span class="text-muted" style="font-weight:400;font-size:11px;">(YoY)</span></th>';
+	meta.years.forEach(function (y, yi) { foot += '<th class="text-center">' + colTotals[yi] + eaYoyHtml(yoy[yi]) + '</th>'; });
+	foot += '<th class="text-center">' + grand + '</th></tr>';
+
+	$('#eaMatrix').html(
+		'<div class="mb-2 text-muted" style="font-size:12px;">' + eaEsc(meta.word) + ' by Grade — compare each grade year-wise (selected period)</div>'
+		+ '<table class="table table-bordered table-striped font-12 nowrap mb-0" style="width:100%;">'
+		+ '<thead>' + head + '</thead><tbody>' + body + '</tbody><tfoot>' + foot + '</tfoot></table>'
+	);
 }
 
 /* Render a "vs target" legend row under the chart: per year, % gain/short vs target. */

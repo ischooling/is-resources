@@ -40,8 +40,8 @@ async function etRunChunks(count, limit, fn) {
 }
 
 var ET_CARDS = [
-	{ key: 'newenroll', label: 'New Enrollment', icon: '<i class="fa fa-user-plus"></i>', cls: 'et-ic-green', countKey: 'newEnrollment' },
-	{ key: 'reenroll', label: 'Re-Enrollment', icon: '<i class="fa fa-refresh"></i>', cls: 'et-ic-blue', countKey: 'reEnrollment' },
+	{ key: 'newenroll', label: 'Partial entry - New enrollment', icon: '<i class="fa fa-user-plus"></i>', cls: 'et-ic-green', countKey: 'newEnrollment' },
+	{ key: 'reenroll', label: 'Partial entry - Re-enrollment', icon: '<i class="fa fa-refresh"></i>', cls: 'et-ic-blue', countKey: 'reEnrollment' },
 	{ key: 'payment', label: 'Payment Pending', icon: '<i class="fa fa-credit-card"></i>', cls: 'et-ic-yellow', countKey: 'paymentPending' },
 	{ key: 'course', label: 'Course Selection', icon: '<i class="fa fa-book"></i>', cls: 'et-ic-orange', countKey: 'courseSelection' },
 	{ key: 'parent', label: 'Parent Details', icon: '<i class="fa fa-users"></i>', cls: 'et-ic-pink', countKey: 'parentDetails' },
@@ -382,7 +382,10 @@ function etInitTable() {
 		columns: [
 			{ title: 'Student Name / ID', data: null, render: function (row) { return etStudentCell(row); } },
 			{ title: 'Enrollment Type', data: 'enrollmentType', render: function (v) {
-				return '<span class="' + (v === 'New Enrollment' ? 'et-enroll-new' : 'et-enroll-re') + '">' + etEsc(v) + '</span>';
+				// Display-only relabel; the underlying value (v) still drives the class + status logic.
+				var isNew = (v === 'New Enrollment');
+				var label = isNew ? 'Partial entry - New enrollment' : (v === 'Re-Enrollment' ? 'Partial entry - Re-enrollment' : v);
+				return '<span class="' + (isNew ? 'et-enroll-new' : 'et-enroll-re') + '">' + etEsc(label) + '</span>';
 			} },
 			{ title: 'Status', data: null, render: function (row) { return etStatusChips(row); } },
 			{ title: 'Discount', data: null, render: function (row) { return etDiscountCell(row); } },
