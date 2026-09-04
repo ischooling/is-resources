@@ -6144,7 +6144,17 @@ function getProfileScheduleFieldList(scheduleData) {
 //     return nowTime;
 // }
 function getMilliseconds(timeText) {
-  return moment(timeText, "MMM DD, YYYY hh:mm:ss A").valueOf();
+    var formats = [
+        "YYYY-MM-DD hh:mm:ss a",   // 2026-09-04 02:29:32 pm
+        "MMM DD, YYYY hh:mm:ss A",  // Sep 04, 2026 02:29:32 PM
+        "MMM D, YYYY hh:mm A"       // Sep 4, 2026 10:46 AM
+    ];
+    var date = moment(timeText, formats, true); // strict parsing
+    if (!date.isValid()) {
+        console.log("Invalid date:", timeText);
+        return NaN;
+    }
+    return date.valueOf();
 }
 
 // function getScheduleUtcToUserTimeMillis(scheduleDateTime) {
@@ -6389,7 +6399,7 @@ async function getMissingDataByUser(payload) {
             var isApiCalled = getProfileDataCallFlag();
             var storedData = getAllProfileFieldsData();
             var storedMissing = getMissingFields();
-
+            
             if (!storedData || !storedMissing || Object.keys(storedMissing).length < 1 && !isApiCalled) {
                 // alert("Fresh Call")
                 PROFILE_RESPONSE_DATA = await getDashboardDataBasedUrlAndPayload(true, true, `profile-view-content-new?payload=${payload}`, '');
@@ -6407,6 +6417,7 @@ async function getMissingDataByUser(payload) {
                 console.log("SCHEDULEL NOW STRUCTURE:", PROFILE_NOW_DATA);
                 console.log("SCHEDULEL LATER STRUCTURE:", PROFILE_SCHEDULE_DATA);
                 missingFields = {};
+                debugger
                 missingFields = checkAndOrganizeFields(PROFILE_RESPONSE_DATA.profileData, GET_FILED_DATA);
                 LOCAL_PROFILE_MISSING_FIELDS = missingFields;
                 console.log("missingFields", missingFields);

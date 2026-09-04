@@ -200,10 +200,39 @@ function paymentReportEventLoad(){
 	// $("#sessionId option:first-child").remove()
 	$(".multiple-select-option").select2({
 		theme:'bootstrap4',
+		width: '100%',
 	});
 	
 	$("#enrollStatus").val(["0","4"]).trigger("change");
 	//$("#paymentStatus").val(["ODUE","DUE"]).trigger("change");
+
+	function applyReasonFilterUi(){
+		if($('#reasonFilter').val() == 'MDP'){
+			$('#documentTypesWrapper').show();
+			$('#documentUploadedWrapper').show();
+		}else{
+			$('#documentTypesWrapper').hide();
+			$('#documentTypes').val(null).trigger('change');
+			$('#documentUploadedWrapper').hide();
+			$('#documentUploaded').prop('checked', false);
+		}
+	}
+	applyReasonFilterUi();
+	$('#reasonFilter').off('change').on('change', function(){
+		applyReasonFilterUi();
+	});
+
+	$("#reenrollPreset").off("change").on("change", function(){
+		if($(this).is(":checked")){
+			$("#progressMin").val("70.00").trigger("change");
+			$("#progressMax").val("100.00").trigger("change");
+			$("#enrollStatus").val(["0","4","3"]).trigger("change");
+		}else{
+			$("#progressMin").val("").trigger("change");
+			$("#progressMax").val("").trigger("change");
+			$("#enrollStatus").val(null).trigger("change");
+		}
+	});
 	
 	// $("#studentName").on("keyup", function() {
 	// 	var value = this.value.toLowerCase().trim();
@@ -240,7 +269,7 @@ function paymentReportEventLoad(){
 		if(type == undefined || type == null || type == ''){
 			type = 'PAYMENT_DATE';
 		}
-		if(type == 'ACADEMIC_YEAR'){
+		if(type == 'ACADEMIC_YEAR' || type == 'ACADEMIC_YEAR_END'){
 			$('#startDateLabel').text('Start Date');
 			$('#endDateLabel').text('End Date');
 		}else{
@@ -451,6 +480,19 @@ function getRequestForPaymentReport(formId, type, forDownload){
 	if($('#recordingStatus').val()!=''){
 		PaymentReportRequestDTO['recordingStatus'] = $('#recordingStatus').val();
 	}
+	if($('#reasonFilter').val()!=''){
+		PaymentReportRequestDTO['reasonFilter'] = $('#reasonFilter').val();
+		if($('#reasonFilter').val()=='MDP' && $('#documentTypes').val()!='' && $('#documentTypes').val()!=null){
+			PaymentReportRequestDTO['documentTypes'] = $('#documentTypes').select2('val');
+			PaymentReportRequestDTO['documentUploaded'] = $('#documentUploaded').is(':checked');
+		}
+	}
+
+	if($("#reenrollPreset").is(":checked")){
+		PaymentReportRequestDTO['reenrollPreset'] = "Y";
+	}else{
+		PaymentReportRequestDTO['reenrollPreset'] = "";
+	}
 	if(type==1){
 		$('#pageNumber').val(1)
 	}
@@ -529,11 +571,16 @@ function resetStudentPaymentForm(formID){
 	$('#'+formID+" #academicYearStatus").val('');
 	$('#'+formID+" #teacherMapStaus").val('');
 	$('#'+formID+" #systemTrainStatus").val('');
-	$('#'+formID+" #progressMin").val('200');
-	$('#'+formID+" #progressMax").val('200');
+	$('#'+formID+" #progressMin").val('');
+	$('#'+formID+" #progressMax").val('');
 	$('#'+formID+" #studentStatus").val('');
 	$('#'+formID+" #transcriptStatus").val('');
 	$('#'+formID+" #recordingStatus").val('');
+	$('#'+formID+" #reasonFilter").val('');
+	$('#'+formID+" #documentTypes").val(null).trigger('change');
+	$('#'+formID+" #documentTypesWrapper").hide();
+	$('#'+formID+" #documentUploaded").prop('checked', false);
+	$('#'+formID+" #documentUploadedWrapper").hide();
 	$('#'+formID+" #pageSize").val("10").trigger("change");
 	//getPaymentReportData('',false,1,'');
 	// $('#'+formID+' .selectReset').val($('#'+formID+' .selectReset option:first-child').val()).trigger('change');
@@ -2174,6 +2221,22 @@ function getMailLogUser(userId){
 			return false;
 		}
 	});
+}
+
+function viewStudentDocuments(userId){
+    $.ajax({
+        type: "GET",
+        url: CONTEXT_PATH + UNIQUEUUID + `/dashboard/student-documents-status?userId=${userId}&schoolId=${SCHOOL_ID}`,
+        dataType: "json",
+        success: function (response) {
+			let modalContent = studentDocumentsDataModal(response.documents);
+			if($("#studentDocumentsContent").length > 0){
+				$("#studentDocumentsContent").remove();
+			}
+			$("body").append(modalContent);
+			$("#studentDocumentsContent").modal("show");
+        }
+    });
 }
 
 function getZadarmaLogs(number){

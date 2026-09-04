@@ -218,9 +218,9 @@ function cardDetailsSummary(data){
 											<label class="label bold">Enrollment Date:</label>
 											<span class="field-value trans5s">${item.semesterStartDate}</span>
 										</div>
-										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+										<!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Overall Progress Report:</label>
-										</div>
+										</div> -->
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Enrolled Status:</label>
 											<span class="field-value trans5s ${item.enrolledStatus=='Withdrawn'?'text-danger':'text-success'}">${item.enrolledStatus}</span>`;
@@ -258,15 +258,15 @@ function cardDetailsSummary(data){
 											}else{
 												html += `<a href="javascript:void(0);" class="btn btn-primary" onclick="return callUserReferralUpdatePaymentWindow('formId','${item.studentStandardId}','8');"><i class="fa fa-cogs"></i>&nbsp;Update Referral Code</a>`;
 											}
-										html += `</div>
-										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
-											<label class="label bold">Overall Progress Report:</label>
-											<span class="field-value trans5s ${sprogress>=0 && sprogress<60 ?'text-danger':'text-success'}">${item.progressReport=='N/A'?'0%':item.progressReport}`;
-											if(profile.lmsUserStatus==1){
-												html += `&nbsp;&nbsp;<a href='javascript:void(0)' data-toggle="tooltip" data-placement="top" data-original-title="Overall Progress Report" onclick="openManageUserStudentPerformanceModal('18','${item.userId}','${paymentReportEscapeSingleQuote(item.studentName || "")}','${item.lmsProviderId || ""}')" class=''><i class='fa fa-eye'></i>&nbsp;</a></span>`;
-											}
-										html += `</div>
-										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+										html += `</div>`;
+										if(item.progressReport!='N/A' && item.progressReport!='Not Started'){
+											html += `<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+												<label class="label bold">Overall Progress Report:</label>
+												<span class="field-value trans5s ${sprogress>=0 && sprogress<60 ?'text-danger':'text-success'}">${item.progressReport}`;
+											html += `&nbsp;&nbsp;<a href='javascript:void(0)' data-toggle="tooltip" data-placement="top" data-original-title="Overall Progress Report" onclick="openManageUserStudentPerformanceModal('18','${item.userId}','${paymentReportEscapeSingleQuote(item.studentName || "")}','${item.lmsProviderId || ""}','${item.studentStandardId || ""}')" class=''><i class='fa fa-eye'></i>&nbsp;</a></span>`;
+											html += `</div>`;
+										}
+										html += `<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Remaining Days:</label>
 											<span class="field-value trans5s ${(item.remainingDays.indexOf("Academic Year End")!=-1 || item.remainingDays=='N/A')?'text-danger':'text-success'}">${item.remainingDays}</span>
 										</div>
@@ -293,6 +293,10 @@ function cardDetailsSummary(data){
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Transcript Publish:</label>
 											<span class="field-value trans5s ${item.marksheetStatus!='Y'?'text-danger':'text-success'}">${item.marksheetStatus=='Y'?'Yes':'No'}</span>
+											<div class="mt-1">
+												<label class="label bold">Documents:</label>
+												<span class="field-value trans5s"><a href="javascript:void(0);" onclick="viewStudentDocuments(${item.userId})"><i class='fa fa-eye'></i>&nbsp;</a></span>
+											</div>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Last Follows:</label>
@@ -372,9 +376,9 @@ function cardDetails(data){
 											<label class="label bold">Enrollment Date:</label>
 											<span class="field-value trans5s">${item.semesterStartDate}</span>
 										</div>
-										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+										<!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 										  <label class="label bold">Overall Progress Report:</label>
-										</div>
+										</div> -->
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Enrolled Status:</label>
 											<span class="field-value trans5s ${item.enrolledStatus=='Withdrawn'?'text-danger':'text-success'}">${item.enrolledStatus}</span>`;
@@ -413,15 +417,15 @@ function cardDetails(data){
 												html+=`<a href="javascript:void(0);" class="btn btn-primary" onclick="return callUserReferralUpdatePaymentWindow('formId','${item.studentStandardId}','8');"><i class="fa fa-cogs"></i>&nbsp;Update Referral Code</a>`;
 											}
 											
-										html+=`</div>
-										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
-											<label class="label bold">Overall Progress Report:</label>
-											<span class="field-value trans5s ${sprogress>=0 && sprogress<60 ?'text-danger':'text-success'}">${item.progressReport=='N/A'?'0%':item.progressReport}`;
-											if(item.updateProfileStudentDTO.lmsUserStatus==1){
-												html+=`&nbsp;&nbsp;<a href='javascript:void(0)' data-toggle="tooltip" data-placement="top" data-original-title="Overall Progress Report" onclick="openManageUserStudentPerformanceModal('18','${item.userId}','${paymentReportEscapeSingleQuote(item.studentName || "")}','${item.lmsProviderId || ""}')" class=''><i class='fa fa-eye'></i>&nbsp;</a></span>`;
-											}
-										html+=`</div>
-										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+										html+=`</div>`;
+										if(item.progressReport!='N/A' && item.progressReport!='Not Started'){
+											html+=`<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+												<label class="label bold">Overall Progress Report:</label>
+												<span class="field-value trans5s ${sprogress>=0 && sprogress<60 ?'text-danger':'text-success'}">${item.progressReport}`;
+											html+=`&nbsp;&nbsp;<a href='javascript:void(0)' data-toggle="tooltip" data-placement="top" data-original-title="Overall Progress Report" onclick="openManageUserStudentPerformanceModal('18','${item.userId}','${paymentReportEscapeSingleQuote(item.studentName || "")}','${item.lmsProviderId || ""}','${item.studentStandardId || ""}')" class=''><i class='fa fa-eye'></i>&nbsp;</a></span>`;
+											html+=`</div>`;
+										}
+										html+=`<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Remaining Days:</label>
 											<span class="field-value trans5s ${(item.remainingDays.indexOf("Academic Year End")!=-1 || item.remainingDays=='N/A')?'text-danger':'text-success'} ">${item.remainingDays}</span>
 										</div>
@@ -452,12 +456,16 @@ function cardDetails(data){
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Transcript Publish:</label>
 											<span class="field-value trans5s ${item.marksheetStatus!='Y'?'text-danger':'text-success'}">${item.marksheetStatus=='Y'?'Yes':'No'}</span>
+											<div class="mt-1">
+												<label class="label bold">Documents:</label>
+												<span class="field-value trans5s"><a href="javascript:void(0);" onclick="viewStudentDocuments(${item.userId})"><i class='fa fa-eye'></i>&nbsp;</a></span>
+											</div>
 										</div>
 										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Last Follows:</label>
 											<span class="field-value trans5s ">${item.lastFollowby==null?'No Followup': item.lastFollowby +' - '+item.lastFollowDate}</span>
 										</div>
-									</div>	
+									</div>
 								</div>
 								<div class="tab-pane p-2 show" id="tab-eg5-1${item.studentStandardId}" role="tabpanel" style="background:#f0f9ff;">
 									<div class="row">
@@ -601,10 +609,10 @@ function cardDetails(data){
 											<label class="label bold">Parent LMS Status:</label>
 											<span class="field-value trans5s ">${item.updateProfileStudentDTO.parentLmsStatus!=''?item.updateProfileStudentDTO.parentLmsStatus:'N/A'}</span>
 										</div>
-										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
+										<!-- <div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
 											<label class="label bold">Overall Progress Report:</label>
 											<span class="field-value trans5s ">${item.updateProfileStudentDTO.parentLmsStatus!=''?item.updateProfileStudentDTO.parentLmsStatus:'N/A'}</span>
-										</div>
+										</div> -->
 									</div>	
 								</div>
 								<div class="tab-pane p-2 show" id="tab-eg5-3${item.studentStandardId}" role="tabpanel" style="background:#f0f9ff;">
@@ -669,10 +677,6 @@ function cardDetails(data){
 											<label class="label bold">Remaining Days:</label>
 											<span class="field-value trans5s  ${(item.remainingDays.indexOf("Academic Year End")!=-1 || item.remainingDays=='N/A')?'text-danger':'text-success'} ">${item.remainingDays}</span>
 										</div>
-										<div class="col-xl-3 col-lg-6 col-md-12 col-sm-12 col-12">
-											<label class="label bold">Weekly Report Frequency:</label>
-											<span class="field-value trans5s ">${item.updateProfileStudentDTO.weeklyReportFrequency!=null?item.updateProfileStudentDTO.weeklyReportFrequency:'N/A'}</span>
-										</div>
 									</div>
 									<div class="row">
 										<div class="col-xl-12">
@@ -709,7 +713,8 @@ function cardDetails(data){
 																		<th>Teacher</th>
 																		<th>Start Date</th>
 																		<th>End Date</th>
-																		<th>Progress</th>
+																		<th>Progress (gradable)</th>
+																		<th>Progress (All Activity)</th>
 																		<th>Credit</th>
 																	</tr>
 																</thead>	
@@ -722,6 +727,7 @@ function cardDetails(data){
 																			<td>${(element.teacherName==null || element.teacherName=='')?'N/A':element.teacherName}</td>
 																			<td>${item.enrollmentStartDate}</td>
 																			<td>${item.enrollmentEndDate=='Dec 31,2999'?'On Going':item.enrollmentEndDate}</td>
+																			<td class="text-center">${element.progressGradable==null || element.progressGradable==''?'N/A':element.progressGradable+'%'}</td>
 																			<td class="text-center">${element.progress}%</td>
 																			<td class="text-center">${element.credits}</td>
 																		</tr>`;
@@ -925,35 +931,36 @@ function filterStudentPaymentReportForm(){
 			+'<div class="card-body">'
 				+'<form id="studentPaymentForm" class="custom-field-scope">'
 					+'<div class="row">'
-							+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+							+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
 								+'<div class="form-group custom-field">'
 									+'<select id="sessionId" class="form-control selectReset">'
 									+'</select>'
 									+'<label>Academic Session</label>'
 								+'</div>'
 							+'</div>'
-							+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+							+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
 								+'<div class="form-group custom-field">'
 									+'<select id="dateType" class="form-control">'
 										+'<option value="PAYMENT_DATE" selected>Payment Date</option>'
-										+'<option value="ACADEMIC_YEAR">Academic Year</option>'
+										+'<option value="ACADEMIC_YEAR">Academic Year Start</option>'
+										+'<option value="ACADEMIC_YEAR_END">Academic Year End</option>'
 									+'</select>'
 									+'<label>Date Type</label>'
 								+'</div>'
 							+'</div>'
-							+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+							+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
 								+'<div class="form-group custom-field">'
 									+'<input type="text" id="startDate" class="form-control" placeholder=" " readonly onkeydown="return false" >'
 									+'<label id="startDateLabel">Payment Start Date</label>'
 								+'</div>'
 							+'</div>'
-							+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+							+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
 								+'<div class="form-group custom-field">'
 									+'<input type="text" id="endDate" class="form-control" placeholder=" " readonly onkeydown="return false" >'
 									+'<label id="endDateLabel">Payment End Date</label>'
 								+'</div>'
 							+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
 							+'<div class="form-group custom-field">'
 								+'<select id="paymentStatus" class="form-control selectReset multiple-select-option" multiple="multiple">'
 									+'<option value="SUCCESS">Success</option>'
@@ -965,13 +972,13 @@ function filterStudentPaymentReportForm(){
 								+'<label>Payment Status</label>'
 							+'</div>'
 						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
 							+'<div class="form-group custom-field">'
 								+'<input type="text" id="overDueBy" class="form-control" placeholder=" " value="">'
 								+'<label>Over Due By (Days in Numbers)</label>'
 							+'</div>'
 						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
 							+'<div class="form-group custom-field">'
 								+'<select id="learningPlatform" class="form-control selectReset multiple-select-option" multiple="multiple">'
 									+getLmsPlatformContent(SCHOOL_ID)
@@ -979,7 +986,7 @@ function filterStudentPaymentReportForm(){
 								+'<label>Select LMS Platform</label>'
 							+'</div>'
 						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
 							+'<div class="form-group custom-field">'
 								+'<select name="systemTrainStatus" id="systemTrainStatus" class="form-control">'
 									+'<option value="">Select System Training</option>'
@@ -989,7 +996,7 @@ function filterStudentPaymentReportForm(){
 								+'<label>System Training</label>'
 							+'</div>'
 						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
 							+'<div class="form-group custom-field">'
 								+'<select name="teacherMapStaus" id="teacherMapStaus" class="form-control">'
 									+'<option value="">Select Teacher Mapping</option>'
@@ -1000,7 +1007,7 @@ function filterStudentPaymentReportForm(){
 								+'<label>Teacher / Batch Mapping</label>'
 							+'</div>'
 						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
 							+'<div class="form-group custom-field">'
 								+'<select id="learningProgram" class="form-control selectReset multiple-select-option" multiple="multiple">'
 									+getLearningProgramContent(SCHOOL_ID)
@@ -1008,7 +1015,7 @@ function filterStudentPaymentReportForm(){
 								+'<label>Select Enroll Type</label>'
 							+'</div>'
 						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
 							+'<div class="form-group custom-field">'
 								+'<select id="gradeId" class="form-control selectReset multiple-select-option" multiple="multiple">'
 								+'</select>'
@@ -1016,19 +1023,17 @@ function filterStudentPaymentReportForm(){
 							+'</div>'
 						+'</div>'
 			
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
 							+'<div class="form-group custom-field">'
-								+'<select id="enrollStatus" class="form-control selectReset multiple-select-option" multiple="multiple">'
-									+'<option value="0">Completed- New enrollment</option>'
-									+'<option value="4">Completed- Re enrollment</option>'
-									+'<option value="1">Withdrawn</option>'
-									+'<option value="2">Partial entry - New enrollment</option>'
-									+'<option value="3">Partial entry - Re-enrollment</option>'
+								+'<select name="lmsStatus" id="lmsStatus" class="form-control">'
+									+'<option value="">Select LMS Status</option>'
+									+'<option value="1">Active</option>'
+									+'<option value="0">Inactive</option>'
 								+'</select>'
-								+'<label>Enroll Status</label>'
+								+'<label>LMS Status</label>'
 							+'</div>'
 						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
 							+'<div class="form-group custom-field">'
 								+'<select name="academicYearStatus" id="academicYearStatus" class="form-control">'
 									+'<option value="">Select Academic Year Selected Status</option>'
@@ -1038,30 +1043,30 @@ function filterStudentPaymentReportForm(){
 								+'<label>Academic Year Selected</label>'
 							+'</div>'
 						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
 							+'<div class="form-group custom-field">'
 								+'<select id="reEnrollStatus" class="form-control selectReset multiple-select-option">'
 									+'<option value="">Select Re-Enroll Status</option>'
 									+'<option value="YEAREND">Academic Year End</option>'
 									+'<option value="ONGOING">Ongoing</option>'
 								+'</select>'
-								+'<label>Re-Enroll</label>'
+								+'<label>Select Status</label>'
 							+'</div>'
 						+'</div>'
 
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
 							+'<div class="form-group custom-field">'
 								+'<input type="text" id="remainingDueBy" class="form-control" placeholder=" " value="">'
 								+'<label>Re-Enroll Remaining (Days in Numbers)</label>'
 							+'</div>'
 						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-						+'<div class="form-group custom-field-scope">'
-							+'<label>Overall Progress Report</label>'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
+						+'<div class="form-group custom-field-scope spf-progress-group">'
+							+'<label class="spf-progress-label">Overall Progress Report</label>'
 							+'<div class="row">'
 								+'<div class="col-6 custom-field">'
 									+'<select id="progressMin" class="form-control">'
-										+'<option value="200">Min</option>'
+										+'<option value="">Min</option>'
 										+'<option value="">N/A</option>'
 										+'<option value="0.00">0</option>'
 										+'<option value="10.00">10</option>'
@@ -1079,7 +1084,7 @@ function filterStudentPaymentReportForm(){
 								+'</div>'
 								+'<div class="col-6 custom-field">'
 									+'<select id="progressMax" class="form-control">'
-										+'<option value="200">Max</option>'
+										+'<option value="">Max</option>'
 										+'<option value="">N/A</option>'
 										+'<option value="0.00">0</option>'
 										+'<option value="10.00">10</option>'
@@ -1098,7 +1103,7 @@ function filterStudentPaymentReportForm(){
 							+'</div>'
 						+'</div>'
 						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
 							+'<div class="form-group custom-field">'
 								+'<select name="studentStatus" id="studentStatus" class="form-control">'
 									+'<option value="">Select Student Status</option>'
@@ -1108,17 +1113,7 @@ function filterStudentPaymentReportForm(){
 								+'<label>Student Status</label>'
 							+'</div>'
 						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
-							+'<div class="form-group custom-field">'
-								+'<select name="lmsStatus" id="lmsStatus" class="form-control">'
-									+'<option value="">Select LMS Status</option>'
-									+'<option value="1">Active</option>'
-									+'<option value="0">Inactive</option>'
-								+'</select>'
-								+'<label>LMS Status</label>'
-							+'</div>'
-						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
 							+'<div class="form-group custom-field">'
 								+'<select name="transcriptStatus" id="transcriptStatus" class="form-control">'
 									+'<option value="">Select Status</option>'
@@ -1126,6 +1121,49 @@ function filterStudentPaymentReportForm(){
 									+'<option value="N">Not Published</option>'
 								+'</select>'
 								+'<label>Transcript Status</label>'
+							+'</div>'
+						+'</div>'
+						+'<div class="w-100"></div>'
+						+'<div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 col-12">'
+							+'<div class="form-group custom-field">'
+								+'<select id="enrollStatus" class="form-control selectReset multiple-select-option" multiple="multiple">'
+									+'<option value="0">Completed- New enrollment</option>'
+									+'<option value="4">Completed- Re enrollment</option>'
+									+'<option value="1">Withdrawn</option>'
+									+'<option value="2">Partial entry - New enrollment</option>'
+									+'<option value="3">Partial entry - Re-enrollment</option>'
+								+'</select>'
+								+'<label>Enroll Status</label>'
+							+'</div>'
+						+'</div>'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
+							+'<div class="form-group custom-field">'
+								+'<select name="reasonFilter" id="reasonFilter" class="form-control">'
+									+'<option value="">Select Transcript Condition</option>'
+									+'<option value="MDP">Document Pending</option>'
+									+'<option value="FPD">Fee Payment Due</option>'
+									+'<option value="IP">Incomplete Progress (less than 100% in all courses)</option>'
+									+'<option value="FP">Full Progress (100% in all courses)</option>'
+									+'<option value="AFP">All Fee Paid</option>'
+								+'</select>'
+								+'<label>Transcript Condition</label>'
+							+'</div>'
+						+'</div>'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12" id="documentTypesWrapper" style="display:none">'
+							+'<div class="form-group custom-field">'
+								+'<select id="documentTypes" class="form-control selectReset multiple-select-option" multiple="multiple">'
+									+'<option value="14">Age Proof</option>'
+									+'<option value="15">Address Proof</option>'
+									+'<option value="16">Parent Passport</option>'
+									+'<option value="17">Last Academic Proof</option>'
+								+'</select>'
+								+'<label>Documents</label>'
+							+'</div>'
+						+'</div>'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12" id="documentUploadedWrapper" style="display:none">'
+							+'<div class="form-group d-flex align-items-center" style="height:52px;">'
+								+'<label class="mb-0 mr-3" for="documentUploaded" style="cursor:pointer;font-size:14px;">Uploaded</label>'
+								+'<input type="checkbox" id="documentUploaded" style="width:20px;height:20px;cursor:pointer;position:relative;left:-10px;">'
 							+'</div>'
 						+'</div>'
 						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
@@ -1138,7 +1176,7 @@ function filterStudentPaymentReportForm(){
 								+'<label>Call Recording Status</label>'
 							+'</div>'
 						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
 							+'<div class="form-group custom-field">'
 								+'<select id="userId" class="form-control selectReset multiple-select-option">'
 									+'<option value="">ALL</option>'
@@ -1147,7 +1185,7 @@ function filterStudentPaymentReportForm(){
 								+'<label>Enrolled By</label>'
 							+'</div>'
 						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
 							+'<div class="form-group custom-field">'
 								+'<select id="reLeadStatus" class="form-control selectReset multiple-select-option" multiple="multiple">'
 								
@@ -1158,11 +1196,11 @@ function filterStudentPaymentReportForm(){
 						
 						
 						
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 d-none">'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12 d-none">'
 							+'<label>Page Number</label>'
 							+'<input type="text" id="pageNumber" value="0" class="form-control" placeholder="Page Number">'
 						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
 							+'<div class="row">'
 								+'<div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">'
 									+'<div class="form-group custom-field">'
@@ -1177,9 +1215,15 @@ function filterStudentPaymentReportForm(){
 										+'<label>Page Size</label>'
 									+'</div>'
 								+'</div>'
+								+'<div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12" style="padding-right:24px !important;">'
+									+'<div class="form-group d-flex align-items-center" style="height:52px;">'
+										+'<label class="mb-0 mr-3" for="reenrollPreset" style="cursor:pointer;font-size:18px;">ReEnroll</label>'
+										+'<input type="checkbox" id="reenrollPreset" style="width:20px;height:20px;cursor:pointer;position:relative;left:-10px;">'
+									+'</div>'
+								+'</div>'
 							+'</div>'
 						+'</div>'
-						+'<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 text-right ml-auto">'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12 text-right ml-auto">'
 							+'<label class="full">&nbsp;</label>'
 							+'<a href="javascript:void(0)" class="btn btn-danger mr-1 resetStudentPaymentRecord" onClick="resetStudentPaymentForm(\'studentPaymentForm\');" ><i class="fa fa-undo"></i>&nbsp;Reset</a>'
 							+'<a href="javascript:void(0)" class="btn btn-success searchStudentPaymentRecord" onClick="getPaymentReportData(\'studentPaymentForm\',false,1, \'search\');" ><i class="fa fa-search"></i>&nbsp;Search</a>'
@@ -3404,6 +3448,95 @@ function zadarmaLogsDataModal(data) {
 			</div>
 		</div>`;
 	return html;
+}
+
+function studentDocumentsDataModal(data) {
+	let html = `
+		<div id="studentDocumentsContent" class="modal fade bd-example-modal-lg fade-scale" role="dialog" aria-labelledby="studentDocumentsLabel" aria-hidden="true">
+			<div class="modal-dialog modal-md" style='width: 50% !important;'>
+				<div class="d-flex flex-wrap">
+					<div class="modal-content border-0">
+						<div class="modal-header py-1 bg-primary text-white">
+							<h5 class="modal-title font-weight-bold">Documents</h5>
+							<button type="button" class="close text-white" onclick="selfModalHide('studentDocumentsContent')">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body pt-1">
+							<div class="flex-grow-1">
+								<table class="table" style="font-size:14px;">
+									<thead>
+										<tr style='background-color:#E7F3FF'>
+											<th class="border text-primary">Document</th>
+											<th class="border text-primary">Status</th>
+											<th class="border text-primary">Action</th>
+										</tr>
+									</thead>
+									<tbody>`;
+	if (data && data.length > 0) {
+		data.forEach((doc) => {
+			html += `
+									<tr>
+										<td>${doc.label}</td>
+										<td>${doc.uploaded ? '<i class="fa fa-check-circle text-success"></i>' : '<i class="fa fa-times-circle text-danger"></i>'}</td>
+										<td>${doc.uploaded ? `<button type="button" class="btn btn-primary btn-sm" data-doc-url="${doc.url}" data-doc-type="${doc.fileType}" onclick="viewDocumentPreview(this)">View</button>` : ''}</td>
+									</tr>`;
+		});
+	} else {
+		html += `<tr><td colspan="3" class="text-center">No documents found</td></tr>`;
+	}
+	html += `</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>`;
+	return html;
+}
+
+function documentPreviewModal(){
+	return `
+		<div id="studentDocPreviewContent" class="modal fade fade-scale" tabindex="-1" role="dialog">
+			<div class="modal-dialog modal-md box-shadow-none" role="document">
+				<div class="modal-content">
+					<div class="modal-header py-1 bg-primary text-white">
+						<h6 class="heading text-white mb-0">Preview File</h6>
+						<button type="button" class="close text-white" onclick="selfModalHide('studentDocPreviewContent')">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body m-0 py-2">
+						<div id="studentDocPreviewImage" class="full text-center d-none">
+							<img class="w-100" src="" />
+						</div>
+						<div id="studentDocPreviewPdf" class="full text-center d-none">
+							<object type="application/pdf" class="w-100" style="height:70vh" data=""></object>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>`;
+}
+
+function viewDocumentPreview(el){
+	var url = $(el).attr('data-doc-url');
+	var fileType = $(el).attr('data-doc-type');
+	if($("#studentDocPreviewContent").length > 0){
+		$("#studentDocPreviewContent").remove();
+	}
+	$("body").append(documentPreviewModal());
+	if(fileType == 'P'){
+		$("#studentDocPreviewPdf object").attr('data', url);
+		$("#studentDocPreviewPdf").removeClass('d-none');
+		$("#studentDocPreviewImage").addClass('d-none');
+	}else{
+		$("#studentDocPreviewImage img").attr('src', url);
+		$("#studentDocPreviewImage").removeClass('d-none');
+		$("#studentDocPreviewPdf").addClass('d-none');
+	}
+	$("#studentDocPreviewContent").modal("show");
 }
 
 function callHippoLogsDataModal(data) {

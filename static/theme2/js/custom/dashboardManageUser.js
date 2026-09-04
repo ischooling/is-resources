@@ -707,7 +707,7 @@ function openTeacherStudentPerformanceModal(moduleId, studentUserId, studentName
 	}
 	return openManageUserStudentPerformanceModal(moduleId, studentUserId, studentName, lmsProviderId);
 }
-function openManageUserStudentPerformanceModal(moduleId, studentUserId, studentName, lmsProviderId) {
+function openManageUserStudentPerformanceModal(moduleId, studentUserId, studentName, lmsProviderId, studentStandardId) {
 	if (!moduleId || !studentUserId) {
 		showMessageTheme2(0, "Invalid student performance request.");
 		return false;
@@ -721,7 +721,8 @@ function openManageUserStudentPerformanceModal(moduleId, studentUserId, studentN
 		.attr("data-module-id", moduleId)
 		.attr("data-student-user-id", studentUserId)
 		.attr("data-student-name", studentName || "")
-		.attr("data-lms-provider-id", lmsProviderId || "");
+		.attr("data-lms-provider-id", lmsProviderId || "")
+		.attr("data-student-standard-id", studentStandardId || "");
 	$("#manageUserStudentPerformanceModal")
 		.off("hidden.bs.modal.manageUserPerformance")
 		.on("hidden.bs.modal.manageUserPerformance", function () {
@@ -731,7 +732,7 @@ function openManageUserStudentPerformanceModal(moduleId, studentUserId, studentN
 		});
 	$("#manageUserStudentPerformanceModal .modal-title").text(studentName ? ("Student Performance | " + studentName) : "Student Performance");
 	$("#manageUserStudentPerformanceModal").modal("show");
-	manageUserStudentPerformanceRenderMain(studentUserId, lmsProviderId);
+	manageUserStudentPerformanceRenderMain(studentUserId, lmsProviderId, studentStandardId);
 	return false;
 }
 
@@ -752,12 +753,12 @@ function getManageUserStudentPerformanceModalHtml() {
     </div>`;
 }
 
-async function manageUserStudentPerformanceRenderMain(studentUserId, lmsProviderId) {
+async function manageUserStudentPerformanceRenderMain(studentUserId, lmsProviderId, studentStandardId) {
 	customLoader(true);
 	hideMessage('');
 	$("#manageUserStudentPerformanceBody").html(`<div class="py-4 text-center">Loading...</div>`);
 	try {
-		var response = await manageUserStudentPerformanceFetch(studentUserId, lmsProviderId);
+		var response = await manageUserStudentPerformanceFetch(studentUserId, lmsProviderId, studentStandardId);
 		var rows = manageUserStudentPerformanceMapRows(response, studentUserId + "");
 		$("#manageUserStudentPerformanceBody").html(getManageUserStudentPerformanceContent(rows, lmsProviderId));
 		manageUserStudentPerformanceInitDataTable();
@@ -768,14 +769,15 @@ async function manageUserStudentPerformanceRenderMain(studentUserId, lmsProvider
 	}
 }
 
-async function manageUserStudentPerformanceFetch(studentUserId, lmsProviderId) {
+async function manageUserStudentPerformanceFetch(studentUserId, lmsProviderId, studentStandardId) {
 	var ajaxReqDetails = {
 		method: "POST",
 		url: APP_BASE_URL + SCHOOL_UUID + "/dashboard/parent/student-academic-performance",
 		body: {
 			userId: USER_ID + "",
 			studentUserId: studentUserId + "",
-			lmsProviderId: lmsProviderId || ""
+			lmsProviderId: lmsProviderId || "",
+			studentStandardId: studentStandardId || ""
 		},
 		global: true,
 		showMessage: false,

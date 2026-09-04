@@ -1642,11 +1642,11 @@ function getSessionMasterList(formId, elementId, allStatus){
 				var result = data['mastersData']['data'];
 				var html = getSessionMasterContent(result, allStatus);
 				if(formId!=''){
-					$('#'+formId+' #'+elementId).html(html);
+					$('#'+formId+' #'+elementId).html(html).trigger("change");
 				}else{
-					$('#'+elementId).html(html);
+					$('#'+elementId).html(html).trigger("change");
 				}
-				
+
 			}
 		}
 	});

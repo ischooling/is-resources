@@ -35201,3 +35201,7 @@ to { background-color: rgb(6, 145, 6); }
 	word-break: normal;
 	overflow-wrap: normal;
 }
+#studentPaymentForm .custom-field label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100% - 20px);}
+#studentPaymentForm .select2-selection__choice{max-width:100% !important;white-space:normal !important;word-break:break-word;}
+#studentPaymentForm .spf-progress-group{position:relative;margin-top:3px;}
+#studentPaymentForm .spf-progress-label{position:absolute;top:-27px;left:15px;background:#fff;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100% - 20px);}
