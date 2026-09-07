@@ -4635,6 +4635,137 @@ function getRequestForMaster(
   return request;
 }
 
+// PERF: session-scoped cache for static master lists (countries, lead sources/statuses,
+// partner types, campaigns, ad-sets, etc.). These are reference data that rarely change
+// within a session, yet the lead list refetches the same ones many times (once per form /
+// dropdown / re-render), which under HTTP/1.1 saturates the connection pool. getMasterListCached
+// returns a Promise of the raw masters response, fetching each requestKey+value only once and
+// serving repeats from memory. Mutating actions must call clearMasterCache(requestKey) so the
+// next read refreshes (e.g. after adding a campaign -> clearMasterCache('CAMPAIN-LIST')).
+window.__masterListCache = window.__masterListCache || {};
+function masterListCacheKey(requestKey, value) {
+  return requestKey + "::" + (value == null ? "" : value);
+}
+function clearMasterCache(requestKey) {
+  if (!requestKey) {
+    window.__masterListCache = {};
+    return;
+  }
+  var prefix = requestKey + "::";
+  Object.keys(window.__masterListCache).forEach(function (k) {
+    if (k.indexOf(prefix) === 0) {
+      delete window.__masterListCache[k];
+    }
+  });
+}
+function getMasterListCached(formId, requestKey, value) {
+  var ck = masterListCacheKey(requestKey, value);
+  // The cache stores the in-flight PROMISE, not just the resolved data, so that duplicate
+  // calls fired concurrently within a single load (e.g. LEAD-STATUS-LIST for both the status
+  // and exclude-status dropdowns) share ONE network request instead of each missing the cache.
+  if (window.__masterListCache[ck]) {
+    return window.__masterListCache[ck];
+  }
+  var p = new Promise(function (resolve, reject) {
+    $.ajax({
+      type: "POST",
+      contentType: APPLICATION_JSON_VALUE,
+      url: getURLForCommon("masters"),
+      data: JSON.stringify(getRequestForMaster(formId, requestKey, value)),
+      dataType: "json",
+      cache: false,
+      timeout: 600000,
+      success: function (data) {
+        // Don't remember a failed response — drop it so the next call retries.
+        if (data && (data.status == "0" || data.status == "2")) {
+          delete window.__masterListCache[ck];
+        }
+        resolve(data);
+      },
+      error: function (e) {
+        delete window.__masterListCache[ck];
+        reject(e);
+      },
+    });
+  });
+  window.__masterListCache[ck] = p;
+  return p;
+}
+
+// PERF: fetch several master lists in ONE /masters-bulk request and pre-fill the master cache
+// with the results, so the individual cache-aware dropdown functions (callLeadStatusList,
+// callPCountries, callMasterCampainList, ...) then serve from that warm cache and make no further
+// network calls. This collapses the lead-list load's ~6-8 duplicate /masters calls into one.
+// GRACEFUL FALLBACK: an in-flight placeholder is installed per key synchronously so a dropdown
+// function that runs before the bulk returns still shares this one request; and if the bulk (or a
+// single entry) fails, that key falls back to an individual /masters fetch — i.e. exactly the
+// pre-batch behaviour. items: [{ requestKey, value, requestExtra, requestExtra1 }].
+function prefetchMastersBulk(items) {
+  if (!items || !items.length) {
+    return Promise.resolve();
+  }
+  var reqs = items.map(function (it) {
+    return getRequestForMaster("", it.requestKey, it.value, it.requestExtra, it.requestExtra1);
+  });
+  // Install an in-flight placeholder promise per not-yet-cached key, synchronously.
+  var pending = {};
+  items.forEach(function (it) {
+    var ck = masterListCacheKey(it.requestKey, it.value);
+    if (!window.__masterListCache[ck]) {
+      var resolveFn;
+      window.__masterListCache[ck] = new Promise(function (res) {
+        resolveFn = res;
+      });
+      pending[ck] = { it: it, resolve: resolveFn };
+    }
+  });
+  // Fulfil a pending key with the bulk result if good, else via an individual /masters fetch.
+  function settle(ck, resp) {
+    var p = pending[ck];
+    if (!p) {
+      return;
+    }
+    if (resp && !(resp.status == "0" || resp.status == "2")) {
+      window.__masterListCache[ck] = Promise.resolve(resp);
+      p.resolve(resp);
+    } else {
+      // Bad/missing entry: drop the placeholder and fetch this one key normally.
+      delete window.__masterListCache[ck];
+      getMasterListCached("", p.it.requestKey, p.it.value)
+        .then(function (d) { p.resolve(d); })
+        .catch(function () { p.resolve({ status: "0" }); });
+    }
+  }
+  return new Promise(function (resolve) {
+    $.ajax({
+      type: "POST",
+      contentType: APPLICATION_JSON_VALUE,
+      url: getURLForCommon("masters-bulk"),
+      data: JSON.stringify({
+        authentication: reqs[0].authentication,
+        requestData: reqs[0].requestData, // satisfies server-side validateCommon
+        requestDataList: reqs.map(function (r) { return r.requestData; }),
+      }),
+      dataType: "json",
+      cache: false,
+      timeout: 600000,
+      success: function (list) {
+        items.forEach(function (it, i) {
+          settle(masterListCacheKey(it.requestKey, it.value), Array.isArray(list) ? list[i] : null);
+        });
+        resolve();
+      },
+      error: function () {
+        // Whole bulk failed: fall back to individual fetches for every pending key.
+        items.forEach(function (it) {
+          settle(masterListCacheKey(it.requestKey, it.value), null);
+        });
+        resolve();
+      },
+    });
+  });
+}
+
 function customLoaderPreview(needToShow) {
   if (needToShow) {
     $("#commonloaderId1").removeClass("hide");

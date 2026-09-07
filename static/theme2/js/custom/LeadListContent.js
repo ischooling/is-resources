@@ -22,20 +22,38 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 	HASHTAGLIST = await getTggingMasterListPromise('');
     var html= await getLeadListMasterContent(roleAndModule, objRights);
     $('#dashboardContentInHTML').html(html);
-	let allSchool = await getOfflineSchoolList(USER_ID);
-	let schoolDropDown = '';
-	allSchool.schoolList.forEach(school => { 
-		schoolDropDown += '<option value="'+school.schoolId+'" extraschooluserid="'+school.userId+'" ' + (school.schoolId == SCHOOL_ID ? 'selected="true"' : '')+'>'+school.schoolName+'</option>';
-	});
-	$("#leadDemoSchoolMove").append(schoolDropDown); 
+	// PERF: warm the master cache for all the lead-list dropdowns in ONE /masters-bulk request
+	// (installs in-flight cache entries synchronously) so the dropdown builders below serve from
+	// it instead of each firing its own /masters call. Falls back to individual calls on failure.
+	prefetchMastersBulk([
+		{ requestKey: 'LEAD-STATUS-LIST', value: objRights.leadType },
+		{ requestKey: 'LEAD-SOURCE-LIST', value: objRights.leadType },
+		{ requestKey: 'UTM-SOURCE-LIST', value: objRights.leadType },
+		{ requestKey: 'COUNTRIES-LIST', value: 0 },
+		{ requestKey: 'CAMPAIN-LIST', value: '' },
+		{ requestKey: 'AD-SET-LIST', value: '' }
+	]);
 	var clickfrom='list';
 	if($("#advanceLeadNewSearchForm #clickFromSearch").val()!=''){
 		clickfrom=$("#advanceLeadNewSearchForm #clickFromSearch").val();
 	}
 	getB2CLeadPopjs(objRights, roleAndModule);
-	var assignUserList = await callLeadAssignUserList('advanceLeadNewSearchForm',''+objRights.leadType+'','leadAssignToSearch', true, objRights.discardPermission, USER_ID, true);
+	// PERF: once the page skeleton exists, fire the slow count + row-data fetches
+	// IMMEDIATELY, then load the secondary dropdowns (school-move list, assign-user list)
+	// in parallel with them. Previously these two setup calls were awaited sequentially
+	// BETWEEN the skeleton and the row fetch, delaying the lead rows by ~3-4s. They only
+	// populate search/modal dropdowns and don't gate row rendering.
 	callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
 	getLeadDataList('advanceLeadNewSearchForm','advance-search', clickfrom,'0', 'new', true,'', objRights, roleAndModule);
+	// Secondary dropdowns — populate in the background; they don't block the lead rows.
+	getOfflineSchoolList(USER_ID).then(function(allSchool){
+		var schoolDropDown = '';
+		(allSchool && allSchool.schoolList ? allSchool.schoolList : []).forEach(function(school){
+			schoolDropDown += '<option value="'+school.schoolId+'" extraschooluserid="'+school.userId+'" ' + (school.schoolId == SCHOOL_ID ? 'selected="true"' : '')+'>'+school.schoolName+'</option>';
+		});
+		$("#leadDemoSchoolMove").append(schoolDropDown);
+	}).catch(function(){});
+	callLeadAssignUserList('advanceLeadNewSearchForm',''+objRights.leadType+'','leadAssignToSearch', true, objRights.discardPermission, USER_ID, true);
 	generateTinyUrls();
 	// setInterval(() => {
 	// 	if(!objRights.discardPermission){

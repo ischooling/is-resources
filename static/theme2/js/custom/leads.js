@@ -4183,15 +4183,8 @@ function resendB2BWelcomeMail(b2bleadId){
 
 function callLeadStatusList(formId, value, elementId, keyStatus) {
 	hideMessageTheme2('');
-	$.ajax({
-		type: "POST",
-		contentType: APPLICATION_JSON_VALUE,
-		url: getURLForCommon('masters'),
-		data: JSON.stringify(getRequestForMaster(formId, 'LEAD-STATUS-LIST', value)),
-		dataType: 'json',
-		cache: false,
-		timeout: 600000,
-		success: function (data) {
+	// PERF: served from the shared master cache (LEAD-STATUS-LIST is fetched repeatedly per load).
+	getMasterListCached(formId, 'LEAD-STATUS-LIST', value).then(function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessageTheme2(true, data['message']);
 			} else {
@@ -4208,8 +4201,7 @@ function callLeadStatusList(formId, value, elementId, keyStatus) {
 				});
 				//buildDropdown(data['mastersData']['data'], 0, 'Select Status');
 			}
-		}
-	});
+	}).catch(function () {});
 }
 
 
@@ -4531,6 +4523,9 @@ function saveCampaignMaster(formId, campid, activeInactive ) {
 				showMessageTheme2(0, data['message'],'',true);
 			} else {
 				showMessageTheme2(1, data['message'],'',false);
+				// PERF: a new campaign was added — invalidate the cached CAMPAIN-LIST so the
+				// next dropdown build refetches it instead of showing a stale list.
+				if (typeof clearMasterCache === 'function') { clearMasterCache('CAMPAIN-LIST'); }
 				$("#"+formId+" #leadCampaignName").val('');
 				$("#"+formId+" #campaignStartDate").val('');
 				callCampainList(false,'');
@@ -5112,13 +5107,8 @@ function callPCountries(formId, value, elementId, preSelected) {
 	}else{
 		$("#" + formId + " #" + elementId).html('<option value="">Select country*</option>');
 	}
-	$.ajax({
-		type: "POST",
-		contentType: APPLICATION_JSON_VALUE,
-		url: getURLForCommon('masters'),
-		data: JSON.stringify(getRequestForMaster(formId, 'COUNTRIES-LIST', value)),
-		dataType: 'json',
-		success: function (data) {
+	// PERF: served from the shared master cache (COUNTRIES-LIST is static and fetched repeatedly).
+	getMasterListCached(formId, 'COUNTRIES-LIST', value).then(function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessage(1, data['message']);
 			} else {
@@ -5129,26 +5119,18 @@ function callPCountries(formId, value, elementId, preSelected) {
 				$.each(countries, function(k, v) {
 					$("#" + formId + " #" + elementId).append('<option dailCode="'+v.extra1+'" dail-country-code="'+v.extra+'" value="'+v.key+'" '+(preSelected==v.key?'selected':'')+'>'+v.value+'</option>');
 				});
-				
-				
+
+
 			}
-		}
-	});
+	}).catch(function () {});
 	return true;
 }
 
 
 function getPartnerTypeList(formId, value,elementId, preSelected, partnerTypeId, partnerDefaultSettings) {
 	$("#" + formId + " #" + elementId).html('<option value="">Select Partner type*</option>');
-	$.ajax({
-		type: "POST",
-		contentType: APPLICATION_JSON_VALUE,
-		url: getURLForCommon('masters'),
-		data: JSON.stringify(getRequestForMaster(formId,'PARTNER-TYPE-LIST', value)),
-		dataType: 'json',
-		cache: false,
-		timeout: 600000,
-		success: function (data) {
+	// PERF: served from the shared master cache (PARTNER-TYPE-LIST rarely changes per session).
+	getMasterListCached(formId, 'PARTNER-TYPE-LIST', value).then(function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessageTheme2(true, data['message']);
 			} else {
@@ -5164,8 +5146,7 @@ function getPartnerTypeList(formId, value,elementId, preSelected, partnerTypeId,
 					}
 				}
 			}
-		}
-	});
+	}).catch(function () {});
 }
 function flushUploadedDocument(){
 	uploadDocs=[];
@@ -7735,15 +7716,8 @@ function callB2CDashboardLead(moduleId,leadType) {
 function callLeadSourceList(formId, value, elementId, keyStatus) {
 	hideMessageTheme2('');
 	customLoader(false);
-	$.ajax({
-		type: "POST",
-		contentType: APPLICATION_JSON_VALUE,
-		url: getURLForCommon('masters'),
-		data: JSON.stringify(getRequestForMaster(formId, 'LEAD-SOURCE-LIST', value)),
-		dataType: 'json',
-		cache: false,
-		timeout: 600000,
-		success: function (data) {
+	// PERF: served from the shared master cache (LEAD-SOURCE-LIST rarely changes per session).
+	getMasterListCached(formId, 'LEAD-SOURCE-LIST', value).then(function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessageTheme2(true, data['message']);
 			} else {
@@ -7761,20 +7735,12 @@ function callLeadSourceList(formId, value, elementId, keyStatus) {
 				});
 				//buildDropdown(data['mastersData']['data'], 0, 'Select Status');
 			}
-		}
-	});
+	}).catch(function () {});
 }
 
 function callUTMSourceList(formId, value, elementId, keyStatus) {
-	$.ajax({
-		type: "POST",
-		contentType: APPLICATION_JSON_VALUE,
-		url: getURLForCommon('masters'),
-		data: JSON.stringify(getRequestForMaster(formId, 'UTM-SOURCE-LIST', value)),
-		dataType: 'json',
-		cache: false,
-		timeout: 600000,
-		success: function (data) {
+	// PERF: served from the shared master cache (UTM-SOURCE-LIST rarely changes per session).
+	getMasterListCached(formId, 'UTM-SOURCE-LIST', value).then(function (data) {
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessageTheme2(true, data['message']);
 			} else {
@@ -7792,8 +7758,7 @@ function callUTMSourceList(formId, value, elementId, keyStatus) {
 				});
 				//buildDropdown(data['mastersData']['data'], 0, 'Select Status');
 			}
-		}
-	});
+	}).catch(function () {});
 }
 
 function getRequestForLeadAssign(formId, key, value,  discardPermission,  requestExtra, schoolId) {
@@ -11120,6 +11085,8 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 		  const html = getB2bLeadList(data, objRights, roleModule);
 		  $("#b2b-lead-list").html(html);
 		  refreshCustomFieldState('#b2b-lead-list');
+		  // PERF: B2B rows have no per-second timers; stop any left running from a B2C view.
+		  if(typeof resetLeadTimers === 'function'){ resetLeadTimers(); }
 		  $('#b2b-lead-list').off('click', '.follow-up-no').on('click', '.follow-up-no', function () {
 			$(this).find(".fa-angle-down").toggleClass('fa-angle-down fa-angle-up');
 			$(this).parent().siblings().find(".fa-angle-up").toggleClass('fa-angle-up fa-angle-down');
@@ -11140,6 +11107,9 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 		  // now collected and fired as ONE batched request each for the whole page.
 		  var statusLogLeadNos = [];
 		  var statusHistoryLeadIds = [];
+		  // PERF: stop/clear any timers from the previous render before registering
+		  // this page's rows (see shared-timer loop in B2CLeadListContent.js).
+		  if(typeof resetLeadTimers === 'function'){ resetLeadTimers(); }
 		  for(var i=0;i<leaddata.length;i++){
 			var leadsd = leaddata[i];
 			getLeadStartTimer(leadsd.assignLeadDatetime, leadsd.leadId);
@@ -11151,7 +11121,28 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 		  getLeadStatusLogBatch(statusLogLeadNos, 'new-lead', objRights.adminStatus);
 		  getLeadStatusLogHistoryBatch(statusHistoryLeadIds);
 		  curentTimeStamp(data.objectRights.timeZoneOffset);
-		  $(".selectcampain").select2({ theme: "bootstrap4", dropdownParent: "#b2c-lead-list" });
+		  // PERF: lazy campaign dropdown. The full ~1,700-option list is no longer inlined
+		  // per lead (see B2CLeadListContent.js) and select2 is no longer initialised on
+		  // every row up front. Instead, when the user first opens a campaign select we
+		  // inject the cached full option list, preserve the current selection, init select2
+		  // on just that element and open it. Delegated on the persistent container and
+		  // re-bound with .off first so repeated list loads never stack duplicate handlers.
+		  function initLazyCampaignSelect(e){
+			if(e.type === 'mousedown'){ e.preventDefault(); }
+			var $sel = $(this);
+			$sel.removeAttr('data-lazy-campaign');
+			var current = $sel.val();
+			if(window.__campaignOptionsHtml){ $sel.html(window.__campaignOptionsHtml); }
+			if(current){ $sel.val(current); }
+			$sel.select2({ theme: "bootstrap4", dropdownParent: "#b2c-lead-list" });
+			$sel.select2('open');
+		  }
+		  $("#b2c-lead-list")
+			.off('mousedown.lazycamp focus.lazycamp', 'select.selectcampain[data-lazy-campaign]')
+			.on('mousedown.lazycamp focus.lazycamp', 'select.selectcampain[data-lazy-campaign]', initLazyCampaignSelect);
+		  // NOTE: call-recording players are rendered visibly with preload="none"
+		  // (see B2CLeadListContent.js), so the media file downloads only when the user
+		  // presses play — no per-row JS handler needed for audio.
 		  $(".leadSearchCampaign").select2({ theme: "bootstrap4", dropdownParent: "#advanceLeadNewSearchForm" });
 		  $(".leadSearchTemplate").select2({ theme: "bootstrap4", dropdownParent: "#advanceLeadNewSearchForm" });
 		  $(".leadSearchDeliveredStatus").select2({

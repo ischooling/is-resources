@@ -1434,15 +1434,9 @@ function toggleLinkTab(type){
 }
 
 function callMasterCampainList(formId, value, elementId) {
-  $.ajax({
-    type: "POST",
-    contentType: APPLICATION_JSON_VALUE,
-    url: getURLForCommon("masters"),
-    data: JSON.stringify(getRequestForMaster(formId, "CAMPAIN-LIST", value)),
-    dataType: "json",
-    cache: false,
-    timeout: 600000,
-    success: function (data) {
+  // PERF: served from the shared master cache. NOTE: campaigns can be added at runtime, so
+  // saveCampaignMaster() calls clearMasterCache('CAMPAIN-LIST') to force a refresh afterwards.
+  getMasterListCached(formId, "CAMPAIN-LIST", value).then(function (data) {
       //console.log(data);
       if (data["status"] == "0" || data["status"] == "2") {
         showMessageTheme2(0, stringMessage[1], "serverError", "");
@@ -1451,26 +1445,17 @@ function callMasterCampainList(formId, value, elementId) {
 		var campaignList=data.mastersData.data
         $("#" + formId + " #" + elementId).html( '<option value="">Select Campain</option>');
         var dropdown = $("#" + formId + " #" + elementId);
-		
+
         $.each(campaignList, function (k, v) {
           dropdown.append('<option value="' + v.value +'" >' + v.value +'('+v.extra+')</option>');
         });
       }
-      return false;
-    }
-  });
+  }).catch(function () {});
 }
 
 function callMasterAdSetList(formId, value, elementId) {
-  $.ajax({
-    type: "POST",
-    contentType: APPLICATION_JSON_VALUE,
-    url: getURLForCommon("masters"),
-    data: JSON.stringify(getRequestForMaster(formId, "AD-SET-LIST", value)),
-    dataType: "json",
-    cache: false,
-    timeout: 600000,
-    success: function (data) {
+  // PERF: served from the shared master cache (AD-SET-LIST rarely changes per session).
+  getMasterListCached(formId, "AD-SET-LIST", value).then(function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
         showMessageTheme2(0, stringMessage[1], "serverError", "");
       } else {
@@ -1481,9 +1466,7 @@ function callMasterAdSetList(formId, value, elementId) {
           dropdown.append('<option value="' + v.value + '">' + v.value + " (" + v.extra + ")" + "</option>");
         });
       }
-      return false;
-    }
-  });
+  }).catch(function () {});
 }
 
 

@@ -879,6 +879,7 @@ function getManageUserStudentPerformanceContent(rows, lmsProviderId) {
 	                            <th>Teacher Name</th>
 	                            <th>End Date</th>
 	                            <th>Remaining Days</th>
+	                            ${!supportsDetailedView ? "<th>Progress (Gradable)</th>" : ""}
 	                            ${supportsDetailedView ? "<th>Pending Assignment</th>" : ""}
 	                            ${supportsDetailedView ? "<th>Progress (gradable)</th>" : ""}
 	                            ${supportsDetailedView ? "<th>Progress (all activities)</th>" : ""}
@@ -906,13 +907,14 @@ function getManageUserStudentPerformanceRowsHtml(rows, lmsProviderId) {
 				<td>${getSalutationByGender(row.teacherGender)} ${manageUserStudentPerformanceEscapeHtml(row.teacherName)}</td>
 	            <td>${manageUserStudentPerformanceEscapeHtml(row.endDate)}</td>
 	            <td>${manageUserStudentPerformanceEscapeHtml(row.remainingDays)}</td>
+	            ${!supportsDetailedView ? `<td>${manageUserStudentPerformanceProgressHtml(row.progressGradable)}</td>` : ""}
 	            ${supportsDetailedView ? `<td>${manageUserStudentPerformanceEscapeHtml(row.pendingAssignment + "")}</td>` : ""}
 	            ${supportsDetailedView ? `<td>${manageUserStudentPerformanceProgressHtml(row.progressGradable)}</td>` : ""}
 	            ${supportsDetailedView ? `<td>${manageUserStudentPerformanceProgressHtml(row.progressAllActivity)}</td>` : ""}
 	        </tr>`;
 	});
 	if (!html) {
-		html = `<tr><td colspan="${supportsDetailedView ? 9 : 5}" class="text-center">No academic performance found</td></tr>`;
+		html = `<tr><td colspan="${supportsDetailedView ? 9 : 6}" class="text-center">No academic performance found</td></tr>`;
 	}
 	return html;
 }

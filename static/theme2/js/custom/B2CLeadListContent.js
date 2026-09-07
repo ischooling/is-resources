@@ -1559,6 +1559,17 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 	}
 	//console.log(data);
 	var campaignList = JSON.parse(leaddata.campaignList);
+	// PERF: build the full campaign <option> markup ONCE per render and cache it.
+	// Previously the entire campaign list (~1,700+ options) was inlined into EVERY
+	// lead card, exploding the DOM (355k+ nodes / ~40MB at 200 leads/page) and freezing
+	// the tab. Each lead now renders only its selected option; the full list is injected
+	// lazily when the user opens that dropdown (see lazy handler in leads.js).
+	var campaignOptionsHtml = '<option value="" data-campain="">--Select Campaign--</option>';
+	for (let cOpt = 0; cOpt < campaignList.length; cOpt++) {
+		const cItem = campaignList[cOpt];
+		campaignOptionsHtml += '<option value="'+cItem.key+'" data-campain="'+cItem.value+'">'+cItem.value+' ('+cItem.extra+')</option>';
+	}
+	window.__campaignOptionsHtml = campaignOptionsHtml;
 	var statusList = JSON.parse(leaddata.statusList);
 	var html='<input type="checkbox" id="selectLeadAll" class="ml-2" />&nbsp;All'
 	+'<select name="leadsPagging" id="leadsPagging" class="ml-1">'
@@ -2032,12 +2043,17 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 										// +'<th class="border-0 p-1">Campaign:</th>'
 											+'<td class="border-0 p-1" colspan="2">'
 											+'<div class="d-flex align-items-center selectcampain-wrapper" style="width: 250px;">'
-												+'<select class="selectcampain" name="campainName" id="campainName_'+leads.leadId+'">'
+												+'<select class="selectcampain" name="campainName" id="campainName_'+leads.leadId+'" data-lazy-campaign="1">'
 												+'<option value="" data-campain="">--Select Campaign--</option>';
+												// PERF: render ONLY the currently-selected campaign here; the full
+												// option list is injected lazily on first open (see leads.js). This keeps
+												// each lead card at <=2 option nodes instead of ~1,700+.
 												for (let c = 0; c < campaignList.length; c++) {
 													const campaign = campaignList[c];
-													//console.log("value=>"+campaign.value);
-													html+='<option value="'+campaign.key+'" data-campain="'+campaign.value+'" '+(leads.utmCampaign==campaign.value?'selected':'') +'>'+campaign.value+' ('+campaign.extra+')</option>';
+													if (leads.utmCampaign == campaign.value) {
+														html+='<option value="'+campaign.key+'" data-campain="'+campaign.value+'" selected>'+campaign.value+' ('+campaign.extra+')</option>';
+														break;
+													}
 												}
 												html+='</select>'
 												+'<button class="ml-2 mr-1 btn btn-sm btn-info" id="saveCampaign" onclick="saveCampaignLead(\''+leads.leadId+'\',\'campainName_'+leads.leadId+'\', \'new-leadcampaign\');">Save</button>'
@@ -2195,8 +2211,11 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                     '<div class="d-flex flex-column align-items-start mb-1" style="gap:8px;">'
                         +'<div class="d-flex align-items-center" style="gap:10px;">'
                             +'<span class="ml-1">Call recording:</span>'
-                            +( agentRecording 
-                                ? '<audio controls style="height:40px; transform:scale(0.9);">'
+                            +( agentRecording
+                                // PERF: keep the audio PLAYER visible so it can be played directly,
+                                // but use preload="none" so the browser downloads the media file only
+                                // when the user actually presses play (not eagerly for every lead).
+                                ? '<audio controls preload="none" style="height:40px; transform:scale(0.9);">'
                                     +'<source src="'+agentRecording+'">'
                                     +'Your browser does not support the audio element.'
                                 +'</audio>'
@@ -2678,69 +2697,94 @@ function b2cleadsPagging(leaddata, objRights){
 	return html;
 }
 
+/* PERF (Chrome + DOM-scanning extensions): previously EACH lead row started its
+   own per-second setInterval - one for the "current time" clock and one for the
+   elapsed countdown. With N rows that fired ~2N separate DOM mutations every
+   second, and a click-to-call browser extension (Zadarma) re-scans the WHOLE
+   document on every mutation, so the page never settled (main thread pegged).
+   Both are now driven by ONE shared 1-second loop that updates every row in a
+   single SYNCHRONOUS pass: a MutationObserver batches all writes from one
+   synchronous burst into a single callback, so the extension re-scans ~once/sec
+   instead of ~2N times/sec. We also skip the DOM write when the rendered text is
+   unchanged, and prune rows whose elements have been removed. resetLeadTimers()
+   runs on each list render to stop the old interval-accumulation leak (the old
+   `var timer; clearInterval(timer);` cleared a fresh undefined local, so stale
+   intervals piled up on every re-render). */
+var __leadTimerRegistry = { start: [], curTime: [] };
+var __leadTimerInterval = null;
+
+function resetLeadTimers(){
+  __leadTimerRegistry.start = [];
+  __leadTimerRegistry.curTime = [];
+  if(__leadTimerInterval){ clearInterval(__leadTimerInterval); __leadTimerInterval = null; }
+}
+
+function startLeadTimerLoopIfNeeded(){
+  if(__leadTimerInterval){ return; }
+  __leadTimerInterval = setInterval(__leadTimerTick, 1000);
+}
+
+function __leadTimerTick(){
+  // Shared "now" values computed once per tick - identical for every row.
+  var timezoneG = getSystemTimezone();
+  var nowUtcStr = changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss');
+  var nowSg = new Date(moment().tz("Asia/Singapore").format("YYYY-MM-DD HH:mm:ss"));
+
+  // Elapsed countdown rows (#timerLeadDisplay_<leadid>).
+  for(var i=__leadTimerRegistry.start.length-1;i>=0;i--){
+    var s = __leadTimerRegistry.start[i];
+    var $el = $('#timerLeadDisplay_'+s.leadid);
+    if($el.length===0){ __leadTimerRegistry.start.splice(i,1); continue; }
+    var diff = nowSg - s.startDate;
+    if(diff < 0){
+      if(s.last!=='future'){ $el.text('⏳ Start time is in the future!').css('color','red'); s.last='future'; }
+      continue;
+    }
+    var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    var hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    var minutes = Math.floor((diff / (1000 * 60)) % 60);
+    var seconds = Math.floor((diff / 1000) % 60);
+    var out = "<span class="+(days>0?'text-danger':'')+">"+days+" days <span>"
+            + "<span class="+(hours>0?'text-danger':'')+">"+hours+" hrs <span>"
+            + "<span class="+(minutes>0?'text-danger':'')+">"+minutes+" mins <span>"
+            + "<span class="+(seconds>0?'text-danger':'')+">"+seconds+" secs<span>";
+    if(out!==s.last){ $el.html(out); s.last=out; }
+  }
+
+  // Current-time clock rows (#leadCurTimeText_<leadId>) - value changes at most once/min.
+  for(var j=__leadTimerRegistry.curTime.length-1;j>=0;j--){
+    var c = __leadTimerRegistry.curTime[j];
+    var $ct = $("#leadCurTimeText_"+c.leadId);
+    if($ct.length===0){ __leadTimerRegistry.curTime.splice(j,1); continue; }
+    if(c.leaddatas.leadTimeZone===''){ continue; }
+    var curentTime = convertTime(nowUtcStr, DATETIME_UTC_FORMATTER, timezoneG, c.leaddatas.leadTimeZone, DISPLAY_DATE_ONLY, DISPLAY_TIME_FORMATTER);
+    var curentLeadRightTime = convertTime(nowUtcStr, DATETIME_UTC_FORMATTER, timezoneG, c.leaddatas.leadTimeZone, "YYYY-MM-DD HH:mm:ss","HH:mm:ss");
+    var currentTimeStr = curentTime.date+' '+curentTime.time;
+    var leadCurrDateTime = new Date(curentLeadRightTime.date);
+    var color = (leadCurrDateTime>=c.startWindow && leadCurrDateTime<=c.endWindow) ? "text-success bold" : "text-danger bold";
+    var html = '<span class="'+color+'">'+currentTimeStr+'<span>';
+    if(html!==c.last){ $ct.html(html); c.last=html; }
+  }
+}
+
 function getUpdateLeadCurrentTime(leads, leadId){
   const leaddatas=leads;
-   var timerForCurTime;
-    clearInterval(timerForCurTime);
-    var currentTimeStr="";
-    var timezoneG = getSystemTimezone();
-    //var leadCurrtime=changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss');
-    var leadCurdate1=convertTime(changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss'), DATETIME_UTC_FORMATTER, timezoneG,  leaddatas.leadTimeZone ,"YYYY-MM-DD","HH:mm:ss");;
-    var leadCurdate=leadCurdate1.date;
-    var leadCurSdate=new Date(leadCurdate+' '+leaddatas.startDateTime);
-    var leadCurEdate=new Date(leadCurdate+' '+leaddatas.endDateTime);
-
-    var leadCurrDateTime;
-    timerForCurTime = setInterval(function() {
-        if(leaddatas.leadTimeZone!=''){
-          var curentTime	=convertTime(changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss'), DATETIME_UTC_FORMATTER, timezoneG,  leaddatas.leadTimeZone ,DISPLAY_DATE_ONLY,DISPLAY_TIME_FORMATTER)
-          var curentLeadRightTime	=convertTime(changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss'), DATETIME_UTC_FORMATTER, timezoneG,  leaddatas.leadTimeZone ,"YYYY-MM-DD HH:mm:ss","HH:mm:ss");
-          currentTimeStr=curentTime.date+' '+curentTime.time;
-          leadCurrDateTime=new Date(curentLeadRightTime.date);
-        }
-        //console.log("currentTimeStr "+currentTimeStr + " "+timezoneG + " "+ leaddatas.leadTimeZone+ " " +leadId);
-        //console.log("leadCurrDateTime "+leadCurrDateTime);
-        if(leadId==leaddatas.leadId){
-            var leadrightTimeCallColor="text-danger bold";
-            if(leadCurrDateTime>=leadCurSdate && leadCurrDateTime<=leadCurEdate){
-                leadrightTimeCallColor="text-success bold";
-            }
-            $("#leadCurTimeText_"+leadId+"").html('<span class="'+leadrightTimeCallColor+'">'+currentTimeStr+'<span>');
-        }
-      }, 1000);
-
+  var timezoneG = getSystemTimezone();
+  var leadCurdate1=convertTime(changeDateFormat(new Date(), 'yyyy-mm-dd hh:mm:ss'), DATETIME_UTC_FORMATTER, timezoneG,  leaddatas.leadTimeZone ,"YYYY-MM-DD","HH:mm:ss");
+  var leadCurdate=leadCurdate1.date;
+  __leadTimerRegistry.curTime.push({
+    leadId: leadId,
+    leaddatas: leaddatas,
+    startWindow: new Date(leadCurdate+' '+leaddatas.startDateTime),
+    endWindow: new Date(leadCurdate+' '+leaddatas.endDateTime),
+    last: null
+  });
+  startLeadTimerLoopIfNeeded();
 }
 
 function getLeadStartTimer(leadstartDate, leadid){
-    var timer;
-    clearInterval(timer); // reset any previous timer
-    const startDate = new Date(leadstartDate);
-
-    // Update every second
-    timer = setInterval(function() {
-      var dateInKolkata = moment().tz("Asia/Singapore").format("YYYY-MM-DD HH:mm:ss");
-      var now = new Date(dateInKolkata);
-      var diff = now - startDate; // milliseconds difference
-
-      if (diff < 0) {
-        $('#timerLeadDisplay_'+leadid).text('⏳ Start time is in the future!').css('color', 'red');
-        return;
-      }
-
-      // Convert milliseconds → time components
-      var days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      var hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      var minutes = Math.floor((diff / (1000 * 60)) % 60);
-      var seconds = Math.floor((diff / 1000) % 60);
-
-      var textdays="<span class="+(days>0?'text-danger':'')+">"+days+" days <span>";
-      var texthours="<span class="+(hours>0?'text-danger':'')+">"+hours+" hrs <span>";
-      var textminutes="<span class="+(minutes>0?'text-danger':'')+">"+minutes+" mins <span>";
-      var textseconds="<span class="+(seconds>0?'text-danger':'')+">"+seconds+" secs<span>";
-      // Format display
-      $('#timerLeadDisplay_'+leadid).html(`${textdays}${texthours}${textminutes}${textseconds}`)
-    }, 1000);
-
+  __leadTimerRegistry.start.push({ leadid: leadid, startDate: new Date(leadstartDate), last: null });
+  startLeadTimerLoopIfNeeded();
 }
 
 function getDemoDetailSummary(){
