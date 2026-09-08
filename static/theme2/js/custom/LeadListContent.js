@@ -43,9 +43,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 	// in parallel with them. Previously these two setup calls were awaited sequentially
 	// BETWEEN the skeleton and the row fetch, delaying the lead rows by ~3-4s. They only
 	// populate search/modal dropdowns and don't gate row rendering.
-	callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
-	getLeadDataList('advanceLeadNewSearchForm','advance-search', clickfrom,'0', 'new', true,'', objRights, roleAndModule);
-	// Secondary dropdowns — populate in the background; they don't block the lead rows.
+	// Secondary school-move dropdown — not part of the row payload; load in the background.
 	getOfflineSchoolList(USER_ID).then(function(allSchool){
 		var schoolDropDown = '';
 		(allSchool && allSchool.schoolList ? allSchool.schoolList : []).forEach(function(school){
@@ -53,7 +51,13 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 		});
 		$("#leadDemoSchoolMove").append(schoolDropDown);
 	}).catch(function(){});
-	callLeadAssignUserList('advanceLeadNewSearchForm',''+objRights.leadType+'','leadAssignToSearch', true, objRights.discardPermission, USER_ID, true);
+	// CORRECTNESS (must run BEFORE the fetches): the assign-to filter defaults to the logged-in
+	// user and IS part of the /lead-list + get-total-lead payload (assignTos). If the row/count
+	// fetch fires before this dropdown is populated, the first request sends assignTos:[] instead
+	// of assignTos:[USER_ID] — wrong lead scope. So await it, THEN fire the count + row data.
+	await callLeadAssignUserList('advanceLeadNewSearchForm',''+objRights.leadType+'','leadAssignToSearch', true, objRights.discardPermission, USER_ID, true);
+	callTotalCountLeads('advanceLeadNewSearchForm',''+roleAndModule.moduleId+'', 'LEAD',''+objRights.clickFrom+'', '0', 'new', true,'',''+objRights.leadType+'', 'Y','0','new-lead');
+	getLeadDataList('advanceLeadNewSearchForm','advance-search', clickfrom,'0', 'new', true,'', objRights, roleAndModule);
 	generateTinyUrls();
 	// setInterval(() => {
 	// 	if(!objRights.discardPermission){
