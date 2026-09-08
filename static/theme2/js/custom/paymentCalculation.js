@@ -127,6 +127,7 @@ function getPaymentDetails() {
 					generateDiscountApplicableFor(false)
 					if (paymentDetails['schedulePayments'] != null) {
 						$('#paymentScheduleDiv').show();
+						$("#paymentScheduleTable tbody").html('');
 						var index = 0;
 						var totalPayableFee = 0.0;
 						$.each(paymentDetails['schedulePayments'], function (k, v) {
