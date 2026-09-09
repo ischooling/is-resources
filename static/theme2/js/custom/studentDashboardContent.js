@@ -864,10 +864,14 @@ function batchReEnrollmentModal(){
 
 async function renderProfileDataInModal(dashboardData){
     getMissingDataByUser(dashboardData.payload).then(function(){
-        $(document).on('shown.bs.modal', '#profileFielddModal', function() {
-            buindProfileElementEvent(previousSchoolElementArray);
-            getInputIntel(inputPhoneNumberArray);
-        });
+        // Use a namespaced .off().on() so this handler is not stacked on every
+        // renderProfileDataInModal call (which would re-run intl-tel init and
+        // duplicate the flag container).
+        $(document).off('shown.bs.modal.profileModal', '#profileFielddModal')
+            .on('shown.bs.modal.profileModal', '#profileFielddModal', function() {
+                buindProfileElementEvent(previousSchoolElementArray);
+                getInputIntel(inputPhoneNumberArray);
+            });
         PROFILE_DATA_INTERVAL = getProfileDateInterVal();
     });
 }

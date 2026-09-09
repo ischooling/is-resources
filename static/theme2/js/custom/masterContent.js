@@ -2641,37 +2641,77 @@ function initializeIntelInput(formId, eleId, itiInstances, flagCode, saveType,av
 		placeholderValue = "";
 		formatOnDisplay = false;
 	}
-    // var phoneNumber = document.querySelector("#"+formId+" #"+eleId);
-    // if (phoneNumber.intlTelInputInstance) {
-    //     phoneNumber.intlTelInputInstance.destroy();
-    //     phoneNumber.removeAttribute('data-intlTelInput-initialized');
-    // }
-    var itiInstances = window.intlTelInput(phoneNumber, {
+    if (!phoneNumber) {
+        return;
+    }
+    // Guard against double initialization. If intl-tel-input is initialized twice
+    // on the same input it wraps the input again, producing a duplicate
+    // .iti__flag-container (two flags/dial codes). This happens for the profile
+    // modal because getInputIntel() runs both on render and again on
+    // 'shown.bs.modal'. Destroy any existing instance (and clean up a stray .iti
+    // wrapper) before re-initializing so there is always exactly one flag.
+    if (phoneNumber.intlTelInputInstance) {
+        try {
+            phoneNumber.intlTelInputInstance.destroy();
+        } catch (e) { /* instance already gone */ }
+        phoneNumber.intlTelInputInstance = null;
+        phoneNumber.removeAttribute('data-intlTelInput-initialized');
+    }
+    // destroy() does NOT remove the custom 'countrychange' listener we add below.
+    // Remove any stale one first, otherwise on re-init setCountry() fires
+    // 'countrychange' and the old closure (which read the now-null instance) throws.
+    if (phoneNumber.itiCountryChangeHandler) {
+        phoneNumber.removeEventListener('countrychange', phoneNumber.itiCountryChangeHandler);
+        phoneNumber.itiCountryChangeHandler = null;
+    }
+    var $existingItiWrapper = $(phoneNumber).closest(".iti");
+    if ($existingItiWrapper.length > 0) {
+        // Unwrap the input from a leftover .iti container so we don't stack wrappers.
+        $existingItiWrapper.find(".iti__flag-container").remove();
+        $(phoneNumber).unwrap();
+    }
+    var itiOptions = {
         separateDialCode: true,
         autoPlaceholder: "off",
 		formatOnDisplay: formatOnDisplay,
 		utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.17/js/utils.js"
-    });
+    };
+    if (formId == "requestProfileForm") {
+        itiOptions.dropdownContainer = document.body;
+    }
+    var itiInstances = window.intlTelInput(phoneNumber, itiOptions);
+    if (formId == "requestProfileForm") {
+        $(".iti--container, .iti__country-list").css({ "z-index": "2060" });
+    }
     if(flagCode == null || flagCode == undefined || flagCode == ""){
         itiInstances.setCountry("US");
     }else{
         itiInstances.setCountry(flagCode);   
     }
     $(phoneNumber).attr("placeholder", placeholderValue);
-	$("#"+eleId).attr("data-countryCode", itiInstances.getSelectedCountryData().iso2);
-	$("#"+eleId).attr("data-ISD-Code",itiInstances.getSelectedCountryData().dialCode);
-    phoneNumber.addEventListener('countrychange', function(e) {
-		
-		if(saveType == "selfSave"){
-			phoneNumberDailCodeChange(phoneNumber.intlTelInputInstance.a.id,flagCode,phoneNumber.intlTelInputInstance.j, avalWhtsAppStatusID, index)
+	$(phoneNumber).attr("data-countryCode", itiInstances.getSelectedCountryData().iso2);
+	$(phoneNumber).attr("data-ISD-Code",itiInstances.getSelectedCountryData().dialCode);
+    var onCountryChange = function(e) {
+		if (!itiInstances) {
+			return;
 		}
-        $("#"+eleId).attr("data-countryCode", itiInstances.getSelectedCountryData().iso2);
-        $("#"+eleId).attr("data-ISD-Code",itiInstances.getSelectedCountryData().dialCode);
+		if(saveType == "selfSave"){
+			// Use the local itiInstances (closure) rather than
+			// phoneNumber.intlTelInputInstance: setCountry() fires 'countrychange'
+			// synchronously during init, before the DOM property is assigned, so
+			// reading phoneNumber.intlTelInputInstance would be null here.
+			phoneNumberDailCodeChange(itiInstances.a.id, flagCode, itiInstances.j, avalWhtsAppStatusID, index)
+		}
+        $(phoneNumber).attr("data-countryCode", itiInstances.getSelectedCountryData().iso2);
+        $(phoneNumber).attr("data-ISD-Code",itiInstances.getSelectedCountryData().dialCode);
         $(phoneNumber).attr("placeholder", placeholderValue);
 		if(formId == "profileForm"){
 			$("label[for='"+eleId+"']").css({"left":$("#"+eleId).css("padding-left")})
 		}
-    });
+    };
+    // Store the handler so a later re-init can removeEventListener it (see guard above).
+    phoneNumber.itiCountryChangeHandler = onCountryChange;
+    phoneNumber.addEventListener('countrychange', onCountryChange);
     phoneNumber.intlTelInputInstance = itiInstances;
     //phoneNumber.setAttribute('data-intlTelInput-initialized', 'true');
 	setTimeout(function () {

@@ -709,6 +709,9 @@ body > .select2-container--open .select2-dropdown,
     z-index:2;
     pointer-events:none;
 }
+#profileFielddModal .custom-field-scope .custom-field.mt-3{
+    margin-top:1.5rem !important;
+}
 `;
 }
 function isPlaceholderOptionText(text) {

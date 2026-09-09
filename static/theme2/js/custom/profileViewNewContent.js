@@ -54,6 +54,7 @@ async function renderStudentProfilePage(extraParam) {
         $("#dashboardContentInHTMLAdditional").html(getProfilePageHeader() + html).show();
         checkJoinedSports(data[4]);
         profileViewPageLoadEvent(data);
+        appendProfileContactVerificationBadgesToProfilePage();
         if (USER_ROLE == "STUDENT" && typeof openWithdrawalRequestForStudent === "function") {
             initStudentWithdrawalSection();
         }
@@ -521,6 +522,82 @@ function dobElement(data) {
     return html;
 }
 
+function isProfileViewContactVerifiedStatus(status) {
+    return status === true || status === "Y" || status === "1" || status === 1;
+}
+
+function getProfileViewWhatsappFieldId(phoneFieldId) {
+    var whatsappFieldMap = {
+        phoneNumber: "phoneNumberWhatsAppStatus",
+        altPhoneNumber: "altPhoneNumberWhatsAppStatus",
+        motherPhoneNumber: "motherPhoneNumberWhatsAppStatus",
+        fatherPhoneNumber: "fatherPhoneNumberWhatsAppStatus",
+        guardianPhoneNumber: "guardianPhoneNumberWhatsAppStatus"
+    };
+    return whatsappFieldMap[phoneFieldId] || "";
+}
+
+function isProfileViewContactVerified(fieldId) {
+    var profileData = PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA.profileData ? PROFILE_RESPONSE_DATA.profileData : {};
+    var verificationMap = profileData.profileContactVerification
+        || (PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA.profileContactVerification)
+        || {};
+    return verificationMap[fieldId] && isProfileViewContactVerifiedStatus(verificationMap[fieldId].verifiedStatus);
+}
+
+function isProfileViewWhatsappChecked(statusValue) {
+    return statusValue === true || statusValue === "Y" || statusValue === "1" || statusValue === 1;
+}
+
+function profileContactVerificationBadges(fieldId, fieldValue, whatsappStatusValue) {
+    if (fieldValue === "" || fieldValue === undefined || fieldValue === null) {
+        return "";
+    }
+    var badges = [];
+    var whatsappFieldId = getProfileViewWhatsappFieldId(fieldId);
+    var whatsappVerified = whatsappFieldId !== ""
+        && isProfileViewWhatsappChecked(whatsappStatusValue)
+        && isProfileViewContactVerified(whatsappFieldId);
+    var fieldVerified = isProfileViewContactVerified(fieldId) || whatsappVerified;
+    if (fieldVerified) {
+        badges.push('<span class="badge badge-success font-10"><i class="fa fa-check mr-1"></i>Verified</span>');
+    }
+    if (whatsappVerified) {
+        badges.push('<span class="badge badge-success font-10"><i class="fa fa-whatsapp mr-1"></i>WhatsApp Verified</span>');
+    }
+    return badges.length > 0
+        ? '<div class="profile-contact-status-labels d-flex flex-wrap mt-n1 mb-2" style="gap:4px;">' + badges.join("") + '</div>'
+        : "";
+}
+
+function appendProfileContactVerificationBadgesToProfilePage() {
+    var fields = [
+        { fieldId: "phoneNumber", whatsappFieldId: "phoneNumberWhatsAppStatus" },
+        { fieldId: "altPhoneNumber", whatsappFieldId: "altPhoneNumberWhatsAppStatus" },
+        { fieldId: "studentEmailId" },
+        { fieldId: "altEmailId" },
+        { fieldId: "motherPhoneNumber", whatsappFieldId: "motherPhoneNumberWhatsAppStatus" },
+        { fieldId: "motherEmail" },
+        { fieldId: "fatherPhoneNumber", whatsappFieldId: "fatherPhoneNumberWhatsAppStatus" },
+        { fieldId: "fatherEmail" },
+        { fieldId: "guardianPhoneNumber", whatsappFieldId: "guardianPhoneNumberWhatsAppStatus" },
+        { fieldId: "guardianEmail" }
+    ];
+    fields.forEach(function (item) {
+        var $field = $("#" + item.fieldId).first();
+        if ($field.length < 1) {
+            return;
+        }
+        var $scope = $field.closest(".custom-field-scope");
+        $scope.find(".profile-contact-status-labels").remove();
+        var whatsappStatusValue = item.whatsappFieldId ? $("#" + item.whatsappFieldId).prop("checked") : "";
+        var badgeHtml = profileContactVerificationBadges(item.fieldId, $field.val(), whatsappStatusValue);
+        if (badgeHtml !== "") {
+            $field.closest(".input-group").after(badgeHtml);
+        }
+    });
+}
+
 function phoneNumberElement(data) {
     var html =
         `<div class="custom-field-scope" style="position:relative;">
@@ -547,6 +624,7 @@ function phoneNumberElement(data) {
             </a>
     </div>
     </div>
+    ${profileContactVerificationBadges('phoneNumber', data.phoneNumber, data.phoneNumberWhatsAppStatus)}
 </div>`;
     return html;
 }
@@ -577,6 +655,7 @@ function altPhoneNumberElement(data) {
             </a>
         </div>
     </div>
+    ${profileContactVerificationBadges('altPhoneNumber', data.altPhoneNumber, data.altPhoneNumberWhatsAppStatus)}
 </div>`;
     return html;
 }
@@ -596,6 +675,7 @@ function studentEmailIdElement(data) {
             </a>
         </div>
     </div>
+    ${profileContactVerificationBadges('studentEmailId', data)}
 </div>`;
     return html;
 }
@@ -615,6 +695,7 @@ function altEmailIdElement(data) {
             </a>
         </div>
     </div>
+    ${profileContactVerificationBadges('altEmailId', data)}
 </div>`;
     return html;
 }
@@ -1106,6 +1187,7 @@ function motherPhoneNumberElement(data) {
             </a>
         </div>
     </div>
+    ${profileContactVerificationBadges('motherPhoneNumber', data.motherPhoneNumber, data.motherPhoneNumberWhatsAppStatus)}
     </div>`;
     return html;
 }
@@ -1124,6 +1206,7 @@ function motherEmailElement(data) {
             </a>
         </div>
     </div>
+    ${profileContactVerificationBadges('motherEmail', data)}
 </div>`;
     return html;
 }
@@ -1288,6 +1371,7 @@ function fatherPhoneNumberElement(data) {
             </a>
         </div>
     </div>
+    ${profileContactVerificationBadges('fatherPhoneNumber', data.fatherPhoneNumber, data.fatherPhoneNumberWhatsAppStatus)}
     </div>`;
     return html;
 }
@@ -1307,6 +1391,7 @@ function fatherEmailElement(data) {
             </a>
         </div>
     </div>
+    ${profileContactVerificationBadges('fatherEmail', data)}
 </div>`;
     return html;
 }
@@ -1473,6 +1558,7 @@ function guardianPhoneNumberElement(data) {
             </a>
         </div>
     </div>
+    ${profileContactVerificationBadges('guardianPhoneNumber', data.guardianPhoneNumber, data.guardianPhoneNumberWhatsAppStatus)}
     </div>`;
     return html;
 }
@@ -1492,6 +1578,7 @@ function guardianEmailElement(data) {
             </a>
         </div>
     </div>
+    ${profileContactVerificationBadges('guardianEmail', data)}
 </div>`;
     return html;
 }
@@ -2302,7 +2389,7 @@ function previousCurrentSchoolGraduationYearElement(data) {
     var html =
         `<div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-3 p-0">
-        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input" name="previousCurrentSchoolGraduationYear" id="previousCurrentSchoolGraduationYear" value="${data != "" && data != undefined ? data : ""}" onkeydown="return M.isChars(event);" placeholder=" " autocomplete="off" onchange="controlEditField(this,'previousCurrentSchoolGraduationYear',\'${data != "" && data != undefined ? data : ""}\','input', '','', 2,'previousCurrentSchoolGraduationYear')">
+        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input" name="previousCurrentSchoolGraduationYear" id="previousCurrentSchoolGraduationYear" value="${data != "" && data != undefined ? data : ""}" placeholder=" " autocomplete="off" readonly keydown="return false" onchange="controlEditField(this,'previousCurrentSchoolGraduationYear',\'${data != "" && data != undefined ? data : ""}\','input', '','', 2,'previousCurrentSchoolGraduationYear')">
         <label for="previousCurrentSchoolGraduationYear">Previous/Current School Graduation Year</label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center" onclick="applyChanges('previousCurrentSchoolGraduationYear', 'previousCurrentSchoolGraduationYear', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',2)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
@@ -3374,8 +3461,8 @@ function confirmSaveModalContent(data) {
 
 function getChunkProfileDataByUserModalContent(data) {
     var html =
-        `<div class="modal fade" id="profileFielddModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
+        `<div class="modal fade" id="profileFielddModal" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog" style="max-width: 1100px;" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white py-2 px-3">
                     <h5 class="modal-title">Complete Your Profile</h5>

@@ -30,6 +30,66 @@ var PROFILE_STUDENT_DOCUMENT_BUCKETS = null;
 var PROFILE_STUDENT_DOCUMENT_UPLOAD_PANEL_HIDDEN = false;
 var PROFILE_STUDENT_DOCUMENT_PREVIEW_BLOB_URL = "";
 var IS_TIMEZONE_CHANGED=false;
+var PROFILE_CONTACT_VERIFICATION_STATE = {};
+var PROFILE_CONTACT_VERIFICATION_CACHE_VERSION = "20260909_PROFILE_CONTACT_VERIFICATION_V16";
+var PROFILE_CONTACT_VERIFICATION_FIELDS = [
+    "phoneNumber",
+    "altPhoneNumber",
+    "studentEmailId",
+    "altEmailId",
+    "motherPhoneNumber",
+    "fatherPhoneNumber",
+    "guardianPhoneNumber",
+    "motherEmail",
+    "fatherEmail",
+    "guardianEmail"
+];
+var PROFILE_CONTACT_INFORMATION_FIELDS = PROFILE_CONTACT_VERIFICATION_FIELDS.concat([
+    "phoneNumberWhatsAppStatus",
+    "altPhoneNumberWhatsAppStatus",
+    "motherPhoneNumberWhatsAppStatus",
+    "fatherPhoneNumberWhatsAppStatus",
+    "guardianPhoneNumberWhatsAppStatus",
+    "motherPhoneEmergencyNumberStatus",
+    "fatherPhoneEmergencyNumberStatus",
+    "guardianEmergencyNumberStatus"
+]);
+var PROFILE_PERSONAL_CONTACT_FIELDS = [
+    "phoneNumber",
+    "altPhoneNumber",
+    "studentEmailId",
+    "altEmailId",
+    "phoneNumberWhatsAppStatus",
+    "altPhoneNumberWhatsAppStatus"
+];
+var PROFILE_PARENT_CONTACT_FIELDS = [
+    "motherPhoneNumber",
+    "fatherPhoneNumber",
+    "guardianPhoneNumber",
+    "motherEmail",
+    "fatherEmail",
+    "guardianEmail",
+    "motherPhoneNumberWhatsAppStatus",
+    "fatherPhoneNumberWhatsAppStatus",
+    "guardianPhoneNumberWhatsAppStatus",
+    "motherPhoneEmergencyNumberStatus",
+    "fatherPhoneEmergencyNumberStatus",
+    "guardianEmergencyNumberStatus"
+];
+var PROFILE_WHATSAPP_VERIFICATION_FIELDS = [
+    "phoneNumberWhatsAppStatus",
+    "altPhoneNumberWhatsAppStatus",
+    "motherPhoneNumberWhatsAppStatus",
+    "fatherPhoneNumberWhatsAppStatus",
+    "guardianPhoneNumberWhatsAppStatus"
+];
+var PROFILE_PHONE_WHATSAPP_FIELD_MAP = {
+    phoneNumber: "phoneNumberWhatsAppStatus",
+    altPhoneNumber: "altPhoneNumberWhatsAppStatus",
+    motherPhoneNumber: "motherPhoneNumberWhatsAppStatus",
+    fatherPhoneNumber: "fatherPhoneNumberWhatsAppStatus",
+    guardianPhoneNumber: "guardianPhoneNumberWhatsAppStatus"
+};
 var SAVE_BLUK_PROFILE_DATA =
     [
         // { eleID: "firstName", keyId: "firstName" },
@@ -134,6 +194,696 @@ function addAndRemoveRequestToSaveBulkData(flag, eleID, keyId) {
     }
 
     // console.log(SAVE_BLUK_PROFILE_DATA);
+}
+
+function isProfileContactVerificationField(fieldId) {
+    return PROFILE_CONTACT_VERIFICATION_FIELDS.indexOf(fieldId) > -1;
+}
+
+function isProfileContactInformationField(fieldId) {
+    return PROFILE_CONTACT_INFORMATION_FIELDS.indexOf(fieldId) > -1;
+}
+
+function getProfileContactSectionType(fieldId) {
+    if (PROFILE_PERSONAL_CONTACT_FIELDS.indexOf(fieldId) > -1) {
+        return "PERSONAL";
+    }
+    if (PROFILE_PARENT_CONTACT_FIELDS.indexOf(fieldId) > -1) {
+        return "PARENT";
+    }
+    return "";
+}
+
+function getProfileContactElement(fieldId) {
+    var $modalElement = $("#profileFielddModal #" + fieldId);
+    if ($("#profileFielddModal").hasClass("show") && $modalElement.length > 0) {
+        return $modalElement.first();
+    }
+    return $("#" + fieldId).first();
+}
+
+function getProfileContactVerificationType(fieldId) {
+    return fieldId && fieldId.toLowerCase().indexOf("email") > -1 ? "EMAIL" : "PHONE";
+}
+
+function getProfileContactValue(fieldId) {
+    return (getProfileContactElement(fieldId).val() || "").trim();
+}
+
+function getProfileContactResponseValue(profileData, fieldId) {
+    var studentProfile = profileData && profileData.studentProfile ? profileData.studentProfile : [];
+    for (var i = 0; i < studentProfile.length; i++) {
+        if (studentProfile[i] && studentProfile[i].hasOwnProperty(fieldId)) {
+            return studentProfile[i][fieldId];
+        }
+    }
+    return "";
+}
+
+function getProfileContactCountryIsdCode(fieldId) {
+    var isdCode = (getProfileContactElement(fieldId).attr("data-isd-code") || "").trim();
+    if (isdCode) {
+        return isdCode;
+    }
+    var fieldMap = {
+        phoneNumber: "phoneNumberCountryCode",
+        altPhoneNumber: "altPhoneNumberCountryCode",
+        motherPhoneNumber: "motherPhoneNumberCountryCode",
+        fatherPhoneNumber: "fatherPhoneNumberCountryCode",
+        guardianPhoneNumber: "guardianPhoneNumberCountryCode"
+    };
+    var countryCodeField = fieldMap[fieldId];
+    if (countryCodeField && PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA.profileData) {
+        var profileData = PROFILE_RESPONSE_DATA.profileData.studentProfile || [];
+        for (var i = 0; i < profileData.length; i++) {
+            if (profileData[i] && profileData[i][countryCodeField]) {
+                return profileData[i][countryCodeField];
+            }
+        }
+    }
+    return "";
+}
+
+function getProfileContactCountryCode(fieldId) {
+    var countryCode = (getProfileContactElement(fieldId).attr("data-countrycode") || "").trim();
+    if (countryCode) {
+        return countryCode;
+    }
+    var fieldMap = {
+        phoneNumber: "phoneNumberCountryCode",
+        altPhoneNumber: "altPhoneNumberCountryCode",
+        motherPhoneNumber: "motherPhoneNumberCountryCode",
+        fatherPhoneNumber: "fatherPhoneNumberCountryCode",
+        guardianPhoneNumber: "guardianPhoneNumberCountryCode"
+    };
+    var countryCodeField = fieldMap[fieldId];
+    var profileData = PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA.profileData
+        ? PROFILE_RESPONSE_DATA.profileData.studentProfile || []
+        : [];
+    for (var i = 0; i < profileData.length; i++) {
+        if (profileData[i] && profileData[i][countryCodeField]) {
+            return profileData[i][countryCodeField];
+        }
+    }
+    return "";
+}
+
+function getProfileContactVerificationKey(fieldId) {
+    return "PROFILE_CONTACT_" + fieldId;
+}
+
+function isProfileContactReadyForVerification(fieldId) {
+    var value = getProfileContactValue(fieldId);
+    if (value === "") {
+        return false;
+    }
+    var $appendActions = getProfileContactElement(fieldId).closest(".input-group").find(".input-group-append-hide");
+    return $appendActions.length < 1 || ($appendActions.css("display") === "none" && !$appendActions.is(":visible"));
+}
+
+function getProfileWhatsappFieldId(fieldId) {
+    return PROFILE_PHONE_WHATSAPP_FIELD_MAP[fieldId] || "";
+}
+
+function isProfileWhatsappVerificationAvailable(fieldId) {
+    return getProfileContactVerificationType(fieldId) === "PHONE" && getProfileWhatsappFieldId(fieldId) !== "";
+}
+
+function isProfileWhatsappChecked(fieldId) {
+    var whatsappFieldId = getProfileWhatsappFieldId(fieldId);
+    return whatsappFieldId !== "" && getProfileContactElement(whatsappFieldId).prop("checked") === true;
+}
+
+function isProfileWhatsappVerificationPending(fieldId) {
+    if (!isProfileWhatsappVerificationAvailable(fieldId) || !isProfileWhatsappChecked(fieldId)) {
+        return false;
+    }
+    var value = getProfileContactValue(fieldId);
+    if (value === "") {
+        return false;
+    }
+    var whatsappFieldId = getProfileWhatsappFieldId(fieldId);
+    var key = getProfileContactVerificationKey(whatsappFieldId);
+    var state = PROFILE_CONTACT_VERIFICATION_STATE[key] || {};
+    return !(state.verified === true && state.verifiedValue === value);
+}
+
+function resetProfileWhatsappVerification(fieldId) {
+    if (!isProfileWhatsappVerificationAvailable(fieldId)) {
+        return;
+    }
+    var whatsappFieldId = getProfileWhatsappFieldId(fieldId);
+    var key = getProfileContactVerificationKey(whatsappFieldId);
+    if (!PROFILE_CONTACT_VERIFICATION_STATE[key]) {
+        PROFILE_CONTACT_VERIFICATION_STATE[key] = {};
+    }
+    PROFILE_CONTACT_VERIFICATION_STATE[key].verified = false;
+    PROFILE_CONTACT_VERIFICATION_STATE[key].verifiedValue = "";
+    PROFILE_CONTACT_VERIFICATION_STATE[key].sentValue = "";
+    PROFILE_CONTACT_VERIFICATION_STATE[key].channel = "WHATSAPP";
+    updateProfileWhatsappVerificationUI(fieldId);
+}
+
+function resetProfileContactVerification(fieldId) {
+    if (!isProfileContactVerificationField(fieldId)) {
+        return;
+    }
+    var key = getProfileContactVerificationKey(fieldId);
+    if (!PROFILE_CONTACT_VERIFICATION_STATE[key]) {
+        PROFILE_CONTACT_VERIFICATION_STATE[key] = {};
+    }
+    PROFILE_CONTACT_VERIFICATION_STATE[key].verified = false;
+    PROFILE_CONTACT_VERIFICATION_STATE[key].verifiedValue = "";
+    PROFILE_CONTACT_VERIFICATION_STATE[key].sentValue = "";
+    PROFILE_CONTACT_VERIFICATION_STATE[key].channel = getProfileContactVerificationType(fieldId);
+    updateProfileContactVerificationUI(fieldId);
+}
+
+function updateProfileContactVerificationUI(fieldId) {
+    var $scope = getProfileContactElement(fieldId).closest(".profile-contact-verification-scope");
+    if ($scope.length < 1) {
+        return;
+    }
+    var key = getProfileContactVerificationKey(fieldId);
+    var state = PROFILE_CONTACT_VERIFICATION_STATE[key] || {};
+    var currentValue = getProfileContactValue(fieldId);
+    var readyForVerification = isProfileContactReadyForVerification(fieldId);
+    var whatsappFieldId = getProfileWhatsappFieldId(fieldId);
+    var whatsappState = whatsappFieldId ? PROFILE_CONTACT_VERIFICATION_STATE[getProfileContactVerificationKey(whatsappFieldId)] || {} : {};
+    var whatsappChecked = isProfileWhatsappVerificationAvailable(fieldId) && isProfileWhatsappChecked(fieldId);
+    var verifiedByWhatsapp = isProfileWhatsappVerificationAvailable(fieldId)
+        && whatsappChecked
+        && whatsappState.verified === true
+        && whatsappState.verifiedValue === currentValue;
+    var isVerified = readyForVerification && ((state.verified === true && state.verifiedValue === currentValue) || verifiedByWhatsapp);
+    $scope.attr("data-verified", isVerified ? "Y" : "N");
+    $scope.find(".profile-contact-edit-action").toggleClass("d-none", !readyForVerification);
+    $scope.find(".profile-contact-verified-badge").toggleClass("d-none", !isVerified);
+    $scope.find(".profile-contact-send-otp").toggleClass("d-none", whatsappChecked || !readyForVerification || isVerified);
+    var showOtpRow = !whatsappChecked && readyForVerification && !isVerified && state.sentValue && state.sentValue === currentValue;
+    $scope.find(".profile-contact-otp-row").toggleClass("d-none", !showOtpRow).toggleClass("d-flex", !!showOtpRow);
+    if (isVerified) {
+        $scope.find(".profile-contact-message").text("");
+    } else if (!state.sentValue || state.sentValue !== currentValue) {
+        $scope.find(".profile-contact-message").text("");
+    }
+    updateProfileWhatsappVerificationUI(fieldId);
+}
+
+function updateProfileWhatsappVerificationUI(fieldId) {
+    if (!isProfileWhatsappVerificationAvailable(fieldId)) {
+        return;
+    }
+    var $scope = getProfileContactElement(fieldId).closest(".profile-contact-verification-scope");
+    if ($scope.length < 1) {
+        return;
+    }
+    var whatsappFieldId = getProfileWhatsappFieldId(fieldId);
+    var key = getProfileContactVerificationKey(whatsappFieldId);
+    var state = PROFILE_CONTACT_VERIFICATION_STATE[key] || {};
+    var value = getProfileContactValue(fieldId);
+    var checked = isProfileWhatsappChecked(fieldId);
+    var readyForVerification = isProfileContactReadyForVerification(fieldId);
+    var isVerified = readyForVerification && checked && state.verified === true && state.verifiedValue === value;
+    var showAction = readyForVerification && checked && !isVerified;
+    var showOtpRow = showAction && state.sentValue && state.sentValue === value;
+
+    $scope.find(".profile-whatsapp-send-otp").toggleClass("d-none", !showAction);
+    $scope.find(".profile-whatsapp-verified-badge").toggleClass("d-none", !isVerified);
+    $scope.find(".profile-whatsapp-otp-row").toggleClass("d-none", !showOtpRow).toggleClass("d-flex", !!showOtpRow);
+    if (isVerified) {
+        $scope.find(".profile-whatsapp-message").text("");
+    } else if (!showOtpRow) {
+        $scope.find(".profile-whatsapp-message").text("");
+    }
+}
+
+function getProfileContactOtpPayload(fieldId, otpType, otpCode, otpOptions) {
+    var isWhatsappOtp = otpOptions && otpOptions.whatsapp === true;
+    var channel = isWhatsappOtp ? "WHATSAPP" : getProfileContactVerificationType(fieldId);
+    var value = getProfileContactValue(fieldId);
+    var otpFieldId = isWhatsappOtp ? getProfileWhatsappFieldId(fieldId) : fieldId;
+    var phoneOtp = channel === "PHONE" || channel === "WHATSAPP";
+    return {
+        authentication: {
+            hash: getHash(),
+            loginHash: "",
+            userType: "STUDENT",
+            userId: USER_ID,
+            schoolId: SCHOOL_ID,
+            schoolUUID: SCHOOL_UUID,
+            sessionUserId: USER_ID
+        },
+        requestOTPData: {
+            otpType: otpType,
+            isdCode: phoneOtp ? getProfileContactCountryIsdCode(fieldId) : "",
+            userphone: phoneOtp ? value : "",
+            otpCode: otpCode || "",
+            signupType: "",
+            isDemoUser: "false",
+            email: channel === "EMAIL" ? value : "",
+            messageChannel: channel,
+            location: "",
+            entityType: isWhatsappOtp ? "STUDENT_PROFILE_CONTACT_WHATSAPP_" + fieldId : "STUDENT_PROFILE_CONTACT_" + fieldId,
+            entityId: PROFILE_RESPONSE_DATA ? PROFILE_RESPONSE_DATA.userId : USER_ID,
+            userId: PROFILE_RESPONSE_DATA ? PROFILE_RESPONSE_DATA.userId : USER_ID,
+            fieldId: otpFieldId,
+            schoolUUID: SCHOOL_UUID,
+            schoolId: SCHOOL_ID,
+            varifiedUsing: channel === "EMAIL" ? "E" : (channel === "WHATSAPP" ? "W" : "N")
+        }
+    };
+}
+
+async function sendProfileContactOtp(fieldId, resend) {
+    var value = getProfileContactValue(fieldId);
+    if (!value) {
+        showMessageTheme2(0, "Please enter value before verification.", "", false);
+        return false;
+    }
+    if (!validateFields(fieldId, fieldId, value)) {
+        return false;
+    }
+    var otpType = resend ? 2 : 1;
+    var response = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, "otp-process", getProfileContactOtpPayload(fieldId, otpType), "api/v1/common");
+    if (response && response.status == 1) {
+        var key = getProfileContactVerificationKey(fieldId);
+        PROFILE_CONTACT_VERIFICATION_STATE[key] = {
+            sentValue: value,
+            verifiedValue: "",
+            verified: false,
+            channel: getProfileContactVerificationType(fieldId)
+        };
+        var $scope = getProfileContactElement(fieldId).closest(".profile-contact-verification-scope");
+        $scope.find(".profile-contact-otp").val("");
+        $scope.find(".profile-contact-message").text("OTP sent");
+        updateProfileContactVerificationUI(fieldId);
+        return true;
+    }
+    showMessageTheme2(0, response && response.message ? response.message : "Unable to send OTP.", "", false);
+    return false;
+}
+
+async function sendProfileWhatsappOtp(fieldId, resend) {
+    var value = getProfileContactValue(fieldId);
+    if (!value) {
+        showMessageTheme2(0, "Please enter phone number before WhatsApp verification.", "", false);
+        return false;
+    }
+    if (!isProfileWhatsappChecked(fieldId)) {
+        showMessageTheme2(0, "Please select WhatsApp available first.", "", false);
+        return false;
+    }
+    if (!validateFields(fieldId, fieldId, value)) {
+        return false;
+    }
+    var otpType = resend ? 2 : 1;
+    var response = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, "otp-process", getProfileContactOtpPayload(fieldId, otpType, "", { whatsapp: true }), "api/v1/common");
+    if (response && response.status == 1) {
+        var whatsappFieldId = getProfileWhatsappFieldId(fieldId);
+        var key = getProfileContactVerificationKey(whatsappFieldId);
+        PROFILE_CONTACT_VERIFICATION_STATE[key] = {
+            sentValue: value,
+            verifiedValue: "",
+            verified: false,
+            channel: "WHATSAPP"
+        };
+        var $scope = getProfileContactElement(fieldId).closest(".profile-contact-verification-scope");
+        $scope.find(".profile-whatsapp-otp").val("");
+        $scope.find(".profile-whatsapp-message").text("WhatsApp OTP sent");
+        updateProfileWhatsappVerificationUI(fieldId);
+        return true;
+    }
+    showMessageTheme2(0, response && response.message ? response.message : "Unable to send WhatsApp OTP.", "", false);
+    return false;
+}
+
+async function verifyProfileWhatsappOtp(fieldId) {
+    var $scope = getProfileContactElement(fieldId).closest(".profile-contact-verification-scope");
+    var otpCode = ($scope.find(".profile-whatsapp-otp").val() || "").trim();
+    var value = getProfileContactValue(fieldId);
+    if (!otpCode) {
+        showMessageTheme2(0, "Please enter WhatsApp OTP.", "", false);
+        return false;
+    }
+    var response = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, "otp-process", getProfileContactOtpPayload(fieldId, 3, otpCode, { whatsapp: true }), "api/v1/common");
+    if (response && response.status == 1) {
+        var whatsappFieldId = getProfileWhatsappFieldId(fieldId);
+        var key = getProfileContactVerificationKey(whatsappFieldId);
+        var phoneKey = getProfileContactVerificationKey(fieldId);
+        PROFILE_CONTACT_VERIFICATION_STATE[key] = {
+            sentValue: value,
+            verifiedValue: value,
+            verified: true,
+            channel: "WHATSAPP"
+        };
+        PROFILE_CONTACT_VERIFICATION_STATE[phoneKey] = {
+            sentValue: value,
+            verifiedValue: value,
+            verified: true,
+            channel: "PHONE"
+        };
+        markProfileContactVerifiedInResponse(whatsappFieldId, value);
+        markProfileContactVerifiedInResponse(fieldId, value);
+        updateProfileContactVerificationUI(fieldId);
+        updateProfileWhatsappVerificationUI(fieldId);
+        showMessageTheme2(1, "WhatsApp verified successfully.", "", false);
+        return true;
+    }
+    showMessageTheme2(0, response && response.message ? response.message : "Invalid WhatsApp OTP.", "", false);
+    return false;
+}
+
+async function verifyProfileContactOtp(fieldId) {
+    var $scope = getProfileContactElement(fieldId).closest(".profile-contact-verification-scope");
+    var otpCode = ($scope.find(".profile-contact-otp").val() || "").trim();
+    var value = getProfileContactValue(fieldId);
+    if (!otpCode) {
+        showMessageTheme2(0, "Please enter OTP.", "", false);
+        return false;
+    }
+    var response = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, "otp-process", getProfileContactOtpPayload(fieldId, 3, otpCode), "api/v1/common");
+    if (response && response.status == 1) {
+        var key = getProfileContactVerificationKey(fieldId);
+        PROFILE_CONTACT_VERIFICATION_STATE[key] = {
+            sentValue: value,
+            verifiedValue: value,
+            verified: true,
+            channel: getProfileContactVerificationType(fieldId)
+        };
+        markProfileContactVerifiedInResponse(fieldId, value);
+        updateProfileContactVerificationUI(fieldId);
+        showMessageTheme2(1, "Contact verified successfully.", "", false);
+        return true;
+    }
+    showMessageTheme2(0, response && response.message ? response.message : "Invalid OTP.", "", false);
+    return false;
+}
+
+function enableProfileContactEdit(fieldId) {
+    getProfileContactElement(fieldId).prop("disabled", false).prop("readonly", false).focus();
+    resetProfileContactVerification(fieldId);
+    resetProfileWhatsappVerification(fieldId);
+}
+
+function isProfileContactVerified(fieldId) {
+    var key = getProfileContactVerificationKey(fieldId);
+    var state = PROFILE_CONTACT_VERIFICATION_STATE[key] || {};
+    var currentValue = getProfileContactValue(fieldId);
+    return currentValue !== "" && state.verified === true && state.verifiedValue === currentValue;
+}
+
+function isProfileContactAlreadyVerifiedFromResponse(profileData, fieldId) {
+    return isProfileContactTypeVerifiedForSection(
+        profileData,
+        getProfileContactVerificationType(fieldId),
+        getProfileContactSectionType(fieldId)
+    );
+}
+
+function isProfileContactVerifiedStatus(status) {
+    return status === "Y" || status === "1" || status === 1 || status === true;
+}
+
+function isProfileContactFieldVerifiedFromResponse(profileData, fieldId) {
+    var verificationMap = profileData && profileData.profileContactVerification
+        ? profileData.profileContactVerification
+        : {};
+    if (verificationMap[fieldId] && isProfileContactVerifiedStatus(verificationMap[fieldId].verifiedStatus)) {
+        return true;
+    }
+    var whatsappFieldId = getProfileWhatsappFieldId(fieldId);
+    if (whatsappFieldId === "") {
+        return false;
+    }
+    return isProfileWhatsappCheckedInResponse(profileData, fieldId)
+        && verificationMap[whatsappFieldId]
+        && isProfileContactVerifiedStatus(verificationMap[whatsappFieldId].verifiedStatus);
+}
+
+function markProfileContactVerifiedInResponse(fieldId, value) {
+    if (!PROFILE_RESPONSE_DATA || !PROFILE_RESPONSE_DATA.profileData) {
+        return;
+    }
+    if (!PROFILE_RESPONSE_DATA.profileData.profileContactVerification) {
+        PROFILE_RESPONSE_DATA.profileData.profileContactVerification = {};
+    }
+    PROFILE_RESPONSE_DATA.profileData.profileContactVerification[fieldId] = {
+        verifiedStatus: "Y",
+        verifiedAt: new Date().toISOString(),
+        contactValue: value || ""
+    };
+    setAllProfileFieldsData(PROFILE_RESPONSE_DATA);
+}
+
+function isProfileContactTypeVerifiedFromResponse(profileData, contactType) {
+    var verificationMap = profileData && profileData.profileContactVerification
+        ? profileData.profileContactVerification
+        : {};
+    for (var i = 0; i < PROFILE_CONTACT_VERIFICATION_FIELDS.length; i++) {
+        var contactFieldId = PROFILE_CONTACT_VERIFICATION_FIELDS[i];
+        if (getProfileContactVerificationType(contactFieldId) === contactType
+                && verificationMap[contactFieldId]
+                && isProfileContactVerifiedStatus(verificationMap[contactFieldId].verifiedStatus)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function isProfileContactTypeVerifiedForSection(profileData, contactType, sectionType) {
+    var verificationMap = profileData && profileData.profileContactVerification
+        ? profileData.profileContactVerification
+        : {};
+    var fields = sectionType === "PARENT" ? PROFILE_PARENT_CONTACT_FIELDS : PROFILE_PERSONAL_CONTACT_FIELDS;
+    for (var i = 0; i < fields.length; i++) {
+        var contactFieldId = fields[i];
+        if (isProfileContactVerificationField(contactFieldId)
+                && getProfileContactVerificationType(contactFieldId) === contactType
+                && isProfileContactFieldVerifiedFromResponse(profileData, contactFieldId)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function isProfileContactRequirementSatisfied(profileData, sectionType) {
+    return isProfileContactTypeVerifiedForSection(profileData, "EMAIL", sectionType)
+        && isProfileContactTypeVerifiedForSection(profileData, "PHONE", sectionType);
+}
+
+function isProfileWhatsappCheckedInResponse(profileData, phoneFieldId) {
+    var whatsappFieldId = getProfileWhatsappFieldId(phoneFieldId);
+    var value = getProfileContactResponseValue(profileData, whatsappFieldId);
+    return value === "Y" || value === "1" || value === 1 || value === true;
+}
+
+function shouldSkipProfileContactField(profileData, fieldId) {
+    if (!isProfileContactInformationField(fieldId)) {
+        return false;
+    }
+    var sectionType = getProfileContactSectionType(fieldId);
+    if (isProfileContactRequirementSatisfied(profileData, sectionType)) {
+        return true;
+    }
+    return isProfileContactVerificationField(fieldId)
+        && isProfileContactTypeVerifiedForSection(profileData, getProfileContactVerificationType(fieldId), sectionType);
+}
+
+function getRequiredProfileContactFieldsFromMissing(missingFieldsData) {
+    var fields = [];
+    if (!missingFieldsData) {
+        return fields;
+    }
+    $.each(missingFieldsData, function (_, groups) {
+        $.each(groups || {}, function (_, fieldList) {
+            $.each(fieldList || [], function (_, fieldObj) {
+                if (fieldObj && isProfileContactVerificationField(fieldObj.fieldId) && fields.indexOf(fieldObj.fieldId) < 0) {
+                    fields.push(fieldObj.fieldId);
+                }
+            });
+        });
+    });
+    return fields;
+}
+
+function validateProfileContactVerificationBeforeSave(saveList) {
+    if (!$("#profileFielddModal").hasClass("show")) {
+        return true;
+    }
+    var requiredFields = getRequiredProfileContactFieldsFromMissing(missingFields);
+    var requiredTypes = {};
+    for (var i = 0; i < requiredFields.length; i++) {
+        if ($("#" + requiredFields[i]).length > 0) {
+            var sectionType = getProfileContactSectionType(requiredFields[i]);
+            requiredTypes[sectionType + "_" + getProfileContactVerificationType(requiredFields[i])] = {
+                sectionType: sectionType,
+                contactType: getProfileContactVerificationType(requiredFields[i])
+            };
+        }
+    }
+    for (var requirementKey in requiredTypes) {
+        var requirement = requiredTypes[requirementKey];
+        if (!isProfileContactTypeVerifiedInModal(requirement.contactType, requirement.sectionType)) {
+            var label = requirement.contactType === "EMAIL" ? "one email" : "one phone number";
+            showMessageTheme2(0, "Please verify at least " + label + " before saving.", "", false);
+            return false;
+        }
+    }
+    return true;
+}
+
+function isProfileContactTypeVerifiedInModal(contactType, sectionType) {
+    if (PROFILE_RESPONSE_DATA && isProfileContactTypeVerifiedForSection(PROFILE_RESPONSE_DATA.profileData, contactType, sectionType)) {
+        return true;
+    }
+    var fields = getRequiredProfileContactFieldsFromMissing(missingFields);
+    for (var i = 0; i < fields.length; i++) {
+        if (getProfileContactVerificationType(fields[i]) === contactType
+                && getProfileContactSectionType(fields[i]) === sectionType
+                && $("#" + fields[i]).length > 0
+                && isProfileContactVerified(fields[i])) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function getSatisfiedProfileContactFieldsForModal() {
+    var fields = getRequiredProfileContactFieldsFromMissing(missingFields);
+    return fields.filter(function (fieldId) {
+        return $("#" + fieldId).length > 0
+            && !isProfileWhatsappVerificationPending(fieldId)
+            && isProfileContactTypeVerifiedInModal(getProfileContactVerificationType(fieldId), getProfileContactSectionType(fieldId));
+    });
+}
+
+function getCompletedNonContactFields(saveList) {
+    return (saveList || []).map(function (item) {
+        return item.eleID;
+    }).filter(function (eleID) {
+        return !isProfileContactVerificationField(eleID);
+    });
+}
+
+function getVerifiedProfileContactFieldsFromList(eleIds) {
+    return (eleIds || []).filter(function (eleID) {
+        return isProfileContactVerificationField(eleID)
+            && getProfileContactValue(eleID) !== ""
+            && !isProfileWhatsappVerificationPending(eleID)
+            && isProfileContactTypeVerifiedInModal(getProfileContactVerificationType(eleID), getProfileContactSectionType(eleID));
+    });
+}
+
+function getProfileFieldsSafeToRemove(eleIdsToRemove) {
+    var eleIds = Array.isArray(eleIdsToRemove) ? eleIdsToRemove : [eleIdsToRemove];
+    return eleIds.filter(function (eleID) {
+        return !isProfileContactVerificationField(eleID);
+    }).concat(getVerifiedProfileContactFieldsFromList(eleIds));
+}
+
+function initProfileContactVerificationForModal(missingFieldsData) {
+    var fields = getRequiredProfileContactFieldsFromMissing(missingFieldsData);
+    $.each(fields, function (_, fieldId) {
+        var $input = $("#" + fieldId);
+        if ($input.length < 1 || $input.closest(".profile-contact-verification-scope").length > 0) {
+            return;
+        }
+        var inputGroup = $input.closest(".input-group");
+        var $scopeWrapper = $input.closest(".custom-field-scope");
+        if ($scopeWrapper.length < 1) {
+            $scopeWrapper = inputGroup.parent();
+        }
+        $scopeWrapper.addClass("profile-contact-verification-scope");
+        inputGroup.find(".input-group-append-hide").hide();
+        inputGroup.after(
+            '<div class="profile-contact-verification-actions d-flex align-items-center flex-wrap mb-2" style="gap:6px;">' +
+                '<button type="button" class="btn btn-light btn-sm border profile-contact-edit-action" onclick="enableProfileContactEdit(\'' + fieldId + '\')"><i class="fa fa-pencil mr-1"></i>Edit</button>' +
+                '<button type="button" class="btn btn-primary btn-sm profile-contact-send-otp" onclick="sendProfileContactOtp(\'' + fieldId + '\', false)"><i class="fa fa-paper-plane mr-1"></i>Send OTP</button>' +
+                (isProfileWhatsappVerificationAvailable(fieldId) ? '<button type="button" class="btn btn-success btn-sm profile-whatsapp-send-otp d-none" onclick="sendProfileWhatsappOtp(\'' + fieldId + '\', false)"><i class="fa fa-whatsapp mr-1"></i>WhatsApp OTP</button>' : '') +
+                '<span class="badge badge-success profile-contact-verified-badge d-none"><i class="fa fa-check mr-1"></i>Verified</span>' +
+                (isProfileWhatsappVerificationAvailable(fieldId) ? '<span class="badge badge-success profile-whatsapp-verified-badge d-none"><i class="fa fa-whatsapp mr-1"></i>WhatsApp Verified</span>' : '') +
+                '<small class="text-primary profile-contact-message"></small>' +
+                (isProfileWhatsappVerificationAvailable(fieldId) ? '<small class="text-success profile-whatsapp-message"></small>' : '') +
+            '</div>' +
+            '<div class="profile-contact-otp-row align-items-center flex-wrap mb-2 d-none" style="gap:6px;">' +
+                '<input type="text" class="form-control form-control-sm profile-contact-otp" maxlength="8" placeholder="OTP" style="max-width:120px;">' +
+                '<button type="button" class="btn btn-success btn-sm" onclick="verifyProfileContactOtp(\'' + fieldId + '\')"><i class="fa fa-check mr-1"></i>Verify</button>' +
+                '<button type="button" class="btn btn-link btn-sm p-0" onclick="sendProfileContactOtp(\'' + fieldId + '\', true)">Resend</button>' +
+            '</div>' +
+            (isProfileWhatsappVerificationAvailable(fieldId)
+                ? '<div class="profile-whatsapp-otp-row align-items-center flex-wrap mb-2 d-none" style="gap:6px;">' +
+                    '<input type="text" class="form-control form-control-sm profile-whatsapp-otp" maxlength="8" placeholder="WhatsApp OTP" style="max-width:140px;">' +
+                    '<button type="button" class="btn btn-success btn-sm" onclick="verifyProfileWhatsappOtp(\'' + fieldId + '\')"><i class="fa fa-check mr-1"></i>Verify WhatsApp</button>' +
+                    '<button type="button" class="btn btn-link btn-sm p-0" onclick="sendProfileWhatsappOtp(\'' + fieldId + '\', true)">Resend</button>' +
+                '</div>'
+                : '')
+        );
+        $input.prop("disabled", false);
+        if (getProfileContactValue(fieldId) !== "") {
+            $input.prop("readonly", true);
+        }
+        $input.on("input.profileContactVerification change.profileContactVerification", function () {
+            resetProfileContactVerification(fieldId);
+            resetProfileWhatsappVerification(fieldId);
+        });
+        if (isProfileWhatsappVerificationAvailable(fieldId)) {
+            getProfileContactElement(getProfileWhatsappFieldId(fieldId))
+                .off("change.profileWhatsappVerification")
+                .on("change.profileWhatsappVerification", function () {
+                    resetProfileWhatsappVerification(fieldId);
+                });
+        }
+        if (PROFILE_RESPONSE_DATA && isProfileContactFieldVerifiedFromResponse(PROFILE_RESPONSE_DATA.profileData, fieldId)
+                && getProfileContactValue(fieldId) !== "") {
+            var key = getProfileContactVerificationKey(fieldId);
+            PROFILE_CONTACT_VERIFICATION_STATE[key] = {
+                sentValue: getProfileContactValue(fieldId),
+                verifiedValue: getProfileContactValue(fieldId),
+                verified: true,
+                channel: getProfileContactVerificationType(fieldId)
+            };
+            updateProfileContactVerificationUI(fieldId);
+        } else {
+            resetProfileContactVerification(fieldId);
+        }
+        if (isProfileWhatsappVerificationAvailable(fieldId)) {
+            var whatsappFieldId = getProfileWhatsappFieldId(fieldId);
+            if (PROFILE_RESPONSE_DATA && isProfileContactFieldVerifiedFromResponse(PROFILE_RESPONSE_DATA.profileData, whatsappFieldId)
+                    && getProfileContactValue(fieldId) !== "") {
+                var whatsappKey = getProfileContactVerificationKey(whatsappFieldId);
+                PROFILE_CONTACT_VERIFICATION_STATE[whatsappKey] = {
+                    sentValue: getProfileContactValue(fieldId),
+                    verifiedValue: getProfileContactValue(fieldId),
+                    verified: true,
+                    channel: "WHATSAPP"
+                };
+                var phoneKey = getProfileContactVerificationKey(fieldId);
+                PROFILE_CONTACT_VERIFICATION_STATE[phoneKey] = {
+                    sentValue: getProfileContactValue(fieldId),
+                    verifiedValue: getProfileContactValue(fieldId),
+                    verified: true,
+                    channel: "PHONE"
+                };
+                markProfileContactVerifiedInResponse(fieldId, getProfileContactValue(fieldId));
+                updateProfileContactVerificationUI(fieldId);
+                updateProfileWhatsappVerificationUI(fieldId);
+            } else {
+                resetProfileWhatsappVerification(fieldId);
+            }
+        }
+    });
+}
+
+function ensureProfileContactVerificationCacheVersion() {
+    var cacheVersionKey = "PROFILE_CONTACT_VERIFICATION_CACHE_VERSION";
+    if (localStorage.getItem(cacheVersionKey) === PROFILE_CONTACT_VERIFICATION_CACHE_VERSION) {
+        return;
+    }
+    localStorage.removeItem("localStorage_Profile_Missing_Fields");
+    localStorage.removeItem("ALL_PROFILE_DATA");
+    localStorage.removeItem("IS_PROFILE_DATA_CALL");
+    localStorage.setItem(cacheVersionKey, PROFILE_CONTACT_VERIFICATION_CACHE_VERSION);
 }
 
 
@@ -3171,7 +3921,7 @@ function validateBulkFields(saveList) {
             fieldValue = $("[id='" + eleID + "']").val();
         }
 
-        if (eleID !== "hobbies") {
+        if (eleID !== "hobbies" && eleID !== "extracurricular") {
             if (!validateFields(eleID, keyId, fieldValue)) {
                 return false;
             }
@@ -3180,9 +3930,38 @@ function validateBulkFields(saveList) {
     return true;
 }
 
+function isExtracurricularSatisfiedInModal() {
+    if ($(".sports-extra-curriculars-wrapper input[type='checkbox']:checked").length > 0) {
+        return true;
+    }
+    return PROFILE_RESPONSE_DATA
+        && PROFILE_RESPONSE_DATA.profileData
+        && checkAllExtracurricularActivities(PROFILE_RESPONSE_DATA.profileData, 4);
+}
+
 
 function saveBulkProfileData(userId, studentStandardId, roleModuleId, moduleId) {
     // console.log(SAVE_BLUK_PROFILE_DATA);
+    if (!validateProfileContactVerificationBeforeSave(SAVE_BLUK_PROFILE_DATA)) {
+        return false;
+    }
+    if ($("#profileFielddModal").hasClass("show") && SAVE_BLUK_PROFILE_DATA.length < 1) {
+        var verifiedContactFields = getSatisfiedProfileContactFieldsForModal();
+        if (verifiedContactFields.length > 0) {
+            missingFields = cleanMissingFields(missingFields, verifiedContactFields);
+            setProfileMissingFields(missingFields);
+            extractFields(missingFields);
+            refreshProfileMissingModalStateAfterBulkSave(missingFields);
+            return false;
+        }
+        if (isExtracurricularSatisfiedInModal()) {
+            missingFields = cleanMissingFields(missingFields, ['extracurricularActivities']);
+            setProfileMissingFields(missingFields);
+            extractFields(missingFields);
+            refreshProfileMissingModalStateAfterBulkSave(missingFields);
+            return false;
+        }
+    }
     applyBulkChanges(SAVE_BLUK_PROFILE_DATA, userId, studentStandardId, roleModuleId, moduleId);
 
 }
@@ -3271,6 +4050,9 @@ function submitApplyChnagesBulk() {
     if (!BULK_PROFILE_SAVE_CONTEXT) {
         return false;
     }
+    if (!validateProfileContactVerificationBeforeSave(BULK_PROFILE_SAVE_CONTEXT.saveList)) {
+        return false;
+    }
 
     var approvedList = BULK_PROFILE_SAVE_CONTEXT.approvedList || [];
     if (approvedList.length < 1) {
@@ -3308,7 +4090,7 @@ function submitApplyChnagesBulk() {
             }
             if(USER_ROLE == "STUDENT"){
                 CUSTOM_DATEPICKER_FIELD_FLAG=false;
-                const eleIdsToRemove = [...approvedList.map(item => item.eleID), ...(approvedList.some(item => item.eleID === "extracurricular") ? ["extracurricularActivities"] : [])];
+                const eleIdsToRemove = [...getCompletedNonContactFields(approvedList), ...getSatisfiedProfileContactFieldsForModal(), ...(approvedList.some(item => item.eleID === "extracurricular") ? ["extracurricularActivities"] : [])];
                 // if(eleIdsToRemove == "extracurricular"){ 
                 //     eleIdsToRemove 
                 // }
@@ -3338,8 +4120,19 @@ function submitApplyChnagesBulk() {
 }
 
 function updateProfileLocalStorageData(eleIdsToRemove){
+    // Keep the full list of just-saved fields (before the "safe to remove" filter)
+    // so we can refresh their cached value in missingFields for any that stay in
+    // the modal (e.g. unverified contact fields). Otherwise the modal re-renders
+    // with the stale value and only shows the new value after a refresh.
+    var savedFieldIds = Array.isArray(eleIdsToRemove) ? eleIdsToRemove.slice() : [eleIdsToRemove];
+    eleIdsToRemove = getProfileFieldsSafeToRemove(eleIdsToRemove);
     extractFields(missingFields);
     MISSING_PARENT_NAME_SECTION_FLAG = getProfileParentNameSaveFlag();
+    if (PROFILE_RESPONSE_DATA) {
+        setAllProfileFieldsData(PROFILE_RESPONSE_DATA);
+    }
+    // ✅ refresh cached values for fields that remain in the modal
+    missingFields = syncMissingFieldValues(missingFields, savedFieldIds);
     // ✅ missingFields update
     missingFields = cleanMissingFields(missingFields, eleIdsToRemove);
     setProfileMissingFields(missingFields);
@@ -3463,44 +4256,39 @@ function cleanMissingFields(missingFields, eleIdsToRemove) {
         return false;
     };
     var parentSection = false;
-    if (Array.isArray(eleIdsToRemove) && eleIdsToRemove.some(id => id.startsWith("mother") || id.startsWith("father") || id.startsWith("guardian") )) {
+    var groupedParentCleanupFields = [
+        "motherPhoneNumber", "motherPhoneNumberWhatsAppStatus", "motherPhoneEmergencyNumberStatus",
+        "fatherPhoneNumber", "fatherPhoneNumberWhatsAppStatus", "fatherPhoneEmergencyNumberStatus",
+        "guardianPhoneNumber", "guardianPhoneNumberWhatsAppStatus", "guardianEmergencyNumberStatus"
+    ];
+    if (Array.isArray(eleIdsToRemove) && eleIdsToRemove.some(id => groupedParentCleanupFields.includes(id))) {
         parentSection = true;
     }
     if(parentSection){
         var groups = ["mother", "father", "guardian"];
 
-        var nameMap = {
-            mother: ["motherName", "motherMiddleName", "motherLastName"],
-            father: ["fatherFirstName", "fatherMiddleName", "fatherLastName"],
-            guardian: ["guardianFirstName", "guardianMiddleName", "guardianLastName"],
-        };
         var phoneNumberMap = {
             mother: ["motherPhoneNumber", "motherPhoneNumberWhatsAppStatus", "motherPhoneEmergencyNumberStatus"],
             father: ["fatherPhoneNumber", "fatherPhoneNumberWhatsAppStatus", "fatherPhoneEmergencyNumberStatus"],
             guardian: ["guardianPhoneNumber","guardianPhoneNumberWhatsAppStatus","guardianEmergencyNumberStatus"],
         };
-        // 🔥 STEP 1: Check if ANY name field is present
-        var isNameFieldTriggered = eleIdsToRemove.some(id =>
-            Object.values(nameMap).flat().includes(id)
-        );
+        var parentContactFieldIds = Object.values(phoneNumberMap).flat();
         var isPhoneNumberTriggered = eleIdsToRemove.some(id =>
-            Object.values(phoneNumberMap).flat().includes(id)
+            parentContactFieldIds.includes(id)
         );
 
-        // 🔥 STEP 2: If triggered → remove ALL name fields from all groups
-        if (isNameFieldTriggered) {
-            Object.values(nameMap).forEach(arr => {
-                arr.forEach(f => fieldsToRemove.add(f));
-            });
-        }
         if (isPhoneNumberTriggered) {
             Object.values(phoneNumberMap).forEach(arr => {
                 arr.forEach(f => fieldsToRemove.add(f));
             });
         }
 
-        // 🔥 STEP 3: Normal logic (Country, DOB etc.)
         eleIdsToRemove.forEach(id => {
+            if (!parentContactFieldIds.includes(id)) {
+                fieldsToRemove.add(id);
+                fieldsToRemove.add(String(id));
+                return;
+            }
 
             var group = "";
             if (id.startsWith("mother")) group = "mother";
@@ -3508,9 +4296,6 @@ function cleanMissingFields(missingFields, eleIdsToRemove) {
             else if (id.startsWith("guardian")) group = "guardian";
 
             var suffix = id.replace(group, "");
-
-            // ❌ skip name fields (already handled above)
-            if (["Name", "FirstName", "MiddleName", "LastName"].includes(suffix)) return;
 
             groups.forEach(g => {
                 if (g !== group) {
@@ -3577,6 +4362,60 @@ function cleanMissingFields(missingFields, eleIdsToRemove) {
     
 
     return missingFields;
+}
+
+/**
+ * The modal builds each input's value from the `value` stored inside the
+ * missingFields object (getMissingProfileFields reads v['value']). When a field
+ * is saved but stays in the modal (e.g. not yet verified), its cached `value`
+ * remains stale, so an in-modal re-render shows the OLD value until a refresh
+ * re-fetches from the server. This walks missingFields and refreshes the `value`
+ * of any saved field to the current live value, keeping the UI in sync
+ * immediately. Accepts an array of eleIDs or of {eleID} items.
+ */
+function syncMissingFieldValues(missingFieldsObj, savedItems) {
+    if (!missingFieldsObj || !Array.isArray(savedItems) || savedItems.length < 1) {
+        return missingFieldsObj;
+    }
+    var savedIds = savedItems.map(function (item) {
+        return (item && typeof item === "object") ? item.eleID : item;
+    }).filter(function (id) {
+        return id !== undefined && id !== null && id !== "";
+    });
+    if (savedIds.length < 1) {
+        return missingFieldsObj;
+    }
+    var getLiveValue = function (fieldId) {
+        var $el = getProfileContactElement(fieldId);
+        if ($el && $el.length > 0) {
+            if ($el.is(":checkbox")) {
+                return $el.prop("checked") ? "Y" : "N";
+            }
+            return ($el.val() || "").toString();
+        }
+        return null;
+    };
+    Object.keys(missingFieldsObj).forEach(function (sectionName) {
+        var sectionGroups = missingFieldsObj[sectionName];
+        if (!sectionGroups) {
+            return;
+        }
+        Object.keys(sectionGroups).forEach(function (groupId) {
+            var fields = sectionGroups[groupId];
+            if (!Array.isArray(fields)) {
+                return;
+            }
+            fields.forEach(function (field) {
+                if (field && savedIds.indexOf(field.fieldId) > -1) {
+                    var liveValue = getLiveValue(field.fieldId);
+                    if (liveValue !== null) {
+                        field.value = liveValue;
+                    }
+                }
+            });
+        });
+    });
+    return missingFieldsObj;
 }
 
 
@@ -3668,6 +4507,26 @@ function getRequestForUpdateProfile(eleID, keyId, userId, studentStandardId, mod
     var requestProfileData = {};
     requestProfileData['studentStandardId'] = studentStandardId;
     requestProfileData['keyId'] = keyId;
+    var getParentNamePayloadValue = function (fieldId) {
+        var domValue = $("#" + fieldId).length > 0 ? $("#" + fieldId).val() : undefined;
+        if (fieldId === eleID) {
+            return domValue != null ? domValue : "";
+        }
+        if (domValue !== "" && domValue !== null && domValue !== undefined) {
+            return domValue;
+        }
+        var savedValue = getValue(fieldId, 1);
+        if (savedValue !== "" && savedValue !== null && savedValue !== undefined) {
+            return savedValue;
+        }
+        if (PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA.profileData) {
+            savedValue = getFieldValue(PROFILE_RESPONSE_DATA.profileData, fieldId, 1);
+            if (savedValue !== "" && savedValue !== null && savedValue !== undefined) {
+                return savedValue;
+            }
+        }
+        return domValue != null ? domValue : "";
+    };
 
     if(keyId == "customProfileFieldId"){
         requestProfileData['fieldValue1'] =  $('#' + eleID).attr("data-element-id");
@@ -3731,9 +4590,9 @@ function getRequestForUpdateProfile(eleID, keyId, userId, studentStandardId, mod
         } else if (keyId == 'nationality') {
             requestProfileData['fieldValue'] = $("#" + eleID + " option:selected").text().trim();;
         } else if (keyId == 'motherName' || keyId == "motherMiddleName" || keyId == "motherLastName") {
-            requestProfileData['firstName'] = $('#motherName').val();
-            requestProfileData['middleName'] = $('#motherMiddleName').val();
-            requestProfileData['lastName'] = $('#motherLastName').val();
+            requestProfileData['firstName'] = getParentNamePayloadValue('motherName');
+            requestProfileData['middleName'] = getParentNamePayloadValue('motherMiddleName');
+            requestProfileData['lastName'] = getParentNamePayloadValue('motherLastName');
             requestProfileData['primaryParent'] = escapeCharacters($('#relationType').val());
             requestProfileData['parentType'] = "Mother";
         } else if (keyId == 'fatherFacebook') {
@@ -3758,15 +4617,15 @@ function getRequestForUpdateProfile(eleID, keyId, userId, studentStandardId, mod
             requestProfileData['fieldValue'] = $("#guardianCountry").val();
         }
         else if (keyId == 'fatherFirstName' || keyId == "fatherMiddleName" || keyId == "fatherLastName") {
-            requestProfileData['firstName'] = $('#fatherFirstName').val();
-            requestProfileData['middleName'] = $('#fatherMiddleName').val();
-            requestProfileData['lastName'] = $('#fatherLastName').val();
+            requestProfileData['firstName'] = getParentNamePayloadValue('fatherFirstName');
+            requestProfileData['middleName'] = getParentNamePayloadValue('fatherMiddleName');
+            requestProfileData['lastName'] = getParentNamePayloadValue('fatherLastName');
             requestProfileData['primaryParent'] = escapeCharacters($('#relationType').val());
             requestProfileData['parentType'] = "Father";
         } else if (keyId == 'guardianFirstName' || keyId == "guardianMiddleName" || keyId == "guardianLastName") {
-            requestProfileData['firstName'] = $('#guardianFirstName').val();
-            requestProfileData['middleName'] = $('#guardianMiddleName').val();
-            requestProfileData['lastName'] = $('#guardianLastName').val();
+            requestProfileData['firstName'] = getParentNamePayloadValue('guardianFirstName');
+            requestProfileData['middleName'] = getParentNamePayloadValue('guardianMiddleName');
+            requestProfileData['lastName'] = getParentNamePayloadValue('guardianLastName');
             requestProfileData['primaryParent'] = escapeCharacters($('#relationType').val());
             requestProfileData['parentType'] = "Guardian";
         } else if (keyId == 'countrySectionParent') {
@@ -3878,33 +4737,33 @@ function getRequestForUpdateProfile(eleID, keyId, userId, studentStandardId, mod
             }
         }
         if (keyId == 'phoneNumber') {
-            requestProfileData['countryCode'] = $('#' + eleID).attr('data-countrycode');//$(".stuPhoneNumber .iti__active").last().attr("data-country-code");
-            requestProfileData['countryIsdCode'] = $('#' + eleID).attr('data-isd-code');//$(".stuPhoneNumber .iti__active").last().attr("data-dial-code");
-            requestProfileData['contactWhatsAppStatus'] = $('#phoneNumberWhatsAppStatus').prop('checked') ? 'Y' : 'N';
+            requestProfileData['countryCode'] = getProfileContactElement(eleID).attr('data-countrycode');//$(".stuPhoneNumber .iti__active").last().attr("data-country-code");
+            requestProfileData['countryIsdCode'] = getProfileContactElement(eleID).attr('data-isd-code');//$(".stuPhoneNumber .iti__active").last().attr("data-dial-code");
+            requestProfileData['contactWhatsAppStatus'] = getProfileContactElement('phoneNumberWhatsAppStatus').prop('checked') ? 'Y' : 'N';
         } if (keyId == 'altPhoneNumber') {
-            requestProfileData['countryCode'] = $('#' + eleID).attr('data-countrycode');//$(".stuAlternatePhoneNumber .iti__active").last().attr("data-country-code");
-            requestProfileData['countryIsdCode'] = $('#' + eleID).attr('data-isd-code');//$(".stuAlternatePhoneNumber .iti__active").last().attr("data-dial-code");
-            requestProfileData['contactWhatsAppStatus'] = $('#altPhoneNumberWhatsAppStatus').prop('checked') ? 'Y' : 'N';
+            requestProfileData['countryCode'] = getProfileContactElement(eleID).attr('data-countrycode');//$(".stuAlternatePhoneNumber .iti__active").last().attr("data-country-code");
+            requestProfileData['countryIsdCode'] = getProfileContactElement(eleID).attr('data-isd-code');//$(".stuAlternatePhoneNumber .iti__active").last().attr("data-dial-code");
+            requestProfileData['contactWhatsAppStatus'] = getProfileContactElement('altPhoneNumberWhatsAppStatus').prop('checked') ? 'Y' : 'N';
         } if (keyId == 'motherPhoneNumber') {
-            requestProfileData['countryCode'] = $('#' + eleID).attr('data-countrycode');//$(".stuParentPhoneNumber .iti__active").last().attr("data-country-code");
-            requestProfileData['countryIsdCode'] = $('#' + eleID).attr('data-isd-code');//$(".stuParentPhoneNumber .iti__active").last().attr("data-dial-code");
-            requestProfileData['contactWhatsAppStatus'] = $('#motherPhoneNumberWhatsAppStatus').prop('checked') ? 'Y' : 'N';
-            requestProfileData['emergencyContactStatus'] = $('#motherPhoneEmergencyNumberStatus').prop('checked') ? 'Y' : 'N';
+            requestProfileData['countryCode'] = getProfileContactElement(eleID).attr('data-countrycode');//$(".stuParentPhoneNumber .iti__active").last().attr("data-country-code");
+            requestProfileData['countryIsdCode'] = getProfileContactElement(eleID).attr('data-isd-code');//$(".stuParentPhoneNumber .iti__active").last().attr("data-dial-code");
+            requestProfileData['contactWhatsAppStatus'] = getProfileContactElement('motherPhoneNumberWhatsAppStatus').prop('checked') ? 'Y' : 'N';
+            requestProfileData['emergencyContactStatus'] = getProfileContactElement('motherPhoneEmergencyNumberStatus').prop('checked') ? 'Y' : 'N';
 
             requestProfileData['primaryParent'] = escapeCharacters($('#relationType').val());
             requestProfileData['parentType'] = "Mother";
         } if (keyId == 'fatherPhoneNumber') {
-            requestProfileData['countryCode'] = $('#' + eleID).attr('data-countrycode');//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-country-code");
-            requestProfileData['countryIsdCode'] = $('#' + eleID).attr('data-isd-code');//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-dial-code");
-            requestProfileData['contactWhatsAppStatus'] = $('#fatherPhoneNumberWhatsAppStatus').prop('checked') ? 'Y' : 'N';
-            requestProfileData['emergencyContactStatus'] = $('#fatherPhoneEmergencyNumberStatus').prop('checked') ? 'Y' : 'N';
+            requestProfileData['countryCode'] = getProfileContactElement(eleID).attr('data-countrycode');//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-country-code");
+            requestProfileData['countryIsdCode'] = getProfileContactElement(eleID).attr('data-isd-code');//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-dial-code");
+            requestProfileData['contactWhatsAppStatus'] = getProfileContactElement('fatherPhoneNumberWhatsAppStatus').prop('checked') ? 'Y' : 'N';
+            requestProfileData['emergencyContactStatus'] = getProfileContactElement('fatherPhoneEmergencyNumberStatus').prop('checked') ? 'Y' : 'N';
             requestProfileData['primaryParent'] = escapeCharacters($('#relationType').val());
             requestProfileData['parentType'] = "Father";
         } if (keyId == 'guardianPhoneNumber') {
-            requestProfileData['countryCode'] = $('#' + eleID).attr('data-countrycode');//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-country-code");
-            requestProfileData['countryIsdCode'] = $('#' + eleID).attr('data-isd-code');//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-dial-code");
-            requestProfileData['contactWhatsAppStatus'] = $('#guardianPhoneNumberWhatsAppStatus').prop('checked') ? 'Y' : 'N';
-            requestProfileData['emergencyContactStatus'] = $('#guardianEmergencyNumberStatus').prop('checked') ? 'Y' : 'N';
+            requestProfileData['countryCode'] = getProfileContactElement(eleID).attr('data-countrycode');//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-country-code");
+            requestProfileData['countryIsdCode'] = getProfileContactElement(eleID).attr('data-isd-code');//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-dial-code");
+            requestProfileData['contactWhatsAppStatus'] = getProfileContactElement('guardianPhoneNumberWhatsAppStatus').prop('checked') ? 'Y' : 'N';
+            requestProfileData['emergencyContactStatus'] = getProfileContactElement('guardianEmergencyNumberStatus').prop('checked') ? 'Y' : 'N';
             requestProfileData['primaryParent'] = escapeCharacters($('#relationType').val());
             requestProfileData['parentType'] = "Guardian";
         }
@@ -3931,7 +4790,7 @@ function getRequestForUpdateProfile(eleID, keyId, userId, studentStandardId, mod
 
 function validateFields(eleID, keyId, fieldValue) {
     var flag = true;
-    if (keyId == 'phoneNumber' || keyId == 'motherPhoneNumber' || keyId == 'fatherPhoneNumber' || keyId == 'guardianPhoneNumber' || keyId == 'payPalPhoneNumber') {
+    if (keyId == 'phoneNumber' || keyId == 'altPhoneNumber' || keyId == 'motherPhoneNumber' || keyId == 'fatherPhoneNumber' || keyId == 'guardianPhoneNumber' || keyId == 'payPalPhoneNumber') {
         // if(keyId=='phoneNumber'){
         var valId = "";
         var lent = $('#' + keyId).val().indexOf("-")
@@ -3958,6 +4817,11 @@ function validateFields(eleID, keyId, fieldValue) {
     else if (keyId == 'gender' || keyId == 'parentGender') {
         if (fieldValue == '' || fieldValue == undefined || fieldValue == 0) {
             showMessageTheme2(0, "Please choose gender.", '', false);
+            return false;
+        }
+    } else if (keyId == 'studentEmailId' || keyId == 'altEmailId' || keyId == 'motherEmail' || keyId == 'fatherEmail' || keyId == 'guardianEmail') {
+        if (fieldValue == '' || fieldValue == undefined || !validateEmail(fieldValue)) {
+            showMessageTheme2(0, "Either field value is invalid or empty.", '', false);
             return false;
         }
     } else if (fieldValue == '' && keyId == 'nationality') {
@@ -4123,7 +4987,7 @@ function validateFields(eleID, keyId, fieldValue) {
             }
         }
 
-    } else if (keyId == 'sendUserVerificationEmail' || keyId == 'verifyUserEmail' || keyId == 'middleName' || keyId == 'lastName' || keyId == 'switchParentStudEmailId' || keyId == 'reserveASeat' || keyId == 'bookASeatNextGradeOpted' || keyId == 'advanceGradeOpted' || "motherMiddleName" || "fatherMiddleName" || "guardianMiddleName") {
+    } else if (keyId == 'sendUserVerificationEmail' || keyId == 'verifyUserEmail' || keyId == 'middleName' || keyId == 'lastName' || keyId == 'switchParentStudEmailId' || keyId == 'reserveASeat' || keyId == 'bookASeatNextGradeOpted' || keyId == 'advanceGradeOpted' || keyId == 'motherMiddleName' || keyId == 'fatherMiddleName' || keyId == 'guardianMiddleName') {
 
     } else if (keyId == "parentEmailSmsLmsCreation") {
         if (!validPassword($("#parentPassword").val())) {
@@ -4220,7 +5084,7 @@ function applyChanges(eleID, keyId, userId, studentStandardId, roleModuleId, mod
         redirectLoginPage();
         return false;
     }
-    if (eleID != "hobbies" || eleID != "extracurricular") {
+    if (eleID != "hobbies" && eleID != "extracurricular") {
         var fieldValue = $("#" + eleID).val();
     }
     if (keyId == 'firstName' || keyId == 'middleName' || keyId == 'lastName'
@@ -4270,7 +5134,7 @@ function applyChanges(eleID, keyId, userId, studentStandardId, roleModuleId, mod
     }
     // console.log("Field Value",fieldValue)
     hideMessageTheme2('');
-    if (eleID != "hobbies") {
+    if (eleID != "hobbies" && eleID != "extracurricular") {
         if (!validateFields(eleID, keyId, fieldValue)) {
             return false;
         }
@@ -4633,6 +5497,17 @@ function applyChanges(eleID, keyId, userId, studentStandardId, roleModuleId, mod
                 
             }
             calculateSectionPercentage();
+            if (isProfileContactVerificationField(eleID)) {
+                resetProfileContactVerification(eleID);
+                updateProfileContactVerificationUI(eleID);
+            } else if (PROFILE_WHATSAPP_VERIFICATION_FIELDS.indexOf(eleID) > -1) {
+                $.each(PROFILE_PHONE_WHATSAPP_FIELD_MAP, function (phoneFieldId, whatsappFieldId) {
+                    if (whatsappFieldId === eleID) {
+                        resetProfileWhatsappVerification(phoneFieldId);
+                        updateProfileWhatsappVerificationUI(phoneFieldId);
+                    }
+                });
+            }
             if(USER_ROLE == "STUDENT"){ 
                 SAVE_BLUK_PROFILE_DATA = SAVE_BLUK_PROFILE_DATA.filter(item => item.eleID !== item.eleID);
                 var eleIdsToRemove=[];
@@ -4887,6 +5762,17 @@ function controlEditField(src, eleID, eleValue, saveType, avalWhtsAppStatusID, c
     //     $(".input-group-append.input-group-append-hide").hide();
     //     RENDER_FLAG = true;
     // }
+    if (isProfileContactVerificationField(eleID)) {
+        resetProfileContactVerification(eleID);
+        updateProfileContactVerificationUI(eleID);
+    } else if (PROFILE_WHATSAPP_VERIFICATION_FIELDS.indexOf(eleID) > -1) {
+        $.each(PROFILE_PHONE_WHATSAPP_FIELD_MAP, function (phoneFieldId, whatsappFieldId) {
+            if (whatsappFieldId === eleID) {
+                resetProfileWhatsappVerification(phoneFieldId);
+                updateProfileWhatsappVerificationUI(phoneFieldId);
+            }
+        });
+    }
 }
 function cancelChanges(eleID, eleValue, saveType, keyId, whatsAppStatusEleId, emergencyNumberStatusEleId, index){
     if(saveType == 'input'){
@@ -4949,6 +5835,17 @@ function cancelChanges(eleID, eleValue, saveType, keyId, whatsAppStatusEleId, em
     } else {
         addAndRemoveRequestToSaveBulkData(false, eleID, keyId);
     }
+    if (isProfileContactVerificationField(eleID)) {
+        resetProfileContactVerification(eleID);
+        updateProfileContactVerificationUI(eleID);
+    } else if (PROFILE_WHATSAPP_VERIFICATION_FIELDS.indexOf(eleID) > -1) {
+        $.each(PROFILE_PHONE_WHATSAPP_FIELD_MAP, function (phoneFieldId, whatsappFieldId) {
+            if (whatsappFieldId === eleID) {
+                resetProfileWhatsappVerification(phoneFieldId);
+                updateProfileWhatsappVerificationUI(phoneFieldId);
+            }
+        });
+    }
 }
 
 function cancelHobbies() {
@@ -5004,37 +5901,43 @@ function cancelCommunication() {
 
 function availableOnWhatsApp(src, eleID, eleValue, saveType, countryCode, index) {
     if (saveType == 'input') {
-        if ($("#" + eleID).val().replace(/\s+/g, '') != PROFILE_RESPONSE_UPDATED_DATA[index][eleID]) {
-            $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
+        var $input = getProfileContactElement(eleID);
+        if ($input.val().replace(/\s+/g, '') != PROFILE_RESPONSE_UPDATED_DATA[index][eleID]) {
+            $input.closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
             addAndRemoveRequestToSaveBulkData(true, eleID, eleID);
         } else if (($(src).prop("checked") ? "Y" : "N") != PROFILE_RESPONSE_UPDATED_DATA[index][$(src).attr("id")]) {
-            $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
+            $input.closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
             addAndRemoveRequestToSaveBulkData(true, eleID, eleID);
-        } else if (countryCode.toLowerCase() != PROFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]].toLowerCase() && PROFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]] != "") {
-            $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
+        } else if (countryCode.toLowerCase() != PROFILE_RESPONSE_UPDATED_DATA[index][$input.attr("data-idlist").split("_")[2]].toLowerCase() && PROFILE_RESPONSE_UPDATED_DATA[index][$input.attr("data-idlist").split("_")[2]] != "") {
+            $input.closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
             addAndRemoveRequestToSaveBulkData(true, eleID, eleID);
         } else {
-            $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "none" });
+            $input.closest(".input-group").find(".input-group-append-hide").css({ "display": "none" });
             addAndRemoveRequestToSaveBulkData(false, eleID, eleID);
         }
     }
+    resetProfileWhatsappVerification(eleID);
+    updateProfileWhatsappVerificationUI(eleID);
 }
 
 function phoneNumberDailCodeChange(eleID, eleValue, eleCurrentValue, avalWhtsAppStatusID, index) {
-    PROFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]] == "" ? PROFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]] = "us" : PROFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]];
-    if ($("#" + eleID).val().replace(/\s+/g, '') != PROFILE_RESPONSE_UPDATED_DATA[index][eleID]) {
-        $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
+    var $input = getProfileContactElement(eleID);
+    PROFILE_RESPONSE_UPDATED_DATA[index][$input.attr("data-idlist").split("_")[2]] == "" ? PROFILE_RESPONSE_UPDATED_DATA[index][$input.attr("data-idlist").split("_")[2]] = "us" : PROFILE_RESPONSE_UPDATED_DATA[index][$input.attr("data-idlist").split("_")[2]];
+    if ($input.val().replace(/\s+/g, '') != PROFILE_RESPONSE_UPDATED_DATA[index][eleID]) {
+        $input.closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
         addAndRemoveRequestToSaveBulkData(true, eleID, eleID);
-    } else if (($("#" + avalWhtsAppStatusID).prop("checked") ? "Y" : "N") != PROFILE_RESPONSE_UPDATED_DATA[index][avalWhtsAppStatusID]) {
-        $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
+    } else if ((getProfileContactElement(avalWhtsAppStatusID).prop("checked") ? "Y" : "N") != PROFILE_RESPONSE_UPDATED_DATA[index][avalWhtsAppStatusID]) {
+        $input.closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
         addAndRemoveRequestToSaveBulkData(true, eleID, eleID);
-    } else if (eleCurrentValue.toLowerCase() != PROFILE_RESPONSE_UPDATED_DATA[index][$("#" + eleID).attr("data-idlist").split("_")[2]].toLowerCase()) {
-        $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
+    } else if (eleCurrentValue.toLowerCase() != PROFILE_RESPONSE_UPDATED_DATA[index][$input.attr("data-idlist").split("_")[2]].toLowerCase()) {
+        $input.closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
         addAndRemoveRequestToSaveBulkData(true, eleID, eleID);
     } else {
-        $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "none" });
+        $input.closest(".input-group").find(".input-group-append-hide").css({ "display": "none" });
         addAndRemoveRequestToSaveBulkData(false, eleID, eleID);
     }
+    resetProfileContactVerification(eleID);
+    resetProfileWhatsappVerification(eleID);
 }
 
 function renderAndPermissionForAproval(src, keyId, userId, studentStandardId, roleModuleId, moduleId, showWarning) {
@@ -5276,14 +6179,23 @@ function overWriteProfileData(eleID, keyId) {
                     PROFILE_RESPONSE_UPDATED_DATA = updateValueByKey(PROFILE_RESPONSE_UPDATED_DATA, keyId, parseInt($("#" + keyId).val()));
                 }
                 else if (keyId == 'phoneNumber' || keyId == 'altPhoneNumber' || keyId == 'motherPhoneNumber' || keyId == 'fatherPhoneNumber' || keyId == 'guardianPhoneNumber' || keyId == 'payPalPhoneNumber') {
-                    var keyList = $("#" + keyId).attr("data-idList").split("_");
+                    var $phoneInput = getProfileContactElement(keyId);
+                    var keyList = $phoneInput.attr("data-idList").split("_");
 
                     var phoneUpdateObj = {
-                        [keyList[0]]: $("#" + eleID).val().replace(/\s+/g, ''),
-                        [keyList[1]]: $('#' + keyList[1]).prop('checked') ? 'Y' : 'N',
-                        [keyList[2]]: $('#' + eleID).attr('data-countrycode'),
-                        [keyList[3]]: $('#' + keyList[3]).prop('checked') ? 'Y' : 'N'
+                        [keyList[1]]: getProfileContactElement(keyList[1]).prop('checked') ? 'Y' : 'N',
+                        [keyList[2]]: getProfileContactElement(eleID).attr('data-countrycode')
                     };
+                    // Only write the phone number itself when the input actually has a
+                    // value. Toggling the WhatsApp/Emergency checkbox on an empty phone
+                    // must update the status flags but must NOT blank the stored number.
+                    var phoneVal = getProfileContactElement(eleID).val().replace(/\s+/g, '');
+                    if (phoneVal !== "") {
+                        phoneUpdateObj[keyList[0]] = phoneVal;
+                    }
+                    if (keyList[3]) {
+                        phoneUpdateObj[keyList[3]] = getProfileContactElement(keyList[3]).prop('checked') ? 'Y' : 'N';
+                    }
                     // console.log(phoneUpdateObj);
                     Object.keys(phoneUpdateObj).forEach(function (key) {
                         PROFILE_RESPONSE_UPDATED_DATA = updateValueByKey(
@@ -5291,6 +6203,13 @@ function overWriteProfileData(eleID, keyId) {
                             key,
                             phoneUpdateObj[key]
                         );
+                        if (PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA.profileData && PROFILE_RESPONSE_DATA.profileData.studentProfile) {
+                            PROFILE_RESPONSE_DATA.profileData.studentProfile = updateValueByKey(
+                                PROFILE_RESPONSE_DATA.profileData.studentProfile,
+                                key,
+                                phoneUpdateObj[key]
+                            );
+                        }
                     });
 
 
@@ -5300,7 +6219,15 @@ function overWriteProfileData(eleID, keyId) {
                     //     PROFILE_RESPONSE_UPDATED_DATA = updateValueByKey(PROFILE_RESPONSE_UPDATED_DATA, keyList[i],v[key]);
                     // });
                 } else {
-                    PROFILE_RESPONSE_UPDATED_DATA = updateValueByKey(PROFILE_RESPONSE_UPDATED_DATA, keyId, $("#" + keyId).val());
+                    var genericVal = $("#" + keyId).val();
+                    // Never blank a contact email/phone in the snapshot with an empty
+                    // value (e.g. when a checkbox toggle incidentally queued the row).
+                    // Non-contact fields keep their existing clear-on-empty behavior.
+                    if (isProfileContactVerificationField(keyId) && (genericVal === "" || genericVal == null)) {
+                        // keep the previously stored value
+                    } else {
+                        PROFILE_RESPONSE_UPDATED_DATA = updateValueByKey(PROFILE_RESPONSE_UPDATED_DATA, keyId, genericVal);
+                    }
                 }
                 // console.log("updated",PROFILE_RESPONSE_UPDATED_DATA);
             }
@@ -5323,6 +6250,18 @@ function overWriteProfileData(eleID, keyId) {
             sportsToKeepLable.push($(this).attr("data-title"))
         });
         PROFILE_RESPONSE_UPDATED_DATA = updateStudentData(PROFILE_RESPONSE_UPDATED_DATA, { sportsToKeep: sportsToKeepLable, }, "extracurricular");
+    } else if (PROFILE_WHATSAPP_VERIFICATION_FIELDS.indexOf(eleID) > -1) {
+        var whatsAppValue = getProfileContactElement(eleID).prop("checked") ? "Y" : "N";
+        PROFILE_RESPONSE_UPDATED_DATA = updateValueByKey(PROFILE_RESPONSE_UPDATED_DATA, eleID, whatsAppValue);
+    }
+
+    // updateValueByKey / updateStudentData return NEW objects, so
+    // PROFILE_RESPONSE_UPDATED_DATA no longer shares a reference with
+    // PROFILE_RESPONSE_DATA.profileData.studentProfile after the first patch.
+    // Re-sync them so the saved value (e.g. altEmailId via applyChanges) is present
+    // in the snapshot immediately — otherwise it only shows after a refresh.
+    if (PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA.profileData) {
+        PROFILE_RESPONSE_DATA.profileData.studentProfile = PROFILE_RESPONSE_UPDATED_DATA;
     }
 
 }
@@ -5522,18 +6461,50 @@ function isParentFilled(data, fields) {
     });
 }
 
+function getParentNonContactGroupedFieldIdsToSkip(parentData) {
+    var fieldsToSkip = new Set();
+    var countryFieldIds = ["motherCountry", "fatherCountry", "guardianCountry"];
+    var groupedFieldSets = [
+        ["motherName", "fatherFirstName", "guardianFirstName"],
+        ["motherMiddleName", "fatherMiddleName", "guardianMiddleName"],
+        ["motherLastName", "fatherLastName", "guardianLastName"],
+        countryFieldIds,
+        ["motherDob", "fatherDob", "guardianDob"],
+        ["motherFacebook", "fatherFacebook", "guardianFacebook"],
+        ["motherOccupation", "fatherOccupation", "guardianOccupation"]
+    ];
+    var isValueFilled = function (fieldId) {
+        var val = parentData?.[fieldId];
+        if (fieldId === "guardianFacebook" && (val === "" || val === null || val === undefined)) {
+            val = parentData?.gurdianFacebook;
+        }
+        if (countryFieldIds.includes(fieldId)) {
+            return val !== "" && val !== null && val !== undefined && val != "0";
+        }
+        return val !== "" && val !== null && val !== undefined;
+    };
+
+    groupedFieldSets.forEach(function (fieldSet) {
+        if (fieldSet.some(isValueFilled)) {
+            fieldSet.forEach(function (fieldId) {
+                fieldsToSkip.add(fieldId);
+            });
+        }
+    });
+
+    return fieldsToSkip;
+}
+
 function checkAndOrganizeFields(objectA, objectB) {
     var currentTimeText = $("#currentTimeForUser").text();
     var nowTime = getMilliseconds(currentTimeText);
     var result = {};
     var socialMedia = ['InstagramURL', 'YouTubeURL', 'LinkedInURL', 'FacebookURL', 'TikTokURL', 'TelegramURL','TwitterURL'];
     var countryFields = ["motherCountry", "fatherCountry", "guardianCountry"];
-    var DOBFields = ["motherDob", "fatherDob", "guardianDob"];
-    var faceBookFields = ["motherFacebook", "fatherFacebook", "guardianFacebook"];
-    var occupationFields = ["motherOccupation", "fatherOccupation", "guardianOccupation"];
     var emailFields = ["motherEmail", "fatherEmail", "guardianEmail"];
     var parentCommunication = ["pcWhatsappView", "pcCallView", "pcEmailView"];
     var phoneNumberFields = ['motherPhoneNumber','motherPhoneNumberWhatsAppStatus','motherPhoneEmergencyNumberStatus','fatherPhoneNumber','fatherPhoneNumberWhatsAppStatus','fatherPhoneEmergencyNumberStatus','guardianPhoneNumber','guardianPhoneNumberWhatsAppStatus','guardianEmergencyNumberStatus'];
+    var contactVerificationFields = PROFILE_CONTACT_VERIFICATION_FIELDS;
     objectB = objectB.sort((a, b) => {
         return Number(a.index) - Number(b.index);
     });
@@ -5549,12 +6520,9 @@ function checkAndOrganizeFields(objectA, objectB) {
             var isMotherComplete = isFullNameFilled(parentData, ["motherName", "motherMiddleName", "motherLastName"]);
             var isFatherComplete = isFullNameFilled(parentData, ["fatherFirstName", "fatherMiddleName", "fatherLastName"]);
             var isGuardianComplete = isFullNameFilled(parentData, ["guardianFirstName", "guardianMiddleName", "guardianLastName"]);
-            var isCountryComplete = isParentCountryFilled(parentData, countryFields);
-            var isDOBComplete = isParentFilled(parentData, DOBFields);
-            var isFaceBookComplete = isParentFilled(parentData, faceBookFields);
-            var isOccupationComplete = isParentFilled(parentData, occupationFields);
             var emailIdComplete = isParentFilled(parentData, emailFields);
             var phoneNumberFieldsComplte = isParentFilled(parentData, phoneNumberFields);
+            var parentNonContactGroupedFieldsToSkip = getParentNonContactGroupedFieldIdsToSkip(parentData);
             
 
             
@@ -5569,16 +6537,28 @@ function checkAndOrganizeFields(objectA, objectB) {
 
                         var groupId = item.groupName || field.groupId;
                         if(nowTime>=getMilliseconds(field.scheduleDateTime)){
+                            if (shouldSkipProfileContactField(objectA, field.fieldId)) {
+                                return;
+                            }
+                            if (!contactVerificationFields.includes(field.fieldId) && parentNonContactGroupedFieldsToSkip.has(field.fieldId)) {
+                                return;
+                            }
                             var fieldValue = getFieldValue(objectA, field.fieldId, parseInt(section.index));
+                            if (contactVerificationFields.includes(field.fieldId) && (fieldValue === '' || fieldValue === null || fieldValue === undefined)) {
+                                fieldValue = getProfileContactResponseValue(objectA, field.fieldId);
+                            }
                             var isEmpty = fieldValue === '' || fieldValue === null || fieldValue === undefined;
                             if (countryFields.includes(field.fieldId)) {
-                                if (isCountryComplete) return;
                                 isEmpty = fieldValue == "0" || fieldValue === null || fieldValue === undefined;
                             }
                             if(hasAnyCommunication && groupId == "Other" && parentCommunication.includes(field.fieldId)){
                                 return;
                             }
-                            if(isEmpty) {
+                            if(contactVerificationFields.includes(field.fieldId)) {
+                                if (!isProfileContactAlreadyVerifiedFromResponse(objectA, field.fieldId)) {
+                                    groupsWithMissingFields.add(groupId);
+                                }
+                            } else if(isEmpty) {
                                 groupsWithMissingFields.add(groupId);
                             }
                         }
@@ -5592,7 +6572,16 @@ function checkAndOrganizeFields(objectA, objectB) {
                         var groupId = item.groupName || field.groupId;
                         if(nowTime>=getMilliseconds(field.scheduleDateTime)){
                             if (groupsWithMissingFields.has(groupId)) {
+                                if (shouldSkipProfileContactField(objectA, field.fieldId)) {
+                                    return;
+                                }
+                                if (!contactVerificationFields.includes(field.fieldId) && parentNonContactGroupedFieldsToSkip.has(field.fieldId)) {
+                                    return;
+                                }
                                 var fieldValue = getFieldValue(objectA, field.fieldId, parseInt(section.index));
+                                if (contactVerificationFields.includes(field.fieldId) && (fieldValue === '' || fieldValue === null || fieldValue === undefined)) {
+                                    fieldValue = getProfileContactResponseValue(objectA, field.fieldId);
+                                }
                                 var isFieldEmpty = fieldValue === '' || fieldValue === null || fieldValue === undefined;
                                 if (countryFields.includes(field.fieldId)) {
                                     isFieldEmpty = fieldValue == "0" || fieldValue === null || fieldValue === undefined;
@@ -5603,7 +6592,9 @@ function checkAndOrganizeFields(objectA, objectB) {
                                         (field.customFieldURL === '' || field.customFieldURL === null || field.customFieldURL === undefined) &&
                                         (field.fileName === '' || field.fileName === null || field.fileName === undefined);
                                 }
-                                if (!isFieldEmpty) return;
+                                var contactAlreadyVerified = contactVerificationFields.includes(field.fieldId) && isProfileContactAlreadyVerifiedFromResponse(objectA, field.fieldId);
+                                if (contactAlreadyVerified) return;
+                                if (!isFieldEmpty && !contactVerificationFields.includes(field.fieldId)) return;
                                 // ✅ ADD THIS CONDITION
                                 if (skipAllNameFields) {
                                     var isNameField =
@@ -5614,23 +6605,11 @@ function checkAndOrganizeFields(objectA, objectB) {
 
                                     if (isNameField) return; // ❌ skip push
                                 }
-                                if (countryFields.includes(field.fieldId)) {
-                                    if (isCountryComplete) return;
-                                }
-                                if (DOBFields.includes(field.fieldId)) {
-                                    if (isDOBComplete) return;
-                                }
-                                if (faceBookFields.includes(field.fieldId)) {
-                                    if (isFaceBookComplete) return;
-                                }
-                                if (occupationFields.includes(field.fieldId)) {
-                                    if (isOccupationComplete) return;
-                                }
                                 if (emailFields.includes(field.fieldId)) {
-                                    if (emailIdComplete) return;
+                                    if (emailIdComplete && !contactVerificationFields.includes(field.fieldId)) return;
                                 }
                                 if (phoneNumberFields.includes(field.fieldId)) {
-                                    if (phoneNumberFieldsComplte) return;
+                                    if (phoneNumberFieldsComplte && !contactVerificationFields.includes(field.fieldId)) return;
                                 }
                                 if(hasAnyCommunication && groupId == "Other" && parentCommunication.includes(field.fieldId)){ return;}
                                 
@@ -5688,6 +6667,9 @@ function checkAndOrganizeFields(objectA, objectB) {
             section.parentChildList.forEach(field => {
                 var groupId = field.groupId;
                 if(nowTime>=getMilliseconds(field.scheduleDateTime)){
+                    if (shouldSkipProfileContactField(objectA, field.fieldId)) {
+                        return;
+                    }
                     if (field.fieldId === 'hobbies') {
                         var hasAllActiveHobbies = checkAllActiveHobbies(objectA);
                         if (!hasAllActiveHobbies) {
@@ -5711,8 +6693,15 @@ function checkAndOrganizeFields(objectA, objectB) {
                     } else {
                         if(field.fieldId != "socialMedia"){
                             var fieldValue = getFieldValue(objectA, field.fieldId, parseInt(section.index));
+                            if (contactVerificationFields.includes(field.fieldId) && (fieldValue === '' || fieldValue === null || fieldValue === undefined)) {
+                                fieldValue = getProfileContactResponseValue(objectA, field.fieldId);
+                            }
                             var isEmpty = fieldValue === '' || fieldValue === null || fieldValue === undefined;
-                            if (isEmpty) {
+                            if (contactVerificationFields.includes(field.fieldId)) {
+                                if (!isProfileContactAlreadyVerifiedFromResponse(objectA, field.fieldId)) {
+                                    groupsWithMissingFields.add(groupId);
+                                }
+                            } else if (isEmpty) {
                                 groupsWithMissingFields.add(groupId);
                             }
                         }
@@ -5726,9 +6715,22 @@ function checkAndOrganizeFields(objectA, objectB) {
                 var groupId = field.groupId;
                 if(nowTime>=getMilliseconds(field.scheduleDateTime)){
                     if (groupsWithMissingFields.has(groupId)) {
+                        if (shouldSkipProfileContactField(objectA, field.fieldId)) {
+                            return;
+                        }
 
                         if (!groupedFields[groupId]) {
                             groupedFields[groupId] = [];
+                        }
+                        if (contactVerificationFields.includes(field.fieldId)) {
+                            var contactFieldValue = getFieldValue(objectA, field.fieldId, parseInt(section.index));
+                            if (contactFieldValue === '' || contactFieldValue === null || contactFieldValue === undefined) {
+                                contactFieldValue = getProfileContactResponseValue(objectA, field.fieldId);
+                            }
+                            var contactFieldEmpty = contactFieldValue === '' || contactFieldValue === null || contactFieldValue === undefined;
+                            if (isProfileContactAlreadyVerifiedFromResponse(objectA, field.fieldId)) {
+                                return;
+                            }
                         }
 
                         if (field.fieldId === 'hobbies') {
@@ -6079,6 +7081,49 @@ function mergeMissingFieldsData(existingFields, incomingFields) {
     return merged;
 }
 
+function normalizeMissingFieldsData(missingFieldsData) {
+    var normalized = {};
+    $.each(missingFieldsData || {}, function (sectionName, groupsObj) {
+        var normalizedGroups = {};
+        $.each(groupsObj || {}, function (groupKey, fieldsList) {
+            var validFields = (fieldsList || []).filter(function (fieldObj) {
+                return fieldObj && fieldObj.fieldId;
+            });
+            if (validFields.length > 0) {
+                normalizedGroups[groupKey] = validFields;
+            }
+        });
+        if (Object.keys(normalizedGroups).length > 0) {
+            normalized[sectionName] = normalizedGroups;
+        }
+    });
+    return normalized;
+}
+
+function hasRenderableProfileModalContent(html) {
+    var $probe = $("<div>").html(html || "");
+    $probe.find("input[type='hidden']").remove();
+    $probe.find(".d-none, [style*='display: none']").remove();
+    return $probe.find("input, select, textarea, a.btn").length > 0;
+}
+
+function removeEmptyProfileModalSections(html) {
+    var $probe = $("<div>").html(html || "");
+    $probe.find(".form-row").each(function () {
+        if (!hasRenderableProfileModalContent($(this).html())) {
+            $(this).remove();
+        }
+    });
+    return $probe.html() || "";
+}
+
+function clearEmptyProfileModalState() {
+    missingFields = {};
+    setProfileMissingFields({});
+    invalidateProfileDataCache();
+    $("#profileFielddModal .modal-body #requestProfileForm").empty();
+}
+
 function mergeScheduleSourceData(existingScheduleData, incomingScheduleData) {
     var merged = Array.isArray(existingScheduleData) ? JSON.parse(JSON.stringify(existingScheduleData)) : [];
     var incoming = Array.isArray(incomingScheduleData) ? incomingScheduleData : [];
@@ -6086,11 +7131,25 @@ function mergeScheduleSourceData(existingScheduleData, incomingScheduleData) {
 }
 
 async function renderMissingFieldsModal(missingFieldsData, scheduleSourceData) {
-    if (!missingFieldsData || Object.keys(missingFieldsData).length < 1) {
+    missingFieldsData = normalizeMissingFieldsData(missingFieldsData);
+    missingFields = missingFieldsData;
+    setProfileMissingFields(missingFieldsData);
+    if (!hasMissingProfileFields(missingFieldsData)) {
+        if ($("#profileFielddModal").hasClass("show")) {
+            $("#profileFielddModal").modal("hide");
+        }
         return false;
     }
     var data = PROFILE_RESPONSE_DATA.profileData.studentProfile;
-    var html = getProfileModalHiddenFieldsHtml(data) + await getMissingProfileFields(missingFieldsData, PROFILE_RESPONSE_DATA);
+    var missingFieldsHtml = removeEmptyProfileModalSections(await getMissingProfileFields(missingFieldsData, PROFILE_RESPONSE_DATA));
+    if (!hasRenderableProfileModalContent(missingFieldsHtml)) {
+        clearEmptyProfileModalState();
+        if ($("#profileFielddModal").hasClass("show")) {
+            $("#profileFielddModal").modal("hide");
+        }
+        return false;
+    }
+    var html = getProfileModalHiddenFieldsHtml(data) + missingFieldsHtml;
     var allowClose = canCloseProfileModal(scheduleSourceData, missingFieldsData);
 
     if ($("#profileFielddModal").length < 1) {
@@ -6108,6 +7167,7 @@ async function renderMissingFieldsModal(missingFieldsData, scheduleSourceData) {
     });
     buindProfileElementEvent(previousSchoolElementArray);
     getInputIntel(inputPhoneNumberArray);
+    initProfileContactVerificationForModal(missingFieldsData);
     $("#profileFielddModal").modal("show");
     
     return true;
@@ -6134,15 +7194,6 @@ function getProfileScheduleFieldList(scheduleData) {
     return scheduleFieldList;
 }
 
-// function getCurrentUserTimeMillis() {
-//     var currentTimeText = $("#currentTimeForUser").text();
-//     var nowMoment = moment(currentTimeText, ['MMM DD, YYYY hh:mm:ss a', 'MMM D, YYYY hh:mm:ss a'], true);
-//     var nowTime = nowMoment.isValid() ? nowMoment.valueOf() : moment.tz(USER_TIMEZONE).valueOf();
-//     if (isNaN(nowTime)) {
-//         nowTime = moment.tz(USER_TIMEZONE).valueOf();
-//     }
-//     return nowTime;
-// }
 function getMilliseconds(timeText) {
     var formats = [
         "YYYY-MM-DD hh:mm:ss a",   // 2026-09-04 02:29:32 pm
@@ -6156,32 +7207,6 @@ function getMilliseconds(timeText) {
     }
     return date.valueOf();
 }
-
-// function getScheduleUtcToUserTimeMillis(scheduleDateTime) {
-//     if (!scheduleDateTime) {
-//         return NaN;
-//     }
-//     var cleanedScheduleDateTime = (scheduleDateTime + "").trim().replace(/\s+/g, " ");
-
-//     // Parse incoming schedule time strictly as UTC, then convert to user timezone.
-//     var scheduleMomentUtc = moment.tz(cleanedScheduleDateTime,
-//         [
-//             DISPLAY_DATE_AND_TIME,
-//             'MMM DD, YYYY hh:mm A',
-//             DATETIME_UTC_FORMATTER,
-//             DATE_UTC + 'T' + TIME_UTC,
-//             DATE_UTC + ' ' + TIME_UTC
-//         ],
-//         true,
-//         'UTC'
-//     );
-
-//     if (!scheduleMomentUtc.isValid()) {
-//         return NaN;
-//     }
-
-//     return scheduleMomentUtc.clone().tz(USER_TIMEZONE).valueOf();
-// }
 
 function getDueProfileScheduleData() {
     PROFILE_SCHEDULE_DATA = getScheduleProfileData();
@@ -6307,7 +7332,10 @@ function showScheduledMissingProfileFields() {
     }
     markScheduleItemsProcessed(dueScheduleData);
     var profileData = {
-        studentProfile: PROFILE_RESPONSE_UPDATED_DATA
+        studentProfile: PROFILE_RESPONSE_UPDATED_DATA,
+        profileContactVerification: PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA.profileData
+            ? PROFILE_RESPONSE_DATA.profileData.profileContactVerification
+            : {}
     };
     var missingScheduleFields = checkAndOrganizeFields(
         profileData,
@@ -6319,6 +7347,7 @@ function showScheduledMissingProfileFields() {
 }
 
 function hasMissingProfileFields(missingFieldsData) {
+    missingFieldsData = normalizeMissingFieldsData(missingFieldsData);
     if (!missingFieldsData) {
         return false;
     }
@@ -6377,10 +7406,12 @@ function filterMissingFieldsByScheduleSource(missingFieldsData, scheduleSourceDa
 }
 
 async function refreshProfileMissingModalStateAfterBulkSave(missingFields) {
+    missingFields = normalizeMissingFieldsData(missingFields);
+    setProfileMissingFields(missingFields);
+    invalidateProfileDataCache();
     if (!hasMissingProfileFields(missingFields)) {
         if ($("#profileFielddModal").hasClass("show")) {
             $("#profileFielddModal").modal("hide");
-            setProfileDataCallFlag(true);
         }
     }else{
         return renderMissingFieldsModal(missingFields, CURRENT_MODAL_SCHEDULE_SOURCE);
@@ -6393,15 +7424,23 @@ async function getMissingDataByUser(payload) {
     var show_Profile_Complete_Process_Flag = JSON.parse(show_Profile_Complete_Process).data.metaValue
     if(show_Profile_Complete_Process_Flag == "Y"){
         if (MODAL_SHOW_FLAG) {
+            ensureProfileContactVerificationCacheVersion();
             $("body").append(cropperImageModalContent() + viewUploadFileModal());
             PROFILE_SCHEDULE_MODAL_SHOWN = false;
             PROFILE_SCHEDULE_PROCESSED_KEYS = {};
             var isApiCalled = getProfileDataCallFlag();
             var storedData = getAllProfileFieldsData();
             var storedMissing = getMissingFields();
+            var hasStoredProfileContactVerification = storedData
+                && storedData.profileData
+                && storedData.profileData.profileContactVerification;
+            var shouldFetchFreshProfileData = !storedData
+                || Object.keys(storedData).length < 1
+                || !storedMissing
+                || (Object.keys(storedMissing).length < 1 && !isApiCalled)
+                || hasStoredProfileContactVerification;
             
-            if (!storedData || !storedMissing || Object.keys(storedMissing).length < 1 && !isApiCalled) {
-                // alert("Fresh Call")
+            if (shouldFetchFreshProfileData) {
                 PROFILE_RESPONSE_DATA = await getDashboardDataBasedUrlAndPayload(true, true, `profile-view-content-new?payload=${payload}`, '');
                 var data = PROFILE_RESPONSE_DATA.profileData.studentProfile;
                 PROFILE_RESPONSE_UPDATED_DATA = data;
@@ -6417,7 +7456,6 @@ async function getMissingDataByUser(payload) {
                 console.log("SCHEDULEL NOW STRUCTURE:", PROFILE_NOW_DATA);
                 console.log("SCHEDULEL LATER STRUCTURE:", PROFILE_SCHEDULE_DATA);
                 missingFields = {};
-                debugger
                 missingFields = checkAndOrganizeFields(PROFILE_RESPONSE_DATA.profileData, GET_FILED_DATA);
                 LOCAL_PROFILE_MISSING_FIELDS = missingFields;
                 console.log("missingFields", missingFields);
@@ -6429,87 +7467,27 @@ async function getMissingDataByUser(payload) {
                 setProfileDataCallFlag(true);
                 MISSING_PARENT_NAME_SECTION_FLAG = getProfileParentNameSaveFlag();
             }else{
-                // alert("Local Data Called")
                 LOCAL_PROFILE_MISSING_FIELDS = storedMissing;
                 missingFields=LOCAL_PROFILE_MISSING_FIELDS
                 PROFILE_RESPONSE_DATA = storedData;
                 PROFILE_RESPONSE_UPDATED_DATA=storedData.profileData.studentProfile;
             }
             
-            // if (PROFILE_NOW_DATA && PROFILE_NOW_DATA.length > 0) {
-            if(Object.keys(LOCAL_PROFILE_MISSING_FIELDS).length>0){
+            if(hasMissingProfileFields(LOCAL_PROFILE_MISSING_FIELDS)){
                 await renderMissingFieldsModal(LOCAL_PROFILE_MISSING_FIELDS, CURRENT_MODAL_SCHEDULE_SOURCE);
+            } else {
+                setProfileMissingFields({});
             }
         }
     }
 }
 
-// function extractFields(data, fields = ["fieldId"]) {
-//   const expected = {
-//     Mother: ["motherName", "motherMiddleName", "motherLastName"],
-//     Father: ["fatherFirstName", "fatherMiddleName", "fatherLastName"],
-//     Guardian: ["guardianFirstName", "guardianMiddleName", "guardianLastName"]
-//   };
-
-//   // ✅ Step 1: Sirf "Parent Information" hona chahiye
-//   const keys = Object.keys(data);
-//   if (keys.length !== 1 || !data["Parent Information"]) {
-//     return null;
-//   }
-
-//   const parentInfo = data["Parent Information"];
-
-//   // ✅ Step 2: Mother, Father, Guardian hi hone chahiye
-//   const parentKeys = Object.keys(parentInfo);
-//   if (
-//     parentKeys.length !== 3 ||
-//     !["Mother", "Father", "Guardian"].every(k => parentKeys.includes(k))
-//   ) {
-//     return null;
-//   }
-
-//   // ✅ Step 3: Har group ke andar exact fieldIds check karo
-//   for (let group in expected) {
-//     const arr = parentInfo[group];
-
-//     if (!Array.isArray(arr) || arr.length !== 3) {
-//       return null;
-//     }
-
-//     const fieldIds = arr.map(item => item.fieldId).sort();
-//     const expectedIds = expected[group].sort();
-
-//     if (JSON.stringify(fieldIds) !== JSON.stringify(expectedIds)) {
-//       return null;
-//     }
-//   }
-
-//   // ✅ Agar sab valid hai tab transform karo
-//   return {
-//     "Parent Information": Object.fromEntries(
-//       Object.entries(parentInfo).map(([key, arr]) => [
-//         key,
-//         arr.map(item => {
-//           let obj = {};
-//           fields.forEach(f => {
-//             if (item.hasOwnProperty(f)) {
-//               obj[f] = item[f];
-//             }
-//           });
-//           return obj;
-//         })
-//       ])
-//     )
-//   };
-// }
 function extractFields(data) {
   const expected = {
     Mother: ["motherName", "motherMiddleName", "motherLastName"],
     Father: ["fatherFirstName", "fatherMiddleName", "fatherLastName"],
     Guardian: ["guardianFirstName", "guardianMiddleName", "guardianLastName"]
   };
-
-  // ✅ Step 1: Sirf "Parent Information" hona chahiye
   const keys = Object.keys(data);
   if (keys.length !== 1 || !data["Parent Information"]) {
         setProfileParentNameSaveFlag(false);
@@ -6517,8 +7495,6 @@ function extractFields(data) {
   }
 
   const parentInfo = data["Parent Information"];
-
-  // ✅ Step 2: Sirf Mother, Father, Guardian hone chahiye
   const parentKeys = Object.keys(parentInfo);
   if (
     parentKeys.length !== 3 ||
@@ -6527,8 +7503,6 @@ function extractFields(data) {
         setProfileParentNameSaveFlag(false);
         return false;
   }
-
-  // ✅ Step 3: Har group ke andar exact fieldIds check karo
   for (let group in expected) {
     const arr = parentInfo[group];
 
@@ -6546,7 +7520,7 @@ function extractFields(data) {
     }
   }
   setProfileParentNameSaveFlag(true);  
-  return true; // ✅ sab valid hai
+  return true;
 }
 
 function transformScheduleDates(data) {
@@ -6569,7 +7543,6 @@ function transformScheduleDates(data) {
     var normalizeAndConvertList = function (list) {
         var normalizedList = [];
         (list || []).forEach(function (item) {
-            // API can send social media items wrapped as { socialMedia: [...] }.
             if (item && Array.isArray(item.socialMedia)) {
                 item.socialMedia.forEach(function (socialItem) {
                     normalizedList.push({
@@ -6621,6 +7594,7 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
     var socialMediaLinkAdd = false;
     var documentProofElements = ['ageProof', 'addressProof', 'parentPassportProof', 'lastAcademicProof'];
     var socialMedia = ['InstagramURL', 'YouTubeURL', 'LinkedInURL', 'FacebookURL', 'TikTokURL', 'TelegramURL','TwitterURL'];
+    var emailFields = ["motherEmail", "fatherEmail", "guardianEmail"];
     var parentPhone = ['motherPhoneNumber','motherPhoneNumberWhatsAppStatus','motherPhoneEmergencyNumberStatus','fatherPhoneNumber','fatherPhoneNumberWhatsAppStatus','fatherPhoneEmergencyNumberStatus','guardianPhoneNumber','guardianPhoneNumberWhatsAppStatus','guardianEmergencyNumberStatus'];
     var html = '';
     $.each(missingFields, function (index, value) {
@@ -6636,6 +7610,9 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
                 if (sectionTitle)
                 fieldId = v['fieldId'];
                 fieldValue = v['value'];
+                if (shouldSkipProfileContactField(PROFILE_RESPONSE_DATA.profileData, fieldId)) {
+                    return;
+                }
                 if (v && v.fieldSource === "customField" && typeof renderDynamicFieldByUserID === 'function') {
                     if(v.inputType == "date"){
                         previousSchoolElementArray.push(v.inputType);
@@ -6678,9 +7655,14 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
                         ${window[fieldId + 'Element'](fieldValue)}
                     </div>`;
                     previousSchoolElementArray.push(fieldId)
-                } else if (fieldValue == "" && (fieldId === 'phoneNumber' || fieldId === 'altPhoneNumber')) {
+                } else if (fieldId === 'phoneNumber' || fieldId === 'altPhoneNumber') {
+                    var personalPhoneData = $.extend({}, PROFILE_RESPONSE_DATA.profileData.studentProfile[0] || {});
+                    if ((personalPhoneData[fieldId] === "" || personalPhoneData[fieldId] === null || personalPhoneData[fieldId] === undefined)
+                            && fieldValue !== "" && fieldValue !== null && fieldValue !== undefined) {
+                        personalPhoneData[fieldId] = fieldValue;
+                    }
                     html += `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
-                            ${window[fieldId + 'Element'](fieldValue)}
+                            ${window[fieldId + 'Element'](personalPhoneData)}
                         </div>`;
                     var fatherPhoneIndex = PROFILE_RESPONSE_UPDATED_DATA.findIndex(obj => obj.hasOwnProperty(fieldId));
                     inputPhoneNumberArray.push({ "fieldId": fieldId, "index": fatherPhoneIndex });
@@ -6699,9 +7681,10 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
                             motherSection=false;
                         }
                         if(typeof window[fieldId + 'Element'] === 'function') {
+                            var parentFieldValue = emailFields.includes(fieldId) ? PROFILE_RESPONSE_DATA.profileData.studentProfile[1][fieldId] : fieldValue;
                             html+=
                             `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
-                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PROFILE_RESPONSE_DATA.profileData.studentProfile[1]:fieldValue)}
+                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PROFILE_RESPONSE_DATA.profileData.studentProfile[1]:parentFieldValue)}
                             </div>`;
                         }
                         
@@ -6714,9 +7697,10 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
                             fatherSection=false;
                         }
                         if(typeof window[fieldId + 'Element'] === 'function') {
+                            var parentFieldValue = emailFields.includes(fieldId) ? PROFILE_RESPONSE_DATA.profileData.studentProfile[1][fieldId] : fieldValue;
                             html+=
                             `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
-                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PROFILE_RESPONSE_DATA.profileData.studentProfile[1]:fieldValue)}
+                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PROFILE_RESPONSE_DATA.profileData.studentProfile[1]:parentFieldValue)}
                             </div>`;
                         }
                     }else if(guardianSectionFlag){
@@ -6728,9 +7712,10 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
                             guardianSection=false;
                         }
                         if(typeof window[fieldId + 'Element'] === 'function') {
+                            var parentFieldValue = emailFields.includes(fieldId) ? PROFILE_RESPONSE_DATA.profileData.studentProfile[1][fieldId] : fieldValue;
                             html+=
                             `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
-                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PROFILE_RESPONSE_DATA.profileData.studentProfile[1]:fieldValue)}
+                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PROFILE_RESPONSE_DATA.profileData.studentProfile[1]:parentFieldValue)}
                             </div>`;
                         }
                     }
@@ -6773,14 +7758,6 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
             html +=`${classPreferredTimingInformationForm()}`
         }
         if (index == "Sport & Extra Curriculars") {
-            var indexNum = PROFILE_RESPONSE_UPDATED_DATA.findIndex(obj => obj.hasOwnProperty('joinedSportsAndECList'));
-            // if (PROFILE_RESPONSE_UPDATED_DATA[indexNum].joinedSportsAndECList.length < 3) {
-            //     html +=
-            //         `<div class="col-12">
-            //         ${participateSportActivitiesElement(PROFILE_RESPONSE_UPDATED_DATA[indexNum], PROFILE_RESPONSE_DATA.studentStandardId, "requestProfileForm")}
-            //     </div>`;
-            //     sportEventDatepickerFlag = true;
-            // }
             if (fieldValue != "" && fieldId == "extracurricularActivities") {
                 html +=
                     `<div class="col-12">
@@ -6790,7 +7767,6 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
         }
         html += `</div>`;
     });
-    // console.log(html);
     return html;
 }
 
@@ -6839,14 +7815,14 @@ function profileFormSectionTile(sectionName) {
         </h5>`
     };
 
-    return titleMap[sectionName] || ""; // Return empty string if not found
+    return titleMap[sectionName] || "";
 }
 
 
 function getInputIntel(InputIntelList) {
     if (InputIntelList.length > 0) {
         $.each(InputIntelList, function (i, v) {
-            initializeIntelInput('requestProfileForm', `${v.fieldId}`, `iti${v.fieldId}`, '', 'selfSave', `${v.fieldId}WhatsAppStatus`, parseInt(v.index))
+            initializeIntelInput('requestProfileForm', `${v.fieldId}`, `iti${v.fieldId}`, getProfileContactCountryCode(v.fieldId), 'selfSave', `${v.fieldId}WhatsAppStatus`, parseInt(v.index))
         });
     }
 }
@@ -6892,17 +7868,19 @@ function buindProfileElementEvent(buindProfileElementEvent) {
                 });
             } else if (v == "previousCurrentSchoolGraduationYear") {
                 var currentYear = new Date().getFullYear();
-                $("#" + v).datepicker({
+                $("#" + v).datepicker("destroy").datepicker({
                     format: "yyyy",
                     viewMode: "years",
                     minViewMode: "years",
                     autoclose: true,
+                    container: "#profileFielddModal .modal-body",
                     endDate: new Date(currentYear, 11, 31)
                 });
             }else if(v == "motherDob" || v == "fatherDob" || v == "guardianDob" || v == "weddingAnniversaryDate"){
-                $("#motherDob, #fatherDob, #guardianDob, #weddingAnniversaryDate, .custom-date-fields").datepicker({
+                $("#motherDob, #fatherDob, #guardianDob, #weddingAnniversaryDate, .custom-date-fields").datepicker("destroy").datepicker({
                     format: 'M dd, yyyy',
                     autoclose: true,
+                    container: "#profileFielddModal .modal-body"
                 }).on('changeDate', function (e) {
                     // Fire `onchange="controlEditField(...)"` only for user selection
                     // (avoid triggering during initial `datepicker('update', ...)` on page load)
@@ -6911,9 +7889,10 @@ function buindProfileElementEvent(buindProfileElementEvent) {
                     }
                 });
             }else if(v == "date" && !CUSTOM_DATEPICKER_FIELD_FLAG){
-                $(".custom-date-fields").datepicker({
+                $(".custom-date-fields").datepicker("destroy").datepicker({
                     format: 'M dd, yyyy',
                     autoclose: true,
+                    container: "#profileFielddModal .modal-body"
                 }).on('changeDate', function (e) {
                     // Fire `onchange="controlEditField(...)"` only for user selection
                     // (avoid triggering during initial `datepicker('update', ...)` on page load)
@@ -6975,8 +7954,14 @@ var getProfileDateInterVal = function () {
         if (ACTIVITY_CLASS_START_TIME.length > 0) {
             if (getFlag()) {
                 if(missingFields != undefined){
-                    if (!$('#profileFielddModal').hasClass("show") && Object.keys(missingFields).length>0) {
-                        $("#profileFielddModal").modal("show");
+                    if (!$('#profileFielddModal').hasClass("show") && hasMissingProfileFields(missingFields)) {
+                        var currentProfileModalBodyHtml = removeEmptyProfileModalSections($("#profileFielddModal .modal-body #requestProfileForm").html());
+                        $("#profileFielddModal .modal-body #requestProfileForm").html(currentProfileModalBodyHtml);
+                        if (hasRenderableProfileModalContent(currentProfileModalBodyHtml)) {
+                            $("#profileFielddModal").modal("show");
+                        } else {
+                            clearEmptyProfileModalState();
+                        }
                     }
                 }
                 var now = new Date().getTime();
@@ -7023,12 +8008,15 @@ function getFlag() {
             }
         }
     }
-    return true;  // If no time ranges match, return true
+    return true;
 }
 
 function stopProfileDataInterval(modalID) {
     clearInterval(intervalId);
     $("#" + modalID).modal("hide");
+    // Invalidate the cached snapshot so re-opening / refreshing pulls fresh data
+    // from the server rather than reusing a stale pre-edit copy.
+    invalidateProfileDataCache();
 }
 
 
@@ -7038,12 +8026,12 @@ function closeProfileModal() {
 
 
 function setProfileMissingFields(data) {
-    localStorage.setItem("localStorage_Profile_Missing_Fields", JSON.stringify(data));
+    localStorage.setItem("localStorage_Profile_Missing_Fields", JSON.stringify(normalizeMissingFieldsData(data)));
 }
 
 function getMissingFields() {
     var data = localStorage.getItem("localStorage_Profile_Missing_Fields");
-    return data ? JSON.parse(data) : {};
+    return data ? normalizeMissingFieldsData(JSON.parse(data)) : {};
 }
 function setAllProfileFieldsData(data) {
     localStorage.setItem("ALL_PROFILE_DATA", JSON.stringify(data));
@@ -7061,6 +8049,20 @@ function setProfileDataCallFlag(flag) {
 function getProfileDataCallFlag() {
     var data = localStorage.getItem("IS_PROFILE_DATA_CALL");
     return data ? JSON.parse(data) : false;
+}
+
+/**
+ * Invalidates the cached profile snapshot so the next getMissingDataByUser()
+ * call re-fetches fresh data from the server (profile-view-content-new) instead
+ * of rebuilding the modal from the stale localStorage copy. Call this after a
+ * successful bulk save so the user sees exactly what was persisted after refresh.
+ */
+function invalidateProfileDataCache() {
+    localStorage.removeItem("ALL_PROFILE_DATA");
+    localStorage.removeItem("localStorage_Profile_Missing_Fields");
+    localStorage.removeItem("PROFILE_NOW_DATA");
+    localStorage.removeItem("PROFILE_SCHEDULE_DATA");
+    setProfileDataCallFlag(false);
 }
 
 function setNowProfileFieldsData(data) {
