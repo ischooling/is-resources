@@ -1892,8 +1892,8 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                     }
                     html+='<br/>';
                     if(leads.phoneNoAlter!=''){
-                      html+=(leads.phoneNoAlter!=''?leads.isdCodeAlter:'') +' '+(leads.phoneNoAlter!=''?leads.phoneNoAlter:'') ;
-                      html+=`<a href="javascript:void(0)" onclick="return confirmAndOpenWhatsAppChat('${paymentReportEscapeSingleQuote((leads.gfname!=''?leads.gfname:'N/A') +' '+  leads.gmname +' '+ leads.glname || '')}','${paymentReportEscapeSingleQuote(leads.altrphoneIsd!=''?leads.altrphoneIsd:'')}','${leads.leadId}','${paymentReportEscapeSingleQuote(leads.leadRightStartTimeCall||'')}','${paymentReportEscapeSingleQuote(leads.leadNo||'')}')" target="_target"> <img src="${PATH_FOLDER_IMAGE2}watsapp-icon.png" width="16px" /></a>`;
+                      html+=(leads.phoneNoAlter!=''?leads.isdCodeAlter:'') +' '+(leads.phoneNoAlter!=''?leads.phoneNoAlter:'');
+                      html+=`<a href="javascript:void(0)" onclick="return confirmAndOpenWhatsAppChat('${paymentReportEscapeSingleQuote((leads.gfname!=''?leads.gfname:'N/A') +' '+  leads.gmname +' '+ leads.glname || '')}','${paymentReportEscapeSingleQuote((leads.phoneNoAlter!=''?leads.isdCodeAlter:'') +' '+(leads.phoneNoAlter!=''?leads.phoneNoAlter:''))}','${leads.leadId}','${paymentReportEscapeSingleQuote(leads.leadRightStartTimeCall||'')}','${paymentReportEscapeSingleQuote(leads.leadNo||'')}')" target="_target"> <img src="${PATH_FOLDER_IMAGE2}watsapp-icon.png" width="16px" /></a>`;
                       html += `
                           <a href="javascript:void(0);" 
                             onclick="callLeadViaCallHippo('${leaddata.allowCallhippoService}','${leaddata.callhippoBypassNumber}','${leads.phoneIsd || ''}','${leads.isdCode || ''}','${leads.phone || ''}')"
