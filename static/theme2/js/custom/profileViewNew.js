@@ -1897,10 +1897,16 @@ async function profileViewPageLoadEvent(data) {
     });
     $("#grade").val(data[2].gradeId).trigger("change");
     $("#changeLearingProgramGradeModal #standardId").val(data[2].gradeId).trigger("change");
-    $("#academicYearStartDate").datepicker({
+    var academicYearStartDateOptions = {
         format: 'M dd, yyyy',
         autoclose: true,
-    });
+    };
+    if (data[2].showSkipSystemTraining) {
+        var skipSystemTrainingMinDate = new Date();
+        skipSystemTrainingMinDate.setDate(skipSystemTrainingMinDate.getDate() + 1);
+        academicYearStartDateOptions.startDate = skipSystemTrainingMinDate;
+    }
+    $("#academicYearStartDate").datepicker(academicYearStartDateOptions);
     $("#enrollmentDate").datepicker({
         format: 'M dd, yyyy',
         autoclose: true,

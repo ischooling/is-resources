@@ -1200,8 +1200,16 @@ function showContentByStep(academicYearSelectedType, systemTrainingSelectedType,
 					$(".school-system-training-step, .moveToDashboard-step").hide();
 				}
 			}else{
-				$(".school-system-training-step").show();
-				$(".academic-step, .moveToDashboard-step").hide();
+				// Same rule as the non-FRESH/FLEX branch above: only force the training step
+				// when systemTrainingSelectedType is actually 'N' (not yet decided). If it's
+				// 'Skipped' (or 'Y'), don't re-show the training choose step here.
+				if(systemTrainingSelectedType=='N'){
+					$(".school-system-training-step").show();
+					$(".academic-step, .moveToDashboard-step").hide();
+				}else{
+					$(".academic-step").show();
+					$(".school-system-training-step, .moveToDashboard-step").hide();
+				}
 			}
 			
 			$("#pageHeading").text("let's get started!");
@@ -1280,16 +1288,18 @@ function showContentByStep(academicYearSelectedType, systemTrainingSelectedType,
 			});
 		}
 		else if(academicYearSelectedType == "Y" && (systemTrainingSelectedType == 'Y' || systemTrainingSelectedType == 'Skipped')){
+			if(systemTrainingSelectedType == 'Skipped'){
+				// Skipped: don't show the "You're All Set" confirmation panel with a manual
+				// Go to Dashboard button - go straight to the dashboard, same as the server-side
+				// redirects already in place for Skipped status.
+				$("#skipSystemTraining").modal("hide");
+				gotoDashboard();
+				return;
+			}
 			$(".moveToDashboard-step").show();
 			$(".school-system-training-step, .academic-step").hide();
-			if(systemTrainingSelectedType!='Skipped'){
-				$("#systemTrainingDateAndTimeLabel").text(systemTrainingDateTime);
-				$(".batchAcademicYear").hide();
-			}else{
-				customLoader(false);
-				$("#skipSystemTraining").modal("hide");
-				$(".first-line, .seconde-line, .batchAcademicYear").hide();
-			}
+			$("#systemTrainingDateAndTimeLabel").text(systemTrainingDateTime);
+			$(".batchAcademicYear").hide();
 			$("#pageHeading").text("very well done. Let's get started!");
 			$("#confirmationAcademicYearModal").modal("hide");
 	
@@ -1628,9 +1638,6 @@ function validateRequestForsaveBuzzSemester(formId){
 	}else if ($("#"+formId+" #semesterDateYear").val()==null || $("#"+formId+" #semesterDateYear").val().trim()=='') {
 		mesg='Academic Year is required';
 		status= false;
-	}else if ($("#"+formId+" #weeklyReportFrequency").val()==null || $("#"+formId+" #weeklyReportFrequency").val().trim()=='') {
-		mesg='Please select week day';
-		status= false;
 	}else{
 		$('#studentEnrollSemester > tbody  > tr').each(function() {
 			var sessionSubjectDTO = {}
@@ -1695,22 +1702,28 @@ function validateRequestForsaveBuzzSemester(formId){
 
 //	return status;
 }
-function saveBuzzSemester(formId, moduleId, studentStandardId, saveAndSyncFlag) {
+function saveBuzzSemester(formId, moduleId, studentStandardId, saveAndSyncFlag, onComplete) {
 	hideModalMessage();
 	if(!validateRequestForsaveBuzzSemester(formId)){
+		if (typeof onComplete === 'function') { onComplete(false); }
 		return false;
 	}
-	var flag=false;
+	// Made async (was async:false) so the browser can actually paint the loader while this
+	// request is in flight - a synchronous request freezes the tab and the loader never gets a
+	// chance to render at all. Callers now get the save result via the onComplete callback
+	// instead of a synchronous return value; the save/validation/message/modal-close/sync-popup
+	// behavior below is unchanged.
+	customLoader(true);
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForHTML('dashboard','save-student-buzz-semester'),
 		data : JSON.stringify(getRequestForSaveBuzzSemester(formId)),
 		dataType : 'json',
-		async : false,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2') {
 				showMessageTheme2(0, data['message']);
+				if (typeof onComplete === 'function') { onComplete(false); }
 				return false;
 			} else {
 				showMessageTheme2(1, data['message']);
@@ -1730,22 +1743,22 @@ function saveBuzzSemester(formId, moduleId, studentStandardId, saveAndSyncFlag) 
 				/*$('#studentSemesterStartDateEntryModel').modal('hide');
 				setTimeout(function(){ callDashboardPageSchool('2b','studentTab','','&schoolId='+SCHOOL_ID); }, 1000);*/
 			}
-			flag= true;
+			if (typeof onComplete === 'function') { onComplete(true); }
 		},
 		error : function(e) {
 			console.log("ERROR : ", e);
+			if (typeof onComplete === 'function') { onComplete(false); }
 		}
 	});
-	return flag;
 }
 
 function saveAndSyncBuzzSemester(formId, moduleId, studentStandardId, courseProviderId, saveAndSyncFlag) {
-	let status = saveBuzzSemester(formId, moduleId, studentStandardId, saveAndSyncFlag);
-	if(status){
-		let syncFunc = 'syncAll("'+formId+'", "STUDENT", '+courseProviderId+')';
-		showWarningMessageShow('Are you sure you want to sync this data? Syncing this data will create a new enrollment/update the enrollment for the student in the LMS?', syncFunc);
-	}
-	
+	saveBuzzSemester(formId, moduleId, studentStandardId, saveAndSyncFlag, function(status){
+		if(status){
+			let syncFunc = 'syncAll("'+formId+'", "STUDENT", '+courseProviderId+')';
+			showWarningMessageShow('Are you sure you want to sync this data? Syncing this data will create a new enrollment/update the enrollment for the student in the LMS?', syncFunc);
+		}
+	});
 }
 function getRequestForSaveBuzzSemester(formId){
 	var request = {};
@@ -1759,7 +1772,6 @@ function getRequestForSaveBuzzSemester(formId){
 	studentSesssionDTO['studentStandardId']=$("#"+formId+" #studentStandardId").val().trim();
 	studentSesssionDTO['standardId']=$("#"+formId+" #standardId").val().trim();
 	studentSesssionDTO['semesterDateStart']=$("#"+formId+" #semesterDateStart").val().trim();
-	studentSesssionDTO['frequencyDayId']=$("#"+formId+" #weeklyReportFrequency").val().trim();
 	studentSesssionDTO['academicYear']=$("#"+formId+" #semesterDateYear").val().trim();
 
 	studentSesssionDTO['standardId']=$("#"+formId+" #standardId").val().trim();
@@ -1769,8 +1781,11 @@ function getRequestForSaveBuzzSemester(formId){
 	$('#studentEnrollSemester > tbody  > tr').each(function() {
 		 var sessionSubjectDTO = {}
 		 var sessionSubjectId = $(this).attr("id");
-		 var sessionId = $(this).find(".sessionName option:selected").attr("data-sessionId");//$(this).find(".sessionId").val().trim();
-		 var sessionName = $(this).find(".sessionName").val().trim();
+		 // Session A/B is now hidden from Manage Enrollment (hardcoded to 'A' below) - the dropdown
+		 // still exists in the DOM (hidden) for its data-sessionId attribute, but we no longer read
+		 // its selected value since the column is no longer user-editable.
+		 var sessionId = $(this).find('.sessionName option[value="A"]').attr("data-sessionId");
+		 var sessionName = 'A';
 		 var subjectId = $(this).find(".subjectId").val().trim();
 		 var lmsSubjectId = $(this).find(".lmsSubjectId").val().trim();
 		 var lmsSubjectStart = $(this).find(".lmsSubjectStart").val().trim();
@@ -1784,7 +1799,7 @@ function getRequestForSaveBuzzSemester(formId){
 				 lmsSubjectId=lmsSubjectIdMove;
 			 }
 		 }
-		 var subjectStatusDate = $(this).find(".subjectStatusDate").val().trim();
+		//  var subjectStatusDate = $(this).find(".subjectStatusDate").val().trim();
 		 var lmsSubjectReference = $(this).find(".lmsSubjectReference").val().trim();
 
 		 sessionSubjectDTO['sessionSubjectId']=sessionSubjectId;
@@ -1799,7 +1814,7 @@ function getRequestForSaveBuzzSemester(formId){
 		 sessionSubjectDTO['endDate']=lmsSubjectEnd;
 		 sessionSubjectDTO['sessionActive']=sessionActive;
 		 sessionSubjectDTO['subjectStatus']=subjectStatus;
-		 sessionSubjectDTO['statusDate']=subjectStatusDate;
+		//  sessionSubjectDTO['statusDate']=subjectStatusDate;
 		 sessionSubjectDTO['lmsSubjectReference']= lmsSubjectReference
 		 sessionSubject.push(sessionSubjectDTO);
 		 if(subjectStatus=='A'){

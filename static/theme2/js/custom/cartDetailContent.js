@@ -130,12 +130,19 @@ function cartDetailContent(data, userId){
 }
 
 function cartCountContent(data, userId){
+    // Only show the cart button in the header when there's actually something in the cart -
+    // data can arrive either as an array of cart items (use .length) or as an object with a
+    // cartCount field, depending on which endpoint populated it.
+    var count = (Array.isArray(data) ? data.length : (data && data.cartCount)) || 0;
+    if (count <= 0) {
+        return '';
+    }
     var html=
         `<a href="javascript:void(0);" onclick="renderCardDetailsContent(${userId});" class="p-0 mr-2 btn" data-toggle="tooltip" data-placement="auto" title="Cart"> 
            <span class="icon-wrapper icon-wrapper-alt rounded-circle"> 
                 <span class="icon-wrapper-bg bg-warning"></span> 
                 <i class="fa fa-shopping-cart text-warning "></i> 
-                <span id="cartHeaderCount" class="badge  badge badge-pill text-white badge-warning position-absolute ml-4 p-1">${data.length || data.cartCount}</span> 
+                <span id="cartHeaderCount" class="badge  badge badge-pill text-white badge-warning position-absolute ml-4 p-1">${count}</span> 
            </span> 
          </a>`
     return html;

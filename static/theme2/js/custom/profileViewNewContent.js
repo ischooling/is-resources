@@ -1921,6 +1921,7 @@ function academicInformation(data) {
                             </span>
                             <span>3. Academic Information</span>
                             <div class="ml-auto">
+                                ${skipSystemTrainingHeaderControl(data)}
                                 ${data.standardStatus == 0 ?
                                     `<a href="javascript:void(0)" onclick="callWithSession('${data.studentIdCardDownloadUrl}');" class="btn btn-sm btn-success mr-1">Download Student ID Card</a>` : ``
                                 }
@@ -2306,6 +2307,48 @@ function academicYearStartDateElement(data) {
         </div>
     </div>`;
     return html;
+}
+
+// Admin-only (gated server-side by showSkipSystemTraining): lets a completed student
+// (semester start date not yet set) have their System Training marked Skipped directly,
+// via the same endpoint the student's own self-skip flow uses
+// (StudentOrientationController#saveOrientSkipStatus). No Academic Year Start Date is
+// read or sent here - that field stays disabled/untouched - a confirm popup is shown
+// before the skip is actually saved.
+function skipSystemTrainingHeaderControl(data) {
+    if (data.showSkipSystemTraining) {
+        return `<a href="javascript:void(0)" id="skipSystemTrainingBtn" class="btn btn-sm btn-primary mr-1" onclick="skipSystemTrainingFromProfile();">Skip System Training</a>`;
+    } else if ((data.systemTrainingStatus || "").toLowerCase() === "skipped") {
+        return `<span id="skipSystemTrainingBtn" class="mr-1 font-weight-semi-bold text-dark" style="font-size:12px">System Training Skipped</span>`;
+    }
+    return `<span id="skipSystemTrainingBtn"></span>`;
+}
+
+function skipSystemTrainingFromProfile() {
+    showWarningMessageShow("Are you sure you want to skip system training for this student?", "confirmSkipSystemTrainingFromProfile();");
+}
+
+function confirmSkipSystemTrainingFromProfile() {
+    var reqData = {};
+    reqData['studentStandardId'] = $("#timeStuStandardId").val();
+    reqData['schoolId'] = SCHOOL_ID;
+    $.ajax({
+        type: "POST",
+        contentType: APPLICATION_JSON_VALUE,
+        url: getURLFor('orientation', 'save-orientation-skip-status'),
+        data: JSON.stringify(reqData),
+        dataType: 'json',
+        cache: false,
+        timeout: 600000,
+        success: function (response) {
+            if (response['status'] == '0' || response['status'] == '2' || response['status'] == 'FAILED') {
+                showMessageTheme2(0, response['message'], '', true);
+            } else {
+                showMessageTheme2(1, response['message'], '', false);
+                $("#skipSystemTrainingBtn").replaceWith('<span id="skipSystemTrainingBtn" class="mr-1 font-weight-semi-bold text-dark" style="font-size:12px">System Training Skipped</span>');
+            }
+        }
+    });
 }
 
 function enrollmentDateElement(data) {
