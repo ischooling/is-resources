@@ -349,7 +349,7 @@ function paymentOverDueCard(details){
     var cardsHtml = "";
     var firstDueDate = "";
     var pendingCardIndex = 0;
-    var chatBaseUrl = (typeof CHAT_URL !== "undefined" && CHAT_URL) ? CHAT_URL : "https://is-chat-react.vercel.app";
+    var chatBaseUrl = (typeof CHAT_URL !== "undefined" && CHAT_URL) ? CHAT_URL : "https://support.internationalschooling.org";
     var chatSupportUrl = chatBaseUrl + "/onboarding-support?uuid=" + UNIQUEUUID;
 
     for (var i = 0; i < dueFees.length; i++) {

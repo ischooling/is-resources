@@ -583,7 +583,7 @@ function getMobileBottomControlViewContent(){
                 };
                 const jsonString = JSON.stringify(data);
                 const chatPayload = btoa(unescape(encodeURIComponent(jsonString)));
-                const chatUrl = `${CHAT_URL}/signIn?uuid=${UNIQUEUUID}+&p=` + chatPayload;
+                const chatUrl = `${CHAT_URL}/sign-in?uuid=${UNIQUEUUID}+&p=` + chatPayload;
                 html += `<a href="${chatUrl}" type="button" target="_blank" class="position-relative">
                             <img src="${PATH_FOLDER_IMAGE2}icon/sidebar/Wati.png" style="width:30px"/>
                         </a>`;

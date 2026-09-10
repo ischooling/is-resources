@@ -1758,11 +1758,17 @@ function successFailedWatiMessagesModal(allData) {
 	
 	sData = [];
 	fData = [];
+	// Gupshup only: always show as sent — the per-recipient failed split is
+	// intentionally not surfaced there; real delivery status comes back later
+	// via the WhatsApp status webhook, not this response. Wati keeps the real
+	// per-recipient success/failed split below.
+	var isGupshupResult = (typeof STUDENT_BROADCAST_PROVIDER !== 'undefined')
+		&& STUDENT_BROADCAST_PROVIDER === 'GUPSHUP';
 	if(allData!=null && allData!=undefined){
 		//console.log('having data');
 		allData.forEach(leadElement => {
 			// $("#wati_logs_link_"+leadElement.leadID).show();
-			if(leadElement.status=='success'){
+			if(isGupshupResult || leadElement.status=='success'){
 				sDataObj={};
 				//console.log("leadElement at successFailedWatiMessagesModal :: " + leadElement);
 				sDataObj["phoneNumber"]=leadElement.phoneNumber;
@@ -1784,7 +1790,7 @@ function successFailedWatiMessagesModal(allData) {
 				fData.push(fDataObj);
 			}
 		});
-	}	
+	}
 	var html = 
 			`
 			<style>

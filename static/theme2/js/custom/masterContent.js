@@ -2922,6 +2922,9 @@ function getAnnouncementAndNewsContent() {
   var showOnlyReleaseNote = SHOW_ONLY_RELEASE_NOTE === true;
   var html = 
     `<div class="right_fixed_action">
+      <!-- Deliberately still the old app. Diary was not migrated and lives
+           there; the new support app serves no /iframe/diary-bridge, so
+           "fixing" this URL alongside the others would silently break diary. -->
       <iframe src="https://is-chat-react.vercel.app/iframe/diary-bridge?userId=${USER_ID}"  style="height:0px"/>`;
       if(!showOnlyReleaseNote && USER_ROLE != "DIRECTOR"){
         html+=
@@ -2946,12 +2949,31 @@ function getAnnouncementAndNewsContent() {
         var data = {u: UNIQUEUUID, e: DEPLOYMENT_MODE, d: new Date().getTime()};
         var jsonString = JSON.stringify(data);
         var chatPayload = btoa(unescape(encodeURIComponent(jsonString)));
-        var chatUrl = `${CHAT_URL}/signIn?uuid=${UNIQUEUUID}+&p=` + chatPayload;
+        var chatUrl = `${CHAT_URL}/sign-in?uuid=${UNIQUEUUID}+&p=` + chatPayload;
         html += 
           `<a href="${chatUrl}" type="button" target="_blank" class="custom-btn-open-options btn btn-primary" data-toggle="tooltip" title="Talk to Us!">
               <i class="fa fa-comments fa-w-16"></i>
               <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="chatUnseenCoutn"></span>
           </a>`;
+
+        // Badge rendered means badge populated. The count was fetched from the
+        // student, teacher and parent dashboards and from nowhere else, while
+        // this markup renders for every role except DIRECTOR — so a member of
+        // staff got the badge and never got a number in it. Monika, an admin
+        // with one unread message, saw an empty pill.
+        //
+        // Asking here rather than adding a fourth role-specific caller: the two
+        // facts are now one line apart and cannot drift again. The existing
+        // three callers become redundant rather than wrong — they refresh the
+        // same figure — and can be removed separately.
+        //
+        // Deferred by a tick because `html` is injected into the DOM by the
+        // caller, synchronously, after this function returns.
+        if (typeof getChat === "function") {
+          setTimeout(function () {
+            getChat(typeof GLOBAL_EMAIL !== "undefined" ? GLOBAL_EMAIL : "", USER_ROLE);
+          }, 0);
+        }
       }
       if (
         !showOnlyReleaseNote &&

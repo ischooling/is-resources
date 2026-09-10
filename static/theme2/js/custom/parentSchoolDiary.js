@@ -36,10 +36,27 @@ try {
 if(USER_ROLE == "TEACHER" && !SCHOOL_DIARY_INITIATES_ROLE){
     SCHOOL_DIARY_INITIATES_ROLE = true;
 }
+/* The diary's own host, which is not the chat host any more: chat is moving to
+   the new support app and the diary is staying put, because /iframe/diary-bridge
+   exists only in the old one. DIARY_URL is its own configuration key
+   (application-*.yml -> DIARY_URL -> CommonUtil.getDiaryUrl), and it falls back
+   to CHAT_URL so an environment that has not been given the key behaves exactly
+   as it did before the split.
+
+   The iframe src and the postMessage origin check below MUST come from the same
+   value. Point the frame at one host and check origins against another and every
+   badge update is dropped in silence -- no 404, no console error, nothing. */
+function diaryBridgeHost(){
+    if(typeof DIARY_URL !== "undefined" && DIARY_URL) return DIARY_URL;
+    if(typeof CHAT_URL !== "undefined" && CHAT_URL) return CHAT_URL;
+    return null;
+}
+
 function diaryBridgeResolveChatOrigin(){
     try{
-        if(typeof CHAT_URL === "undefined" || !CHAT_URL) return null;
-        return new URL(CHAT_URL, window.location.href).origin;
+        var host = diaryBridgeHost();
+        if(!host) return null;
+        return new URL(host, window.location.href).origin;
     }catch(e){
         return null;
     }
@@ -73,7 +90,7 @@ function diaryBridgeEnsureVisibilityObserver(){
 function diaryBridgeEnsureConnected(){
     if(DIARY_BRIDGE_CONNECTED) return;
     if(typeof USER_ID === "undefined" || USER_ID === null || USER_ID === "") return;
-    if(typeof CHAT_URL === "undefined" || !CHAT_URL) return;
+    if(!diaryBridgeHost()) return;
 
     if(!document.body){
         if(DIARY_BRIDGE_CONNECT_SCHEDULED) return;
@@ -96,7 +113,7 @@ function diaryBridgeEnsureConnected(){
         var iframe = document.createElement("iframe");
         iframe.id = DIARY_BRIDGE_IFRAME_ID;
         iframe.src =
-          `${CHAT_URL}/iframe/diary-bridge?userId=${encodeURIComponent(USER_ID)}` +
+          `${diaryBridgeHost()}/iframe/diary-bridge?userId=${encodeURIComponent(USER_ID)}` +
           `&origin=${encodeURIComponent(window.location.origin)}`;
         iframe.style.display = "none";
         document.body.appendChild(iframe);

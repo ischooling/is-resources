@@ -132,7 +132,7 @@ async function renderMigrationDetailsOptionContent(data) {
 
 function migrationDetailsOptionContent(data) {
 	console.log(data)
-	var chatBaseUrl = (typeof CHAT_URL !== "undefined" && CHAT_URL) ? CHAT_URL : "https://is-chat-react.vercel.app";
+	var chatBaseUrl = (typeof CHAT_URL !== "undefined" && CHAT_URL) ? CHAT_URL : "https://support.internationalschooling.org";
     	var chatSupportUrl = chatBaseUrl + "/onboarding-support?uuid=" + UNIQUEUUID;
 	var studentCredit=data.studentCredit;
 	var disabledAdmission=data.disabledAdmission;

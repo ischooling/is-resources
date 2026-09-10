@@ -69,7 +69,7 @@ function needHelpSlideContent(standardId){
 					+'</div>'
 					+'<div class="d-flex text-center mt-2">'
 						if(CHAT_URL != ''){
-							+'<a href="'+CHAT_URL+'/signIn?uuid='+UNIQUEUUID+'" target="_blank" class="btn btn-primary btn-outline-white mr-2 w-100" onclick="needHelpContentShow(false)">Yes</a>'
+							+'<a href="'+CHAT_URL+'/sign-in?uuid='+UNIQUEUUID+'" target="_blank" class="btn btn-primary btn-outline-white mr-2 w-100" onclick="needHelpContentShow(false)">Yes</a>'
 						}
 						+'<a href="javascript:void(0)" class="btn btn-white btn-outline-primary w-100" onclick="needHelpContentShow(false, true)">No</a>'
 					+'</div>'

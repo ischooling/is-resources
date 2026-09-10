@@ -401,7 +401,7 @@
 		};
 		var jsonString = JSON.stringify(data);
 		var chatPayload = btoa(unescape(encodeURIComponent(jsonString)));
-		var chatUrl = CHAT_URL + '/signIn?uuid=' + data.u + '+&p=' + chatPayload;
+		var chatUrl = CHAT_URL + '/sign-in?uuid=' + data.u + '+&p=' + chatPayload;
 		var link =
 			'<a target="_blank" href="' + chatUrl + '"' +
 				' class="notify-bell-chat d-flex justify-content-center align-items-center group">' +
