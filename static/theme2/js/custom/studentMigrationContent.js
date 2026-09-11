@@ -188,26 +188,24 @@ function migrationDetailsOptionContent(data) {
 								html+='</div>'
 								console.log("data",data);
 								PERMOTED_GRADE= studentCredit.nextGrade;
-								if(data.registrationType!="ONE_TO_ONE_FLEX"){
-									if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
-										html+='<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 required-credits mt-0 mb-4">'
-											+'<h6 class="text-center font-26 font-weight-bold mb-3">';
-												html+='Congratulations, Dear '+data.name+'!</span>'
-											+'</h6>'
-											+'<h6 class="text-center font-20 font-weight-semi-bold mt-4">';
-												html+='You have been <b class="text-black">promoted</b> to <span class="font-weight-semi-bold">'+studentCredit.nextGrade+'</span>'
-											+'</h6>'
-										+'</div>';
-									}else{
-										html+='<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 required-credits mt-0 mb-3">'
-											+'<h2 class="text-center font-28 font-weight-bold mb-2">'
-												+'Don\'t give up'
-											+'</h2>'
-											+'<h6 class="text-center font-18 font-weight-bold text-muted">'
-												+'Retake your courses and earn your way to the next grade'
-											+'</h6>'
-										+'</div>';
-									}
+								if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
+									html+='<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 required-credits mt-0 mb-4">'
+										+'<h6 class="text-center font-26 font-weight-bold mb-3">';
+											html+='Congratulations, Dear '+data.name+'!</span>'
+										+'</h6>'
+										+'<h6 class="text-center font-20 font-weight-semi-bold mt-4">';
+											html+='You have been <b class="text-black">promoted</b> to <span class="font-weight-semi-bold">'+studentCredit.nextGrade+'</span>'
+										+'</h6>'
+									+'</div>';
+								}else{
+									html+='<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 required-credits mt-0 mb-3">'
+										+'<h2 class="text-center font-28 font-weight-bold mb-2">'
+											+'Don\'t give up'
+										+'</h2>'
+										+'<h6 class="text-center font-18 font-weight-bold text-muted">'
+											+'Retake your courses and earn your way to the next grade'
+										+'</h6>'
+									+'</div>';
 								}
 								if(parseFloat(studentCredit.totalCredit) < studentCredit.minmumCreditLimit  && (studentCredit.withDrawSubject != 0 || studentCredit.incomplteSubject !=0)){
 									if(studentCredit.currentGradeId==8 || studentCredit.currentGradeId==9 || studentCredit.currentGradeId==10 || studentCredit.currentGradeId==19 || studentCredit.currentGradeId==20 || studentCredit.currentGradeId==21){
