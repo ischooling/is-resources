@@ -1,4 +1,6 @@
 var CAN_SHOW_ENROLL_RESERVE_MODAL = true;
+var LAST_RESERVE_SEAT_RESPONSE = null;
+var LAST_RESERVE_SEAT_NEXT_GRADE = null;
 $(document).on("click", "#dashboardPayment #chkval", function () {
 	if ($("#chkval").is(":checked")) {
 		$("#payTabData").removeAttr("disabled");
@@ -24,10 +26,13 @@ $(document).on("hide.bs.modal", "#enrollReserveModal, #reserveSeatModal", functi
 // }
 
 function showEnrollReserveModal(){
-	// if($("#enrollReserveModal").length == 1){
-	// 	$("#enrollReserveModal").remove();
-	// }
-	// $("body").append(enrollReserveModalContent());
+	if($("#enrollReserveModal").length == 0 && LAST_RESERVE_SEAT_RESPONSE != null){
+		$("body").append(enrollReserveModalContent(LAST_RESERVE_SEAT_RESPONSE.details, LAST_RESERVE_SEAT_NEXT_GRADE));
+	}
+	if($(".modal.show, .modal.in").length == 0){
+		$(".modal-backdrop").remove();
+		$("body").removeClass("modal-open");
+	}
 	$("#enrollReserveModal").modal("show")
 }
 function showReserveSeatModal(){
@@ -58,7 +63,10 @@ async function getReserveASeatForNextGrade(userId, nextGrade){
 				// $('.reserve-seat-wrapper').hide();
 			} else {
 				if(data['statusCode'] == 'S001'){
-					if($("body .reserve-seat-wrapper").length == 0){
+					LAST_RESERVE_SEAT_RESPONSE = data;
+					LAST_RESERVE_SEAT_NEXT_GRADE = nextGrade;
+					if($("body #reserve-seat-wrapper").length == 0){
+						$("body #need-help-slide-wrapper").remove();
 						$("body").append(getReserveSeatContent(data, nextGrade));
 					}
 					// setTimeout(() => {

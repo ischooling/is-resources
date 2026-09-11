@@ -436,6 +436,11 @@ function renderAdvancePayment(userId, studentStandardId, schoolWebsite, logoUrl,
 	console.log(responseData)
 	$('body').append(customAdvanceContent(responseData, userId, studentStandardId, schoolWebsite, logoUrl, copyrightYear, copyrightUrl, copyrightName));
 	var advanceFeeDetails = responseData.advanceFeeDetails;
+	if (responseData['advanceFeeStatus'] != 'C') {
+		$('#learningProgram').val('');
+	} else {
+		$('#learningProgram').val(advanceFeeDetails.learningPlan);
+	}
 	$('#currentLearningProgramHidden').val(advanceFeeDetails.learningPlan);
 	if (advanceFeeDetails.learningPlan == 'ONE_TO_ONE_FLEX') {
 		actualGrades = ['13', '14', '15', '16', '17'];
@@ -443,8 +448,7 @@ function renderAdvancePayment(userId, studentStandardId, schoolWebsite, logoUrl,
 		$('#forGradeId').val(advanceFeeDetails.forGradeId);
 		$('#forGradeIdHidden').val(advanceFeeDetails.forGradeId);
 		var eligibleGradeForDualDiploma = [9, 10, 20, 21];
-		if (advanceFeeDetails.learningPlan != 'DUAL_DIPLOMA'
-			&& jQuery.inArray(parseInt($('#forGradeIdHidden').val()), eligibleGradeForDualDiploma) < 0) {
+		if (jQuery.inArray(parseInt($('#forGradeIdHidden').val()), eligibleGradeForDualDiploma) < 0) {
 			$("#learningProgram option[value='DUAL_DIPLOMA']").remove();
 		}
 	} else {
@@ -459,18 +463,10 @@ function renderAdvancePayment(userId, studentStandardId, schoolWebsite, logoUrl,
 		$('#forGradeId').val(advanceFeeDetails.forGradeId);
 		$('#forGradeIdHidden').val($("#forGradeId :selected").text().split(' ')[1]);
 		var eligibleGradeForDualDiploma = [9, 10, 11, 12];
-		if (advanceFeeDetails.learningPlan != 'DUAL_DIPLOMA'
-			&& jQuery.inArray(parseInt($('#forGradeIdHidden').val()), eligibleGradeForDualDiploma) < 0) {
+		if (jQuery.inArray(parseInt($('#forGradeIdHidden').val()), eligibleGradeForDualDiploma) < 0) {
 			$("#learningProgram option[value='DUAL_DIPLOMA']").remove();
 		}
 	}
-	// Advance payment is always raised for the next grade, so the learner stays on the learning
-	// program of the grade they are currently in - keep it selected and read-only here.
-	if ($("#learningProgram option[value='" + advanceFeeDetails.learningPlan + "']").length == 0) {
-		$('#learningProgram').append('<option value="' + advanceFeeDetails.learningPlan + '">' + advanceFeeDetails.learningPlan + '</option>');
-	}
-	$('#learningProgram').val(advanceFeeDetails.learningPlan);
-	$('#learningProgram').prop('disabled', true);
 	$('#paymentMode').val(advanceFeeDetails.paymentMode);
 	$('#courseFee').val(getNumberWithPrecision(advanceFeeDetails.courseFee, 2));
 	$('#transactionCharge').val(getNumberWithPrecision(advanceFeeDetails.transactionCharge, 2));
