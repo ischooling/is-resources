@@ -149,7 +149,7 @@ function getAddB2BSubPartnerModal(coutryPartnerType){
 									<div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12 mb-2">
 										<label class="m-0">State<sup class="text-danger">*</sup></label>
 										<select name="stateId" id="stateId" class="form-control" required disabled>
-											<option value="0">Select State/Province*</option>
+											<option value="0">Select Province/State*</option>
 										</select>
 									</div>
 									<div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12 mb-2">

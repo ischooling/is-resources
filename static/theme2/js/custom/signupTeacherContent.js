@@ -563,9 +563,9 @@ function getTeacherBasicInfoContent(signupTeacher){
                     <i class="zmdi zmdi-pin"></i>
                     <div class="custom-field">
                         <select class="select_dropdown form-control-field" name="stateId" id="stateId">
-                            <option value="">Select State/Province*</option>
+                            <option value="">Select Province/State*</option>
                         </select>
-                        <label for="stateId">State/Province*</label>
+                        <label for="stateId">Province/State*</label>
                     </div>
                 </div>
                 <div class="form-holder valid-field divCity">

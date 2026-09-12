@@ -262,7 +262,7 @@ a, a:hover, a:focus{text-decoration: none;}
 	.pg-modal-v2 .pg-actions{display:none;}
 	.pg-modal-v2 .modal-footer.pg-footer{flex:0 0 auto;display:flex;align-items:center;justify-content:center;padding:12px 14px;margin:0;background:#fff;border-top:1px solid #eef1f6;box-shadow:0 -4px 16px rgba(15,23,42,.08);}
 	.pg-modal-v2 .modal-footer.pg-footer > *{margin:0;}
-	.pg-modal-v2 .pg-pay-mobile{display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px 16px;border:0;border-radius:12px;background:linear-gradient(90deg, var(--pc) 0%, var(--sc, #3311bb) 100%);color:#fff;font-size:16px;font-weight:700;box-shadow:0 10px 24px rgba(37,56,235,.3);cursor:pointer;}
+	.pg-modal-v2 .pg-pay-mobile{display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px 16px;border:0;border-radius:12px;background:var(--pc);color:#fff;font-size:16px;font-weight:700;box-shadow:0 10px 24px rgba(37,56,235,.3);cursor:pointer;}
 	.pg-modal-v2 .pg-pay-mobile .pg-paynow-text{color:#fff;}
 	.pg-modal-v2 .pg-gateway-banner{justify-content:center}
 }
@@ -276,4 +276,172 @@ a, a:hover, a:focus{text-decoration: none;}
 	.pg-modal-v2 .payment-form ul li label,
 	.pg-modal-v2 .payment-form ul li input:not([type="file"]),
 	.pg-modal-v2 .payment-form ul li textarea{width:100% !important;}
+}
+
+
+/* ============================================================
+   Payment Summary Modal — redesigned (#studentPaymentModal.ps-modal-v2)
+   Fee-plan chooser shown in student signup. Self-contained,
+   theme-aware (uses --pc / --sc), Bootstrap 4.6 friendly, responsive.
+   ============================================================ */
+#studentPaymentModal.ps-modal-v2 .modal-content{
+	border:0;border-radius:16px;overflow:hidden;
+	box-shadow:0 24px 60px rgba(15,23,42,.25);margin-top:40px !important;
+}
+
+/* ---- header ---- */
+#studentPaymentModal.ps-modal-v2 .modal-header.ps-header{
+	display:flex;align-items:center;justify-content:space-between;gap:14px;
+	padding:18px 22px !important;border:0;border-radius:0;
+}
+#studentPaymentModal.ps-modal-v2 .ps-header-left{display:flex;align-items:center;gap:14px;min-width:0;}
+#studentPaymentModal.ps-modal-v2 .ps-header-icon{
+	flex:0 0 auto;width:46px;height:46px;border-radius:50%;
+	background:rgba(255,255,255,.20);color:#fff;font-size:24px;
+	display:inline-flex;align-items:center;justify-content:center;
+}
+#studentPaymentModal.ps-modal-v2 .ps-header-icon i{position:static;font-size:24px;}
+#studentPaymentModal.ps-modal-v2 .ps-header-title{
+	margin:0;font-size:20px;line-height:1.2;font-weight:700;color:#fff;letter-spacing:0;font-family: "Open sans";
+}
+#studentPaymentModal.ps-modal-v2 .ps-header-subtitle{
+	margin:2px 0 0;font-size:13px;line-height:1.3;color:rgba(255,255,255,.9);
+}
+#studentPaymentModal.ps-modal-v2 .close.ps-close{
+	position:relative;flex:0 0 auto;opacity:1;margin:0;padding:0;text-shadow:none;
+	width:34px;height:34px;border:0;border-radius:0px;
+	background:red !important;color:#fff !important;
+	font-size:22px;line-height:1;display:inline-flex;align-items:center;justify-content:center;
+	transition:background .15s ease, transform .15s ease;
+}
+#studentPaymentModal.ps-modal-v2 .close.ps-close:hover{transform:scale(1.05);}
+#studentPaymentModal.ps-modal-v2 .close.ps-close span{color:#fff;}
+#studentPaymentModal.ps-modal-v2 .close.ps-close:after{display:none !important;}
+
+/* ---- body ---- */
+#studentPaymentModal.ps-modal-v2 .modal-body{padding:22px !important;margin-top:0 !important;background:#fff;}
+#studentPaymentModal.ps-modal-v2 .feeDetailsContentDiv{padding:0;}
+#studentPaymentModal.ps-modal-v2 .feePayMode > .p-0{padding:0 !important;}
+
+/* ---- plan option cards ---- */
+#studentPaymentModal.ps-modal-v2 .payment-item{
+	display:flex;flex-wrap:wrap;gap:16px;justify-content:stretch;margin-bottom:6px;
+}
+#studentPaymentModal.ps-modal-v2 .radio.radio-payment-option{
+	flex:1 1 0;min-width:240px;width:auto;height:auto;
+	margin:0 0 6px !important;padding:0 !important;
+	background:transparent;box-shadow:none;border:0;border-radius:14px;
+}
+#studentPaymentModal.ps-modal-v2 .radio.radio-payment-option:hover{background:transparent;box-shadow:none;}
+#studentPaymentModal.ps-modal-v2 .radio.radio-payment-option [type="radio"]{display: none;}
+#studentPaymentModal.ps-modal-v2 .radio-payment-option label{
+	position:relative;display:flex;align-items:center;gap:14px;width:100%;height:auto;margin:0;
+	padding:16px 18px 16px 46px !important;border:2px solid #e5e9f2 !important;border-radius:14px;
+	background:#fff;color:#1f2542;cursor:pointer;transition:all .18s ease;
+}
+#studentPaymentModal.ps-modal-v2 .radio-payment-option label:hover{
+	border-color:var(--pc) !important;box-shadow:0 6px 18px rgba(15,23,42,.08);
+}
+/* radio indicator */
+#studentPaymentModal.ps-modal-v2 .radio-payment-option label .circle{
+	position:absolute;left:16px;top:50%;transform:translateY(-50%);
+	width:20px;height:20px;margin:0;background:#fff;border:2px solid #c7cede !important;
+}
+#studentPaymentModal.ps-modal-v2 .radio-payment-option label .check{
+	position:absolute;left:20px;top:50%;transform:translateY(-50%) scale(0);
+	width:12px;height:12px;margin:0;background:var(--pc);
+}
+#studentPaymentModal.ps-modal-v2 .radio-payment-option input[type=radio]:checked ~ label .check{
+	transform:translateY(-50%) scale(1) !important;
+}
+#studentPaymentModal.ps-modal-v2 .radio-payment-option input[type=radio]:checked ~ label .circle{border-color:#fff !important;}
+/* option icon */
+#studentPaymentModal.ps-modal-v2 .ps-opt-icon{
+	flex:0 0 auto;width:42px;height:42px;border-radius:10px;
+	background:#eef2fb;color:var(--pc);font-size:18px;
+	display:inline-flex;align-items:center;justify-content:center;
+}
+#studentPaymentModal.ps-modal-v2 .ps-opt-icon i{position:static;font-size:18px;}
+/* option text */
+#studentPaymentModal.ps-modal-v2 .radio-payment-option label .checked-font-style{
+	position:static !important;left:auto !important;top:auto !important;
+	margin-left:0 !important;flex:1 1 auto;display:block;line-height:1.3 !important;color:#1f2542;margin-right: 15px;
+}
+#studentPaymentModal.ps-modal-v2 .radio-payment-option .checked-font-style b{font-size:14px;font-weight:700;display:inline-block;}
+#studentPaymentModal.ps-modal-v2 .radio-payment-option .pay-amount-text{font-size:20px;font-weight:800;margin-top:2px;line-height:1.2;}
+/* selected card */
+#studentPaymentModal.ps-modal-v2 .radio-payment-option input[type=radio]:checked ~ label{
+	background:var(--pc) !important;border-color:var(--pc) !important;color:#fff;
+	box-shadow:0 10px 26px rgba(37,56,235,.28);
+}
+#studentPaymentModal.ps-modal-v2 .radio-payment-option input[type=radio]:checked ~ label .checked-font-style,
+#studentPaymentModal.ps-modal-v2 .radio-payment-option input[type=radio]:checked ~ label .checked-font-style b,
+#studentPaymentModal.ps-modal-v2 .radio-payment-option input[type=radio]:checked ~ label .pay-amount-text{color:#fff !important;}
+#studentPaymentModal.ps-modal-v2 .radio-payment-option input[type=radio]:checked ~ label .ps-opt-icon{background:rgba(255,255,255,.22);color:#fff;}
+
+/* ---- fee table ---- */
+#studentPaymentModal.ps-modal-v2 .scholarship-details{margin-top:8px;}
+#studentPaymentModal.ps-modal-v2 .scholarship-details .table-responsive{
+	border:1px solid #e8ebf2 !important;border-radius:12px;overflow:hidden;
+}
+#studentPaymentModal.ps-modal-v2 .scholarship-details table{margin:0;width:100%;border-collapse:collapse;}
+#studentPaymentModal.ps-modal-v2 .scholarship-details thead th{
+	background:#eef2fb !important;color:#141b34 !important;
+	border:0 !important;border-bottom:1px solid #e0e5f1 !important;
+	font-weight:700;font-size:13px;padding:12px 16px;
+}
+#studentPaymentModal.ps-modal-v2 .scholarship-details tbody td{
+	border:1px solid #cad5ee !important;border-bottom:1px solid #eef1f6 !important;
+	padding:12px 16px;font-size:14px;color:#3a4256;vertical-align:middle;background:#fff;
+	font-weight: 500;
+}
+#studentPaymentModal.ps-modal-v2 .scholarship-details tbody tr:nth-of-type(even) td{background:#fafbfe;}
+#studentPaymentModal.ps-modal-v2 .scholarship-details tbody tr:last-child td{border-bottom:0 !important;}
+#studentPaymentModal.ps-modal-v2 .scholarship-details ol{margin:4px 0 0;padding-left:20px;}
+#studentPaymentModal.ps-modal-v2 .scholarship-details ol li{font-size:13px;}
+/* highlighted payable-fee row */
+#studentPaymentModal.ps-modal-v2 .scholarship-details tbody tr.ps-payable-row td{
+	background:#e9f0ff !important;border-top:1px solid #cfe0ff !important;border-bottom:0 !important;font-size:15px;
+}
+#studentPaymentModal.ps-modal-v2 .scholarship-details tbody tr.ps-payable-row strong,
+#studentPaymentModal.ps-modal-v2 .scholarship-details tbody tr.ps-payable-row b{color:#141b34;font-weight:700;}
+
+/* ---- note ---- */
+#studentPaymentModal.ps-modal-v2 .ps-note{
+	display:flex;align-items:start;justify-content:center;gap:8px;
+	margin:2px 0 0 !important;color:#181b1e;font-size:13px;
+}
+#studentPaymentModal.ps-modal-v2 .ps-note-ico{
+	flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:var(--pc);color:#fff;
+	font-size:11px;display:inline-flex;align-items:center;justify-content:center;
+}
+#studentPaymentModal.ps-modal-v2 .ps-note-ico i{position:static;font-size:11px;line-height: 20px;}
+
+
+
+/* ---- responsive ---- */
+@media (max-width:767px){
+	#studentPaymentModal.ps-modal-v2 .modal-header.ps-header{padding:14px 16px !important;}
+	#studentPaymentModal.ps-modal-v2 .ps-header-icon{width:40px;height:40px;font-size:20px;}
+	#studentPaymentModal.ps-modal-v2 .ps-header-title{font-size:17px;}
+	#studentPaymentModal.ps-modal-v2 .ps-header-subtitle{font-size:12px;}
+	#studentPaymentModal.ps-modal-v2 .modal-body{padding:16px !important;}
+	#studentPaymentModal.ps-modal-v2 .payment-item{flex-direction:column;gap:12px;}
+	#studentPaymentModal.ps-modal-v2 .radio.radio-payment-option{width:100% !important;min-width:0;height:auto !important;margin:0 0 4px !important;}
+	#studentPaymentModal.ps-modal-v2 .radio-payment-option label{padding:14px 14px 14px 46px !important;border:2px solid #e5e9f2 !important;display:flex !important;align-items:center;}
+	#studentPaymentModal.ps-modal-v2 .radio-payment-option input[type=radio]:checked ~ label{border-color:var(--pc) !important;}
+	#studentPaymentModal.ps-modal-v2 .radio-payment-option label .circle{left:15px !important;top:50% !important;}
+	#studentPaymentModal.ps-modal-v2 .radio-payment-option label .check{left:19px;top:50% !important;}
+	#studentPaymentModal.ps-modal-v2 .radio.radio-payment-option .checked-font-style[style]{margin-left:0 !important;font-size:inherit;line-height:1.3 !important;}
+	#studentPaymentModal.ps-modal-v2 .radio-payment-option .checked-font-style b{font-size:13px;}
+	#studentPaymentModal.ps-modal-v2 .radio-payment-option .pay-amount-text{font-size:18px;}
+	#studentPaymentModal.ps-modal-v2 .ps-opt-icon{width:38px;height:38px;font-size:16px;}
+	#studentPaymentModal.ps-modal-v2 .scholarship-details thead th,
+	#studentPaymentModal.ps-modal-v2 .scholarship-details tbody td{padding:10px 10px;font-size:12px;}
+	#studentPaymentModal.ps-modal-v2 .ps-next-btn{width:100% !important;justify-content:center;padding:12px 20px !important;}
+}
+
+@media (max-width:550px){
+	#studentPaymentModal.ps-modal-v2 .radio-payment-option label{padding: 14px 14px 14px 44px !important;}
+	.radio.radio-payment-option label span{left: 3px;}
 }

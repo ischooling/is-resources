@@ -601,6 +601,17 @@ position:relative;
     box-shadow:0 0 0 3px rgba(37,99,235,.15);
 }
 
+/* Invalid fields (.form-holder.valid-field.false) must NOT take the active/blue
+   border or focus glow, even while focused or filled - keep them red. */
+.custom-field-scope .form-holder.valid-field.false .custom-field input,
+.custom-field-scope .form-holder.valid-field.false .custom-field select,
+.custom-field-scope .form-holder.valid-field.false .custom-field textarea,
+.custom-field-scope .form-holder.valid-field.false .custom-field .select2-selection--single,
+.custom-field-scope .form-holder.valid-field.false .custom-field .select2-selection--multiple{
+    border-color:red !important;
+    box-shadow:none !important;
+}
+
 /* CUSTOM SELECT ARROW */
 .custom-field-scope .custom-field select{
     padding-right:40px;
@@ -1854,8 +1865,8 @@ function callStates(formId, value, countryId, stateId, cityId) {
   if (cityId == undefined) {
     cityId = "cityId";
   }
-  if (!validateRequestForMaster(formId, countryId)) {
-    resetDropdown($("#" + formId + " #" + stateId), "Select State/Province*");
+  if (!validateRequestForMaster(formId, countryId) && ($("#"+countryId).val()== null || $("#"+countryId).val()== undefined || $("#"+countryId).val()== "")) {
+    resetDropdown($("#" + formId + " #" + stateId), "Select Province/State*");
     $("#" + formId + " #" + stateId)
       .val(0)
       .trigger("change");
@@ -1886,7 +1897,7 @@ function callStates(formId, value, countryId, stateId, cityId) {
         buildDropdown(
           data["mastersData"]["states"],
           $("#" + formId + " #" + stateId),
-          "Select State/Province*"
+          "Select Province/State*"
         );
       }
       $("#" + formId + " #" + stateId).prop("disabled", false);
@@ -1912,7 +1923,7 @@ function callStatesNew(formId, value, elementId, bindElementId) {
   hideMessage("");
   if (!validateRequestForMaster(formId, elementId)) {
     $("#" + formId + " #" + bindElementId).val(0);
-    resetDropdown($("#" + formId + " #stateId"), "Select State/Province*");
+    resetDropdown($("#" + formId + " #stateId"), "Select Province/State*");
     $("#" + formId + " #cityId").val(0);
     resetDropdown($("#" + formId + " #cityId"), "Select City*");
     return false;
@@ -1933,7 +1944,7 @@ function callStatesNew(formId, value, elementId, bindElementId) {
         buildDropdown(
           data["mastersData"]["states"],
           $("#" + formId + " #" + bindElementId),
-          "Select State/Province*"
+          "Select Province/State*"
         );
       }
       $("#" + formId + " #" + bindElementId).prop("disabled", false);
@@ -5854,6 +5865,24 @@ $(document).on("show.bs.modal", ".modal", function () {
 
     var $modal = $(this);
 
+    // Bootstrap only fires show.bs.modal when a modal is ACTUALLY transitioning
+    // hidden -> shown (its internal _isShown guard makes a redundant
+    // .modal('show') on an already-open modal a full no-op, event included).
+    // But a modal that briefly, imperceptibly cycles hidden->shown again while
+    // it is still effectively on screen (e.g. some interaction inside a modal
+    // opened ON TOP of it re-triggers this one) must NOT be treated as a fresh
+    // top-of-stack open: recomputing here would let it leapfrog above a modal
+    // legitimately stacked above it (e.g. #changeSelectedGradeModal jumping
+    // above the #datepickerModal opened from inside it, just because the
+    // datepicker's own navigation or a window focus change briefly cycled the
+    // grade modal). If we already assigned this modal a position and it still
+    // carries our marker, keep that position instead of recomputing.
+    var previousZIndex = $modal.data("stacked-zindex");
+    if ($modal.hasClass("modal-zindex-adjusted") && previousZIndex != null) {
+        $modal.css("z-index", previousZIndex);
+        return;
+    }
+
     // Highest z-index among OTHER modals that are still on screen. We include
     // ":visible" modals that no longer have ".show" because an outgoing modal
     // stays display:block (and its backdrop stays in the DOM) during its fade.
@@ -5882,7 +5911,8 @@ $(document).on("show.bs.modal", ".modal", function () {
     var backdropZIndex = modalZIndex - 1;
 
     $modal.css("z-index", modalZIndex);
-    $modal.addClass("modal-zindex-adjusted"); 
+    $modal.addClass("modal-zindex-adjusted");
+    $modal.data("stacked-zindex", modalZIndex);
     // Bootstrap injects this modal's backdrop AFTER the show.bs.modal event,
     // so defer to the next tick to grab and position it.
     setTimeout(function () {
@@ -5912,8 +5942,13 @@ $(document).on("hidden.bs.modal", ".modal", function () {
 
     var $modal = $(this);
 
-    // Release the inline z-index we assigned to the modal that just closed.
+    // Release the inline z-index we assigned to the modal that just closed, and
+    // drop our stacking markers so a genuinely fresh later reopen recomputes
+    // its position instead of reusing this now-stale one (see the show.bs.modal
+    // handler's early-return guard above).
     $modal.css("z-index", "");
+    $modal.removeClass("modal-zindex-adjusted");
+    $modal.removeData("stacked-zindex");
 
     // Remaining modals (the one that closed no longer has ".show").
     var $openModals = $(".modal.show");

@@ -1,4 +1,6 @@
 var PREVIOUS_LEARNING_PROGRAM_INDEX;
+var STUDENT_SINGUP_CURRENT_STEP;
+var IS_PARENT_COUNTRY_CHANGE = false;
 
 // ── Recent-enrollment social-proof toast (same design as studentMigration.js) ──
 // Uses the global toastr library (loaded on theme2 pages). Unique names/classes so it
@@ -115,6 +117,18 @@ function showSkeleton (isShow, skeletonType){
 signupStageStatusInitiated=false;
 var signupStage1Form = '';
 var signupStage2Form = '';
+// Returns a signup field's current value as a string (never null/undefined), looked up
+// by its GLOBAL id. The review screen's inline edit temporarily moves step fields out of
+// their <form> (#signupStage1/#signupStage2) into a review table cell, so form-scoped
+// selectors like $("#signupStage1 #firstName") stop matching and ".val()" becomes
+// undefined -> ".trim()"/".length" would then throw. Looking up by id alone keeps working
+// in both the normal form and the moved-into-review state.
+function signupFieldValue(id) {
+	var el = document.getElementById(id);
+	if (!el) { return ''; }
+	var v = $(el).val();
+	return (v == null) ? '' : String(v);
+}
 function addSignupFieldBackgroundOverride() {
 	if ($("#signupFieldBackgroundOverride").length > 0) {
 		return;
@@ -135,14 +149,15 @@ function addSignupFieldBackgroundOverride() {
 					width: 100%;
 				}
 				#signupStage1 .custom-field .iti input.form-control-field {
-					padding-left: 68px !important;
+					padding-left: 55px !important;
+					padding-bottom:6px
 				}
 				#signupStage1 .custom-field .iti .iti__selected-flag {
 					padding-left: 12px;
 					padding-right: 10px;
 				}
 				@media (max-width: 767px) {
-					#signupStage1 .nationality-id-hint {
+					#signupStage1 .nationality-id-hint:not(.mobile-nationality-id-hint) {
 						top: 95% !important;
 					}
 				}
@@ -151,7 +166,8 @@ function addSignupFieldBackgroundOverride() {
                     width: 100%;
                 }
                 #signupStage2 .custom-field .iti input#parentPhoneNumber {
-                    padding-left: 68px !important;
+                    padding-left: 55px !important;
+					padding-bottom:6px !important;
                 }
                 #signupStage1 .custom-field .iti .iti__selected-flag {
                     padding-left: 12px;
@@ -160,6 +176,14 @@ function addSignupFieldBackgroundOverride() {
                 #signupStage2 .custom-field .iti .iti__selected-flag {
                     padding-left: 12px;
                     padding-right: 10px;
+                }
+                #signupStage1 .custom-field .form-control-field,
+                #signupStage1 .custom-field .select-option-field,
+                #signupStage1 .custom-field .select2-selection--single,
+                #signupStage2 .custom-field .form-control-field,
+                #signupStage2 .custom-field .select-option-field,
+                #signupStage2 .custom-field .select2-selection--single {
+                    border-width: 2px !important;
                 }
             </style>`);
 }
@@ -182,7 +206,40 @@ function placeSignupValidationError(error, element) {
 		error.insertAfter(element);
 	}
 }
+/* ===== Enrollment step completion flags (localStorage) =====
+   Purpose: show each step's success message ("Great! Student details completed" etc.)
+   only the FIRST time that step is saved. On later edit/save or back->next, and after a
+   page refresh, the flag stays true so the message is not shown again.
+   Keys are scoped per enrollment via UNIQUEUUID so a new enrollment starts fresh. */
+function getEnrollmentStepStorageKey(step){
+	var uid = window.__enrollUuid || (typeof UNIQUEUUID !== 'undefined' && UNIQUEUUID) || 'default';
+	return 'enrollStep' + step + '_' + uid;
+}
+function getEnrollmentStepFlag(step){
+	try{
+		return localStorage.getItem(getEnrollmentStepStorageKey(step)) === 'true';
+	}catch(e){ return false; }
+}
+function setEnrollmentStepFlag(step, value){
+	try{
+		localStorage.setItem(getEnrollmentStepStorageKey(step), value ? 'true' : 'false');
+	}catch(e){}
+}
+function initEnrollmentStepFlags(uniqueId){
+	try{ window.__enrollUuid = uniqueId || window.__enrollUuid || 'default'; }catch(e){}
+	try{
+		for(var step = 1; step <= 3; step++){
+			// Only set false when the key does not exist yet, so completed steps
+			// stay "true" across a page refresh and their message is not repeated.
+			if(localStorage.getItem(getEnrollmentStepStorageKey(step)) === null){
+				localStorage.setItem(getEnrollmentStepStorageKey(step), 'false');
+			}
+		}
+	}catch(e){}
+}
+
 async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, moduleName, programLabel, moduleId, learningProgram, MAINTENANCEDOWNTIME, signupType, studentUserId) {
+	initEnrollmentStepFlags(UNIQUEUUID);
 	if(signupType == "Offline" && studentUserId != USER_ID){
 		signupStageStatusInitiated=false;
 	}
@@ -216,10 +273,36 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 	$("#formSteps").append(signupModals());
 	signupStage1Form = $('#signupStage1');
 	signupStage2Form = $('#signupStage2');
+	// jQuery Validate's .valid() throws "Cannot read properties of undefined (reading 'element')"
+	// when it runs on an input that is not inside a form carrying a validator. The review-screen
+	// inline edit temporarily moves step fields out of their <form> into a table cell (see
+	// moveReviewFieldsToTable), so a blur/change on such a field would crash. Guard once so
+	// .valid() safely no-ops in that detached state (save-time validation still runs after the
+	// fields are moved back into the form).
+	if (!$.fn.__validGuarded) {
+		var _origValidFn = $.fn.valid;
+		$.fn.valid = function () {
+			if (this.length && !$(this[0]).is('form')) {
+				var ownerForm = this[0].form;
+				if (!ownerForm || !$.data(ownerForm, 'validator')) { return true; }
+			}
+			return _origValidFn.apply(this, arguments);
+		};
+		$.fn.__validGuarded = true;
+	}
 	signupStage1Form.validate({
 		errorElement: "span",
 		errorClass: "error-msg",
 		errorPlacement: placeSignupValidationError,
+		// Turn the field border red on validation failure and clear it when valid, by
+		// toggling the existing .false/.true .valid-field wrapper classes (see the
+		// ".false.valid-field input{border-color:red}" rules in style.css / new_signup.css).
+		highlight: function (element) {
+			$(element).closest('.valid-field').removeClass('true').addClass('false');
+		},
+		unhighlight: function (element) {
+			$(element).closest('.valid-field').removeClass('false');
+		},
 	    rules: {
 		   firstName: {
 			  required: true,
@@ -265,37 +348,37 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 	    },
 	    messages: {
 		   firstName: {
-			  required: "Please enter first name",
+			  required: "",
 		   },
 		   lastName: {
-			  required: "Please enter last name",
+			  required: "",
 		   },
 		   dob: {
-			  required: "Please enter date of birth"
+			  required: ""
 		   },
 			   studentGender: {
-			  required: "Please select gender"
+			  required: ""
 		   },
 		   countryId: {
-			  required: "Please select country"
+			  required: ""
 		   },
 		   stateId: {
-			  required: "Please select state/province"
+			  required: ""
 		   },
 		   cityId: {
-			  required: "Please select city"
+			  required: ""
 		   },
 		   emailId: {
-			  required: "Please enter email"
+			  required: ""
 		   },
 		   applyStandardId: {
-			  required: "Please select the Grade",
+			  required: "",
 		   },
 		   nationality: {
-			  required: "Please select the Nationality",
+			  required: "",
 		   },
 		   contactNumber: {
-			  required: "Please enter phone number"
+			  required: ""
 		   }
 
 	    }
@@ -304,6 +387,15 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 		errorElement: "span",
 		errorClass: "error-msg",
 		errorPlacement: placeSignupValidationError,
+		// Turn the field border red on validation failure and clear it when valid, by
+		// toggling the existing .false/.true .valid-field wrapper classes (see the
+		// ".false.valid-field input{border-color:red}" rules in style.css / new_signup.css).
+		highlight: function (element) {
+			$(element).closest('.valid-field').removeClass('true').addClass('false');
+		},
+		unhighlight: function (element) {
+			$(element).closest('.valid-field').removeClass('false');
+		},
 	    rules: {
 		   parentFirstName: {
 			  required: true,
@@ -341,28 +433,28 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 	    },
 	    messages: {
 		   parentFirstName: {
-			  required: "Please enter first name",
+			  required: "",
 		   },
 		   parentlastName: {
-			  required: "Please enter last name",
+			  required: "",
 		   },
 		   parentGender: {
-			  required: "Please select gender",
+			  required: "",
 		   },
 		   relation: {
-			  required: "Please select relation",
+			  required: "",
 		   },
 		   otherName: {
-			  required: "Please enter other relation"
+			  required: ""
 		   },
 		   pCountryId: {
-			  required: "Please select country"
+			  required: ""
 		   },
 		   pStateId: {
-			  required: "Please select state/province"
+			  required: ""
 		   },
 		   pCityId: {
-			  required: "Please select city"
+			  required: ""
 		   }
 	    }
 	});
@@ -370,9 +462,14 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 	    await callForStudentSelection(signupType, studentUserId);
 	}
 	if (signupPage >= 2) {
+		// 
+		setActiveStep(2);
+		showSkeleton(true, "step2");
 	    callForParentSelection(studentUserId);
 	}
 	if (signupPage >= 3) {
+		setActiveStep(3);
+		showSkeleton(true, "step3");
 	    getAllCourseDetails('N', '');
 	}
 	if (signupPage == 4) {
@@ -467,6 +564,7 @@ async function getStudentDocsUnderVerificationPageContent(enrollmentDocsState){
 async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleName, programLabel, moduleId, learningProgram, MAINTENANCEDOWNTIME, signupType, studentUserId) {
 	const schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
 	const schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
+	const schoolSettingsOffice = await getSchoolSettingsOffice(SCHOOL_ID);
 	var payload = {
 				'userId' : USER_ID
 			};
@@ -476,178 +574,193 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
 	// }
 	SHOW_PAYMENT_OPTION = responseData.showPaymentOption;
 	var html = `
-        <div class="wrapper-style custom-field-scope full">`
-			if(signupType == "Online" || studentUserId == USER_ID){
-				html+=
-				`<a class="tab-and-mobile-logout-btn" href="javascript:void(0)" onclick="signupLogout()">
-					<i class="zmdi zmdi-power"></i> <span class="mobile-view-logout">Log out</span>
-				</a>`
-			}
-			if((signupType == "Offline") && studentUserId != USER_ID){
-				html+=`<a href="javascript:void(0);" onclick="backToDedicatedModule('partner-enrollment-list');" class="btn btn-primary rounded float-right mb-2"><i class="fa fa-arrow-left mr-1" aria-hidden="true"></i> Back to Student Enrollments</a>`
-			}
-            html+=`<section class="full">`
+        <div class="wrapper-style custom-field-scope full">
+			<div class="fixed-header">`
 				if(signupType == "Online" || studentUserId == USER_ID){
 					html+=
-					`<div class="full mb-2 ${SCHOOL_ID == 1 ? 'desktop-view':'other-school'}">
-						<div class="logo">
-							<a href="${schoolSettingsLinks.schoolWebsite}" target="blank">
-								<img src="${schoolSettingsLinks.logoUrl}${SCRIPT_VERSION}" alt="${schoolSettingsLinks.schoolWebsite}" target="blank">
-							</a>
-						</div>
-					</div>`;
-
-					if(SCHOOL_ID == 1){
-						html+=
-						`<div class="mobile-view">
-							<a href="${schoolSettingsLinks.schoolWebsite}" target="blank">
-								<img src="${PATH_FOLDER_IMAGE2}is_fav_logo_200.png${SCRIPT_VERSION}" alt="${schoolSettingsLinks.schoolWebsite}" target="blank">
-							</a>
-							<section class="full text-center">
-								<h1 class="form-heading white-txt-color secondary-bg page-heading learingProgramHeader" val="${learningProgram}">`;
-									if(moduleId == 'STUDENT'){
-										html+=programLabel;
-									}else{
-										html+=moduleName;
-									}
-								html += `</h1>
-							</section>
-							<div style="min-width:25px">&nbsp;</div>
-						</div>`
-					}
-					html+=`<section class="full text-center desktop-view">
-						<h1 class="form-heading white-txt-color secondary-bg page-heading learingProgramHeader" val="${learningProgram}">`;
-							if (moduleId == 'STUDENT') {
-								html += programLabel;
-							} else {
-								html += moduleName;
-							}
-						html+=`</h1>
-					</section>
-                	<div class="timer" id="stepsMessage">Takes less than 1 minute to complete this step</div>`
-				}else {
-					html+=
-					`<div id="signupLearningProgramWrapper" class="col-xl-4 col-lg-5 col-md-6 col-sm-8 col-12 mx-auto">
-						<label class="d-flex justify-content-center font-weight-bold font-22">Choose Program</label>
-						<select id="learningProgramPartnerStudent" class="form-control w-75 mx-auto" style="max-width:320px;-webkit-appearance:auto !important">
-							<option value="">Select Program</option>
-							${getAllLearningProgramContent(SCHOOL_ID)}
-						</select>
-					</div>
-					<div class="timer" id="stepsMessage">Takes less than 1 minute to complete this step</div>`
+					`<a class="tab-and-mobile-logout-btn" href="javascript:void(0)" onclick="signupLogout()">
+						<i class="zmdi zmdi-power"></i> <span class="mobile-view-logout">Log out</span>
+					</a>`
 				}
-            html+=`</section>
-            	<input type="hidden" id="courseProviderId" value="${courseProviderId}" />
-			<input type="hidden" id="enrollmentFor" value="" />
-			<div class="fixed-button one-btn">
-				<a class="primary-bg white-txt-color" href="${BASE_URL}${CONTEXT_PATH}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}" class="tab-and-mobile-logout-btn">
-					<i class="zmdi zmdi-power"></i> Log out</i>
-				</a>
-			</div>`;
-			if (MAINTENANCEDOWNTIME != '') {
-				html += `
-					<div class="full">
-						<marquee id="marqueeDiv" direction="left" style="color: red" width="100%">${MAINTENANCEDOWNTIME}</marquee>
-					</div>`;
-			}
-    		html += `
-            ${/*<div class="server-message" style="display:none">
-				<span id="msgTheme2" class="msg error"><i class="fa fa-times"></i> Error Message </span>
-			</div>*/''}
-            <div id="formSteps">
-                <div class="steps clearfix">
-                    <ul role="tablist">
-                        <li role="tab" aria-disabled="false" class="first current" aria-selected="true">
-                            <a id="steps-uid-0-t-0" href="#steps-uid-0-h-0" aria-controls="steps-uid-0-p-0">
-                                <span class="current-info audible">current step: </span>
-                                <span class="number">1.</span>
-                                <img src="${PATH_FOLDER_IMAGE2}step-1.png" alt="">
-                                <span class="step-order">Step 1</span>
-                            </a>
-                            <span class="step-arrow step1"></span>
-                        </li>
-                        <li role="tab" aria-disabled="false">
-                            <a id="steps-uid-0-t-1" href="#steps-uid-0-h-1" aria-controls="steps-uid-0-p-1">
-                                <span class="number">2.</span>`;
-								if (courseProviderId == 39) {
-									html += `<img src="${PATH_FOLDER_IMAGE2}talking-deactive.png" alt="">`;
+				if((signupType == "Offline") && studentUserId != USER_ID){
+					html+=`<a href="javascript:void(0);" onclick="backToDedicatedModule('partner-enrollment-list');" class="btn btn-primary rounded float-right mb-2"><i class="fa fa-arrow-left mr-1" aria-hidden="true"></i> Back to Student Enrollments</a>`
+				}
+            	html+=`<section class="full">`
+					if(signupType == "Online" || studentUserId == USER_ID){
+						html+=
+						`<div class="full mb-2 ${SCHOOL_ID == 1 ? 'desktop-view':'other-school'}">
+							<div class="logo">
+								<a href="${schoolSettingsLinks.schoolWebsite}" target="blank">
+									<img src="${schoolSettingsLinks.logoUrl}${SCRIPT_VERSION}" alt="${schoolSettingsLinks.schoolWebsite}" target="blank">
+								</a>
+							</div>
+						</div>`;
+
+						if(SCHOOL_ID == 1){
+							html+=
+							`<div class="mobile-view">
+								<a href="${schoolSettingsLinks.schoolWebsite}" target="blank">
+									<img src="${PATH_FOLDER_IMAGE2}is_fav_logo_200.png${SCRIPT_VERSION}" alt="${schoolSettingsLinks.schoolWebsite}" target="blank">
+								</a>
+								<section class="full text-center">
+									<h1 class="form-heading white-txt-color secondary-bg page-heading learingProgramHeader" val="${learningProgram}">`;
+										if(moduleId == 'STUDENT'){
+											html+=programLabel;
+										}else{
+											html+=moduleName;
+										}
+									html += `</h1>
+								</section>
+								<div style="min-width:25px">&nbsp;</div>
+							</div>`
+						}
+						html+=`<section class="full text-center desktop-view">
+							<h1 class="form-heading white-txt-color secondary-bg page-heading learingProgramHeader" val="${learningProgram}">`;
+								if (moduleId == 'STUDENT') {
+									html += programLabel;
 								} else {
-									html += `<img src="${PATH_FOLDER_IMAGE2}step-2-deactive.png" alt="">`;
+									html += moduleName;
 								}
-    							html += `<span class="step-order">Step 2</span>
-                            </a>
-                            <span class="step-arrow step2"></span>
-                        </li>
-                        <li role="tab" aria-disabled="false">
-                            <a id="steps-uid-0-t-2" href="#steps-uid-0-h-2" aria-controls="steps-uid-0-p-2">
-                                <span class="number">3.</span>
-                                <img src="${PATH_FOLDER_IMAGE2}step-4-deactive.png" alt="">
-                                <span class="step-order">Step 3</span>
-                            </a>
-                            <span class="step-arrow step3"></span>
-                        </li>
-                        <li role="tab" aria-disabled="false" class="last">
-                            <a id="steps-uid-0-t-3" href="#steps-uid-0-h-3" aria-controls="steps-uid-0-p-3">
-                                <span class="number">4.</span>
-                                <img src="${PATH_FOLDER_IMAGE2}step-5-deactive.png" alt="">
-                                <span class="step-order">Step 4</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="content">
-                    <section id="step-1" class="step mt-2 active-step">
-                        <div class="full step-1-skeleton skeleton-wrapper"></div>
-                        <form id="signupStage1" name="signupStage1" method="post" autocomplete="off" action="javascript:void(0);" style="display:none;">
-                            <div id="signupStage1Content" style="display:inline-block;width: 100%;"></div>
-                        </form>
-                    </section>
+							html+=`</h1>
+						</section>
+						<div class="timer" id="stepsMessage">Complete in under 1 minute</div>`
+					}else {
+						html+=
+						`<div id="signupLearningProgramWrapper" class="col-xl-4 col-lg-5 col-md-6 col-sm-8 col-12 mx-auto">
+							<label class="d-flex justify-content-center font-weight-bold font-22">Choose Program</label>
+							<select id="learningProgramPartnerStudent" class="form-control w-75 mx-auto" style="max-width:320px;-webkit-appearance:auto !important">
+								<option value="">Select Program</option>
+								${getAllLearningProgramContent(SCHOOL_ID)}
+							</select>
+						</div>
+						<div class="timer" id="stepsMessage">Complete in under 1 minute</div>`
+					}
+				html+=`</section>
+			</div>
+            	<input type="hidden" id="courseProviderId" value="${courseProviderId}" />
+				<input type="hidden" id="enrollmentFor" value="" />
+				<div class="fixed-button one-btn">
+					<a class="primary-bg white-txt-color" href="${BASE_URL}${CONTEXT_PATH}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}" class="tab-and-mobile-logout-btn">
+						<i class="zmdi zmdi-power"></i> Log out</i>
+					</a>
+				</div>`;
+				if (MAINTENANCEDOWNTIME != '') {
+					html += `
+						<div class="full">
+							<marquee id="marqueeDiv" direction="left" style="color: red" width="100%">${MAINTENANCEDOWNTIME}</marquee>
+						</div>`;
+				}
+				html += `
+				${/*<div class="server-message" style="display:none">
+					<span id="msgTheme2" class="msg error"><i class="fa fa-times"></i> Error Message </span>
+				</div>*/''}
+				<div id="formSteps">
+					<div class="steps clearfix">
+						<ul role="tablist">
+							<li role="tab" aria-disabled="false" class="first current" aria-selected="true">
+								<a id="steps-uid-0-t-0" href="#steps-uid-0-h-0" aria-controls="steps-uid-0-p-0">
+									<span class="current-info audible">current step: </span>
+									<span class="number">1.</span>
+									<img src="${PATH_FOLDER_IMAGE2}step-1.png" alt="">
+									<span class="step-order">Step 1</span>
+								</a>
+								<span class="step-arrow step1"></span>
+							</li>
+							<li role="tab" aria-disabled="false">
+								<a id="steps-uid-0-t-1" href="#steps-uid-0-h-1" aria-controls="steps-uid-0-p-1">
+									<span class="number">2.</span>`;
+									if (courseProviderId == 39) {
+										html += `<img src="${PATH_FOLDER_IMAGE2}talking-deactive.png" alt="">`;
+									} else {
+										html += `<img src="${PATH_FOLDER_IMAGE2}step-2-deactive.png" alt="">`;
+									}
+									html += `<span class="step-order">Step 2</span>
+								</a>
+								<span class="step-arrow step2"></span>
+							</li>
+							<li role="tab" aria-disabled="false">
+								<a id="steps-uid-0-t-2" href="#steps-uid-0-h-2" aria-controls="steps-uid-0-p-2">
+									<span class="number">3.</span>
+									<img src="${PATH_FOLDER_IMAGE2}step-4-deactive.png" alt="">
+									<span class="step-order">Step 3</span>
+								</a>
+								<span class="step-arrow step3"></span>
+							</li>
+							<li role="tab" aria-disabled="false" class="last">
+								<a id="steps-uid-0-t-3" href="#steps-uid-0-h-3" aria-controls="steps-uid-0-p-3">
+									<span class="number">4.</span>
+									<img src="${PATH_FOLDER_IMAGE2}step-5-deactive.png" alt="">
+									<span class="step-order">Step 4</span>
+								</a>
+							</li>
+						</ul>
+					</div>
+					<div class="content">
+						<section id="step-1" class="step mt-2 active-step">
+							<div class="full step-1-skeleton skeleton-wrapper"></div>
+							<form id="signupStage1" name="signupStage1" method="post" autocomplete="off" action="javascript:void(0);" style="display:none;">
+								<div id="signupStage1Content" style="display:inline-block;width: 100%;"></div>
+							</form>
+						</section>
 
-                    <section id="step-2" class="step mt-2">
-                        <div class="full step-2-skeleton skeleton-wrapper"></div>
-                        <form id="signupStage2" name="signupStage2" method="post" autocomplete="off" action="javascript:void(0);">
-                            <div id="signupStage2Content" style="display: inline-block;width: 100%;"></div>
-                        </form>
-                    </section>
+						<section id="step-2" class="step mt-2">
+							<div class="full step-2-skeleton skeleton-wrapper"></div>
+							<form id="signupStage2" name="signupStage2" method="post" autocomplete="off" action="javascript:void(0);">
+								<div id="signupStage2Content" style="display: inline-block;width: 100%;"></div>
+							</form>
+						</section>
 
-                    <section id="step-3" class="step mt-2">
-                        <div class="full step-3-skeleton skeleton-wrapper"></div>
-                        <form id="signupStage3" name="signupStage3" method="post" autocomplete="off" action="javascript:void(0);">
-                            <div id="signupStage3Content" style="display: inline-block;width: 100%;"></div>
-                        </form>
-                    </section>
+						<section id="step-3" class="step mt-4">
+							<div class="full step-3-skeleton skeleton-wrapper"></div>
+							<form clas="mt-2" id="signupStage3" name="signupStage3" method="post" autocomplete="off" action="javascript:void(0);">
+								<div id="signupStage3Content" style="display: inline-block;width: 100%;"></div>
+							</form>
+						</section>
 
-                    <section id="step-4" class="step mt-2">
-                        <div class="full step-4-skeleton skeleton-wrapper"></div>
-                        <div id="signupStage4Content" style="display: inline-block;width: 100%;"></div>
-                    </section>
-                </div>
-                <div class="actions clearfix">
-                    <ul role="menu" aria-label="Pagination">
-                        <li class="prev-btn" style="display:none">
-                            <a href="javascript:void(0)" class="primary-bg white-txt-color white-hov-bg primary-hov-border-color primary-hov-txt" style="width:auto;padding-left:16px;padding-right:16px;" role="menuitem" onclick="moveStep('prev')">Back</a>
-                        </li>
-                        <li class="next-btn">
-                            <a href="javascript:void(0)" class="primary-bg white-txt-color white-hov-bg primary-hov-border-color primary-hov-txt" style="width:auto;padding-left:16px;padding-right:16px;" role="menuitem" onclick="moveStep('next')">Next</a>
-                        </li>
-                        <li class="finish-btn" style="display: none;">
-                            <a href="javascript:void(0)" id="finishBtnId" class="primary-bg white-txt-color white-hov-bg primary-hov-border-color primary-hov-txt" style="width:auto;padding-left:16px;padding-right:16px;" role="menuitem" onclick="moveStep('finish');showPaymentModal();">`;
-							if(signupType == 'Online' ){
-								if (SHOW_PAYMENT_OPTION == 'Y') {
-									html += 'Proceed';
-								} else {
+						<section id="step-4" class="step mt-2">
+							<div class="full step-4-skeleton skeleton-wrapper"></div>
+							<form id="signupStage4" name="signupStage4" method="post" autocomplete="off" action="javascript:void(0);">
+								<div id="signupStage4Content" style="display: inline-block;width: 100%;"></div>
+							</form>
+						</section>
+					</div>
+					<div class="actions clearfix">
+						<ul role="menu" aria-label="Pagination">
+							<li class="prev-btn" style="display:none">
+								<a href="javascript:void(0)" class="cutom-btn primary-bg white-txt-color" style="width:auto;" role="menuitem" onclick="moveStep('prev')">Back</a>
+							</li>
+							<li class="next-btn">
+								<a href="javascript:void(0)" class="cutom-btn primary-bg white-txt-color" style="width:auto;" role="menuitem" onclick="moveStep('next')">Next</a>
+							</li>
+							<li class="finish-btn" style="display: none;">
+								<a href="javascript:void(0)" id="finishBtnId" class="cutom-btn primary-bg white-txt-color" style="width:auto;" role="menuitem" onclick="moveStep('finish');showPaymentModal();">`;
+								if(signupType == 'Online' ){
+									if (SHOW_PAYMENT_OPTION == 'Y') {
+										html += 'Final Step';
+									} else {
+										html += 'Submit Application';
+									}
+								}else{
 									html += 'Submit Application';
 								}
-							}else{
-								html += 'Submit Application';
-							}
-    						html += `</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-			<p class="copyRights">${schoolSettingsTechnical.isCoPoweredBy != null ? 'Powered by ' + schoolSettingsTechnical.copyrightName : 'Copyright © ' + schoolSettingsTechnical.copyrightYear + ' - ' + schoolSettingsTechnical.copyrightName + ' - All Rights Reserved.'}</p>
-        </div>`;
+								html += `</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+				
+				<div class="desktop_whatsapp_button_wrapper">
+					<a target="_blank" rel="noopener noreferrer" class="flex desktop_whatsapp_button" href="https://api.whatsapp.com/send?phone=${schoolSettingsOffice.whatsAppCode}${schoolSettingsOffice.whatsAppContact}">
+						<img src="${PATH_FOLDER_IMAGE2}whatsapp-new.webp" width="50"/>
+					</a>
+				</div>
+				<div class="fixed-footer">
+					<p class="copyRights">${schoolSettingsTechnical.isCoPoweredBy != null ? 'Powered by ' + schoolSettingsTechnical.copyrightName : 'Copyright © ' + schoolSettingsTechnical.copyrightYear + ' - ' + schoolSettingsTechnical.copyrightName + ' - All Rights Reserved.'}</p>
+					<div class="whatsapp_button_wrapper d-flex flex-wrap">
+						<a target="_blank" rel="noopener noreferrer" class="flex items-center justify-center py-2 text-white whatsapp_button" href="https://api.whatsapp.com/send?phone=${schoolSettingsOffice.whatsAppCode}${schoolSettingsOffice.whatsAppContact}"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 1.8a8.2 8.2 0 1 1-4.2 15.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 0 1 12 3.8zm4.7 10.3c-.3-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.1-.2 0-.4.1-.5l.4-.5c.1-.2.2-.3.3-.5v-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.9.9-1 2.1-.4 3.4a11 11 0 0 0 4.5 4.5c1.9.9 2.7.8 3.4.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.6-.3z"></path></svg>Need support for enrolment</a>
+					</div>
+				</div>
+		</div>`;
 		html += logOutModalContent();
     return html;
 }
@@ -687,10 +800,10 @@ function renderStudentDetails(data, signupType){
 	});
 	dobInitalize(SCHOOL_ID,false,signupStudent.courseProviderId)
 	$("#signupStage1 #gender option[value='TRANSGENDER']").remove();
-	createSelect2Element('signupStage1', 'gender')
-	createSelect2Element('signupStage1', 'countryId')
-	createSelect2Element('signupStage1', 'stateId')
-	createSelect2Element('signupStage1', 'cityId')
+	createSelect2Element('signupStage1', 'gender');
+	createSelect2Element('signupStage1', 'countryId');
+	createSelect2Element('signupStage1', 'stateId');
+	createSelect2Element('signupStage1', 'cityId');
 	createSelect2Element('signupStage1', 'nationality')
 	if($('#learingProgramHeader').val()=='DUAL_DIPLOMA'){
 		$('#signupStage1 #studyingGradeId').val(signupStudent.studyingGradeId);
@@ -714,6 +827,7 @@ function renderStudentDetails(data, signupType){
 			   }else{
 				itiContcat.setCountry(signupStudent.countryCode);
 			}
+			// attachPhoneLengthLimit(inputContact, itiContcat);
 			inputContact.addEventListener('countrychange', function(e) {
 				$('#countryIsd').val(itiContcat.getSelectedCountryData().iso2);
 				$('#countryDailCode').val(itiContcat.getSelectedCountryData().dialCode);
@@ -725,9 +839,9 @@ function renderStudentDetails(data, signupType){
 		}
 	}
 	$("#firstName").blur(function() {
-		if ($("#signupStage1 #firstName").val().trim()=="") {
+		if (signupFieldValue('firstName').trim()=="") {
 			$('#firstName').valid();
-			validEndInvalidField(null, "firstName");
+			validEndInvalidField(false, "firstName");
 			//showMessage(0, 'First Name is required');
 			return false
 		}else{
@@ -735,7 +849,7 @@ function renderStudentDetails(data, signupType){
 		}
 	});
 	$("#middleName").blur(function() {
-		if ($("#signupStage1 #middleName").val().trim()=="") {
+		if (signupFieldValue('middleName').trim()=="") {
 			validEndInvalidField(null, "middleName");
 			return false
 		}else{
@@ -744,8 +858,8 @@ function renderStudentDetails(data, signupType){
 	});
 	$("#lastName").blur(function() {
 		$('#lastName').valid();
-		if ($("#signupStage1 #lastName").val().trim()=="") {
-			validEndInvalidField(null, "lastName");
+		if (signupFieldValue('lastName').trim()=="") {
+			validEndInvalidField(false, "lastName");
 			//showMessage(0, 'Last Name is required');
 			return false
 		}else{
@@ -755,8 +869,8 @@ function renderStudentDetails(data, signupType){
 
 	$("#studyingSchoolName").blur(function() {
 		$('#studyingSchoolName').valid();
-		if ($("#signupStage1 #studyingSchoolName").val().trim()=="") {
-			validEndInvalidField(null, "studyingSchoolName");
+		if (signupFieldValue('studyingSchoolName').trim()=="") {
+			validEndInvalidField(false, "studyingSchoolName");
 			//showMessage(0, 'Last Name is required');
 			return false
 		}else{
@@ -767,7 +881,7 @@ function renderStudentDetails(data, signupType){
 	$("#studyingGradeId").on("change",function(){
 		$('#studyingGradeId').valid();
 		if ($("#signupStage1 #studyingGradeId").val()=="") {
-			validEndInvalidField(null, "studyingGradeId");
+			validEndInvalidField(false, "studyingGradeId");
 			//showMessage(0, 'Gendar is required');
 			return false
 		}else{
@@ -778,7 +892,7 @@ function renderStudentDetails(data, signupType){
 	$("#countryIdOfSchool").on("change",function(){
 		$('#countryIdOfSchool').valid();
 		if ($("#signupStage1 #countryIdOfSchool").val()=="") {
-			validEndInvalidField(null, "countryIdOfSchool");
+			validEndInvalidField(false, "countryIdOfSchool");
 			//showMessage(0, 'Gendar is required');
 			return false
 		}else{
@@ -812,7 +926,7 @@ function renderStudentDetails(data, signupType){
 			}
 		}else if($('#signupStage1 #dob').val()==""){
 			//showMessage(0, 'Please choose your Date of Birth.');
-			validEndInvalidField(null, "dob");
+			validEndInvalidField(false, "dob");
 			$('#dob').valid();
 			return false
 		}
@@ -822,7 +936,7 @@ function renderStudentDetails(data, signupType){
 	});
 	$("#applyStandardId").on("change",function(){
 		if ($("#signupStage1 #applyStandardId").val()=="") {
-			validEndInvalidField(null, "applyStandardId");
+			validEndInvalidField(false, "applyStandardId");
 			$('#applyStandardId').valid();
 			if(!$('#signupStage1 #dob').parent().hasClass("false")){
 				validEndInvalidField(null, "dob");
@@ -840,7 +954,7 @@ function renderStudentDetails(data, signupType){
 	$("#gender").on("change",function(){
 		$('#gender').valid();
 		if ($("#signupStage1 #gender").val()=="") {
-			validEndInvalidField(null, "gender");
+			validEndInvalidField(false, "gender");
 			//showMessage(0, 'Gendar is required');
 			return false
 		}else{
@@ -851,7 +965,7 @@ function renderStudentDetails(data, signupType){
 	$("#nationality").on("change",function(){
 		$('#nationality').valid();
 		if ($("#signupStage1 #nationality").val()=="") {
-			validEndInvalidField(null, "nationality");
+			validEndInvalidField(false, "nationality");
 			//showMessage(0, 'Gendar is required');
 			return false
 		}else{
@@ -860,12 +974,12 @@ function renderStudentDetails(data, signupType){
 	});
 	$("#contactNumber").unbind().bind("change",function(){
 		$('#contactNumber').valid();
-		if ($("#signupStage1 #contactNumber").val().length < 5 && $("#signupStage1 #contactNumber").val().length > 0 ) {
+		if (signupFieldValue('contactNumber').length < 5 && signupFieldValue('contactNumber').length > 0 ) {
 			validEndInvalidField(false, "contactNumber");
 			return false
 		}
-		if ($("#signupStage1 #contactNumber").val().trim()=="" || $("#signupStage1 #contactNumber").val().length == 0 ) {
-			validEndInvalidField(null, "contactNumber");
+		if (signupFieldValue('contactNumber').trim()=="" || signupFieldValue('contactNumber').length == 0 ) {
+			validEndInvalidField(false, "contactNumber");
 			//showMessage(0, 'Gendar is required');
 			return false
 		}else{
@@ -931,42 +1045,76 @@ function renderStudentDetails(data, signupType){
 	if(nonMandatoryFields.length>0){
 		formValdate('signupStage1', [], nonMandatoryFields);
 	}
-	$("#signupStage1 #countryId").on("change",function(){
-		$('#signupStage1 #countryId').valid();
-		var selectedCountry =  $('option:selected', this).attr("dail-country-code");
-		if(IGNORECOUNTRYARRAY.includes(selectedCountry)) {
-			selectedCountry	= "US";
-		}
-		callStates('signupStage1', this.value, 'countryId', 'stateId', 'cityId');
-		if( selectedCountry !=undefined && selectedCountry != ''){
-			itiContcat.setCountry(selectedCountry);
+	$("#countryId").on("change",function(){
+		var formId = $(this).closest("form").attr("id");
+		if(STUDENT_SINGUP_CURRENT_STEP==1){
+			var selectedCountry =  $('option:selected', this).attr("dail-country-code");
+			$('#'+formId+' #stateId').val('').trigger('change');
+			$('#'+formId+' #cityId').val('').trigger('change');
+			callStates(formId, this.value, 'countryId', 'stateId', 'cityId');
+			if( selectedCountry !=undefined && selectedCountry != ''){
+				itiContcat.setCountry(selectedCountry);
+			}else{
+				$("#stateId").html("<option value=''>Select Province/State*</option>");
+			}
+			$('#'+formId+' #cityId').html('<option value="">Select City*</option>');
+			checkCSCValidation(selectedCountry, "countryId", "Country");
 		}else{
-			$("#stateId").html("<option value=''>Select State/Province*</option>");
+			$('#'+formId+' #countryId').valid();
+			var selectedCountry =  $('option:selected', this).attr("dail-country-code");
+			if(IGNORECOUNTRYARRAY.includes(selectedCountry)) {
+				selectedCountry	= "US";
+			}
+			callStates(formId, this.value, 'countryId', 'stateId', 'cityId');
+			if( selectedCountry !=undefined && selectedCountry != ''){
+				itiContcat.setCountry(selectedCountry);
+			}else{
+				$("#stateId").html("<option value=''>Select Province/State*</option>");
+			}
+			$("#signupStage1 #cityId").html("<option value=''>Select City*</option>");
+			checkCSCValidation(selectedCountry, "countryId", "Country");
+			checkCSCValidation("", "stateId", "Province/State*");
+			checkCSCValidation("", "cityId", "City");
+			//$("#signupStage1").valid()
+			// $('#signupStage1 #countryId').val('').trigger("change");
+			$('#countryId').valid();
+			$('#stateId').valid();
+			$('#cityId').valid();
+			
+			// When cleared, drop focus so the field shows the unfocused (red) state
+			// instead of the blue focus outline, matching State/Province and City.
+			if(!$('#'+formId+' #countryId').val()){
+				$('#'+formId+' #countryId').select2('close');
+				$('#'+formId+' #countryId').next('.select2').find('.select2-selection').blur();
+			}
 		}
-		$("#signupStage1 #cityId").html("<option value=''>Select City*</option>");
-		checkCSCValidation(selectedCountry, "countryId", "Country");
-		checkCSCValidation("", "stateId", "State/Province*");
-		checkCSCValidation("", "cityId", "City");
-		//$("#signupStage1").valid()
-		$('#stateId').valid();
-		$('#cityId').valid();
+		
 	});
 
-	$("#signupStage1 #stateId").on("change",function(){
+	$("#stateId").on("change",function(){
+		
 		var selectedState =  $('option:selected', this).attr("value");
-		$('#stateId').valid();
-		checkCSCValidation($("#signupStage1 #stateId").val(), "stateId", "State/Province*");
+		var formId = $(this).closest("form").attr("id");
+		if(STUDENT_SINGUP_CURRENT_STEP!=1){
+			$('#stateId').valid();
+		}
+		checkCSCValidation($("#"+formId+" #stateId").val(), "stateId", "Province/State*");
 		checkCSCValidation("", "cityId", "City");
-		callCities('signupStage1', this.value, 'stateId', 'cityId');
+		callCities(formId, this.value, 'stateId', 'cityId');
 		if(selectedState == ''){
 			$("#cityId").html("<option value=''>Select City*</option>");
 		}
-		$('#cityId').valid();
+		if(STUDENT_SINGUP_CURRENT_STEP!=1){
+			$('#cityId').valid();
+		}
 
 	});
-	$("#signupStage1 #cityId").on("change",function(){
-		checkCSCValidation($("#signupStage1 #cityId").val(), "cityId", "City");
-		$('#cityId').valid();
+	$("#cityId").on("change",function(){
+		var formId = $(this).closest("form").attr("id");
+		checkCSCValidation($("#"+formId+" #cityId").val(), "cityId", "City");
+		if(STUDENT_SINGUP_CURRENT_STEP!=1){
+			$('#cityId').valid();
+		}
 	});
 	$("#learningProgramPartnerStudent").val(data.signupStudent.learningProgram).trigger('change');
 	$("#learningProgramPartnerStudent").attr("onchange", "changeLearningProgramOfPartnerInitiate('"+(data.signupStudent.studyingGradeId == undefined ? "":data.signupStudent.studyingGradeId)+"')");
@@ -1049,7 +1197,7 @@ function getStudentDetailsContent(data, signupType) {
                         value="${signupStudent.firstName}" maxlength="40"
                         ${data.paymentStatus === 'SUCCESS' ? 'disabled' : ''}
                         onkeydown="return M.isChars(event);" placeholder=" " tabindex="${++tabindex}">
-                    <label for="firstName">First Name*</label>
+                    <label for="firstName">First Name<sup class="sup">*</sup></label>
                 </div>
             </div>
             <div class="form-holder valid-field">
@@ -1069,7 +1217,7 @@ function getStudentDetailsContent(data, signupType) {
                         value="${signupStudent.lastName}" maxlength="40"
                         ${data.paymentStatus === 'SUCCESS' ? 'disabled' : ''}
                         onkeydown="return M.isChars(event);" placeholder=" " tabindex="${++tabindex}">
-                    <label for="lastName">Last Name*</label>
+                    <label for="lastName">Last Name<sup class="sup">*</sup></label>
                 </div>
             </div>
         </div>
@@ -1080,13 +1228,13 @@ function getStudentDetailsContent(data, signupType) {
 					<select name="learningLabel" id="learningLabel" class="form-control-field" tabindex="${++tabindex}" onchange="calculateGradeLabel()" style="display:${data.signupStudent.courseProviderId === 39 ? 'block' : 'none'};">
 						${getLearningLabel()}
 					</select>
-					<label for="learningLabel">Learning Label*</label>
+					<label for="learningLabel">Learning Label<sup class="sup">*</sup></label>
 				</div>
 				<div class="custom-field" style="display:${data.signupStudent.courseProviderId != 39 ? 'block' : 'none'};">
 					<select name="applyStandardId" id="applyStandardId" class="form-control-field" tabindex="${++tabindex}" style="display:${data.signupStudent.courseProviderId != 39 ? 'block' : 'none'};">
 						${getOptions(data.signupStudent.grades, data.signupStudent.standardId)}
 					</select>
-					<label for="applyStandardId">Grade*</label>
+					<label for="applyStandardId">Grade<sup class="sup">*</sup></label>
 				</div>
 			</div>
 			<div class="form-holder valid-field">
@@ -1096,7 +1244,7 @@ function getStudentDetailsContent(data, signupType) {
 					value="${signupStudent.dob}"
 					placeholder=" "
 					onkeydown="return false" tabindex="${++tabindex}" readonly>
-					<label for="dob">Date of Birth* (MM DD, YYYY)</label>
+					<label for="dob">Date of Birth<sup class="sup">*</sup> (MMM DD, YYYY)</label>
 				</div>
 			</div>
 			<div class="form-holder valid-field">
@@ -1106,7 +1254,7 @@ function getStudentDetailsContent(data, signupType) {
 					${data.paymentStatus === 'SUCCESS' ? 'disabled' : ''}>
 					${getGenderContent()}
 					</select>
-					<label for="gender">Gender*</label>
+					<label for="gender">Gender<sup class="sup">*</sup></label>
 				</div>
 			</div>
 		</div>
@@ -1117,7 +1265,7 @@ function getStudentDetailsContent(data, signupType) {
                     <input type="email" name="communicationEmail" id="communicationEmail" class="form-control-field"
                         value="${signupStudent.communicationEmail}" ${signupStudent.communicationEmail == "" ? "" : "disabled"}
                         placeholder=" " tabindex="${++tabindex}">
-                    <label for="communicationEmail">Email*</label>
+                    <label for="communicationEmail">Email<sup class="sup">*</sup></label>
                 </div>
             </div>
             <div class="form-holder password valid-field">
@@ -1126,26 +1274,30 @@ function getStudentDetailsContent(data, signupType) {
                     <input type="tel" name="contactNumber" id="contactNumber" class="form-control-field"
                         maxlength="15" value="${signupStudent.contactNumber}"
                         onkeydown="return M.digit(event);" placeholder=" " tabindex="${++tabindex}">
-                    <label for="contactNumber">Phone Number*</label>
+                    <label for="contactNumber">Mobile Number<sup class="sup">*</sup></label>
                 </div>
             </div>
             <div class="form-holder valid-field">
+				<span class="nationality-id-hint mobile-nationality-id-hint" style="color:#181818;font-weight:700;position:absolute;bottom:92%;right:25px">You must have a valid National ID</span>
+				<span class="nationality-id-hint desktop-nationality-id-hint" style="color:#181818;font-weight:700;position:absolute;bottom:96%;right:25px">You must have a valid National ID</span>
                 <i class="zmdi zmdi-globe"></i>
                 <div class="custom-field">
                     <select name="nationality" id="nationality" class="form-control-field" required tabindex="${++tabindex}">
                         <option value="">Select Nationality*</option>
                         ${getNationalityOption(signupStudent.countries, signupStudent.nationality)}
                     </select>
-                    <label for="nationality">Nationality*</label>
+                    <label for="nationality">Nationality<sup class="sup">*</sup></label>
                 </div>
-                <span class="nationality-id-hint" style="color:#444;position:absolute;top:60%;left:0">You must have a valid ID of your nationality</span>
+                
             </div>
         </div>
-        <div class="form-row mb-2">
+        ${/*<div class="form-row mb-2 student-current-location">
             <strong>Student's Current Location</strong>
-        </div>
+        </div>*/''}
         <div class="form-row">
             <div class="form-holder valid-field">
+				<strong class="student-current-location-desktop" style="color:#181818;font-weight:700;position:absolute;bottom:96%;right:25px">Student's Current Location</strong>
+				<span class="student-current-location-mobile" style="color:#181818;font-weight:700;position:absolute;bottom:92%;right:25px">Student's Current Location</span>
                 <i class="zmdi zmdi-pin"></i>
                 <div class="custom-field">
                     <select name="countryId" id="countryId" class="form-control-field" required tabindex="${++tabindex}"
@@ -1153,17 +1305,17 @@ function getStudentDetailsContent(data, signupType) {
                         <option value="">Select Country*</option>
                         ${getCountriesOption(signupStudent.countries, signupStudent.countryId)}
                     </select>
-                    <label for="countryId">Country*</label>
+                    <label for="countryId">Country<sup class="sup">*</sup></label>
                 </div>
             </div>
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-map"></i>
                 <div class="custom-field">
                     <select name="stateId" id="stateId" class="form-control-field" required tabindex="${++tabindex}">
-                        <option value="">Select State/Province*</option>
+                        <option value="">Select Province/State*</option>
                         ${getStatesOption(signupStudent.states, signupStudent.stateId)}
                     </select>
-                    <label for="stateId">State/Province*</label>
+                    <label for="stateId">Province/State<sup class="sup">*</sup></label>
                 </div>
             </div>
             <div class="form-holder valid-field">
@@ -1173,7 +1325,7 @@ function getStudentDetailsContent(data, signupType) {
                         <option value="">Select City*</option>
                         ${getCitiesOption(signupStudent.cities, signupStudent.cityId)}
                     </select>
-                    <label for="cityId">City*</label>
+                    <label for="cityId">City<sup class="sup">*</sup></label>
                 </div>
             </div>
         </div>
@@ -1187,7 +1339,7 @@ function getStudentDetailsContent(data, signupType) {
 					<input type="text" name="studyingSchoolName" id="studyingSchoolName" class="form-control-field"
 						value="${signupStudent.studyingSchoolName}"
 						placeholder=" " tabindex="${++tabindex}">
-					<label for="studyingSchoolName">Student's School Name*</label>
+					<label for="studyingSchoolName">Student's School Name<sup class="sup">*</sup></label>
 				</div>
 			</div>
 			<div class="form-holder valid-field">
@@ -1197,7 +1349,7 @@ function getStudentDetailsContent(data, signupType) {
 						<option value="0">Student Current Grade*</option>
 						${getStandardContentForDualDimploma(data.signupStudent.studyingGradeId)}
 					</select>
-					<label for="studyingGradeId">Student Current Grade*</label>
+					<label for="studyingGradeId">Student Current Grade<sup class="sup">*</sup></label>
 				</div>
 			</div>
 			<div class="form-holder valid-field">
@@ -1207,7 +1359,7 @@ function getStudentDetailsContent(data, signupType) {
 						<option value="">Select Country of School*</option>
 						${getCountriesOption(signupStudent.countries, signupStudent.countryIdOfSchool)}
 					</select>
-					<label for="countryIdOfSchool">Country of School*</label>
+					<label for="countryIdOfSchool">Country of School<sup class="sup">*</sup></label>
 				</div>
 			</div>
 		</div>`;
@@ -1251,6 +1403,8 @@ function renderParentDetails(data){
                 }else{
                     //itiParent.setCountry($("#pCountryId option:selected").attr('dail-country-code'));
                 }
+
+                // attachPhoneLengthLimit(inputParentPhone, itiParent);
                 inputParentPhone.addEventListener('countrychange', function(e) {
                     $('#parentCountryIsd').val(itiParent.getSelectedCountryData().iso2);
                     $('#parentCountryDailCode').val(itiParent.getSelectedCountryData().dialCode);
@@ -1263,8 +1417,8 @@ function renderParentDetails(data){
 			}
 		}
 		$("#parentFirstName").blur(function() {
-			if ($("#signupStage2 #parentFirstName").val().trim()=="") {
-				validEndInvalidField(null, "parentFirstName");
+			if (signupFieldValue('parentFirstName').trim()=="") {
+				validEndInvalidField(false, "parentFirstName");
 				//showMessage(0, 'First Name is required');
 				return false
 			}else{
@@ -1272,7 +1426,7 @@ function renderParentDetails(data){
 			}
 		});
 		$("#parentMiddletName").blur(function() {
-			if ($("#signupStage2 #parentMiddletName").val().trim()=="") {
+			if (signupFieldValue('parentMiddletName').trim()=="") {
 				validEndInvalidField(null, "parentMiddletName");
 				return false
 			}else{
@@ -1280,8 +1434,8 @@ function renderParentDetails(data){
 			}
 		});
 		$("#parentlastName").blur(function() {
-			if ($("#signupStage2 #parentlastName").val().trim()=="") {
-				validEndInvalidField(null, "parentlastName");
+			if (signupFieldValue('parentlastName').trim()=="") {
+				validEndInvalidField(false, "parentlastName");
 				//showMessage(0, 'Last Name is required');
 				return false
 			}else{
@@ -1290,7 +1444,7 @@ function renderParentDetails(data){
 		});
 		$("#relation").on("change", function() {
 			if ($("#signupStage2 #relation").val()=="") {
-				validEndInvalidField(null, "relation");
+				validEndInvalidField(false, "relation");
 				//showMessage(0, 'Last Name is required');
 				return false
 			}else{
@@ -1298,10 +1452,10 @@ function renderParentDetails(data){
 			}
 		});
 		$("#parentEmailId").blur(function() {
-			if ($("#signupStage2 #parentEmailId").val().trim()=="") {
+			if (signupFieldValue('parentEmailId').trim()=="") {
 				validEndInvalidField(null, "parentEmailId");
 				return true
-			}else if (!validateEmail($("#signupStage2 #parentEmailId").val().trim())) {
+			}else if (!validateEmail(signupFieldValue('parentEmailId').trim())) {
 				//showMessage(false, 'Email is either empty or invalid');
 				validEndInvalidField(false, "parentEmailId");
 				return false
@@ -1310,12 +1464,12 @@ function renderParentDetails(data){
 			}
 		});
 		$("#parentPhoneNumber").blur(function() {
-			if ($("#signupStage2 #parentPhoneNumber").val().length < 5 && $("#signupStage2 #parentPhoneNumber").val().length > 0 ) {
+			if (signupFieldValue('parentPhoneNumber').length < 5 && signupFieldValue('parentPhoneNumber').length > 0 ) {
 				validEndInvalidField(false, "parentPhoneNumber");
 				return false
 			}
-			if ($("#signupStage2 #parentPhoneNumber").val().trim()=="" || $("#signupStage2 #parentPhoneNumber").val().length == 0 ) {
-				validEndInvalidField(null, "parentPhoneNumber");
+			if (signupFieldValue('parentPhoneNumber').trim()=="" || signupFieldValue('parentPhoneNumber').length == 0 ) {
+				// validEndInvalidField(false, "parentPhoneNumber");
 				//showMessage(0, 'Gendar is required');
 				return false
 			}else{
@@ -1325,7 +1479,7 @@ function renderParentDetails(data){
 	}
 
 	$("#referralCode").blur(function() {
-		if ($("#signupStage2 #referralCode").val().trim()=="") {
+		if (signupFieldValue('referralCode').trim()=="") {
 			validEndInvalidField(null, "referralCode");
 			return true
 		}else{
@@ -1333,7 +1487,7 @@ function renderParentDetails(data){
 		}
 	});
 	$("#pcModeWhatsapp").on("change", function(){
-		if($("#signupStage2 #pcModeWhatsapp").is(":checked") || $("#signupStage2 #pcModeCall").is(":checked") || $("#signupStage2 #pcModeEmail").is(":checked")){
+		if($("#signupStage2 #pcModeWhatsapp").is(":checked")){
 			validEndInvalidField(true, "pcModeWhatsapp");
 			return true
 		}else{
@@ -1342,20 +1496,20 @@ function renderParentDetails(data){
 		}
 	});
 	$("#pcModeCall").on("change", function(){
-		if($("#signupStage2 #pcModeWhatsapp").is(":checked") || $("#signupStage2 #pcModeCall").is(":checked") || $("#signupStage2 #pcModeEmail").is(":checked")){
-			validEndInvalidField(true, "pcModeWhatsapp");
+		if($("#signupStage2 #pcModeCall").is(":checked")){
+			validEndInvalidField(true, "pcModeCall");
 			return true
 		}else{
-			validEndInvalidField(null, "pcModeWhatsapp");
+			validEndInvalidField(null, "pcModeCall");
 			return false
 		}
 	});
 	$("#pcModeEmail").on("change", function(){
-		if($("#signupStage2 #pcModeWhatsapp").is(":checked") || $("#signupStage2 #pcModeCall").is(":checked") || $("#signupStage2 #pcModeEmail").is(":checked")){
-			validEndInvalidField(true, "pcModeWhatsapp");
+		if($("#signupStage2 #pcModeEmail").is(":checked")){
+			validEndInvalidField(true, "pcModeEmail");
 			return true
 		}else{
-			validEndInvalidField(null, "pcModeWhatsapp");
+			validEndInvalidField(null, "pcModeEmail");
 			return false
 		}
 	});
@@ -1430,6 +1584,7 @@ function renderParentDetails(data){
 
 	}else{
 		$("#pCountryId").on("change",function(){
+			var formId = $(this).closest("form").attr("id");
 			var selectedCountry =  $('option:selected', this).attr("dail-country-code");
 			if(selectedCountry != undefined && selectedCountry != ''){
 				$('#pCountryId').valid();
@@ -1437,34 +1592,43 @@ function renderParentDetails(data){
 					selectedCountry	= "US";
 				}
 				itiParent.setCountry(selectedCountry);
-				callStates('signupStage2', this.value, 'pCountryId', 'pStateId', 'pCityId');
+				$("#pStateId").html("<option value=''>Select Province/State*</option>");
 				$("#pCityId").html("<option value=''>Select City*</option>");
+				callStates(formId, this.value, 'pCountryId', 'pStateId', 'pCityId');
 			}else{
-				$("#pStateId").html("<option value=''>Select State/Province*</option>");
+				$("#pStateId").html("<option value=''>Select Province/State*</option>");
 				$("#pCityId").html("<option value=''>Select City*</option>");
 			}
-			pCheckCSCValidation(selectedCountry, "pCountryId", "Country");
+			if(!IS_PARENT_COUNTRY_CHANGE){
+				pCheckCSCValidation(selectedCountry, "pCountryId", "Country");
+			}
 			pCheckCSCValidation("", "pStateId", "State/Province");
 			pCheckCSCValidation("", "pCityId", "City");
-			$("#signupStage2").valid()
+			if(!IS_PARENT_COUNTRY_CHANGE){
+				$("#signupStage2").valid()
+			}else{
+				$("#pCountryId").closest(".form-holder.valid-field").removeClass("true");
+			}
 		});
 
 		$("#pStateId").on("change",function(){
 			var selectedState =  $('option:selected', this).attr("value");
+			var formId = $(this).closest("form").attr("id");
 			$('#pStateId').valid();
-			pCheckCSCValidation($("#signupStage2 #pStateId").val(), "pStateId", "State/Province");
+			pCheckCSCValidation($("#"+formId+" #pStateId").val(), "pStateId", "State/Province");
 			pCheckCSCValidation("", "pCityId", "City");
-			callCities('signupStage2', this.value, 'pStateId', 'pCityId');
+			callCities(formId, this.value, 'pStateId', 'pCityId');
 			if(selectedState == ''){
 				$("#pCityId").html("<option value=''>Select City*</option>");
 			}
 			$('#pCityId').valid();
 		});
 		$("#pCityId").on("change",function(){
+			var formId = $(this).closest("form").attr("id");
 			if($('#pCityId').val() != undefined || $('#pCityId').val() != null){
 				$('#pCityId').valid();
 			}
-			pCheckCSCValidation($("#signupStage2 #pCityId").val(), "pCityId", "pCityId");
+			pCheckCSCValidation($("#"+formId+" #pCityId").val(), "pCityId", "pCityId");
 		});
 	}
 }
@@ -1484,7 +1648,7 @@ function autoSelectDropDownParentDetails(signupParent){
 		$('#signupStage2 #pCityId').val(signupParent.cityId);
 	}
 	if($('#countryId').val() == $('#pCountryId').val() && $('#stateId').val() == $('#pStateId').val() && $('#cityId').val() == $('#pCityId').val()){
-		$('#signupStage2 #sameAsStudentLocation').prop('checked',true);
+		// $('#signupStage2 #sameAsStudentLocation').prop('checked',true);
 		$('#signupStage2 #pCountryId').prop('disabled',true);
 		$('#signupStage2 #pStateId').prop('disabled',true);
 		$('#signupStage2 #pCityId').prop('disabled',true);
@@ -1527,7 +1691,7 @@ function getParentDetailsContent(data) {
                         <option value="CS">College Student</option>
                         <option value="WP">Working Professional</option>
                     </select>
-                    <label for="workingProfession">Student or working professional?*</label>
+                    <label for="workingProfession">Student or working professional?<sup class="sup">*</sup></label>
                 </div>
             </div>
             <div class="form-holder valid-field">
@@ -1536,7 +1700,7 @@ function getParentDetailsContent(data) {
                     <input type="text" name="institutionName" id="institutionName" class="form-control-field"
                         value="${signupParent.institutionName}"
                         placeholder=" " tabindex="${++tabindex}">
-                    <label for="institutionName">Name of School/College/Organization*</label>
+                    <label for="institutionName">Name of School/College/Organization<sup class="sup">*</sup></label>
                 </div>
             </div>
             <div class="form-holder valid-field">
@@ -1546,7 +1710,7 @@ function getParentDetailsContent(data) {
                         <option value="0" disabled selected>Country of the School/College/Organization*</option>
                         ${getCountriesOption(signupParent.countries, signupParent.countryId)}
                     </select>
-                    <label for="institutionCountryId">Country of School/College/Organization*</label>
+                    <label for="institutionCountryId">Country of School/College/Organization<sup class="sup">*</sup></label>
                 </div>
             </div>
         </div>`;
@@ -1561,7 +1725,7 @@ function getParentDetailsContent(data) {
                     <input type="text" class="form-control-field" style="text-transform:capitalize" name="parentFirstName" id="parentFirstName"
                         value="${signupParent.firstName}" maxlength="40" onkeydown="return M.isChars(event);"
                         placeholder=" " tabindex="${++tabindex}">
-                    <label for="parentFirstName">First Name*</label>
+                    <label for="parentFirstName">First Name<sup class="sup">*</sup></label>
                 </div>
             </div>
             <div class="form-holder valid-field">
@@ -1579,7 +1743,7 @@ function getParentDetailsContent(data) {
                     <input type="text" class="form-control-field" style="text-transform:capitalize" name="parentlastName" id="parentlastName"
                         name="parentlastName" value="${signupParent.lastName}" maxlength="40"
                         onkeydown="return M.isChars(event);" placeholder=" " tabindex="${++tabindex}">
-                    <label for="parentlastName">Last Name*</label>
+                    <label for="parentlastName">Last Name<sup class="sup">*</sup></label>
                 </div>
             </div>
         </div>
@@ -1590,7 +1754,7 @@ function getParentDetailsContent(data) {
                     <select name="relation" id="relation" class="form-control-field" required tabindex="15">
                         ${getRelationshipContent()}
                     </select>
-                    <label for="relation">Relation with student*</label>
+                    <label for="relation">Relation with student<sup class="sup">*</sup></label>
                 </div>
             </div>
             <div class="form-holder valid-field bottom-error-message">
@@ -1614,13 +1778,13 @@ function getParentDetailsContent(data) {
                 </div>
             </div>
         </div>
-        <div class="form-row m-0 " style="${hideClass}">
+        <div class="form-row m-0 parent-current-location" style="${hideClass}">
             <strong>Parent's Current Location</strong>
         </div>
-        <div class="form-row mb-2 " style="${hideClass}">
-            <label for="sameAsStudentLocation" class="f-13">
+        <div class="form-row mb-2 same-student-location" style="${hideClass}">
+            <label for="sameAsStudentLocation">
                 <input id="sameAsStudentLocation" class="m-0" tabindex="${++tabindex}" type="checkbox" onclick="addressSameAs()" />
-                Same as student location
+                Change your location
             </label>
         </div>
         <div class="form-row " style="${hideClass}">
@@ -1629,19 +1793,19 @@ function getParentDetailsContent(data) {
                 <div class="custom-field">
                     <select name="pCountryId" id="pCountryId" class="form-control-field" tabindex="${++tabindex}">
                         <option value="">Select Country*</option>
-                        ${getCountriesOption(signupParent.countries, signupParent.countryId)}
+						${getCountriesOption(signupParent.countries, signupParent.countryId)}
                     </select>
-                    <label for="pCountryId">Country*</label>
+                    <label for="pCountryId">Country<sup class="sup">*</sup></label>
                 </div>
             </div>
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-map"></i>
                 <div class="custom-field">
                     <select name="pStateId" id="pStateId" class="form-control-field" tabindex="${++tabindex}">
-                        <option value="">Select State/Province*</option>
+                        <option value="">Select Province/State*</option>
                         ${getStatesOption(signupParent.states, signupParent.stateId)}
                     </select>
-                    <label for="pStateId">State/Province*</label>
+                    <label for="pStateId">State/Province<sup class="sup">*</sup></label>
                 </div>
             </div>
             <div class="form-holder valid-field">
@@ -1651,7 +1815,7 @@ function getParentDetailsContent(data) {
                         <option value="">Select City*</option>
                         ${getCitiesOption(signupParent.cities, signupParent.cityId)}
                     </select>
-                    <label for="pCityId">City*</label>
+                    <label for="pCityId">City<sup class="sup">*</sup></label>
                 </div>
             </div>
         </div>`;
@@ -1660,24 +1824,23 @@ function getParentDetailsContent(data) {
     html += `
     <div class="form-row m-0 justify-content-center">
         <div class="form-holder text-center font-sm-11" style="width:100%">
-            <strong>Your Preferred Communication&nbsp;</strong>
-            <b>(You may choose more than one)</b>
-            <div class="full d-flex justify-content-center ">
+            <strong class="preferred-communication">How to Contact You?&nbsp;</strong>
+            <div class="full d-flex justify-content-center communication-checkbox-wrapper flex-wrap">
                 <label class="cursor communication-mode text-dark valid-field" for="pcModeWhatsapp">
                     <img src="${PATH_FOLDER_IMAGE2}watsapp-icon.png" width="16px" />
-                    <span class="d-inline-block ml-1">WhatsApp</span>
+                    <span class="d-inline-block ml-1 communication-label">WhatsApp</span>
                     <input id="pcModeWhatsapp" name="pcModeWhatsapp" type="checkbox" value="whatsapp"
                         ${signupParent.communicationWhatsApp == 'Y' ? 'checked' : ''} tabindex="${++tabindex}">
                 </label>
-                <label class="cursor communication-mode text-dark" for="pcModeCall">
+                <label class="cursor communication-mode text-dark valid-field" for="pcModeCall">
                     <i class="fa fa-phone"></i>
-                    <span class="d-inline-block ml-1">Call</span>
+                    <span class="d-inline-block ml-1 communication-label">Call</span>
 					<input id="pcModeCall" name="pcModeCall" type="checkbox" value="call"
                         ${signupParent.communicationCall == 'Y' ? 'checked' : ''} tabindex="${++tabindex}">
                 </label>
-                <label class="cursor communication-mode text-dark" for="pcModeEmail">
+                <label class="cursor communication-mode text-dark valid-field" for="pcModeEmail">
                     <i class="fa fa-envelope"></i>
-                    <span class="d-inline-block ml-1">Email</span>
+                    <span class="d-inline-block ml-1 communication-label">Email</span>
 					<input id="pcModeEmail" name="pcModeEmail" type="checkbox" value="email"
                         ${signupParent.communicationEmail == 'Y' ? 'checked' : ''} tabindex="${++tabindex}">
                 </label>
@@ -1696,9 +1859,45 @@ function renderCourseSelectionContent(csr){
 	if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' ){
 		$('#signupStage3 #gradeId').val(csr.standardId);
 	}
-	$('[data-toggle="tooltip"]').tooltip({
+	var upgradeCourseTooltipSelector = ".upgradeCourses [data-toggle='tooltip']";
+	$('[data-toggle="tooltip"]').not(upgradeCourseTooltipSelector).tooltip({
 		html: true
 	});
+	$(upgradeCourseTooltipSelector).each(function () {
+		var tooltipText = $(this).attr('data-upgrade-tooltip-title') || $(this).attr('data-original-title') || $(this).attr('title') || '';
+		$(this).tooltip('dispose')
+			.attr('data-upgrade-tooltip-title', tooltipText)
+			.removeAttr('data-original-title')
+			.removeAttr('title');
+	});
+	$(upgradeCourseTooltipSelector).tooltip({
+		html: true,
+		trigger: 'manual',
+		sanitize: false,
+		template: '<div class="tooltip upgrade-course-tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner"></div></div>',
+		title: function () {
+			var tooltipText = $('<div>').text($(this).attr('data-upgrade-tooltip-title') || '').html();
+			return '<button type="button" class="upgrade-course-tooltip-close" aria-label="Close">&times;</button><span class="upgrade-course-tooltip-content">' + tooltipText + '</span>';
+		}
+	});
+	$(document).off('mouseenter.upgradeCourseTooltip mouseleave.upgradeCourseTooltip', upgradeCourseTooltipSelector)
+		.on('mouseenter.upgradeCourseTooltip', upgradeCourseTooltipSelector, function () {
+			$(this).tooltip('show');
+		})
+		.on('mouseleave.upgradeCourseTooltip', upgradeCourseTooltipSelector, function () {
+			$(this).tooltip('hide');
+		});
+	$(document).off('click.upgradeCourseTooltipClose').on('click.upgradeCourseTooltipClose', '.upgrade-course-tooltip-close', function (event) {
+		event.preventDefault();
+		event.stopPropagation();
+		var tooltipId = $(this).closest('.tooltip').attr('id');
+		if(tooltipId){
+			$('[aria-describedby="' + tooltipId + '"]').tooltip('hide');
+		}else{
+			$(upgradeCourseTooltipSelector).tooltip('hide');
+		}
+	});
+
 	$('[data-toggle="tooltip"]').on('show.bs.tooltip', function () {
         $(".form-row .form-holder.selected-course-view").css({"overflow-x":"visible"});
 	});
@@ -1723,7 +1922,11 @@ function renderCourseSelectionContent(csr){
 	},1500);
 
 
-	$('.accordion .a-title').unbind().bind('click', function () {
+	$('#step-3 .accordion .a-title, .accordion .a-title .review-btn .cutom-btn').unbind().bind('click', function (event) {
+		// Same fix as in getReviewAndPayRendered(): the review-btn button is nested inside its
+		// own .a-title, which is also bound here, so a click on it would otherwise bubble and
+		// run this handler a second time (slideToggle open, then bubble closes it right back).
+		event.stopPropagation();
 		const $li = $(this).closest('li');
 		const $icon = $(this).find('.plus-icon');
 		$li.find('.a-content').stop().slideToggle();
@@ -1791,14 +1994,14 @@ function getCourseSelectionContent(csr){
 	if(csr.standardId!=8){
 	}
 	html+=
-	'<h3 class="mb-1 select-grade-title course-selection-grade-title" style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;">';
+	'<h3 class="mb-3 select-grade-title course-selection-grade-title" style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;">';
 		if(csr.courseProviderId == 39){
-			html+='<span class="alternate-txt-color course-selection-title-text mb-4" style="margin-bottom:0;white-space:nowrap;">Your Courses For</span>';
+			// html+='<span class="alternate-txt-color course-selection-title-text mb-4" style="margin-bottom:0;white-space:nowrap;">Your Courses For</span>';
 		}else{
 			if(csr.registrationType == 'BATCH'){
-				html+='<span class="alternate-txt-color course-selection-title-text" style="margin-bottom:0;white-space:nowrap;">Your Courses For</span>';
+				// html+='<span class="alternate-txt-color course-selection-title-text" style="margin-bottom:0;white-space:nowrap;">Your Courses For</span>';
 			}else{
-				html+='<span class="alternate-txt-color course-selection-title-text" style="margin-bottom:0;white-space:nowrap;">Course Selection For</span>';
+				// html+='<span class="alternate-txt-color course-selection-title-text" style="margin-bottom:0;white-space:nowrap;">Course Selection For</span>';
 			}
 		}
 		if(csr.courseProviderId == 39){
@@ -1830,12 +2033,15 @@ function getCourseSelectionContent(csr){
 			}else{
 				var grade = csr.standardName.split(" ");
 				grade = grade[1];
-				html+=
-				'<span class="alternate-txt-color">&nbsp;'+csr.standardName+'</span>'
+				// html+=
+				// '<span class="alternate-txt-color">&nbsp;'+csr.standardName+'</span>';
 				if($("#signupType").val() == "Online" || $("#userId").val() == USER_ID){
 					html+=
-					'<span class="change-grade primary-bg font-sm-12" onclick="changeSelectedGrade()">'
-						+'Change Grade <i class="fa fa-exchange" aria-hidden="true"></i>'
+					'<span class="change-grade secondary-bg font-sm-12 mb-2">'
+						+''+csr.standardName
+					+'</span>'
+					+'<span class="change-grade secondary-bg font-sm-12 mb-2" id="changeSelectedGrade" onclick="changeSelectedGrade(\'signupStage3Content\')">'
+						+' change&nbsp;<img src="'+PATH_FOLDER_IMAGE2+'change.png" width="25"/></i>'
 					+'</span>';
 				}
 			}
@@ -1887,23 +2093,33 @@ function getCourseSelectionContent(csr){
 						html+='<div class="form-holder selected-course-view" style="width:100%">'
 							+'<div class="fixed-item full">'
 								+'<div class="full selected-course primary-bg primary-border-color head">'
-									+'<h4 id="totalCredit" totalCredit="'+csr.totalCredit+'" class="title angle-arrow font-sm-10 justify-content-center primary-bg white-txt-color">';
+									+'<h4 id="totalCredit" totalCredit="'+csr.totalCredit+'" class="11 title angle-arrow font-sm-10 justify-content-center primary-bg white-txt-color">';
 										if(csr.selectedSubjects!=null && csr.selectedSubjects.length>0){
 											if(csr.registrationType=='BATCH' || csr.courseProviderId == 39){
 												html+=csr.selectedSubjects.length;
-												html+=' Mandatory / Fixed ';
+												html+=' Fixed Courses';
 												if(csr.selectedSubjects.length>1){
-													html+=' Courses worth '+csr.totalCredit+' credits';
+													// html+=' Courses worth '+csr.totalCredit+' credits';
 												}else{
-													html+=' Course worth '+csr.totalCredit+' credit';
+													// html+=' Course worth '+csr.totalCredit+' credit';
 												}
 
 											}else{
-												html+='You have '+csr.selectedSubjects.length;
-												if(csr.selectedSubjects.length>1){
-													html+=' Courses worth '+csr.totalCredit+' credits';
+												
+												if ([1, 2, 3, 11, 12, 13, 14, 15, 16, 17].includes(Number(csr.standardId))) {
+													html+=csr.selectedSubjects.length;
+													if(csr.selectedSubjects.length>1){
+														html+=' Courses Selected';
+													}else{
+														html+=' Course worth '+csr.totalCredit+' credit';
+													}
 												}else{
-													html+=' Course worth '+csr.totalCredit+' credit';
+													html+='You have '+csr.selectedSubjects.length;
+													if(csr.selectedSubjects.length>1){
+														html+=' Courses worth '+csr.totalCredit+' credits';
+													}else{
+														html+=' Course worth '+csr.totalCredit+' credit';
+													}
 												}
 											}
 										}else{
@@ -1925,12 +2141,16 @@ function getCourseSelectionContent(csr){
 													$.each(csr.selectedSubjects, function(k, courseDetails) {
 														html+=
 														'<div class="course-item'+(csr.controlType=="add" && csr.lastCourseId == courseDetails.courseId?' slide-animation':'')+'" seletedSubject="'+courseDetails.courseId+'">'
-															+'<span class="count">'+(k+1)+'.&nbsp;</span>'
+															+'<span class="count">'+(k+1)+'&nbsp;</span>'
 															+'<div class="selected_course_name">'
 																// +'<div class="course-icon"></div>'
 																+'<div class="course-name-wrapper">'
-																	+'<h4 class="course-name">'
-																		+ courseDetails.courseName + ' (' + courseDetails.creditScore + ' Credit) '
+																	+'<h4 class="course-name 1">'
+																		+ courseDetails.courseName;
+																		
+																		if (![1, 2, 3, 11, 12, 13, 14, 15, 16, 17].includes(Number(csr.standardId))) {
+																			html+=' (' + courseDetails.creditScore + ' Credit)'
+																		}
 																		// +'<span class="price">'
 																		// 	+' <b>';
 																		// 		if(csr.showCourseFee =='Y'){
@@ -1939,32 +2159,33 @@ function getCourseSelectionContent(csr){
 																		// 		html+=
 																		// 	'</b>'
 																		// +'</span>'
-																	+'</h4>'
+																	html+='</h4>'
 																+'</div>'
 																+'<div class="add-course-btn">'
 																	// +'<span class="white-txt-color mr-1"><i class="fa fa-check"></i></span>';
 																	if(courseDetails.upgradeCourses!=null && courseDetails.upgradeCourses.length>0){
 																		$.each(courseDetails.upgradeCourses, function(k, upgradeCourse) {
-																			html+=
-																			'<span class="1 remove-icon upgradeCourses primary-txt-color"';
-																				if(upgradeCourse.warningMessage==''){
-																					html+='onclick="confirmUpgradeCourse('+courseDetails.categoryId+','+courseDetails.courseId+','+upgradeCourse.courseId+')">';
-																				}else{
-																					html+='onclick="upgradeCourse('+courseDetails.categoryId+','+courseDetails.courseId+','+upgradeCourse.courseId+',\''+upgradeCourse.warningMessage+'\')">';
-																				}
-																				html+=upgradeCourse.buttonLabel;
-																				if(courseDetails.courseTypeOriginal == 'Regular'){
-																					html+=' <i class="fa fa-arrow-up" title="'+upgradeCourse.buttonLabel+'"></i>';
-																				}else{
-																					html+=' <i class="fa fa-arrow-down" title="'+upgradeCourse.buttonLabel+'"></i>';
-																				}
-																			html+=
-																			'</span>';
-																			if(upgradeCourse.courseType == "ADV"){
-																				html+='<span class="primary-txt-color white-bg upgradeCourses" style="display:inline-block;border-radius:4px;" data-toggle="tooltip" title="Advanced courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
-																			}else if(upgradeCourse.courseType == "HON"){
-																				html+='<span class="primary-txt-color white-bg upgradeCourses" style="display:inline-block;border-radius:4px;" data-toggle="tooltip" title="Honors courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
-																			};
+																			html+='<div class="upgradeCourses primary-txt-color px-0 tooltil-wrapper">'
+																				+'<span class="remove-icon pl-1 font-weight-bold"';
+																					if(upgradeCourse.warningMessage==''){
+																						html+='onclick="confirmUpgradeCourse('+courseDetails.categoryId+','+courseDetails.courseId+','+upgradeCourse.courseId+')">';
+																					}else{
+																						html+='onclick="upgradeCourse('+courseDetails.categoryId+','+courseDetails.courseId+','+upgradeCourse.courseId+',\''+upgradeCourse.warningMessage+'\')">';
+																					}
+																					html+=upgradeCourse.buttonLabel;
+																					if(courseDetails.courseTypeOriginal == 'Regular'){
+																						html+=' <i class="fa fa-arrow-up" title="'+upgradeCourse.buttonLabel+'"></i>';
+																					}else{
+																						html+=' <i class="fa fa-arrow-down" title="'+upgradeCourse.buttonLabel+'"></i>';
+																					}
+																				html+=
+																				'</span>';
+																				if(upgradeCourse.courseType == "ADV"){
+																					html+='<span class="mr-0 primary-txt-color white-bg upgradeCourses" style="border-radius:4px;" data-toggle="tooltip" title="Advanced courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
+																				}else if(upgradeCourse.courseType == "HON"){
+																					html+='<span class="mr-0 primary-txt-color white-bg upgradeCourses" style="border-radius:4px;" data-toggle="tooltip" title="Honors courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
+																				};
+																			html+='</div>';
 																		});
 																	}
 
@@ -2025,23 +2246,38 @@ function getCourseSelectionContent(csr){
 							}
 							html+='<div class="fixed-item full">'
 								+'<div class="full selected-course primary-bg primary-border-color head">'
-									+'<h4 id="totalCredit" totalCredit="'+csr.totalCredit+'" class="title angle-arrow font-sm-10 justify-content-center primary-bg white-txt-color">';
+									+'<h4 id="totalCredit" totalCredit="'+csr.totalCredit+'" class="22 title angle-arrow font-sm-10 justify-content-center primary-bg white-txt-color">';
 										if(csr.selectedSubjects!=null && csr.selectedSubjects.length>0){
 											if(csr.registrationType=='BATCH' || csr.courseProviderId == 39){
 												html+=csr.selectedSubjects.length;
-												html+=' Mandatory / Fixed ';
+												html+=' Fixed Courses';
 												if(csr.selectedSubjects.length>1){
-													html+=' Courses worth '+csr.totalCredit+' credits';
+													// html+=' Courses worth '+csr.totalCredit+' credits';
 												}else{
-													html+=' Course worth '+csr.totalCredit+' credit';
+													// html+=' Course worth '+csr.totalCredit+' credit';
 												}
 											}else{
-												html+='You have '+csr.selectedSubjects.length;
-												if(csr.selectedSubjects.length>1){
-													html+=' Courses worth '+csr.totalCredit+' credits';
+												if ([1, 2, 3, 11, 12, 13, 14, 15, 16, 17].includes(Number(csr.standardId))) {
+													html+=csr.selectedSubjects.length;
+													if(csr.selectedSubjects.length>1){
+														html+=' Courses Selected';
+													}else{
+														html+=' Course worth '+csr.totalCredit+' credit';
+													}
 												}else{
-													html+=' Course worth '+csr.totalCredit+' credit';
+													html+='You have '+csr.selectedSubjects.length;
+													if(csr.selectedSubjects.length>1){
+														html+=' Courses worth '+csr.totalCredit+' credits';
+													}else{
+														html+=' Course worth '+csr.totalCredit+' credit';
+													}
 												}
+												// html+='You have '+csr.selectedSubjects.length;
+												// if(csr.selectedSubjects.length>1){
+												// 	html+=' Courses worth '+csr.totalCredit+' credits';
+												// }else{
+												// 	html+=' Course worth '+csr.totalCredit+' credit';
+												// }
 											}
 										}else{
 											html+='Please select a course';
@@ -2049,7 +2285,8 @@ function getCourseSelectionContent(csr){
 									html+=
 									'</h4>';
 									if(csr.selectedSubjects!=null && csr.selectedSubjects.length>0){
-										html+='<span class="removeAllCourses" title="Remove All Selected Courses" onclick="removeAllCourseWarning()">Remove ALL&nbsp;<i class="fa fa-trash"></i></span>';
+										// html+='<span class="removeAllCourses" title="Remove All Selected Courses" onclick="removeAllCourseWarning()">ALL&nbsp;<i class="fa fa-trash"></i></span>';
+										html+='<span class="removeAllCourses" title="Remove All Selected Courses" onclick="removeAllCourseWarning()">ALL&nbsp;<img src="'+PATH_FOLDER_IMAGE2+'bin.png" width="18"/></span>';
 									}
 								html+=
 								'</div>'
@@ -2062,20 +2299,25 @@ function getCourseSelectionContent(csr){
 													$.each(csr.selectedSubjects, function(k, courseDetails) {
 														html+=
 														'<div class="course-item'+(csr.controlType=="add" && csr.lastCourseId == courseDetails.courseId?' slide-animation':'')+'" seletedSubject="'+courseDetails.courseId+'">'
-															+'<span class="count">'+(k+1)+'.&nbsp;</span>'
+															+'<span class="count">'+(k+1)+'&nbsp;</span>'
 															+'<div class="selected_course_name">'
 																// +'<div class="course-icon"></div>'
 																+'<div class="course-name-wrapper">'
 																	+'<h4 class="course-name">'
-																		+ courseDetails.courseName + ' (' + courseDetails.creditScore + ' Credit) '
+																		
+																		+ courseDetails.courseName;
+																		if (![1, 2, 3, 11, 12, 13, 14, 15, 16, 17].includes(Number(csr.standardId))) {
+																			html+=' (' + courseDetails.creditScore + ' Credit)'
+																		}
 																		// +'<span class="price">'
-																		// 	+' <b class="ml-3">';
+																		// 	+' <b>';
 																		// 		if(csr.showCourseFee =='Y'){
 																		// 			html+=courseDetails.coursePriceSelectedString;
 																		// 		}
 																		// 		html+=
 																		// 	'</b>'
 																		// +'</span>'
+																	html+='</h4>'
 																	+'</h4>'
 																+'</div>'
 																+'<div class="add-course-btn add-course-btn-partner">';
@@ -2083,25 +2325,27 @@ function getCourseSelectionContent(csr){
 																	if(courseDetails.upgradeCourses!=null && courseDetails.upgradeCourses.length>0){
 																		$.each(courseDetails.upgradeCourses, function(k, upgradeCourse) {
 																			html+=
-																			'<span class="remove-icon upgradeCourses primary-txt-color"';
-																				if(upgradeCourse.warningMessage==''){
-																					html+='onclick="confirmUpgradeCourse('+courseDetails.categoryId+','+courseDetails.courseId+','+upgradeCourse.courseId+')">';
-																				}else{
-																					html+='onclick="upgradeCourse('+courseDetails.categoryId+','+courseDetails.courseId+','+upgradeCourse.courseId+',\''+upgradeCourse.warningMessage+'\')">';
-																				}
-																				html+=upgradeCourse.buttonLabel;
-																				if(courseDetails.courseTypeOriginal == 'Regular'){
-																					html+=' <i class="fa fa-arrow-up" title="'+upgradeCourse.buttonLabel+'"></i>';
-																				}else{
-																					html+=' <i class="fa fa-arrow-down" title="'+upgradeCourse.buttonLabel+'"></i>';
-																				}
-																			html+=
-																			'</span>';
-																			if(upgradeCourse.courseType == "ADV"){
-																				html+='<span class="primary-txt-color white-bg upgradeCourses" style="display:inline-block;border-radius:4px;" data-toggle="tooltip" title="Advanced courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
-																			}else if(upgradeCourse.courseType == "HON"){
-																				html+='<span class="primary-txt-color white-bg upgradeCourses" style="display:inline-block;border-radius:4px;" data-toggle="tooltip" title="Honors courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
-																			};
+																			'<div class="upgradeCourses primary-txt-color px-0 tooltil-wrapper">'
+																				+'<span class="remove-icon pl-1 font-weight-bold"';
+																					if(upgradeCourse.warningMessage==''){
+																						html+='onclick="confirmUpgradeCourse('+courseDetails.categoryId+','+courseDetails.courseId+','+upgradeCourse.courseId+')">';
+																					}else{
+																						html+='onclick="upgradeCourse('+courseDetails.categoryId+','+courseDetails.courseId+','+upgradeCourse.courseId+',\''+upgradeCourse.warningMessage+'\')">';
+																					}
+																					html+=upgradeCourse.buttonLabel;
+																					if(courseDetails.courseTypeOriginal == 'Regular'){
+																						html+=' <i class="fa fa-arrow-up" title="'+upgradeCourse.buttonLabel+'"></i>';
+																					}else{
+																						html+=' <i class="fa fa-arrow-down" title="'+upgradeCourse.buttonLabel+'"></i>';
+																					}
+																				html+='</span>';
+																				if(upgradeCourse.courseType == "ADV"){
+																					html+='<span class="mr-0 primary-txt-color white-bg upgradeCourses" style="border-radius:4px;" data-toggle="tooltip" title="Advanced courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
+																				}else if(upgradeCourse.courseType == "HON"){
+																					html+='<span class="mr-0 primary-txt-color white-bg upgradeCourses" style="border-radius:4px;" data-toggle="tooltip" title="Honors courses have more assessments & assignments as compared to regular courses and contribute to a higher GPA."><i class="fa fa-info-circle m-0"></i></span>';
+																				};
+																			html+='</div>';
+																			
 																		});
 																	}
 																	if(courseDetails.courseMandatory==1){
@@ -2117,7 +2361,8 @@ function getCourseSelectionContent(csr){
 																			}
 																		}
 																	}else if(courseDetails.courseMandatory==0){
-																		html+= '<span class="remove-icon removeAllCourses" onclick="removeCourse(\''+courseDetails.courseId+'\',\''+courseDetails.categoryId+'\',\'ft_courses\')">Remove <i class="fa fa-trash" title="Remove Course"></i></span>';
+																		// html+= '<span class="remove-icon removeAllCourses" onclick="removeCourse(\''+courseDetails.courseId+'\',\''+courseDetails.categoryId+'\',\'ft_courses\')">Remove <i class="fa fa-trash" title="Remove Course"></i></span>';
+																		html+= '<span class="remove-icon removeAllCourses" onclick="removeCourse(\''+courseDetails.courseId+'\',\''+courseDetails.categoryId+'\',\'ft_courses\')"><img src="'+PATH_FOLDER_IMAGE2+'bin.png" width="18"/></span>';
 																	}
 																html+=
 																'</div>'
@@ -2202,7 +2447,7 @@ function getCourseSelectionContent(csr){
 												html+='</span>'
 											+'</label>';
 											if(csr.eligibleForRecommendedCourse){
-												html+='<button class="btn white-bg primary-txt-color pull-right" style="margin:0px;font-weight:bold;padding:4px !important;text-transform:capitalize;box-shadow:0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.70);font-size:13px" onclick="recommendedCourse()">Add Recommended Courses</button>'
+												html+='<button class="btn white-bg primary-txt-color pull-right recommended-course" style="margin:0px;font-weight:bold;padding:4px !important;text-transform:capitalize;box-shadow:0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.70);font-size:13px" onclick="recommendedCourse()">Add Recommended Courses</button>'
 											}
 										html+=
 										'</a>'
@@ -2259,14 +2504,16 @@ function getCourseSelectionContent(csr){
 																						html+=
 																						'</ul>'
 																					+'</div>'
-																					+'<div style="display: flex;flex-direction: column;justify-content: center;align-items: center;width: 15%;text-align: center;">'
-																						+'<label class="m-0 course-type-title primary-txt-color pull-right">';
-																							if(csr.showCourseFee =='Y'){
-																								html+=`<p>`+subject.subjectPriceString+`</p>`;
+																					+'<div style="display: flex;flex-direction: column;justify-content: flex-end;align-items: center;text-align: center;white-space:nowrap;padding:0px 8px">';
+																							if($.inArray(csr.standardId, [1, 2, 3, 11, 12, 13, 14, 15, 16, 17]) === -1) {
+																								html+='<label class="m-0 course-type-title primary-txt-color pull-right">';
+																									if(csr.showCourseFee =='Y'){
+																										html+=`<p>`+subject.subjectPriceString+`</p>`;
+																									}
+																									html+=
+																									subject.subjectCredit+' Credit&nbsp;'
+																								+'</label>';
 																							}
-																							html+=
-																							subject.subjectCredit+' Credit&nbsp;'
-																						+'</label>';
 																						if(subject.courseDescriptionUrl!=null && subject.courseDescriptionUrl!=''){
 																							html+=`<a href="javaScript:void(0);" onclick="openCourseDetailModal('`+subject.courseDescriptionUrl+`', '`+subject.subjectName+`')" class="view-course-details theme-text">Course Summary</a>`;
 																							// html+=`<a href="javascriptVoid(0);" onclick="openCourseDetailModal('`+subject.courseDescriptionUrl+`', '`+subject.subjectName+`')" class="btn btn-sm" style="background-color:transparent;font-size:8px;margin:0px;box-shadow:0px 0px;color:#007fff;">Course Summary</a>`;
@@ -2422,18 +2669,41 @@ function signupModals(){
 			+'</div>'
 		+'</div>'
 	+'</div>'
-	+'<div class="modal fade" id="changeSelectedGrade">'
-		+'<div class="modal-dialog modal-md modal-dialog-centered" role="document" >'
+	+'<div class="modal fade" id="changeSelectedGradeModal">'
+		+'<div class="modal-dialog modal-md" role="document" >'
 			+'<div class="modal-content text-center">'
 				+'<div class="modal-header justify-content-center" style="width: 100% !important; padding: 0 0 !important; height: 45px; border: none;"></div>'
 				+'<div class="modal-body delete-modal">'
-					+'<i aria-hidden="true" class="fa fa-exchange alternate-bg white-txt-color" style="border-radius: 50%; font-size: 40px; position: absolute; top: -85px; right: 0; left: 0; margin: 0 auto; width: 75px; line-height: 75px;"></i>'
-					+'<p class="heading alternate-txt-color"id="changeSelectedGradeMessage">Are you sure you want to change the grade? <br> You will be re-directed to Step 1 of the enrollment process.</p>'
+					+'<div class="alternate-bg white-txt-color" style="border-radius: 50%; font-size: 40px; position: absolute; top: -85px; right: 0; left: 0; margin: 0 auto; width: 75px; line-height: 75px;">'
+						+'<img src="'+PATH_FOLDER_IMAGE2+'change.png" width="50"/>'
+					+'</div>'
+					+'<p class="heading alternate-txt-color" id="changeSelectedGradeMessage">Change Grade &amp; Date of Birth</p>'
+					+'<div class="form-row mt-4 d-flex">'
+						+'<div class="col-6 mt-1">'
+							+'<div class="form-holder valid-field" style="width:100%;margin:0 0 10px 0;">'
+								// +'<i class="zmdi zmdi-book"></i>'
+								+'<div class="custom-field" style="width:100%;">'
+									+'<select name="changeGradeSelect" id="changeGradeSelect" class="form-control-field" style="width:100%;"></select>'
+									+'<label for="changeGradeSelect">Grade<sup class="sup">*</sup></label>'
+								+'</div>'
+							+'</div>'
+						+'</div>'
+						+'<div class="col-6 mt-1">'
+							+'<div class="form-holder valid-field" style="width:100%;margin:0;">'
+								// +'<i class="zmdi zmdi-account-calendar"></i>'
+								+'<div class="custom-field" style="width:100%;">'
+									+'<input type="text" name="changeGradeDob" id="changeGradeDob" class="form-control-field" placeholder=" " onkeydown="return false" readonly>'
+									+'<label for="changeGradeDob">Date of Birth<sup class="sup">*</sup></label>'
+									+'<p class="m-0" style="position:absolute;top:100%;left:0;font-size:12px">(MMM DD, YYYY)</p>'
+								+'</div>'
+							+'</div>'
+						+'</div>'
+					+'</div>'
 				+'</div>'
 				+'<div class="modal-footer text-center" style="border: none; padding: 0; margin-bottom: 15px;">'
 					+'<div class="text-center" style="margin: 0 auto;">'
-						+'<button type="button" class="btn alternate-txt-color" style="border: 1px solid var(--sc) !important; background: transparent !important;" onclick="proceedToChangeGrade()">Yes</button>'
-						+'<button type="button" class="btn" data-dismiss="modal" style="background:var(--sc);">No</button>'
+						+'<button id="saveChangeGrade" type="button" class="btn alternate-txt-color" style="border: 1px solid var(--sc) !important; background: transparent !important;" onclick="saveSelectedGradeAndDob()">Save</button>'
+						+'<button type="button" class="btn" data-dismiss="modal" style="background:var(--sc);border: 1px solid var(--sc) !important">Cancel</button>'
 					+'</div>'
 				+'</div>'
 			+'</div>'
@@ -2699,13 +2969,18 @@ function getStudentDocumentPreviewModalContent(){
 
 function getPaymentModeContent(){
 	var html=
-	'<div class="modal fade theme-modal fade-scale max-size-modal" id="studentPaymentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">'
+	'<div class="modal fade theme-modal fade-scale max-size-modal ps-modal-v2" id="studentPaymentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">'
 		+'<div class="modal-dialog modal-lg" role="document">'
 			+'<div class="modal-content mx-auto" style="max-width: 1000px;">'
-				+'<div class="modal-header primary-bg white-txt-color">'
-					// +'<h4 class="modal-title " style=" margin-left: 10px;">Fee Details</h4>'
-
-					+'<button type="button" class="close close-with-red-color ml-auto" aria-label="Close" data-dismiss="modal" style="margin-right: 5px;"><span style="color: #fff;">&times;</span></button>'
+				+'<div class="modal-header primary-bg white-txt-color ps-header">'
+					+'<div class="ps-header-left">'
+						// +'<span class="ps-header-icon"><i class="zmdi zmdi-balance-wallet"></i></span>'
+						+'<div class="ps-header-text">'
+							+'<h5 class="ps-header-title">Fee Summary</h5>'
+							// +'<p class="ps-header-subtitle">Review your selected plan and fee details</p>'
+						+'</div>'
+					+'</div>'
+					+'<button type="button" class="close ps-close ml-auto" aria-label="Close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>'
 				+'</div>'
 				+'<div class="modal-body" style="display:inline-block;width:100%;">'
 					+skeletonFeeDetails()
@@ -2730,8 +3005,9 @@ function paymentModalContentWithData(cdrDTO){
 						+'<label for="pay-registration" class="primary-border-color" onclick="displayScholorshipDetails(\'dtl-registration\');">'
 							+'<span class="circle primary-border-color ml-0"></span>'
 							+'<span class="check primary-bg-checked"></span>'
+							// +'<span class="ps-opt-icon"><i class="fa fa-bookmark"></i></span>'
 							+'<span class="checked-font-style primary-txt-color" style="margin-left: 35px; line-height:21px" id="payFive"> <b> Reserve an enrollment Seat</b><br>'
-								+'('+cdrDTO.enrollmentFee.enrollmentFeeString+')'
+								+'<div class="pay-amount-text">('+cdrDTO.enrollmentFee.enrollmentFeeString+')</div>'
 							+'</span>'
 						+'</label>'
 					+'</div>';
@@ -2743,15 +3019,15 @@ function paymentModalContentWithData(cdrDTO){
 						+'<label for="pay-one" class="primary-border-color" onclick="displayScholorshipDetails(\''+cdrDTO.oneTimePayment.paymentKey+'\');">'
 							+'<span class="circle primary-border-color ml-0"></span>'
 							+'<span class="check primary-bg-checked"></span>'
+							// +'<span class="ps-opt-icon"><i class="fa fa-credit-card"></i></span>'
 							+'<span class="checked-font-style primary-txt-color" style="margin-left: 35px; line-height:21px" id="payOne">';
 								if(cdrDTO.oneTimePayment.paymentOptionDiscount>0){
-									html+='<b>'+cdrDTO.oneTimePayment.paymentMode+' & save '
+									html+='<b>Pay '+cdrDTO.oneTimePayment.paymentMode+' & save '
 									+cdrDTO.oneTimePayment.paymentOptionDiscountString+'</b><br>';
 								}else{
-									html+='<b>'+cdrDTO.oneTimePayment.paymentMode+'</b><br>';
+									html+='<b>Pay '+cdrDTO.oneTimePayment.paymentMode+'</b><br>';
 								}
-								html+=
-								cdrDTO.oneTimePayment.payableFeeString
+								html+='<div class="pay-amount-text">'+cdrDTO.oneTimePayment.payableFeeString+'</div>'
 							+'</span>'
 						+'</label>'
 					+'</div>';
@@ -2763,16 +3039,17 @@ function paymentModalContentWithData(cdrDTO){
 						+'<label for="pay-three" class="primary-border-color" onclick="displayScholorshipDetails(\''+cdrDTO.monthlyFeeDetails.paymentKey+'\');">'
 							+'<span class="circle primary-border-color ml-0"></span>'
 							+'<span class="check primary-bg-checked"></span>'
+							// +'<span class="ps-opt-icon"><i class="fa fa-calendar"></i></span>'
 							+'<span class="checked-font-style primary-txt-color" style="margin-left: 35px; line-height:21px">'
 								+'<b>';
 								// +cdrDTO.monthlyFeeDetails.paymentMode;
 								// if(cdrDTO.schoolId==5){
 								// 	html+='(4 Installments, every 3 months)';
 								// }else{
-									html+='Easy installments';
+									html+='Pay Easy installments';
 								// }
-								html+='</b><br>'+cdrDTO.monthlyFeeDetails.payableFeeString
-							+'</span>'
+								html+='</b><br><div class="pay-amount-text">'+cdrDTO.monthlyFeeDetails.payableFeeString
+							+'</div></span>'
 						+'</label>'
 					+'</div>';
 				}
@@ -2783,8 +3060,9 @@ function paymentModalContentWithData(cdrDTO){
 						+'<label for="pay-custom" class="primary-border-color" onclick="displayScholorshipDetails(\''+cdrDTO.advanceFeeDetails.paymentKey+'\');">'
 							+'<span class="circle primary-border-color ml-0"></span>'
 							+'<span class="check primary-bg-checked"></span>'
+							// +'<span class="ps-opt-icon"><i class="fa fa-calendar"></i></span>'
 							+'<span class="checked-font-style primary-txt-color" style="margin-left: 35px; line-height:21px">'
-								+'<b>Customized plan (Easy installments)</b> <br>'
+								+'<b>Pay Customized plan (Easy installments)</b> <br>'
 								+paymentCalculationResponse.paymentDetails.totalPayableAmountString
 							+'</span>'
 						+'</label>'
@@ -2848,15 +3126,15 @@ function paymentModalContentWithData(cdrDTO){
 										+'</table>'
 										+'<div class="full installment3-course-fee-details" style="display: none;">'
 											+'<div>'
-												+'<h3 class="primary-txt-color" style="margin-bottom:0 !important;text-align:left;letter-spacing:1px">FEE SCHEDULE</h3>'
+												+'<h3 class="secondary-bg text-white py-2" style="margin-bottom:0 !important;text-align:left;letter-spacing:1px;padding-left:15px;font-size:16px">FEE SCHEDULE</h3>'
 											+'</div>'
 											+'<table class="table table-bordered table-striped without_h_scroll">'
 												+'<thead class="theme-bg primary-bg white-txt-color">'
-													+'<tr>'
-														+'<th>Description</th>'
-														+'<th style="text-align:center"><span class="previewPaymentOption"></span>Total</th>'
-														+'<th style="text-align:center">Paying</th>'
-													+'</tr>'
+													// +'<tr>'
+													// 	+'<th>Description</th>'
+													// 	+'<th style="text-align:center"><span class="previewPaymentOption"></span>Total</th>'
+													// 	+'<th style="text-align:center">Paying</th>'
+													// +'</tr>'
 												+'</thead>'
 												+'<tbody>'
 													+monthlyFeeShchedule(cdrDTO)
@@ -2885,14 +3163,14 @@ function paymentModalContentWithData(cdrDTO){
 							+'</div>'
 						+'</div>'
 						+'<div>'
-							+'<p class="text-center font-sm-12"><b>Note:</b> All fees mentioned above are in US Dollars</p>'
+							+'<p class="text-center font-sm-12 ps-note font-weight-bold"><b>Note:</b> All fees mentioned above are in US Dollars</p>'
 						+'</div>'
 					+'</div>'
 					+'<div class="col-md-12 col-sm-12 col-xs-12">'
 						+'<div class="row">'
 							// +'<div class="col-md-10"></div>'
-							+'<div class="col-md-12 text-center">'
-								+'<button type="button" class="btn theme-bg primary-bg white-txt-color" style="width:auto;padding-left:16px;padding-right:16px;" onclick="choosePaymentOption();">Next</button>'
+							+'<div class="col-md-12 text-center mt-2">'
+								+'<button type="button" class="cutom-btn primary-bg white-txt-color" style="width:auto !important;" onclick="choosePaymentOption();">Next</button>'
 							+'</div>'
 						+'</div>'
 					+'</div>'
@@ -2905,17 +3183,37 @@ function paymentModalContentWithData(cdrDTO){
 }
 
 function getReviewAndPayRendered(data){
+	// Move any in-progress inline-edit form back to its step section before we
+	// replace the review HTML, otherwise the detached form would be destroyed.
+	if(typeof restoreActiveReviewEditIfAny === "function"){
+		restoreActiveReviewEditIfAny();
+	}
+	// cache the latest review data so a Cancel can rebuild the table without a backend call
+	window.__lastReviewData = data;
 	$('#signupStage4Content').show();
 	$('#signupStage4Content').html(getReviewAndPayContent(data));
 	// $("#reference_number, #logout_modal_logout, #goToDashboardWarningMessage").remove();
 	// $("body").append();
 	
-	$('.accordion .a-title').unbind().bind('click', function(){
-		$(this).parent().closest('li').find('.a-content').stop().slideToggle();
+	$('#step-3 .accordion .a-title, .accordion .a-title .review-btn .cutom-btn').unbind().bind('click', function(event){
+		// The "Review" button sits INSIDE its own .a-title, so a click on it bubbles up to the
+		// .a-title element right after — which is ALSO bound to this same handler. Without
+		// stopping that bubble, one click ran this handler twice (slideToggle open, then the
+		// bubbled call immediately toggled it shut again), which is why the section appeared to
+		// slide down and instantly slide back up on its own.
+		event.stopPropagation();
+		var $li = $(this).closest('li');
+		var rtype = reviewTypeForNode($li);
+		// Clicking Review while this section is mid-edit discards the edits: it restores the
+		// original read-only values and moves the fields back — WITHOUT calling any save API.
+		if(rtype && window.__activeReviewEdit === rtype){
+			finishReviewEdit(rtype);
+		}
+		$li.find('.a-content').stop().slideToggle();
 		// $(this).find('.plus-icon').toggleClass('fa-minus fa-plus')
 		// $(this).parent().closest('li').siblings().find('.plus-icon').removeClass('fa-minus')
 		// $(this).parent().closest('li').siblings().find('.plus-icon').addClass('fa-plus')
-		$(this).parent().closest('li').siblings().find('.a-content').slideUp();
+		$li.siblings().find('.a-content').slideUp();
 	});
 
 	if(data.isOptedAlternetPaymentMethod==1){
@@ -2989,7 +3287,28 @@ function getReviewAndPayRendered(data){
 	if($(".copyRights").length<1){
 		getSchoolSettingsTechnical(SCHOOL_ID).then(function(schoolSettingsTechnical){
 			var copyrightText = schoolSettingsTechnical.isCoPoweredBy != null ? 'Powered by ' + schoolSettingsTechnical.copyrightName : 'Copyright © ' + schoolSettingsTechnical.copyrightYear + ' - ' + schoolSettingsTechnical.copyrightName + ' - All Rights Reserved.';
-			$('#signupStage4Content').closest('section').append('<p class="copyRights">'+copyrightText+'</p>');
+			$('#signupStage4Content').closest('section').append(
+				'' +
+				`<div class="desktop_whatsapp_button_wrapper">
+					<a target="_blank" rel="noopener noreferrer" class="flex desktop_whatsapp_button"
+					href="https://api.whatsapp.com/send?phone=${schoolSettingsOffice.whatsAppCode}${schoolSettingsOffice.whatsAppContact}">
+						<img src="${PATH_FOLDER_IMAGE2}whatsapp-new.webp" width="50"/>
+					</a>
+				</div>
+				<div class="fixed-footer">
+					<p class="copyRights">${copyrightText}</p>
+					<div class="whatsapp_button_wrapper d-flex flex-wrap">
+						<a target="_blank" rel="noopener noreferrer"
+						class="flex items-center justify-center py-2 text-white whatsapp_button"
+						href="https://api.whatsapp.com/send?phone=${schoolSettingsOffice.whatsAppCode}${schoolSettingsOffice.whatsAppContact}">
+							<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="#fff">
+								<path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 1.8a8.2 8.2 0 1 1-4.2 15.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 0 1 12 3.8zm4.7 10.3c-.3-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.1-.2 0-.4.1-.5l.4-.5c.1-.2.2-.3.3-.5v-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.9.9-1 2.1-.4 3.4a11 11 0 0 0 4.5 4.5c1.9.9 2.7.8 3.4.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.6-.3z"></path>
+							</svg>
+							Need support for enrolment
+						</a>
+					</div>
+				</div>`
+			);
 		});
 	}
 }
@@ -2999,7 +3318,7 @@ function getReviewAndPayContent(data){
 	var html=
 	'<h4></h4>'
 	+'<section>'
-		+'<h3 class="alternate-txt-color">Kindly Review your details</h3>'
+		+'<h3 class="alternate-txt-color review-signup-details">Kindly Review your details</h3>'
 		+'<div class="form-row form-review-partner">'
 			+'<div class="full w-100">'
 				+'<div class="full">'
@@ -3013,7 +3332,8 @@ function getReviewAndPayContent(data){
 						+'<li>'
 							+courseDetailsPreview(data)
 						+'</li>'
-					+'</ul>';
+					+'</ul>'
+					+'<div id="reviewInlineEditContainer" class="review-inline-edit-container" style="display:none;"></div>';
 					// if(data.returnUrl !=''){
 					// 	html+=
 					// 	'<hr>'
@@ -3045,39 +3365,74 @@ function getReviewAndPayContent(data){
 
 function studentDetailsPreview(data){
 	var signupStudent=data.signupStudent;
+	// Grade label is read from the (still-populated) step-1 form so the review shows
+	// every step-1 field. Falls back to the course grade name when available.
+	var gradeLabel = '';
+	try{
+		if(signupStudent.courseProviderId==39){
+			gradeLabel = $.trim($('#signupStage1 #learningLabel option:selected').text() || '');
+		}else{
+			gradeLabel = $.trim($('#signupStage1 #applyStandardId option:selected').text() || '');
+		}
+	}catch(e){}
+	if(!gradeLabel && data.signupCourse && data.signupCourse.standardName){
+		gradeLabel = data.signupCourse.standardName;
+	}
 	var html =
-	'<div class="student-details-info">'
+	'<div class="student-details-info" id="student-details-info">'
 		+'<div class="full">'
-			+'<h4 class="a-title">Student Details <i class="fa plus-icon fa-plus"></i></h4>'
+			
+			+'<h4 class="a-title">'
+				+'Student Details ';
+				
+				if(!data.customPaymentEnabled){
+					html+=
+					'<div class="edit-btn">'
+						+'<button class="cutom-btn primary-bg white-txt-color" onclick="event.stopPropagation();openReviewInlineEdit(\'student\')">Edit</button>'
+					+'</div>';
+				}
+				
+				html+='<div class="review-btn">'
+					+'<button class="cutom-btn primary-bg white-txt-color">Review</button>' 
+				+'</div>'
+			+'</h4>'
 			// +'<div class="h_scroll primary-bg">'
 			// 	+'<img src="'+PATH_FOLDER_IMAGE2+'h_scroll.png">'
 			// +'</div>'
 		+'</div>'
 		+'<div class="a-content" style="display: none;">'
 			+'<div class="table-responsive">'
-				+'<table class="table-style">'
+				+'<table class="table-style mobile-responsive-table">'
 					+'<tbody>'
 						+'<tr>'
-							+'<th>Name</th>'
-							+'<td>'+signupStudent.firstName+' '+signupStudent.middleName+' '+signupStudent.lastName+'</td>'
+							+'<th class="review_th_title">Name</th>'
+							+'<td data-review-td="name">'+signupStudent.firstName+' '+signupStudent.middleName+' '+signupStudent.lastName+'</td>'
+						+'</tr>';
+						if(gradeLabel != ''){
+							html+=
+							'<tr>'
+								+'<th class="review_th_title">Grade</th>'
+								+'<td data-review-td="grade">'+gradeLabel+'</td>'
+							+'</tr>';
+						}
+						html+=
+						'<tr>'
+							+'<th class="review_th_title">Date of Birth</th>'
+							+'<td data-review-td="dob">'+signupStudent.dob+'</td>'
 						+'</tr>'
 						+'<tr>'
-							+'<th>Date of Birth</th>'
-							+'<td>'+signupStudent.dob+'</td>'
-						+'</tr>'
-						+'<tr>'
-							+'<th>Gender</th>'
-							+'<td>'
+							+'<th class="review_th_title">Gender</th>'
+							+'<td data-review-td="gender">'
 								+signupStudent.genderName
 							+'</td>'
 						+'</tr>'
 						+'<tr>'
-							+'<th>Email</th>'
-							+'<td>'+signupStudent.communicationEmail+'</td>'
+							+'<th class="review_th_title">Email</th>'
+							+'<td data-review-td="email">'+signupStudent.communicationEmail+'</td>'
 						+'</tr>'
 						+'<tr>'
-							+'<th>Phone Number</th>'
-							+'<td>';
+							+'<th class="review_th_title">Phone Number</th>'
+							+'<td data-review-td="phone">';
 								if(signupStudent.contactNumber==null || signupStudent.contactNumber==''){
 									html+='N/A';
 								}else{
@@ -3088,41 +3443,36 @@ function studentDetailsPreview(data){
 							'</td>'
 						+'</tr>'
 						+'<tr>'
-							+'<th>Nationality</th>'
-							+'<td>'+signupStudent.nationality+'</td>'
+							+'<th class="review_th_title">Nationality</th>'
+							+'<td data-review-td="nationality">'+signupStudent.nationality+'</td>'
 						+'</tr>'
 						+'<tr>'
-							+'<th>Country | State | City</th>'
-							+'<td>'+signupStudent.countryName+ " | " +signupStudent.stateName+ " | " +signupStudent.cityName+'</td>'
+							+'<th class="review_th_title">Country | State | City</th>'
+							+'<td data-review-td="location">'+signupStudent.countryName+ " | " +signupStudent.stateName+ " | " +signupStudent.cityName+'</td>'
 						+'</tr>'
 						if($('#learingProgramHeader').val()=='DUAL_DIPLOMA'){
 							html+=
 							'<tr>'
-								+'<th>Student\'s School Name</th>'
-								+'<td>'+signupStudent.studyingSchoolName+'</td>'
+								+'<th class="review_th_title">Student\'s School Name</th>'
+								+'<td data-review-td="studyingSchoolName">'+signupStudent.studyingSchoolName+'</td>'
 							+'</tr>'
 							+'<tr>'
-								+'<th>Student Current Grade</th>'
-								+'<td>'+signupStudent.studyingGradeName+'</td>'
+								+'<th class="review_th_title">Student Current Grade</th>'
+								+'<td data-review-td="studyingGrade">'+signupStudent.studyingGradeName+'</td>'
 							+'</tr>'
 							+'<tr>'
-								+'<th>Country of School</th>'
-								+'<td>'+signupStudent.countryNameOfSchool+'</td>'
+								+'<th class="review_th_title">Country of School</th>'
+								+'<td data-review-td="countryOfSchool">'+signupStudent.countryNameOfSchool+'</td>'
 							+'</tr>';
 						}
 						html+=
 					'</tbody>'
 				+'</table>'
 			+'</div>';
-			if(!data.customPaymentEnabled){
-				html+=
-				'<div class="edit-btn">'
-					+'<button class="primary-bg white-txt-color" onclick="displaySection(1)">Edit <i class="fa fa-edit"></i></button>'
-				+'</div>';
-			}
 			html+=
-		'</div>'
-	+'</div>'
+				'<div class="review-edit-slot review-edit-wrapper" style="display:none;"></div>'
+			+'</div>'
+		+'</div>'
 	return html;
 }
 
@@ -3130,40 +3480,47 @@ function parentDetailsPreview(data){
 	var signupParent=data.signupParent;
 	var courseProviderId=data.signupStudent.courseProviderId;
 	var html =
-	'<div class="student-parent-info">'
+	'<div class="student-parent-info" id="student-parent-info">'
 		+'<div class="full">'
 			+'<h4 class="a-title">';
-			if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' ){
-				html+='Academic & Communication Details';
-			}else{
-				if(data.signupStudent.courseProviderId==39){
-					html+='Communication Details';
+				if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' ){
+					html+='Academic & Communication Details';
 				}else{
-					html+='Parent/Guardian Details';
+					if(data.signupStudent.courseProviderId==39){
+						html+='Communication Details';
+					}else{
+						html+='Parent/Guardian Details';
+					}
 				}
-			}
-			html+=
-			'<i class="fa plus-icon fa-plus"></i></h4>'
+				if(!data.customPaymentEnabled){
+					html+='<div class="edit-btn">'
+						+'<button class="cutom-btn primary-bg white-txt-color" onclick="event.stopPropagation();openReviewInlineEdit(\'parent\')">Edit</button>'
+					+'</div>';
+				}
+				html+='<div class="review-btn">'
+					+'<button class="cutom-btn primary-bg white-txt-color">Review</button>' 
+				+'</div>'
+			+'</h4>'
 			// +'<div class="h_scroll primary-bg">'
 			// 	+'<img src="'+PATH_FOLDER_IMAGE2+'h_scroll.png">'
 			// +'</div>'
 		+'</div>'
 		+'<div class="a-content" style="display: none;">'
 			+'<div class="table-responsive">'
-				+'<table class="table-style">'
+				+'<table class="table-style mobile-responsive-table">'
 					+'<tbody>';
 						if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' ){
 							html+=
 							'<tr>'
-								+'<th>Student or a working professional</th>'
+								+'<th class="review_th_title">Student or a working professional</th>'
 								+'<td>'+signupParent.workingProfessionName+'</td>'
 							+'</tr>'
 							+'<tr>'
-								+'<th>Name of the School/College/Organization</th>'
+								+'<th class="review_th_title">Name of the School/College/Organization</th>'
 								+'<td>'+signupParent.institutionName+'</td>'
 							+'</tr>'
 							+'<tr>'
-								+'<th>Country of the School/College/Organization</th>'
+								+'<th class="review_th_title">Country of the School/College/Organization</th>'
 								+'<td>'+signupParent.institutionCountryName+'</td>'
 							+'</tr>';
 						}else{
@@ -3172,16 +3529,16 @@ function parentDetailsPreview(data){
 							}else{
 								html+=
 								'<tr>'
-									+'<th>Name</th>'
-									+'<td>'+signupParent.firstName+' '+signupParent.middleName+' '+signupParent.lastName+'</td>'
+									+'<th class="review_th_title">Name</th>'
+									+'<td data-review-td="name">'+signupParent.firstName+' '+signupParent.middleName+' '+signupParent.lastName+'</td>'
 								+'</tr>'
 								+'<tr>'
-									+'<th>Relation with student</th>'
-									+'<td>'+signupParent.relationshipName+'</td>'
+									+'<th class="review_th_title">Relation with student</th>'
+									+'<td data-review-td="relation">'+signupParent.relationshipName+'</td>'
 								+'</tr>'
 								+'<tr>'
-									+'<th>Email</th>'
-									+'<td>';
+									+'<th class="review_th_title">Email</th>'
+									+'<td data-review-td="email">';
 										if(signupParent.email == null || signupParent.email==''){
 											html+='N/A';
 										}else{
@@ -3191,8 +3548,8 @@ function parentDetailsPreview(data){
 									'</td>'
 								+'</tr>'
 								+'<tr>'
-									+'<th>Phone Number</th>'
-									+'<td>';
+									+'<th class="review_th_title">Phone Number</th>'
+									+'<td data-review-td="phone">';
 										if(signupParent.contactNumber==null || signupParent.contactNumber==''){
 											html+='N/A';
 										}else{
@@ -3203,26 +3560,29 @@ function parentDetailsPreview(data){
 									'</td>'
 								+'</tr>'
 								+'<tr>'
-									+'<th>Country | State | City</th>'
-									+'<td>'+signupParent.countryName+ " | " +signupParent.stateName+ " | " +signupParent.cityName+'</td>'
-								+'</tr>'
-								+'<tr>'
-									+'<th>Referral Code</th>'
-									+'<td>';
-									if(signupParent.referralCode==null || signupParent.referralCode==''){
-										html+='N/A';
-									}else{
-										html+=signupParent.referralCode;
-									}
-									html+=
-									'</td>'
+									+'<th class="review_th_title">Country | State | City</th>'
+									+'<td data-review-td="location">'+signupParent.countryName+ " | " +signupParent.stateName+ " | " +signupParent.cityName+'</td>'
 								+'</tr>';
+								if(signupParent.referralCode!=null && signupParent.referralCode!=''){
+									html+='<tr>'
+											+'<th class="review_th_title">Referral Code</th>'
+											+'<td>';
+											if(signupParent.referralCode==null || signupParent.referralCode==''){
+												html+='N/A';
+											}else{
+												html+=signupParent.referralCode;
+											}
+											html+=
+											'</td>'
+									+'</tr>';
+								}
+								
 							}
 						}
 						html+=
 						'<tr>'
-							+'<th>Preferred Communication</th>'
-							+'<td>'
+							+'<th class="review_th_title">Preferred Communication</th>'
+							+'<td data-review-td="communication">'
 								+'<div class="full d-flex">'
 									+'<label class="communication-mode text-dark" for="pcModeWhatsapp">';
 										if(signupParent.communicationWhatsApp == "Y"){
@@ -3255,14 +3615,10 @@ function parentDetailsPreview(data){
 					+'</tbody>'
 				+'</table>'
 			+'</div>';
-			if(!data.customPaymentEnabled){
-				html+=
-				'<div class="edit-btn">'
-					+'<button class="primary-bg white-txt-color" onclick="displaySection(2)">Edit <i class="fa fa-edit"></i></button>'
-				+'</div>';
-			}
+
 			html+=
-		'</div>'
+				'<div class="review-edit-slot review-edit-wrapper" style="display:none;"></div>'
+		+'</div>'
 	+'</div>';
 	return html;
 }
@@ -3272,7 +3628,18 @@ function courseDetailsPreview(data){
 	var html =
 	'<div class="student-courses-info">'
 		+'<div class="full">'
-			+'<h4 class="a-title">Selected Courses <i class="fa fa-plus plus-icon"></i></h4>'
+			+'<h4 class="a-title">'
+				+'Selected Courses';
+				if(!data.customPaymentEnabled){
+					html+='<div class="edit-btn">'
+						+'<button class="cutom-btn primary-bg white-txt-color" onclick="event.stopPropagation();openReviewInlineEdit(\'course\')">Edit</button>'
+					+'</div>';
+				}
+				html+='<div class="review-btn">'
+					+'<button class="cutom-btn primary-bg white-txt-color">Review</button>' 
+				+'</div>'
+
+			+'</h4>'
 			// +'<div class="h_scroll primary-bg">'
 			// 	+'<img src="'+PATH_FOLDER_IMAGE2+'h_scroll.png">'
 			// +'</div>'
@@ -3291,7 +3658,7 @@ function courseDetailsPreview(data){
 					+'<thead>'
 						+'<tr>'
 							+'<th>Course Name</th>';
-							if($.inArray(signupCourse.standardId, [17,11,12,13,14,15,16]) == -1) {
+							if($.inArray(signupCourse.standardId, [1,2,3,11,12,13,14,15,16,17]) == -1) {
 								html+='<th>Credit</th>';
 							}
 							html+=
@@ -3305,7 +3672,7 @@ function courseDetailsPreview(data){
 								html+=
 								'<tr>'
 									+'<td>'+courseDt.courseName+'</td>';
-									if($.inArray(signupCourse.standardId, [17,11,12,13,14,15,16]) == -1) {
+									if($.inArray(signupCourse.standardId, [1,2,3,11,12,13,14,15,16,17]) == -1) {
 										html+='<td>'+courseDt.creditScore+'</td>';
 									}
 								html+=
@@ -3313,7 +3680,7 @@ function courseDetailsPreview(data){
 							}
 						});
 					html+='</tbody>';
-					if($.inArray(signupCourse.standardId, [17,11,12,13,14,15,16]) == -1) {
+					if($.inArray(signupCourse.standardId, [1,2,3,11,12,13,14,15,16,17]) == -1) {
 						html+=
 						'<tfoot>'
 							+'<tr>'
@@ -3324,16 +3691,488 @@ function courseDetailsPreview(data){
 					}
 				html+='</table>'
 			+'</div>';
-			if(!data.customPaymentEnabled){
-				html+=
-				'<div class="edit-btn">'
-					+'<button class="primary-bg white-txt-color" onclick="displaySection(3)">Edit <i class="fa fa-edit"></i></button>'
-				+'</div>';
-			}
+			
 			html+=
-		'</div>'
+				'<div class="review-edit-slot" style="display:none;"></div>'
+		+'</div>'
 	+'</div>';
 	return html;
+}
+
+/* ===== Review-screen inline edit =====
+   The Edit buttons on the "Kindly Review your details" screen no longer navigate
+   back to a step.
+
+   Student & Parent (table sections): on Edit, the read-only table (the [data-review-td]
+   markup itself is left untouched) is hidden and the matching field(s) for the section —
+   together with their .form-holder wrapper (so select2, datepicker, intl-tel-input,
+   cascading and validation stay intact) — are physically MOVED from the hidden step form
+   into that section's .review-edit-wrapper div, laid out in the same .form-row grouping
+   as the original step form (see buildReviewEditRows). A placeholder is left behind in the
+   form so every field can be reassembled exactly. On Save the fields are moved back into
+   the form, the existing validation + save endpoint run (fromReview=true), the review is
+   re-rendered, and the wrapper is emptied and hidden while the table is shown again.
+   Backend logic is unchanged.
+
+   REVIEW_EDIT_DISABLED_KEYS lists keys that are still moved into the review-edit-wrapper
+   (so their current value is visible in place, in the same .form-row layout as everything
+   else) but whose actual <input>/<select> is force-disabled there (currently Student
+   Details' Grade and DOB) — they cannot be changed from the review screen.
+
+   Course (not a table): the whole #signupStage3 form is relocated into
+   #reviewInlineEditContainer (outside the review <ul class="accordion">), with the
+   review accordion class temporarily removed so the course form's own global
+   ".accordion" selectors don't target the review sections. */
+
+// td-key -> step field ids. '__grade' and '__communication' are resolved at runtime.
+var REVIEW_EDIT_MAP = {
+	student: { box:'#student-details-info', formSel:'#signupStage1', content:'#signupStage1Content', fields:{
+		name:['firstName','middleName','lastName'],
+		grade:['__grade'],
+		dob:['dob'],
+		gender:['gender'],
+		email:['communicationEmail'],
+		phone:['contactNumber'],
+		nationality:['nationality'],
+		location:['countryId','stateId','cityId'],
+		studyingSchoolName:['studyingSchoolName'],
+		studyingGrade:['studyingGradeId'],
+		countryOfSchool:['countryIdOfSchool']
+	}},
+	parent: { box:'#student-parent-info', formSel:'#signupStage2', content:'#signupStage2Content', fields:{
+		name:['parentFirstName','parentMiddletName','parentlastName'],
+		relation:['relation'],
+		email:['parentEmailId'],
+		phone:['parentPhoneNumber'],
+		location:['pCountryId','pStateId','pCityId'],
+		communication:['__communication']
+	}}
+};
+
+// Keys that are moved into the review-edit-wrapper like any other field, but whose control(s)
+// are force-disabled there so the user can see the value but cannot change it.
+var REVIEW_EDIT_DISABLED_KEYS = {
+	student: ['grade', 'dob']
+};
+
+function getReviewInlineEditConfig(type){
+	return { form:'#signupStage3', home:'#step-3', title:'Edit Selected Courses' };
+}
+
+function getReviewInlineEditActions(type){
+	return '<div class="review-edit-actions">'
+			// +'<button type="button" class="review-edit-cancel cutom-btn bg-danger white-txt-color" onclick="cancelReviewInlineEdit(\''+type+'\')">Cancel</button>'
+			+'<button type="button" class="review-edit-save cutom-btn primary-bg white-txt-color" onclick="saveReviewInlineEdit(\''+type+'\')">Save</button>'
+		+'</div>';
+}
+
+// Resolve the jQuery element to move for a given field id (reads from the form).
+function getReviewFieldElement(cfg, fieldId){
+	if(fieldId === '__grade'){
+		var cp39 = (String($('#courseProviderId').val()) === '39');
+		return $(cfg.formSel+' #'+(cp39 ? 'learningLabel' : 'applyStandardId')).closest('.form-holder');
+	}
+	if(fieldId === '__communication'){
+		return $(cfg.formSel+' #pcModeWhatsapp').closest('.form-row');
+	}
+	var $f = $(cfg.formSel+' #'+fieldId);
+	if($f.length === 0){ return $(); }
+	var $holder = $f.closest('.form-holder');
+	return $holder.length ? $holder : $f;
+}
+
+// Group the resolved field elements (keyed by their data-review-td key, in the same order as
+// cfg.fields) into .form-row divs the same way the original step form groups them: a key that
+// resolves to more than one field (e.g. name, location) fills a row by itself; runs of
+// single-field keys (e.g. grade, dob, gender) are grouped three-per-row.
+function buildReviewEditRows(elementsByKey, keyOrder){
+	var rows = [];
+	var pendingSingles = [];
+	function flushSingles(){
+		if(pendingSingles.length === 0){ return; }
+		var $row = $('<div class="form-row"></div>');
+		pendingSingles.forEach(function($el){ $row.append($el); });
+		rows.push($row);
+		pendingSingles = [];
+	}
+	keyOrder.forEach(function(key){
+		var els = elementsByKey[key];
+		if(!els || els.length === 0){ return; }
+		// A resolved element that is ALREADY a .form-row (e.g. '__communication', which
+		// grabs the whole preferred-communication row as-is) must be used directly as the
+		// row — wrapping it in another .form-row would double-nest it.
+		if(els.length === 1 && els[0].hasClass('form-row')){
+			flushSingles();
+			rows.push(els[0]);
+		}else if(els.length > 1){
+			flushSingles();
+			var $row = $('<div class="form-row"></div>');
+			els.forEach(function($el){ $row.append($el); });
+			rows.push($row);
+		}else{
+			pendingSingles.push(els[0]);
+			if(pendingSingles.length === 3){ flushSingles(); }
+		}
+	});
+	flushSingles();
+	return rows;
+}
+
+// Force-disable (or restore) every <input>/<select> inside a moved field's element(s), for
+// keys listed in REVIEW_EDIT_DISABLED_KEYS. The previous disabled state of each control is
+// remembered in window.__reviewEditDisabledEls so it can be restored exactly (rather than
+// always re-enabling, which could wrongly enable a control disabled for its own reasons,
+// e.g. paymentStatus === 'SUCCESS').
+function setReviewFieldControlsDisabled($el, disabled){
+	$el.find('select, input').addBack('select, input').each(function(){
+		if(disabled){
+			window.__reviewEditDisabledEls.push({ el: this, wasDisabled: this.disabled });
+			this.disabled = true;
+		}
+		var $ctrl = $(this);
+		if($ctrl.data('select2')){
+			try{ $ctrl.trigger('change.select2'); }catch(e){}
+		}
+	});
+}
+
+// Move each field (with its wrapper) from the hidden form into the section's review-edit-wrapper
+// div, hiding the read-only table for the duration of the edit. Keys listed in
+// REVIEW_EDIT_DISABLED_KEYS (Grade/DOB) are still moved (so their value stays visible in the
+// same .form-row layout) but their actual control(s) are force-disabled so they cannot be
+// changed. A placeholder is left behind in the form so every field can be put back in the
+// same spot on Save/Cancel.
+function moveReviewFieldsToTable(type){
+	var cfg = REVIEW_EDIT_MAP[type];
+	if(!cfg){ return; }
+	var $box = $(cfg.box);
+	var disabledKeys = REVIEW_EDIT_DISABLED_KEYS[type] || [];
+	// Hide the read-only table while editing (shown again on Review / Save / Cancel via
+	// finishReviewEdit / moveReviewFieldsBack).
+	$box.find('.table-responsive').hide();
+	$box.find('.review_th_title').hide();
+	var $wrapper = $box.find('.review-edit-wrapper');
+	$wrapper.empty();
+	window.__reviewEditMoved = [];
+	window.__reviewEditDisabledEls = [];
+	// Only move fields for a key whose <td data-review-td="key"> was actually rendered in
+	// THIS table (e.g. studyingSchoolName/studyingGrade/countryOfSchool only exist for
+	// DUAL_DIPLOMA) — otherwise a field would show up in edit mode that was never part of
+	// the review for the current program/course-provider.
+	var keyOrder = Object.keys(cfg.fields).filter(function(key){
+		return $box.find('[data-review-td="'+key+'"]').length > 0;
+	});
+	var elementsByKey = {};
+	keyOrder.forEach(function(key){
+		var els = [];
+		cfg.fields[key].forEach(function(fieldId){
+			try{
+				var $el = getReviewFieldElement(cfg, fieldId);
+				if(!$el || $el.length === 0){ return; }
+				var $ph = $('<span class="fh-placeholder" style="display:none;"></span>');
+				$el.before($ph);
+				window.__reviewEditMoved.push({ ph:$ph, el:$el });
+				var $moved = $el.detach();
+				if(disabledKeys.indexOf(key) !== -1){
+					setReviewFieldControlsDisabled($moved, true);
+				}
+				els.push($moved);
+			}catch(e){
+				if(window.console && console.log){ console.log('review field move error', fieldId, e); }
+			}
+		});
+		elementsByKey[key] = els;
+	});
+	buildReviewEditRows(elementsByKey, keyOrder).forEach(function($row){
+		$wrapper.append($row);
+	});
+	$wrapper.show();
+}
+
+// Put every moved field back exactly where it came from (replace its placeholder), restoring
+// any control that was force-disabled for editing to its original disabled state, then hide
+// the review-edit-wrapper and show the read-only table again. `type` defaults to whichever
+// section is currently active.
+function moveReviewFieldsBack(type){
+	if(!window.__reviewEditMoved){ return; }
+	type = type || window.__activeReviewEdit;
+	var cfg = REVIEW_EDIT_MAP[type];
+	window.__reviewEditMoved.forEach(function(m){
+		try{
+			m.ph.replaceWith(m.el);
+		}catch(e){}
+	});
+	window.__reviewEditMoved = null;
+	if(window.__reviewEditDisabledEls){
+		window.__reviewEditDisabledEls.forEach(function(d){
+			try{
+				d.el.disabled = d.wasDisabled;
+				var $ctrl = $(d.el);
+				if($ctrl.data('select2')){ $ctrl.trigger('change.select2'); }
+			}catch(e){}
+		});
+		window.__reviewEditDisabledEls = null;
+	}
+	if(cfg){
+		var $box = $(cfg.box);
+		$box.find('.review-edit-wrapper').empty().hide();
+		$box.find('.table-responsive').show();
+	}
+}
+
+/* ---- Review inline-edit snapshot / change-detection / restore (student & parent) ----
+   Two independent snapshots are taken per section when Edit is clicked and kept apart:
+     originalValues      -> the review <td> HTML shown BEFORE Edit. Restored on Review, and
+                            on a Save that changed nothing, so cell formatting/icons survive.
+     originalFieldValues -> the save-request DATA the fields held at Edit time. Used ONLY to
+                            decide whether Save must hit the API. It reuses the existing
+                            request builders, so there is no second field list to maintain.
+   State is per type ('student' / 'parent') so the two sections never share a snapshot. */
+window.__reviewEditState = window.__reviewEditState || {};
+
+// Serialise just the DATA sub-object of the existing save request (the authentication block
+// carries a random getHash(), so it is deliberately excluded). Reads from the step form, so
+// callers must ensure the fields are IN the form (they are at Edit time, and again after
+// moveReviewFieldsBack() at Save time).
+function getReviewFieldSnapshot(type){
+	try{
+		if(type === 'student' && typeof getRequestForStudent === 'function'){
+			return JSON.stringify(getRequestForStudent().signupStudent);
+		}
+		if(type === 'parent' && typeof getRequestForSignupParent === 'function'){
+			return JSON.stringify(getRequestForSignupParent().signupParent);
+		}
+	}catch(e){
+		if(window.console && console.log){ console.log('review snapshot error', type, e); }
+	}
+	return '';
+}
+
+// Capture the current review-cell HTML for every editable cell. MUST run BEFORE the cells
+// are emptied by moveReviewFieldsToTable().
+function captureReviewValues(type){
+	var cfg = REVIEW_EDIT_MAP[type];
+	var values = {};
+	if(!cfg){ return values; }
+	var $box = $(cfg.box);
+	$.each(cfg.fields, function(key){
+		var $td = $box.find('[data-review-td="'+key+'"]').first();
+		if($td.length){ values[key] = $td.html(); }
+	});
+	return values;
+}
+
+// Put the captured review-cell HTML back and drop the edit-only class.
+function restoreReviewValues(type){
+	var cfg = REVIEW_EDIT_MAP[type];
+	var state = window.__reviewEditState[type];
+	if(!cfg || !state || !state.originalValues){ return; }
+	var $box = $(cfg.box);
+	$.each(state.originalValues, function(key, html){
+		var $td = $box.find('[data-review-td="'+key+'"]').first();
+		if($td.length){ $td.html(html).removeClass('review-td-editing'); }
+	});
+}
+
+// True when any save-relevant field differs from the Edit-time snapshot (no snapshot -> be
+// safe and allow the save).
+function hasReviewEditChanges(type){
+	var state = window.__reviewEditState[type];
+	if(!state){ return true; }
+	return getReviewFieldSnapshot(type) !== state.originalFieldValues;
+}
+
+// Which section ('student' / 'parent') a clicked header/li belongs to, via its box selector.
+function reviewTypeForNode($node){
+	var $li = $node.closest('li');
+	var found = null;
+	$.each(REVIEW_EDIT_MAP, function(type, cfg){
+		if($li.find(cfg.box).length){ found = type; return false; }
+	});
+	return found;
+}
+
+// Leave edit mode WITHOUT saving: fields back to the form (existing placeholder mechanism),
+// original review values back in the cells, header buttons reset (Edit shown, Save removed),
+// and the per-section state cleared.
+function finishReviewEdit(type){
+	moveReviewFieldsBack(type);
+	restoreReviewValues(type);
+	var cfg = REVIEW_EDIT_MAP[type];
+	if(cfg){
+		var $box = $(cfg.box);
+		$box.find('.review_th_title').show();
+		$box.find('.a-title .review-edit-actions').remove();
+		$box.find('.edit-btn').show();
+	}
+	window.__reviewEditState[type] = null;
+	if(window.__activeReviewEdit === type){ window.__activeReviewEdit = null; }
+}
+
+// ---- Course (whole-form relocate into a container outside the accordion) ----
+function hideReviewForInlineEdit(){
+	$('.form-review-partner ul.accordion').removeClass('accordion').addClass('review-accordion-hidden').hide();
+	$('.form-review-partner .payabledetails').hide();
+	$('.review_currency_note').hide();
+}
+function showReviewAfterInlineEdit(){
+	$('.form-review-partner ul.review-accordion-hidden').addClass('accordion').removeClass('review-accordion-hidden').show();
+	$('.form-review-partner .payabledetails').show();
+	$('.review_currency_note').show();
+}
+function restoreReviewForm(type){
+	var cfg = getReviewInlineEditConfig(type);
+	var $form = $(cfg.form).detach();
+	$form.show();
+	$(cfg.home).append($form);
+}
+
+// If any section is mid-edit, undo the DOM move so a re-render/navigation can't
+// strand or destroy the step form.
+function restoreActiveReviewEditIfAny(){
+	var type = window.__activeReviewEdit;
+	if(!type){ return; }
+	if(type === 'course'){
+		try{ restoreReviewForm('course'); }catch(e){}
+	}else{
+		try{ moveReviewFieldsBack(); }catch(e){}
+	}
+	// Drop the snapshot for the section we just closed so it cannot leak into the next one.
+	if(window.__reviewEditState){ window.__reviewEditState[type] = null; }
+	window.__activeReviewEdit = null;
+}
+
+function openReviewInlineEdit(type){
+	hideMessage('');
+	// Already editing this same section: clicking Edit again must be a no-op. Re-running the
+	// move would $td.empty() the cells (destroying the inputs now living inside them) and then
+	// find nothing in the form to move back, leaving the table cells blank.
+	if(window.__activeReviewEdit === type){ return; }
+	// If another section is mid-edit, put its fields/form back AND rebuild the review
+	// read-only, so the previously-edited table isn't left with blank cells.
+	if(window.__activeReviewEdit && window.__activeReviewEdit !== type){
+		restoreActiveReviewEditIfAny();
+		if(window.__lastReviewData){
+			getReviewAndPayRendered(window.__lastReviewData);
+		}
+	}
+	if(type === 'course'){
+		var cfg = getReviewInlineEditConfig(type);
+		var $container = $('#reviewInlineEditContainer');
+		if($container.length === 0 || $(cfg.form).length === 0){ return; }
+		hideReviewForInlineEdit();
+		var $form = $(cfg.form).detach();
+		$form.show();
+		$container.empty()
+			.append('<h3 class="review-edit-title alternate-txt-color">'+cfg.title+'</h3>')
+			.append($form)
+			.append(getReviewInlineEditActions(type))
+			.show();
+		window.__activeReviewEdit = type;
+		try{ $('html,body').animate({ scrollTop: $container.offset().top - 20 }, 250); }catch(e){}
+		$("#formSteps .actions.clearfix, .review-signup-details").hide();
+		return;
+	}
+	// student / parent: keep the table, make the <td> cells editable in place
+	var mcfg = REVIEW_EDIT_MAP[type];
+	if(!mcfg || $(mcfg.box).length === 0 || $(mcfg.formSel).length === 0){ return; }
+	var $content = $(mcfg.box).find('.a-content').first();
+	$content.show(); // ensure the section is expanded (e.g. after a rebuild on edit-switch)
+	// Hide the Edit button and show Save/Cancel IN ITS PLACE (the section header .a-title),
+	// so they always appear even if something goes wrong while moving the fields into the
+	// cells. A later Save/Cancel re-renders the review and brings the Edit button back.
+	var $editBtn = $(mcfg.box).find('.edit-btn');
+	$editBtn.hide();
+	if($(mcfg.box).find('.a-title .review-edit-actions').length === 0){
+		$editBtn.after(getReviewInlineEditActions(type));
+	}else{
+		$(mcfg.box).find('.a-title .review-edit-actions').show();
+	}
+	// Snapshot the read-only cells AND the current form values BEFORE moving the fields in
+	// (moveReviewFieldsToTable empties the cells and detaches the fields). A FRESH snapshot is
+	// taken on every Edit, so stale state never leaks between edit sessions or sections.
+	window.__reviewEditState[type] = {
+		originalValues: captureReviewValues(type),
+		originalFieldValues: getReviewFieldSnapshot(type),
+		editing: true
+	};
+	try{
+		moveReviewFieldsToTable(type);
+	}catch(e){
+		if(window.console && console.log){ console.log('review inline edit move error', e); }
+	}
+	window.__activeReviewEdit = type;
+}
+
+function cancelReviewInlineEdit(type){
+	hideMessage('');
+	if(type === 'course'){
+		restoreReviewForm('course');
+		window.__activeReviewEdit = null;
+		$('#reviewInlineEditContainer').empty().hide();
+		showReviewAfterInlineEdit();
+		$("#formSteps .actions.clearfix, .review-signup-details").show();
+		return;
+	}
+	// student/parent: discard edits and rebuild the table from the last data (no backend)
+	moveReviewFieldsBack();
+	window.__activeReviewEdit = null;
+	if(window.__lastReviewData){
+		getReviewAndPayRendered(window.__lastReviewData);
+	}else{
+		callForReviewAndPaymentSelection('');
+	}
+}
+
+function validateReviewCourseSelection(){
+	var selected = ($('#selectedSubjects').val() || '').trim();
+	if(selected === ''){
+		showMessageTheme2(0, 'Please select at least one course');
+		return false;
+	}
+	return true;
+}
+
+function saveReviewInlineEdit(type){
+	hideMessage('');
+	if(type === 'course'){
+		if(!validateReviewCourseSelection()){ return; }
+		finishReviewInlineEditSave('course');
+		return;
+	}
+	// student/parent: move the fields back into the form first, so the request builders and
+	// validation see them.
+	moveReviewFieldsBack();
+	// Nothing changed since Edit -> do NOT call save-student-details / save-parent-details;
+	// just restore the read-only review and exit edit mode.
+	if(!hasReviewEditChanges(type)){
+		finishReviewEdit(type);
+		return;
+	}
+	window.__activeReviewEdit = null;
+	// Something changed -> run the existing validation + save endpoint (fromReview=true). On
+	// AJAX success the save callback re-renders the review via finishReviewInlineEditSave().
+	var result = (type === 'student') ? callForSignupStudentDetails(true) : callForSignUpParents(true);
+	if(result === false){
+		// sync validation failed (top message shown) — reopen the table edit so user can fix,
+		// keeping the snapshot so a later save still detects changes correctly.
+		moveReviewFieldsToTable(type);
+		$(REVIEW_EDIT_MAP[type].box).find('.edit-btn').hide();
+		window.__activeReviewEdit = type;
+	}
+}
+
+// Invoked from the save-details success callbacks (fromReview === true), and for courses.
+// Passing '' (not 'Y') re-renders the review without re-triggering payment-plan reload.
+function finishReviewInlineEditSave(type){
+	if(type === 'course'){
+		restoreReviewForm('course');
+	}
+	// The review is about to be re-rendered from the freshly-saved data; drop the edit
+	// snapshot so it can never leak into the next edit session.
+	if(window.__reviewEditState){ window.__reviewEditState[type] = null; }
+	window.__activeReviewEdit = null;
+	callForReviewAndPaymentSelection('');
 }
 
 function feePaymentReview(data){
@@ -3380,11 +4219,11 @@ function feePaymentReview(data){
 				+'</div>'
 				+'<table class="table-style">'
 					+'<thead>'
-						+'<tr>'
-							+'<th class="th" style="width:60%">Description</th>'
-							+'<th class="th" style="text-align:center;width:20%">Total</th>'
-							+'<th class="th" style="text-align:center;width:20%">Paying</th>'
-						+'</tr>'
+						// +'<tr>'
+						// 	+'<th class="th" style="width:60%">Description</th>'
+						// 	+'<th class="th" style="text-align:center;width:20%">Total</th>'
+						// 	+'<th class="th" style="text-align:center;width:20%">Paying</th>'
+						// +'</tr>'
 					+'</thead>'
 					+'<tbody>';
 						html+=monthlyFeeShchedule(cdrDTO)
@@ -3407,7 +4246,7 @@ function getBookAnEnrollmentTable(cdrDTO){
 		// 	+'<td style="text-align:right">'+cdrDTO.enrollmentFee.enrollmentFeeString+'</td>'
 		// 	+'<td style="text-align:right">'+cdrDTO.enrollmentFee.enrollmentFeeString+'</td>'
 		// +'</tr>'
-		'<tr>'
+		'<tr class="ps-payable-row">'
 			+'<td><b>Payable Fee</b></td>'
 			+'<td style="text-align:right">'+cdrDTO.enrollmentFee.enrollmentFeeString+'</td>'
 			+'<td style="text-align:right">'+cdrDTO.enrollmentFee.enrollmentFeeString+'</td>'
@@ -3612,7 +4451,7 @@ function getAnnualPaymentTable(cdrDTO){
 			}
 		}
 		html+=
-		'<tr>'
+		'<tr class="ps-payable-row">'
 			+'<td>'
 				+'<strong>Payable Fee</strong>'
 			+'</td>'
@@ -3665,7 +4504,7 @@ function getMonthlyPaymentTable(cdrDTO){
 		}
 		if(showPayableFee){
 			html+=
-			'<tr>'
+			'<tr class="ps-payable-row">'
 				+'<td>'
 					+'<strong>Payable Fee</strong>'
 				+'</td>'
@@ -3721,7 +4560,7 @@ function getCustomizedPaymentTable(data){
 			+'</tr>';
 		});
 		html+=
-		'<tr>'
+		'<tr class="ps-payable-row">'
 			+'<td><strong>Payable Fee</strong></td>'
 			+'<td style="text-align:right">'
 				+'<strong>';
@@ -4119,6 +4958,8 @@ function recommendedCourseModalContent(data){
 	var selectedSubjects = ($("#selectedSubjects").val() || '').split(',').map(id => id.trim());
 	var mandatorySubjects = data.recommendedCourses.filter(item => item.courseMandatory == 1);
 	var nonMandatorySubjects = data.recommendedCourses.filter(item => item.courseMandatory == 0);
+	var id = $(".step.active-step").attr("id");
+	var standardId = $("#"+id+" #standardId").val();
 	// console.log("Mandatory:", mandatorySubjects);
 	// console.log("Non Mandatory:", nonMandatorySubjects);
 	var totalCredit = 0;
@@ -4170,9 +5011,11 @@ function recommendedCourseModalContent(data){
 									+'<div class="d-inline-flex ml-auto">'
 										+'<div class="d-flex flex-wrap align-items-center">'
 											+'<div class="align-items-center d-inline-flex ml-auto" style="gap:10px">'
-												+'<span class="d-inline-block px-2 font-12" style="color:#077507;background:#d9efd6;border-radius:30px"><i class="zmdi zmdi-lock-outline"></i>&nbsp;Mandatory</span>'
-												+'<span class="d-inline-block font-12">'+v.subjectCredit+' Credit</span>'
-											+'</div>'
+												+'<span class="d-inline-block px-2 font-12" style="color:#077507;background:#d9efd6;border-radius:30px"><i class="zmdi zmdi-lock-outline"></i>&nbsp;Mandatory</span>';
+												if (![1, 2, 3, 11, 12, 13, 14, 15, 16, 17].includes(Number(standardId))) {
+													html+='<span class="d-inline-block font-12">'+v.subjectCredit+' Credit</span>';
+												}
+											html+='</div>'
 										+'</div>'
 									+'</div>'
 								+'</li>';
@@ -4210,9 +5053,11 @@ function recommendedCourseModalContent(data){
 									+'</div>'
 									+'<div class="d-inline-flex  ml-auto">'
 										+'<div class="d-flex flex-wrap align-items-center">'
-											+'<div class="d-inline-flex ml-auto" style="gap:10px">'
-												+'<span class="d-inline-block font-12">'+v.subjectCredit+' Credit</span>'
-												+'<span class="btn-sm white-bg add-and-remove-btn cursor '+(selectedSubjects.includes(String(v.subjectId))?'border-danger text-danger':'theme-border primary-txt-color')+'  border font-12" id="add_remove_button_'+v.subjectId+'" style="color:#007fff;background:#d7eaff;" onclick="addRecommendedCourseByBtn(\''+(i+1)+'\',\''+v.subjectId+'\')">'+(selectedSubjects.includes(String(v.subjectId))? '<i class="zmdi zmdi-minus"></i>&nbsp;Remove':'<i class="zmdi zmdi-plus"></i>&nbsp;Add')+'</span>'
+											+'<div class="d-inline-flex ml-auto" style="gap:10px">';
+												if(![1, 2, 3, 11, 12, 13, 14, 15, 16, 17].includes(Number(standardId))) {
+													html+='<span class="d-inline-block font-12">'+v.subjectCredit+' Credit</span>';
+												}
+												html+='<span class="btn-sm white-bg add-and-remove-btn cursor '+(selectedSubjects.includes(String(v.subjectId))?'border-danger text-danger':'theme-border primary-txt-color')+'  border font-12" id="add_remove_button_'+v.subjectId+'" style="color:#007fff;background:#d7eaff;" onclick="addRecommendedCourseByBtn(\''+(i+1)+'\',\''+v.subjectId+'\')">'+(selectedSubjects.includes(String(v.subjectId))? '<i class="zmdi zmdi-minus"></i>&nbsp;Remove':'<i class="zmdi zmdi-plus"></i>&nbsp;Add')+'</span>'
 											+'</div>'
 										+'</div>'
 									+'</div>'
@@ -4220,21 +5065,23 @@ function recommendedCourseModalContent(data){
 							});
 						html+='</ul>';
 					}
-					html+=
-					'<div class="w-100 mt-2 d-flex rounded-lg p-2" style="background:var(--plc)">';
+					if(![1, 2, 3, 11, 12, 13, 14, 15, 16, 17].includes(Number(standardId))) {
 						html+=
-						`<div class="d-flex align-items-center w-100">
-							<div class="mr-3 rounded-circle align-items-center d-inline-flex justify-content-center" style="color:#fff;background:#007fff;width: 40px;height: 40px;">
-								<i class="zmdi zmdi-graduation-cap font-24"></i>
-							</div>
-							<div class="flex-grow-1">
-								<div class="font-weight-bold text-dark font-18">Total Credits</div>
-								<div class="font-12">Including all recommended courses</div>
-							</div>
-							<div class="ml-auto font-28 font-weight-bold d-inline-flex primary-txt-color mr-2">${totalCredit}</div>
-						</div>`;
-					html+='</div>'
-					+'<div class="w-100 mt-2 d-flex rounded-lg p-2" style="background:#FFF8E1;border:1px solid #FFE082">';
+						'<div class="w-100 mt-2 d-flex rounded-lg p-2" style="background:var(--plc)">';
+							html+=
+							`<div class="d-flex align-items-center w-100">
+								<div class="mr-3 rounded-circle align-items-center d-inline-flex justify-content-center" style="color:#fff;background:#007fff;width: 40px;height: 40px;">
+									<i class="zmdi zmdi-graduation-cap font-24"></i>
+								</div>
+								<div class="flex-grow-1">
+									<div class="font-weight-bold text-dark font-18">Total Credits</div>
+									<div class="font-12">Including all recommended courses</div>
+								</div>
+								<div class="ml-auto font-28 font-weight-bold d-inline-flex primary-txt-color mr-2">${totalCredit}</div>
+							</div>`;
+						html+='</div>'
+					}
+					html+='<div class="w-100 mt-2 d-flex rounded-lg p-2" style="background:#FFF8E1;border:1px solid #FFE082">';
 						html+=
 						`<div class="d-flex align-items-center w-100">
 							<div class="mr-3 rounded-circle align-items-center d-inline-flex justify-content-center text-dark" style="background:#F59E0B;min-width: 40px;height: 40px;">
@@ -4277,11 +5124,11 @@ function recommendedCourseModalContent(data){
 				});
 				if(confirmBtn){
 					html+='<div class="modal-footer py-2" style="background-color:#f8f9fa;border-top:1px solid #e9ecef;">'
-						+'<a href="javascript:void(0)" class="btn primary-bg text-white;" id="confirmAndAddRecommendedCourse" onclick="chooseRecomendedCourse()"><b>Confirm</b></a>'
+						+'<a href="javascript:void(0)" class="btn primary-bg text-white" id="confirmAndAddRecommendedCourse" onclick="chooseRecomendedCourse()"><b>Confirm</b></a>'
 					+'</div>';
 				}else{
 					html+='<div class="modal-footer py-2" style="background-color:#f8f9fa;border-top:1px solid #e9ecef;">'
-						+'<a href="javascript:void(0)" class="btn btn-light text-white;" id="confirmAndAddRecommendedCourse" onclick="chooseRecomendedCourse()" disabled><b>Confirm</b></a>'
+						+'<a href="javascript:void(0)" class="btn btn-light text-white" id="confirmAndAddRecommendedCourse" onclick="chooseRecomendedCourse()" disabled><b>Confirm</b></a>'
 					+'</div>';
 				}
 
@@ -4305,7 +5152,7 @@ function logOutModalContent(){
 					+'<div class="modal-footer text-center" style="border: none; padding: 0; margin-bottom: 15px;">'
 						+'<div class="text-center" style="margin: 0 auto;">'
 							+'<button type="button" data-dismiss="modal" class="btn primary-txt-color" style="border: 1px solid var(--pc) !important; background: transparent !important;"  onclick="logoutConfimation(true, \''+BASE_URL+CONTEXT_PATH+SCHOOL_UUID+'/common/logout/'+UNIQUEUUID+'\')">Yes</button>'
-							+'<button type="button" class="btn" data-dismiss="modal" style="background:var(--pc);">No</button>'
+							+'<button type="button" class="btn" data-dismiss="modal" style="background:var(--pc);border:1px solid var(--pc);">No</button>'
 						+'</div>'
 					+'</div>'
 			+'</div>'

@@ -54,11 +54,46 @@ $(document).on('keyup', function(e) {
     }
 });
 
+// Red-border EVERY currently-empty required student field so the user sees all missing fields
+// at once when moving to the next step. Mirrors the exact required set (and the same conditional
+// groups) checked in validateRequestForSignupStudent below. Filled fields are left untouched.
+function highlightRequiredStudentFields(){
+	var F = 'signupStage1';
+	function emptyText(id){ var v = $("#"+F+" #"+id).val(); return (v == null || $.trim(String(v)) == ""); }
+	function emptySelect(id){ var v = $("#"+F+" #"+id).val(); return (v == null || v == '' || v == 0); }
+	// Only red-border the empty ones; filled fields keep whatever their own blur/change
+	// handlers set (so a filled-but-format-invalid field is not wrongly cleared to green).
+	function mark(id, isEmpty){ if(isEmpty){ validEndInvalidField(false, id); } }
+
+	mark('firstName', emptyText('firstName'));
+	mark('lastName', emptyText('lastName'));
+	mark('applyStandardId', emptySelect('applyStandardId'));
+	mark('dob', emptyText('dob'));
+	mark('gender', emptySelect('gender'));
+	if($('#learingProgramHeader').val() == 'DUAL_DIPLOMA'){
+		mark('studyingSchoolName', emptyText('studyingSchoolName'));
+		mark('studyingGradeId', emptySelect('studyingGradeId'));
+		mark('countryIdOfSchool', emptySelect('countryIdOfSchool'));
+	}else{
+		if($('#courseProviderId').val() == 39){
+			mark('learningLabel', emptySelect('learningLabel'));
+		}
+		mark('communicationEmail', emptyText('communicationEmail'));
+		mark('contactNumber', emptyText('contactNumber'));
+		mark('nationality', emptySelect('nationality'));
+	}
+	mark('countryId', emptySelect('countryId'));
+	mark('stateId', emptySelect('stateId'));
+	mark('cityId', emptySelect('cityId'));
+}
+
 function validateRequestForSignupStudent(){
 	/*if (!validateFormAscii()) {
 		showMessageTheme2(0, 'Please use the English Keyboard while providing information');
 		return false
 	}*/
+	// Red-border every empty required field before showing the single first-error message.
+	highlightRequiredStudentFields();
 	if ($("#signupStage1 #firstName").val()=="") {
 		showMessageTheme2(0, 'First Name is required');
 		return false
@@ -152,7 +187,7 @@ function validateRequestForSignupStudent(){
 	return true;
 }
 
-function callForSignupStudentDetails() {
+function callForSignupStudentDetails(fromReview) {
 	hideMessage('');
 	if(!validateRequestForSignupStudent()){
 		return false;
@@ -176,8 +211,13 @@ function callForSignupStudentDetails() {
 		showMessageTheme2(0, 'Age of student should not be more then '+MAX_AGE_LIMIT+' years');
 		return false;
 	}
-	setActiveStep(2);
-	showSkeleton(true, "step2");
+	// When editing from the review screen, do not navigate to step 2.
+	// Note: moveStep() calls this with a string arg ('signupStage1'), so only a
+	// strict boolean true (from the review inline edit) counts as fromReview.
+	if(fromReview !== true){
+		setActiveStep(2);
+		showSkeleton(true, "step2");
+	}
 	$(".prev-btn, .next-btn").addClass("disabled");
 	$.ajax({
 		type : "POST",
@@ -186,7 +226,7 @@ function callForSignupStudentDetails() {
 		data : JSON.stringify(getRequestForStudent()),
 		dataType : 'json',
 		async : true,
-		global : false,
+		// global : false,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if (data['status'] == '3') {
@@ -211,20 +251,47 @@ function callForSignupStudentDetails() {
 				}
 			} else {
 				var windowWidth = $(window).width();
-				if(windowWidth >580){
-					showMessageTheme2(1, ' Great! Student details completed (✓)', '', true);
+				// Show the success message only the first time step 1 is completed. Uses ONLY
+				// the per-step localStorage flag (UUID-scoped, reset for a new enrollment) —
+				// STUDENT_SINGUP_CURRENT_STEP is fixed for the whole page session to whatever
+				// step the student resumed at, so an "&& STUDENT_SINGUP_CURRENT_STEP<1" clause
+				// would wrongly block this on a student resuming exactly at step 1.
+				if(typeof getEnrollmentStepFlag !== "function" || !getEnrollmentStepFlag(1)){
+				// if(STUDENT_SINGUP_CURRENT_STEP<1){
+					if(windowWidth >580){
+						// showMessageTheme2(1, ' Just three step away', '', true);
+					}else{
+						// $("#showMessageInPopup #msgText").text('Just three step away');
+						// $("#showMessageInPopup").modal("show");
+						setTimeout(function(){
+							$("#showMessageInPopup").modal("hide");
+						},3000);
+					}
+					if(typeof setEnrollmentStepFlag === "function"){
+						setEnrollmentStepFlag(1, true);
+					}
+				}
+				if(fromReview === true){
+					// stay on the review screen: move the form back and refresh review.
+					// If "Change your location" is unchecked, the parent's location is the
+					// student's location -- since the student's location may have just changed
+					// here, re-sync the parent's Country/State/City to match and persist that
+					// (save-parent-details) before re-rendering, so Parent | Guardian Details on
+					// the review shows the updated location instead of the stale one.
+					if(typeof syncParentLocationWithStudent === "function" && !$('#sameAsStudentLocation').is(':checked')){
+						syncParentLocationWithStudent(function(){
+							callForSignUpParents(true);
+						});
+					}else{
+						finishReviewInlineEditSave('student');
+					}
 				}else{
-					$("#showMessageInPopup #msgText").text('Great! Student details completed');
-					$("#showMessageInPopup").modal("show");
-					setTimeout(function(){
-						$("#showMessageInPopup").modal("hide");
-					},3000);
+					if($("#signupType").val() == "Offline"){
+						$("#learningProgramPartnerStudent").attr("disabled", true);
+						$("#signupLearningProgramWrapper").hide();
+					}
+					callForParentSelection();
 				}
-				if($("#signupType").val() == "Offline"){
-					$("#learningProgramPartnerStudent").attr("disabled", true);
-					$("#signupLearningProgramWrapper").hide();
-				}
-				callForParentSelection();
 			}
 		},
 		error: function(e){
@@ -289,14 +356,14 @@ function displaySection(sectionNumber){
 }
 
 function calculateAge(){
-	$('#signupStage1 #dob').removeClass('is-Empty');
-	var studentDOB = $('#signupStage1 #dob').val().split("-");
-	var age = M.countAgeNew(studentDOB[1], studentDOB[0], studentDOB[2]);
-	if(age>29.941173){
-	showMessageTheme2(0, 'Age of student should not be more then 30 years');
-		return true;
-	}
-	return true;
+    $('#signupStage1 #dob').removeClass('is-Empty');
+    var studentDOB = $('#signupStage1 #dob').val().split("-");
+    var age = M.countAgeNew(studentDOB[1], studentDOB[0], studentDOB[2]);
+    if(age>29.941173){
+    showMessageTheme2(0, 'Age of student should not be more then 30 years');
+        return true;
+    }
+    return true;
 }
 
 // function maxAge(standardId, enrollmentType){
@@ -344,15 +411,22 @@ function dobInitalize(schoolId, needToInitalize, courseProviderId){
 			$('#dob').val('')
 		}
 		$('#dob').datepicker('remove')
+		// .datepicker('remove') tears down the plugin's own listeners but NOT this
+		// 'changeDate'/'change' handler we chain below — dobInitalize() runs again on every
+		// Grade change, so without unbinding first these would stack up on repeated calls.
+		$('#dob').off('changeDate.dobInitalize change.dobInitalize');
 		$('#dob').datepicker({
 		   	autoclose: true,
 		   	format: 'M dd, yyyy',
 			container: '#datepickerModalView',
 		   	startDate:startDate,
 		   	endDate:endDate
-		}).on('changeDate', function() {
+		}).on('changeDate.dobInitalize change.dobInitalize', function() {
+			var formId = $(this).closest("form").attr("id");
 			$('#dob').valid();
-			calculateAge('signupStage1');
+			calculateAge(formId);
+			// Close the datepicker's wrapping mobile modal as soon as the date changes —
+			// datepicker's own autoclose only closes its calendar dropdown, not this modal.
 			$("#datepickerModal").modal("hide");
 		});
 	// }else{
@@ -377,15 +451,15 @@ function dobInitalize(schoolId, needToInitalize, courseProviderId){
 function getStepsMessage(step){
 	html='';
 	if(step==0){
-		$('#stepsMessage').html('Takes less than 1 minute to complete this step');
+		$('#stepsMessage').html('Complete in under 1 minute');
 	}else if(step==1){
-		$('#stepsMessage').html('Takes less than 1 minute to complete this step');
+		$('#stepsMessage').html('Complete in under 1 minute');
 	}else if(step==2){
 		$('#stepsMessage').html('Takes less than 2 minutes to complete this step');
 	}else if(step==3){
-		$('#stepsMessage').html('Takes less than 1 minute to complete this step');
+		$('#stepsMessage').html('Complete in under 1 minute');
 	}else{
-		$('#stepsMessage').html('Takes less than 1 minute to complete this step');
+		$('#stepsMessage').html('Complete in under 1 minute');
 	}
 }
 
@@ -547,6 +621,11 @@ function setActiveStep(step){
 }
 
 async function moveStep(moveType){
+	// If a review inline-edit is open, move its form back to its step first so
+	// navigating away can't leave the form stranded in the review container.
+	if(typeof restoreActiveReviewEditIfAny === "function"){
+		restoreActiveReviewEditIfAny();
+	}
 	var courseProviderId=$('#courseProviderId').val();
 	var sectionLength = $(".step").length;
 	var currentStep = $(".step.active-step").index()+1;
@@ -708,11 +787,11 @@ async function moveStep(moveType){
 		if(prevStep == 1 ){
 			$(".prev-btn").hide();
 		}else if(prevStep == 3){
-			if(SHOW_PAYMENT_OPTION=='Y'){
-				if(!$('#studentPaymentModal').is(':visible') || $('#studentPaymentModal').length<1){
-					callForPaymentModeSelection('signupStage3','');
-				}
-			}
+			// if(SHOW_PAYMENT_OPTION=='Y'){
+			// 	if(!$('#studentPaymentModal').is(':visible') || $('#studentPaymentModal').length<1){
+			// 		callForPaymentModeSelection('signupStage3','');
+			// 	}
+			// }
 		}else{
 			$(".prev-btn").show();    
 		} 

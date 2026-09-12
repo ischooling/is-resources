@@ -86,7 +86,7 @@ function signupTeacherStage1OnLoadEvent(signupTeacher){
 				}
 				itiContcat.setCountry(selectedCountry);
 			}else{
-				$("#stateId").html("<option value=''>Select State/Province*</option>");
+				$("#stateId").html("<option value=''>Select Province/State*</option>");
 			}
 			callStates('teacherSignupStage1', this.value, 'countryId');
 			$("#cityId").html("<option value=''>Select City*</option>");

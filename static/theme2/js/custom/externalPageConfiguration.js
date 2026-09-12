@@ -389,7 +389,7 @@ function callStates(formId, value, elementId) {
   console.log(value);
   if (!validateRequestForMaster(formId, elementId)) {
     $("#" + formId + " #stateId").val();
-    resetDropdown($("#" + formId + " #stateId"), "Select State/Province*");
+    resetDropdown($("#" + formId + " #stateId"), "Select Province/State*");
     $("#" + formId + " #cityId").val();
     resetDropdown($("#" + formId + " #cityId"), "Select city*");
     return false;
@@ -411,7 +411,7 @@ function callStates(formId, value, elementId) {
         buildDropdown(
           data["data"],
           $("#" + formId + " #stateId"),
-          "Select State/Province*"
+          "Select Province/State*"
         );
         if (formId == "inquiryForm") {
           $("#" + formId + " #countryCode").val(

@@ -1791,7 +1791,7 @@ async function profileViewPageLoadEvent(data) {
     $("#country").unbind().bind("change", function () {
         callStates('profileForm', this.value, 'country', 'state', 'city');
         if ($(this).val() == "") {
-            $("#state").html("<option value=''>Select State/Province*</option>");
+            $("#state").html("<option value=''>Select Province/State*</option>");
         }
         $("#city").html("<option value=''>Select City*</option>");
     });

@@ -108,3 +108,22 @@ input[type=radio]:checked~.white-bg-checked, input[type=checkbox]:checked~.white
     color: var(--pc) !important;
     border: 2px solid var(--pc) !important;
 }
+
+/* ===== Review-screen inline edit ===== */
+.review-edit-slot{margin-top:10px}
+.review-edit-slot .form-row{margin-left:0;margin-right:0}
+.custom-field:has(.select2-container--disabled){cursor:not-allowed}
+/* select2.min.css itself sets cursor:default directly on the selection box when disabled
+   (.select2-container--default.select2-container--disabled .select2-selection--single); that
+   direct rule on the descendant wins over the cursor set on the ancestor .custom-field above,
+   so it must be overridden here too, at the same specificity, loaded after select2.min.css. */
+.custom-field .select2-container--disabled .select2-selection--single,
+.custom-field .select2-container--disabled .select2-selection--multiple{cursor:not-allowed}
+
+@media (max-width:575px){.review-edit-actions{justify-content:stretch}.review-edit-actions button{flex:1;min-width:0}}
+.review-inline-edit-container{margin-top:8px;padding-top:6px}
+.review-inline-edit-container .review-edit-title{font-size:18px;font-weight:700;text-align:center;margin-bottom:14px}
+.table-style td.review-td-editing{padding:8px 10px;background:#f7faff}
+.review-td-field{display:inline-block;width:100%;margin:6px 10px 6px 0;vertical-align:top}
+.review-td-field.form-holder{min-width:180px}
+.table-style td.review-td-editing .form-row{margin:0}

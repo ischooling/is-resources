@@ -557,6 +557,7 @@ async function showPaymentModal() {
 }
 
 function getAllCourseDetails(isGradeChange, courseId) {
+	// showSkeleton(true, "step3");
 	$("#commonloaderId, #commonloaderBody").show();
 	var docsStatusSeq = ++STUDENT_DOCS_COURSE_DETAILS_SEQ;
 	var standardId = $("#signupStage3 #standardId").val();
@@ -615,7 +616,7 @@ function getAllCourseDetails(isGradeChange, courseId) {
 				}
 			} else {
 				$("#creditsLimitsModal, #creditsLimitsOverModal").modal("hide");
-				showMessageTheme2(true, data['message']);
+				showMessageTheme2(data['message'] == 'No changes to save' ? false : true, data['message']);
 				$(".step-3-skeleton").html('');
 				$(".step-3-skeleton").hide('');
 				$("#signupStage3").show();
@@ -636,9 +637,28 @@ function getAllCourseDetails(isGradeChange, courseId) {
 					$('#applyStandardId').val($('#signupStage3 #gradeId').val()).trigger('change');
 					$('#dob').val(dob);
 				}
+				var activeTab = $(".step.active-step").attr("id")
+				$('#'+activeTab+' .accordion .a-title, .accordion .a-title .review-btn .cutom-btn').unbind().bind('click', function(){
+					var $li = $(this).closest('li');
+					var rtype = reviewTypeForNode($li);
+					// Clicking Review while this section is mid-edit discards the edits: it restores the
+					// original read-only values and moves the fields back — WITHOUT calling any save API.
+					if(rtype && window.__activeReviewEdit === rtype){
+						finishReviewEdit(rtype);
+					}
+					$li.find('.a-content').stop().slideToggle();
+					// $(this).find('.plus-icon').toggleClass('fa-minus fa-plus')
+					// $(this).parent().closest('li').siblings().find('.plus-icon').removeClass('fa-minus')
+					// $(this).parent().closest('li').siblings().find('.plus-icon').addClass('fa-plus')
+					$li.siblings().find('.a-content').slideUp();
+				});
+
 			}
 			$(".prev-btn, .next-btn").removeClass("disabled");
 			$("#commonloaderId, #commonloaderBody").hide();
+			$('html, body').animate({
+				scrollTop: 0
+			}, 300);
 		},
 		error: function(e){
 			if (checkonlineOfflineStatus()) {
@@ -775,7 +795,6 @@ function choosePaymentOption() {
 			url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/enrollment/choose-payment-plan',
 			data: JSON.stringify(getRequestForChoosePaymentOption()),
 			dataType: 'json',
-			global: false,
 			success: function (data) {
 				if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 					if (data['status'] == '3') {
@@ -804,30 +823,33 @@ function choosePaymentOption() {
 					setActiveStep(4);
 					callForReviewAndPaymentSelection('Y');
 					var windowWidth = $(window).width();
-					
-					if(SHOW_PAYMENT_OPTION=='Y'){
+					// Show the success message only the first time step 3 is completed. Uses ONLY
+					// the per-step localStorage flag (UUID-scoped, reset for a new enrollment) —
+					// STUDENT_SINGUP_CURRENT_STEP is fixed for the whole page session to whatever
+					// step the student resumed at, so an "&& STUDENT_SINGUP_CURRENT_STEP<3" clause
+					// would wrongly block this on a student resuming exactly at step 3 (the exact
+					// case reported: choosing the payment plan for the very first time).
+					if(typeof getEnrollmentStepFlag !== "function" || !getEnrollmentStepFlag(3)){
 						if(windowWidth >580){
-							showMessageTheme2(1, ' Superb! Just one step left. (✓)', '', true);
+							// showMessageTheme2(1, ' Just one step away', '', true);
 						}else{
-							$("#showMessageInPopup #msgText").text('Superb! Just one step left');
-							$("#showMessageInPopup").modal("show");
+							// $("#showMessageInPopup #msgText").text('Just one step away');
+							// $("#showMessageInPopup").modal("show");
 							setTimeout(function(){
 								$("#showMessageInPopup").modal("hide");
 							},3000);
 						}
-						hideModalMessage();
-					}else{
-						if(windowWidth >580){
-							showMessageTheme2(1, ' Superb! Just one step left. (✓)', '', true);
-						}else{
-							$("#showMessageInPopup #msgText").text('Superb! Just one step left');
-							$("#showMessageInPopup").modal("show");
-							setTimeout(function(){
-								$("#showMessageInPopup").modal("hide");
-							},3000);
+						if(typeof setEnrollmentStepFlag === "function"){
+							setEnrollmentStepFlag(3, true);
 						}
 					}
-					
+					if(SHOW_PAYMENT_OPTION=='Y'){
+						hideModalMessage();
+					}
+
+					$('html, body').animate({
+						scrollTop: 0
+					}, 300);
 				}
 			},
 			error: function(e){
@@ -1011,16 +1033,142 @@ function getRequestForProgressionToDashboard() {
 }
 
 function proceedToChangeGrade() {
-	$('#changeSelectedGrade').modal('hide')
+	$('#changeSelectedGradeModal').modal('hide')
 	displaySection(1);
+	$(".actions.clearfix").show();
 }
 
 function cancelToChangeGrade() {
-	$('#changeSelectedGrade').modal('hide')
+	$('#changeSelectedGradeModal').modal('hide')
+}
+var POPLATED_CHANGE_GRADE_OPEN = false;
+function changeSelectedGrade() {
+	var $stepGrade = $('#signupStage1 #applyStandardId');
+	var $modal = $('#changeSelectedGradeModal');
+
+	// Seed DOB from Step 1 and wire up the big, centered datepicker modal — safe to do before
+	// the modal is visible.
+	$('#changeGradeDob').val($('#signupStage1 #dob').val());
+	initChangeGradeDatepicker();
+	$('#changeGradeSelect, #changeGradeDob').removeClass('is-Empty');
+	$modal.off('shown.bs.modal.changeGrade').on('shown.bs.modal.changeGrade', function () {
+		if (POPLATED_CHANGE_GRADE_OPEN) { return; }
+		POPLATED_CHANGE_GRADE_OPEN = true;
+		if ($('#changeGradeSelect').hasClass('select2-hidden-accessible')) {
+			$('#changeGradeSelect').select2('destroy');
+		}
+		var $freshGradeOptions = $stepGrade.find('option').clone().removeAttr('data-select2-id');
+		$('#changeGradeSelect').empty().append($freshGradeOptions).val($stepGrade.val());
+		$('#changeGradeSelect').select2({
+			placeholder: 'Grade',
+			dropdownParent: $modal
+		});
+		$('#changeGradeSelect').val($('#signupStage1 #applyStandardId').val()).trigger('change');
+		// Blank the DOB whenever the grade is changed (age range depends on the grade).
+		$('#changeGradeSelect').off('change.changeGrade').on('change.changeGrade', function () {
+			$('#changeGradeDob').val('');
+		});
+	});
+	$('#changeSelectedGradeModal').off('hidden.bs.modal.changeGrade').on('hidden.bs.modal.changeGrade', function () {
+        $('#changeGradeDob').val($('#signupStage1 #dob').val());
+		$('#changeGradeSelect').val($('#signupStage1 #applyStandardId').val()).trigger('change');
+    });
+
+	$modal.modal("show");
 }
 
-function changeSelectedGrade() {
-	$('#changeSelectedGrade').modal("show");
+function initChangeGradeDatepicker() {
+	var maxAge = ($('#courseProviderId').val() == 39) ? 60 : 30;
+	var startDate = new Date();
+	var endDate = new Date();
+	endDate.setFullYear(endDate.getFullYear() - 2);
+	startDate.setFullYear(startDate.getFullYear() - maxAge);
+	$('#changeGradeDob').datepicker('remove');
+	// Render the calendar into the shared datepicker modal so it opens as the big,
+	// centered picker used across the enrollment flow (same as Step 1's DOB).
+	$('#changeGradeDob').datepicker({
+		autoclose: true,
+		format: 'M dd, yyyy',
+		container: '#datepickerModalView',
+		startDate: startDate,
+		endDate: endDate
+	}).off('changeDate.changeGrade').on('changeDate.changeGrade', function () {
+		$('#changeGradeDob').removeClass('is-Empty');
+		$('#datepickerModal').modal('hide');
+	});
+	$('#changeGradeDob').off('click.changeGrade').on('click.changeGrade', function () {
+		$('#datepickerModal').modal('show');
+	});
+}
+
+function saveSelectedGradeAndDob() {
+	var grade = $('#changeGradeSelect').val();
+	var dob = $.trim($('#changeGradeDob').val());
+	if (grade == null || $.trim(String(grade)) == '' || grade == 0) {
+		showMessageTheme2(0, 'Grade is required');
+		return;
+	}
+	if (dob == '') {
+		showMessageTheme2(0, 'Date of Birth is required');
+		return;
+	}
+	// Age check mirrors validateRequestForSignupStudent on Step 1.
+	var dobd = changeDateFormat(getDateInDateFormat(dob), 'mm-dd-yyyy');
+	var dob1 = dobd.split('-');
+	var maxAge = ($('#courseProviderId').val() == 39) ? 60 : 30;
+	if (M.countAgeNew(dob1[1], dob1[0], dob1[2]) > maxAge) {
+		showMessageTheme2(0, 'Age of student should not be more then ' + maxAge + ' years');
+		return;
+	}
+	// Push the chosen values into the Step-1 fields, then persist via the same
+	// endpoint Step 1 uses so eligibility / plan re-checks run server-side.
+	// Step 1's Grade field is a select2 widget: plain .val() alone updates the underlying
+	// <select> but leaves select2's own rendered label showing the OLD grade (so navigating
+	// back to Step 1 without a fresh page/API load would still show, e.g., "Grade 5" after
+	// saving "Grade 10" here). Trigger ONLY select2's own 'change.select2' refresh event -- not
+	// a plain 'change' -- so its label redraws without also firing #applyStandardId's
+	// un-namespaced change handler (signupStudentContent.js), which calls dobInitalize(...,
+	// true) and would blank #dob right back out after we just set it below.
+	$('#signupStage1 #applyStandardId').val(grade).trigger('change.select2');
+	$('#signupStage1 #dob').val(dob);
+	$('#saveChangeGrade').attr('disabled', true);
+	$.ajax({
+		type: 'POST',
+		contentType: APPLICATION_JSON_VALUE,
+		url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + '/student/enrollment/save-student-details',
+		data: JSON.stringify(getRequestForStudent()),
+		dataType: 'json',
+		async: true,
+		success: function (data) {
+			$('#saveChangeGrade').attr('disabled', false);
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
+				if (data['status'] == '3') {
+					redirectLoginPage();
+				} else if (data['statusCode'] == 'FLAGGED') {
+					$('#changeSelectedGradeModal').modal('hide');
+					$('#flaggedModal').remove();
+					$('body').append(flaggedModalContent(data));
+					$('#flaggedModal').modal('show');
+				} else if (data['statusCode'] == 'ELIGIBLE_CUSTOME_PLAN' || data['statusCode'] == 'REDIRECT_TO_DASHBOOARD') {
+					window.location.reload();
+				} else {
+					showMessageTheme2(0, data['message']);
+				}
+			} else {
+				// Saved. Refresh Step-3 courses in place for the (possibly) new grade.
+				$('#changeSelectedGradeModal').modal('hide');
+				$('#signupStage3 #standardId').val(grade);
+				$('#signupStage3 #gradeId').val(grade);
+				$('#selectedSubjects').val('');
+				$('#controlType').val('remove');
+				getAllCourseDetails('Y', '');
+			}
+		},
+		error: function (e) {
+			$('#saveChangeGrade').attr('disabled', false);
+			if (checkonlineOfflineStatus()) { return; }
+		}
+	});
 }
 
 function radioBtnChecked() {
@@ -1125,7 +1273,7 @@ function callForPaymentModeSelection(formId, callFrom) {
 		data: JSON.stringify(getRequestForPaymentModeSelection(formId, callFrom)),
 		dataType: 'json',
 		async: true,
-		global: false,
+		// global: false,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if (data['status'] == '3') {
@@ -1247,6 +1395,7 @@ function callForReviewAndPaymentSelection(reloadRequired) {
 				getReviewAndPayRendered(data);
 			}
 			$(".prev-btn, .next-btn, .finish-btn").removeClass("disabled");
+			$(".actions.clearfix").show();
 		},
 		error: function(e){
 			if (checkonlineOfflineStatus()) {
@@ -1426,7 +1575,7 @@ function recommendedCourse() {
 		data: JSON.stringify(getRequestForReviewAndPaymentSelection('')),
 		dataType: 'json',
 		async: true,
-		global: false,
+		// global: false,
 		success: function (data) {
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if (data['status'] == '3') {

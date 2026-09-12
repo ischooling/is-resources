@@ -2548,7 +2548,7 @@ function initializeCountryStateCity(formId, countryId, stateId, cityId){
             callStates(formId, this.value, countryId, stateId, cityId);
 			$("#" + formId + " #" + cityId).html(`<option value="">Select City*</option>`).prop("disabled", true);
         } else {
-            $("#" + formId + " #" + stateId).html(`<option value="">Select State/Province*</option>`).prop("disabled", true);
+            $("#" + formId + " #" + stateId).html(`<option value="">Select Province/State*</option>`).prop("disabled", true);
             $("#" + formId + " #" + cityId).html(`<option value="">Select City*</option>`).prop("disabled", true);
 
             if($("#"+formId+" #"+cityId).data('select2')) {

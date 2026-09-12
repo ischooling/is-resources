@@ -21,13 +21,18 @@ $("#pStateId").unbind().bind("change",function(){
 $("#pCityId").unbind().bind("change",function(){
 	$('#pCityId').valid();
 });
-function callForSignUpParents() {
+function callForSignUpParents(fromReview) {
 	hideMessage('');
 	if(!validateRequestForSignupParent()){
 		return false;
 	}
-	setActiveStep(3);
-	showSkeleton(true, "step3");
+	// When editing from the review screen, do not navigate to step 3.
+	// Note: moveStep() calls this with a string arg ('signupStage2'), so only a
+	// strict boolean true (from the review inline edit) counts as fromReview.
+	if(fromReview !== true){
+		setActiveStep(3);
+		showSkeleton(true, "step3");
+	}
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
@@ -35,7 +40,7 @@ function callForSignUpParents() {
 		data : JSON.stringify(getRequestForSignupParent()),
 		dataType : 'json',
 		async : true,
-		global : false,
+		// global : false,
 		success : function(data) {
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if (data['status'] == '3') {
@@ -60,7 +65,9 @@ function callForSignUpParents() {
 			} else {
 				var windowWidth = $(window).width();
 				var msg = "";
-				getAllCourseDetails('N','');
+				if(fromReview !== true){
+					getAllCourseDetails('N','');
+				}
 				if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX'){
 					msg ="Wow! Academic & Communication Details Updated."
 				}else if($("#courseProviderId").val() == 39){
@@ -71,16 +78,30 @@ function callForSignUpParents() {
 					}
 				}
 				else{
-					msg = windowWidth>580?" Wow! Parent details completed. (✓)":"Wow! Parent details completed"
+					msg = windowWidth>580?" Just two step away":"Just two step away"
 				}
-				if(windowWidth >580){
-					showMessageTheme2(1, msg, '', true);
-				}else{
-					$("#showMessageInPopup #msgText").text(msg);
-					$("#showMessageInPopup").modal("show");
-					setTimeout(function(){
-						$("#showMessageInPopup").modal("hide");
-					},3000);
+				// Show the success message only the first time step 2 is completed. Uses ONLY
+				// the per-step localStorage flag (UUID-scoped, reset for a new enrollment) —
+				// STUDENT_SINGUP_CURRENT_STEP is fixed for the whole page session to whatever
+				// step the student resumed at, so an "&& STUDENT_SINGUP_CURRENT_STEP<2" clause
+				// would wrongly block this on a student resuming exactly at step 2.
+				if(typeof getEnrollmentStepFlag !== "function" || !getEnrollmentStepFlag(2)){
+					if(windowWidth >580){
+						// showMessageTheme2(1, msg, '', true);
+					}else{
+						// $("#showMessageInPopup #msgText").text(msg);
+						// $("#showMessageInPopup").modal("show");
+						setTimeout(function(){
+							$("#showMessageInPopup").modal("hide");
+						},3000);
+					}
+					if(typeof setEnrollmentStepFlag === "function"){
+						setEnrollmentStepFlag(2, true);
+					}
+				}
+				if(fromReview === true){
+					// stay on the review screen: move the form back and refresh review
+					finishReviewInlineEditSave('parent');
 				}
 			}
 		},
@@ -92,9 +113,38 @@ function callForSignUpParents() {
 	});
 }
 
+// Red-border EVERY currently-empty required parent field so the user sees all missing fields at
+// once when moving to the next step. Mirrors the exact required set (and the same conditional
+// groups) checked in validateRequestForSignupParent below. Filled fields are left untouched, and
+// parentPhoneNumber / referralCode are excluded — the validation does not require them non-empty.
+function highlightRequiredParentFields(){
+	var F = 'signupStage2';
+	function emptyText(id){ var v = $("#"+F+" #"+id).val(); return (v == null || $.trim(String(v)) == ""); }
+	function emptySelect(id){ var v = $("#"+F+" #"+id).val(); return (v == null || v == '' || v == 0); }
+	// Only red-border the empty ones; filled fields keep whatever their own blur/change
+	// handlers set (so a filled-but-format-invalid field is not wrongly cleared to green).
+	function mark(id, isEmpty){ if(isEmpty){ validEndInvalidField(false, id); } }
+
+	if($('#learingProgramHeader').val() == 'ONE_TO_ONE_FLEX'){
+		mark('workingProfession', emptySelect('workingProfession'));
+		mark('institutionName', emptyText('institutionName'));
+		mark('institutionCountryId', emptySelect('institutionCountryId'));
+	}else if($('#courseProviderId').val() == 39){
+		// courseProviderId 39: no per-field requirements in this branch
+	}else{
+		mark('parentFirstName', emptyText('parentFirstName'));
+		mark('parentlastName', emptyText('parentlastName'));
+		mark('relation', emptySelect('relation'));
+		mark('pCountryId', emptySelect('pCountryId'));
+		mark('pStateId', emptySelect('pStateId'));
+		mark('pCityId', emptySelect('pCityId'));
+	}
+}
+
 function validateRequestForSignupParent(){
 	hideMessage('');
-	
+	// Red-border every empty required field before showing the single first-error message.
+	highlightRequiredParentFields();
 	// if (!validateFormAscii()) {
 	// 	showMessageTheme2(0, 'Please use the English Keyboard while providing information');
 	// 	return false
@@ -157,7 +207,7 @@ function validateRequestForSignupParent(){
 	if(pcModeWhatsapp == "Y" || pcModeCall == "Y" || pcModeEmail == "Y"){
 		
 	}else{
-		showMessageTheme2(0, 'Your preferred communication is required');
+		showMessageTheme2(0, 'How to Contact You? is required');
 		return false
 	}
 //	if ($("#signupStage2 #countryCodeParent").val()==null) {
@@ -514,29 +564,54 @@ function getDataForOtpVerification(){
 	return request;
 }
 
+// Cascades the parent's Country -> State -> City selects to match the student's current
+// location (#signupStage1 #countryId/#stateId/#cityId), same as the "Change your location"
+// checkbox OFF path. Each step waits for the previous select's change-triggered AJAX (states/
+// cities) to populate before setting the next, so this only works while #pCountryId/#pStateId/
+// #pCityId are enabled. `callback` (optional) runs once the city is set. Shared by addressSameAs()
+// (checkbox toggle) and the review-screen Student Details save (student's location edited while
+// "Change your location" stays unchecked -> parent location must follow it).
+function syncParentLocationWithStudent(callback){
+	$('#signupStage2 #pCountryId').val($('#signupStage1 #countryId').val()).trigger('change');
+	window.setTimeout(function(){
+		$('#signupStage2 #pStateId').val($('#signupStage1 #stateId').val()).trigger('change');
+		window.setTimeout(function(){
+			$('#signupStage2 #pCityId').val($('#signupStage1 #cityId').val()).trigger('change');
+			if(typeof callback === 'function'){ callback(); }
+		},500);
+	},500);
+}
+
 function addressSameAs(){
 	var flag=$('#sameAsStudentLocation').is(':checked');
 	if(flag){
-		$('#sameAsStudentLocation').prop('disabled', true);
-		$('#signupStage2 #pCountryId').val($('#signupStage1 #countryId').val()).trigger('change');
-		window.setTimeout(function(){
-			$('#signupStage2 #pStateId').val($('#signupStage1 #stateId').val()).trigger('change');
-			$('#signupStage2 #pStateId').prop('disabled',true);
-			window.setTimeout(function(){
-				$('#signupStage2 #pCityId').val($('#signupStage1 #cityId').val()).trigger('change');
-				$('#signupStage2 #pCityId').prop('disabled',true).promise().done(function(){
-					$('#sameAsStudentLocation').prop('disabled',false);	
-				});
-			},500);
-		},500);
-		$('#signupStage2 #pCountryId').prop('disabled',true);
-	}else{
+		// "Change your location" ON: unlock the fields and blank them so the parent
+		// can enter a location different from the student's (country -> state -> city).
+		IS_PARENT_COUNTRY_CHANGE=true;
+		$('#signupStage2 #pStateId').html('<option value="">Select Province/State*</option>');
+		$('#signupStage2 #pCityId').html('<option value="">Select City*</option>');
 		$('#signupStage2 #pCountryId').prop('disabled',false);
 		$('#signupStage2 #pStateId').prop('disabled',false);
 		$('#signupStage2 #pCityId').prop('disabled',false);
+
 		$('#signupStage2 #pCountryId').val('').trigger('change');
-		$('#signupStage2 #pStateId').html('<option value="">Select State/Province*</option>');
-		$('#signupStage2 #pCityId').html('<option value="">Select City*</option>');
+		$('#signupStage2 #pStateId').val('').trigger('change');
+		$('#signupStage2 #pCityId').val('').trigger('change');
+
+	}else{
+		IS_PARENT_COUNTRY_CHANGE=false;
+		// OFF: reuse the student's location and lock the fields again.
+		$('#sameAsStudentLocation').prop('disabled', true);
+		$('#signupStage2 #pCountryId').prop('disabled',false);
+		$('#signupStage2 #pStateId').prop('disabled',false);
+		$('#signupStage2 #pCityId').prop('disabled',false);
+		syncParentLocationWithStudent(function(){
+			$('#signupStage2 #pCountryId').prop('disabled',true);
+			$('#signupStage2 #pStateId').prop('disabled',true);
+			$('#signupStage2 #pCityId').prop('disabled',true).promise().done(function(){
+				$('#sameAsStudentLocation').prop('disabled',false);
+			});
+		});
 	}
 }
 
@@ -577,7 +652,7 @@ function callForParentSelection(studentUserId) {
 					SHOW_PAYMENT_OPTION = responseData.showPaymentOption;
 					if(responseData.signupType == 'Online' ){
 						if (SHOW_PAYMENT_OPTION == 'Y') {
-							$("#finishBtnId").text('Proceed');
+							$("#finishBtnId").text('Final Step');
 						} else {
 							$("#finishBtnId").text('Submit Application');
 						}
