@@ -13,7 +13,7 @@
 	src: url("../fonts/lato/Lato-Bold.ttf");
 }
 #recommendedCourseModal .btn[disabled], #recommendedCourseModal .btn input[disabled]{pointer-events: none;opacity: 1;}
-html, body{font-family: 'Open Sans !important';ba}
+html, body{font-family: 'Open Sans !important';}
 * {
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
