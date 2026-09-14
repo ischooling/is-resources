@@ -455,10 +455,10 @@ function validateRequestForsaveSemesterStartDateEntry1(formId){
 		showMessageTheme2(0, 'Semester End Date is required');
 		return false
 	}
-	if ($("#"+formId+" #weeklyReportFrequency").val()==null || $("#"+formId+" #weeklyReportFrequency").val().trim()=='') {
-		showMessageTheme2(0, 'Please select week day');
-		return false;
-	}
+	// if ($("#"+formId+" #weeklyReportFrequency").val()==null || $("#"+formId+" #weeklyReportFrequency").val().trim()=='') {
+	// 	showMessageTheme2(0, 'Please select week day');
+	// 	return false;
+	// }
 	if ($("#"+formId+" #semesterStatus").val()==null || $("#"+formId+" #semesterStatus").val().trim()=='') {
 		showMessageTheme2(0, 'Please choose semester  status');
 		return false;
