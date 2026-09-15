@@ -2811,10 +2811,24 @@ function monthlyFeeShchedule(cdrDTO){
 	return html;
 }
 
+function getCustomizedPlanExtraFees(data){
+	var extraFees = [];
+	if(data.advanceFeeDetails != null && data.advanceFeeDetails.monthlyFees != null){
+		$.each(data.advanceFeeDetails.monthlyFees, function(k, monthlyFee) {
+			if(monthlyFee != null && monthlyFee.paymentLabel == 'Extra Course Fee'
+					&& monthlyFee.status != 'SUCCESS' && monthlyFee.amount > 0){
+				extraFees.push(monthlyFee);
+			}
+		});
+	}
+	return extraFees;
+}
+
 function getCustomizedPaymentTable(data){
 	var html=``;
 	if(data.customPaymentEnabled){
 		var paymentDetails = data.paymentCalculationResponse.paymentDetails;
+		var extraFees = getCustomizedPlanExtraFees(data);
 		if(paymentDetails.schedulePayments.length>0){
 			html+=
 			`<div class="full">
@@ -2841,12 +2855,28 @@ function getCustomizedPaymentTable(data){
 								</td>
 							</tr>`;
 						});
+						var extraFeeTotal = 0;
+						$.each(extraFees, function(loop, extraFee) {
+							extraFeeTotal += extraFee.amount;
+							html+=
+							`<tr>
+								<td>
+									${extraFee.paymentLabel} (Scheduled ${extraFee.scheduledDate})
+								</td>
+								<td style="text-align:right">
+									${extraFee.amountString}
+								</td>
+								<td style="text-align:right">
+									${extraFee.amountString}
+								</td>
+							</tr>`;
+						});
 					html+=`</tbody>
 				</table>
 			</div>
 			<div class="d-flex align-items-center">
 				<h5 class="font-weight-bold font-16 my-2 text-dark">Payable Fee</h5>
-				<span class="d-inline-flex my-1 font-weight-bold font-20 text-right text-dark ml-auto">${paymentDetails.totalPayableAmountString}</span>
+				<span class="d-inline-flex my-1 font-weight-bold font-20 text-right text-dark ml-auto">${extraFeeTotal>0 ? (data.currency + getNumberWithPrecision(paymentDetails.totalPayableAmount + extraFeeTotal, 2)) : paymentDetails.totalPayableAmountString}</span>
 			</div>
 			<div>
 				<p class="mb-2 text-center"><b>Note:</b> All fees mentioned above are in US Dollars</p>

@@ -1481,7 +1481,11 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
         // PAST class/activity -> two badges: "Expired" + (Missed | Late Joined) when attendance
         // applies. Live/Upcoming -> single badge. Non-timed events -> none.
         var statusBadge = isTimedEvent(event) ? buildStatusBadges(event) : "";
-        var joinStatusLabel = isTimedEvent(event) ? joinStatus(event) : "";
+        // TEMP: Join-status label (MISSED/LATE JOIN/ON TIME) disabled on the calendar dashboard
+        // tile until the MISSED/timezone attendance bug is root-caused. Re-enable by restoring
+        // the line below.
+        // var joinStatusLabel = isTimedEvent(event) ? joinStatus(event) : "";
+        var joinStatusLabel = "";
             /*<div class="dashboard-today-event p-2 rounded-10 ${activeClass} ${dashedClass}" data-today-event-id="${event.id}" style="border-color:${(status == 'live' ? `red`:getEventTextColor(event.eventKind, event.courseId))} !important;">*/
             var html=`<div class="dashboard-today-event p-2 rounded-10 justify-content-center ${activeClass} ${dashedClass}" data-today-event-id="${event.id}" style="border-color:${(status == 'live' ? colorCode:colorCode)} !important; --dash-color:${colorCode};">
                 
@@ -2182,7 +2186,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
             if(response['dateStatus']=='between'){
                 var classUrl=response['redirectUrl'];
                 $('#classJoinInSameWindowModal').modal({backdrop: 'static', keyboard: false});
-                $('#classJoinInSameWindowBody').html(calendarMeetingLinkValidateStudent(classUrl, response, eventKind, courseId, "", "", "", "", salutation));
+                $('#classJoinInSameWindowBody').html(calendarMeetingLinkValidateStudent(classUrl, response, eventKind, courseId, classTitle, teacherName, classStatus, eventType, salutation));
                 window.setTimeout(function () { $('#classJoinInSameWindowModal').modal('hide');}, response['meetingJoinModalHideMin']*1000);
                 window.open(classUrl,"_blank");
             }
@@ -2229,7 +2233,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                                 </li>
                                 <li class="d-flex flex-wrap mb-1">
                                     <span class="text-black-80 font-weight-semi-bold font-14 pr-2 text-left" style="min-width:80px">Teacher</span>
-                                    <span class="text-black-80 font-weight-semi-bold font-14">${salutation+"."+ " "+response.subjectName}</span>
+                                    <span class="text-black-80 font-weight-semi-bold font-14">${salutation+"."+ " "+teacherName}</span>
                                 </li>
                                 <li class="d-flex flex-wrap mb-1">
                                     <span class="text-black-80 font-weight-semi-bold font-14 pr-2 text-left" style="min-width:80px">Status</span>
@@ -2351,7 +2355,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                             </li>
                             <li class="d-flex flex-wrap mb-1">
                                 <span class="text-black-80 font-weight-semi-bold font-14 pr-2 text-left" style="min-width:80px">Teacher</span>
-                                <span class="text-black-80 font-weight-semi-bold font-14">${salutation+"."+ " "+response.subjectName}</span>
+                                <span class="text-black-80 font-weight-semi-bold font-14">${salutation+"."+ " "+teacherName}</span>
                             </li>
                             <li class="d-flex flex-wrap mb-1">
                                 <span class="text-black-80 font-weight-semi-bold font-14 pr-2 text-left" style="min-width:80px">Status</span>
@@ -2636,10 +2640,13 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                 '</li>' +
                 row("Time", classStartTime, "") +
                 row("Duration", timeText, "") +
-                '<li class="d-flex flex-wrap mb-2">' +
-                    '<span class="text-black-80 font-weight-semi-bold font-14 pr-2 text-left" style="min-width:90px">Join Status</span>' +
-                    '<span class="font-14 font-weight-semi-bold" style="color:' + getDisplayStatusColor(getEventDisplayStatus(event), event.eventKind, event.courseId) + '">' + getDisplayStatusLabel(getEventDisplayStatus(event))+ '</span>' +
-                '</li>' +
+                // TEMP: 'Join Status' row (MISSED/LATE JOIN/ON TIME) disabled in the class-details
+                // popup until the MISSED/timezone attendance bug is root-caused. Re-enable by
+                // restoring the block below.
+                // '<li class="d-flex flex-wrap mb-2">' +
+                //     '<span class="text-black-80 font-weight-semi-bold font-14 pr-2 text-left" style="min-width:90px">Join Status</span>' +
+                //     '<span class="font-14 font-weight-semi-bold" style="color:' + getDisplayStatusColor(getEventDisplayStatus(event), event.eventKind, event.courseId) + '">' + getDisplayStatusLabel(getEventDisplayStatus(event))+ '</span>' +
+                // '</li>' +
                 (event.lateSeconds>0 ? row("Late", LatetimeText, ""):"") +
                 (event.category != "BATCH" ? (teacherName && teacherName !== "Teacher" ? row(teacherLabel, teacherName, event.salutation) : "") :"") +
                 
@@ -2789,7 +2796,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
             return;
         }
         if (event.url) {
-            classDetailsOnModal(event.url, event.eventKind, event.courseId, event.title, event.name, event.classStatus, event.eventType, event.salutation);
+            classDetailsOnModal(event.url, event.eventKind, event.courseId, event.title, event.origName, event.classStatus, event.eventType, event.salutation);
             return;
         }
         if (event.eventKind === "holiday" || event.eventKind === "schoolEvent") {

@@ -1654,6 +1654,235 @@ function editAttendance(attendanceid, attendminuts, remark, calltype, startdate,
 	return false;
 }
 
+function loadLcaTeacherAttendanceSyncActions() {
+	var attendanceIds = [];
+	$('.lcaSyncAction').each(function() {
+		var actionContainer = $(this);
+		var attendanceid = actionContainer.data('attendance-id');
+		if (!attendanceid || actionContainer.data('lca-sync-loaded')) {
+			return;
+		}
+		actionContainer.data('lca-sync-loaded', true);
+		if (attendanceIds.indexOf(String(attendanceid)) === -1) {
+			attendanceIds.push(String(attendanceid));
+		}
+	});
+	if (attendanceIds.length == 0) {
+		return false;
+	}
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForHTML('report','teacher-attendance-lca-sync-list'),
+		dataType : 'JSON',
+		global : false,
+		data : JSON.stringify(getLcaTeacherAttendanceSyncListRequest(attendanceIds)),
+		success : function(data) {
+			if (!data || data.length == 0) {
+				return false;
+			}
+			for (var index = 0; index < data.length; index++) {
+				var item = data[index];
+				var attendanceid = item['rattendid'];
+				var actionContainer = $('.lcaSyncAction[data-attendance-id="'+attendanceid+'"]');
+				actionContainer.html(
+					'<div id="lcaSyncPreview'+attendanceid+'" class="mb-2 px-2 py-1" style="font-size:12px;color:#5f4300;background:#fff7df;border-left:3px solid #f5b51b;border-radius:3px;"><b>Suggested actual time:</b><br/>'
+					+ escapeHtml(formatAttendanceDisplayRange(item['lcaActualStartTime'], item['lcaActualEndTime'])) + ' ('
+					+ escapeHtml(item['lcaActualDuration']) + ')</div>'
+					+ '<button type="button" id="lcaSyncButton'+attendanceid+'" class="mb-2 mr-2 btn-pill btn btn-warning btn-sm" onclick="syncTeacherAttendanceFromLca(\''+attendanceid+'\');">Review Time</button>'
+				);
+			}
+			return false;
+		},
+		error : function() {
+			$('.lcaSyncAction').data('lca-sync-loaded', false);
+		}
+	});
+	return false;
+}
+
+function syncTeacherAttendanceFromLca(attendanceid) {
+	customLoader(true);
+	hideMessageTheme2('');
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForHTML('report','teacher-attendance-lca-sync-preview'),
+		dataType : 'JSON',
+		data : JSON.stringify(getLcaTeacherAttendanceSyncRequest(attendanceid)),
+		success : function(data) {
+			customLoader(false);
+			if (data['statusCode'] == '0' || data['statusCode'] == '2') {
+				showMessageTheme2(0, data['message'] || 'No LCA missed teacher attendance found','',true);
+				return false;
+			}
+			var confirmMessage = buildLcaTeacherAttendanceSyncSelection(data, attendanceid);
+			showWarningMessage(confirmMessage.replace(/'/g, "\\'"), "applyLcaTeacherAttendanceSync('"+attendanceid+"')");
+			styleAttendanceReviewWarningModal();
+			return false;
+		},
+		error : function() {
+			customLoader(false);
+			showMessageTheme2(0, 'Unable to verify LCA attendance','',true);
+		}
+	});
+	return false;
+}
+
+function buildLcaTeacherAttendanceSyncSelection(data, attendanceid) {
+	var entries = [];
+	try {
+		entries = JSON.parse(data['lcaEntryJson'] || '[]');
+	} catch (e) {
+		entries = [];
+	}
+	var selectedIds = (data['lcaEntryIds'] || '').split(',');
+	var html = '<div class="text-left">';
+	html += '<div class="attendance-review-summary">';
+	html += '<div class="attendance-review-box"><div class="attendance-review-label">Recorded time</div><div class="attendance-review-time">' + escapeHtml(formatAttendanceDisplayRange(data['jointimes'], data['endTimes'])) + '<br/>(' + escapeHtml(formatSecondsAsHHMMSS(data['durations'])) + ')</div></div>';
+	if (data['lcaSyncAvailable'] == 'Y') {
+		html += '<div class="attendance-review-box suggested"><div class="attendance-review-label">Suggested actual time</div><div class="attendance-review-time">' + escapeHtml(formatAttendanceDisplayRange(data['lcaActualStartTime'], data['lcaActualEndTime'])) + '<br/>(' + escapeHtml(data['lcaActualDuration']) + ')</div></div>';
+	}
+	html += '</div>';
+	html += '<div class="mb-2" style="font-weight:700;color:#111827;">Select entries to combine</div>';
+	for (var index = 0; index < entries.length; index++) {
+		var entry = entries[index];
+		var checked = selectedIds.indexOf(String(entry.id)) !== -1 ? ' checked' : '';
+		html += '<label class="attendance-review-entry">'
+			+ '<input type="checkbox" class="lcaSyncEntry' + attendanceid + '" value="' + entry.id + '"' + checked + ' /> '
+			+ '<span><span class="attendance-review-entry-title">' + escapeHtml(entry.name) + '</span> '
+			+ '<span class="attendance-review-role">(' + escapeHtml(entry.joiningType == 'H' ? 'Host' : 'Participant') + ')</span><br/>'
+			+ '<span class="attendance-review-entry-meta">' + escapeHtml(formatAttendanceDisplayRange(entry.joinTime, entry.leaveTime)) + ' (' + escapeHtml(entry.duration) + ')</span></span>'
+			+ '</label>';
+	}
+	html += '</div>';
+	return html;
+}
+
+function styleAttendanceReviewWarningModal() {
+	var reviewContent = $("#warningMessage").html();
+	$("#remarksresetDelete").addClass("attendance-review-modal");
+	$("#remarksresetDelete .modal-header").attr("style", "top:0 !important;width:100% !important;background-color:#eff6ff !important;padding:18px 22px !important;border-radius:8px 8px 0 0 !important;border-bottom:1px solid #bfdbfe !important;justify-content:flex-start !important;");
+	$("#warningMessage").html("Review Attendance Time");
+	$("#statusMessage-1").html(reviewContent);
+	$("#resetDeleteErrorWarningYes")
+		.text("Apply Selected Time")
+		.attr("style", "color:#111827 !important;border:1px solid #f3b91f !important;background:#f5b51b !important;font-weight:700 !important;padding:7px 14px;");
+	$("#resetDeleteErrorWarningNo")
+		.text("Cancel")
+		.attr("style", "color:#374151 !important;border:1px solid #d1d5db !important;background:#ffffff !important;font-weight:700 !important;padding:7px 14px;");
+	$("#remarksresetDelete").one("hidden.bs.modal.attendanceReview", function() {
+		$("#remarksresetDelete").removeClass("attendance-review-modal");
+		$("#remarksresetDelete .modal-header").attr("style", "top: 0 !important;width:100% !important;background-color:#f44336 !important; padding: 15px 10px;border-radius: 5px 5px 0px 0px !important");
+		$("#statusMessage-1").html('<i class="fa fa-trash fa-4x" style="color:#f44336 !important;"></i>');
+		$("#resetDeleteErrorWarningYes")
+			.text("Yes")
+			.attr("style", "color:#f44336 !important;border:1px solid #f44336 !important;background:transparent !important;font-weight: 700;");
+		$("#resetDeleteErrorWarningNo")
+			.text("No")
+			.attr("style", "font-weight: 700;");
+	});
+}
+
+function applyLcaTeacherAttendanceSync(attendanceid) {
+	var selectedLcaEntryIds = getSelectedLcaTeacherAttendanceEntryIds(attendanceid);
+	if (selectedLcaEntryIds.length == 0) {
+		showMessageTheme2(0, 'Please select LCA entries','',true);
+		return false;
+	}
+	customLoader(true);
+	hideMessageTheme2('');
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForHTML('report','sync-teacher-attendance-from-lca'),
+		dataType : 'JSON',
+		data : JSON.stringify(getLcaTeacherAttendanceSyncRequest(attendanceid, selectedLcaEntryIds.join(','))),
+		success : function(data) {
+			customLoader(false);
+			if (data['statusCode'] == '0' || data['statusCode'] == '2') {
+				showMessageTheme2(0, data['message'] || 'Unable to sync LCA attendance','',true);
+				return false;
+			}
+			$('.startTimes'+attendanceid).text(formatAttendanceDisplayTimeOnly(data['lcaActualStartTime']));
+			$('.endTimes'+attendanceid).text(formatAttendanceDisplayTimeOnly(data['lcaActualEndTime']));
+			$('.durations'+attendanceid).text(data['lcaActualDuration']);
+			$('.publish'+attendanceid).text('Unpublished');
+			$('.publish'+attendanceid).removeClass('text-success');
+			$('.publish'+attendanceid).addClass('text-danger');
+			$('#lcaSyncButton'+attendanceid).remove();
+			$('#lcaSyncPreview'+attendanceid).remove();
+			showMessageTheme2(1, data['message'] || 'Teacher attendance synced from LCA','',true);
+			return false;
+		},
+		error : function() {
+			customLoader(false);
+			showMessageTheme2(0, 'Unable to sync LCA attendance','',true);
+		}
+	});
+	return false;
+}
+
+function getSelectedLcaTeacherAttendanceEntryIds(attendanceid) {
+	var selectedIds = [];
+	$('.lcaSyncEntry'+attendanceid+':checked').each(function() {
+		selectedIds.push($(this).val());
+	});
+	return selectedIds;
+}
+
+function getLcaTeacherAttendanceSyncListRequest(attendanceIds) {
+	var request = {};
+	request['rattendIds'] = attendanceIds.join(',');
+	request['userId'] = USER_ID;
+	return request;
+}
+
+function getLcaTeacherAttendanceSyncRequest(attendanceid, lcaEntryIds) {
+	var request = {};
+	request['rattendid'] = attendanceid;
+	request['userId'] = USER_ID;
+	request['lcaEntryIds'] = lcaEntryIds || '';
+	return request;
+}
+
+function formatAttendanceDisplayRange(startDateTime, endDateTime) {
+	var start = moment(startDateTime, "YYYY-MM-DD HH:mm:ss", true);
+	var end = moment(endDateTime, "YYYY-MM-DD HH:mm:ss", true);
+	if (!start.isValid() || !end.isValid()) {
+		return (startDateTime || '') + ' - ' + (endDateTime || '');
+	}
+	if (start.isSame(end, 'day')) {
+		return start.format("dddd, MMM D, YYYY") + ', ' + start.format("h:mm A") + ' - ' + end.format("h:mm A");
+	}
+	return start.format("dddd, MMM D, YYYY, h:mm A") + ' - ' + end.format("dddd, MMM D, YYYY, h:mm A");
+}
+
+function formatAttendanceDisplayTimeOnly(dateTime) {
+	var parsedDateTime = moment(dateTime, "YYYY-MM-DD HH:mm:ss", true);
+	return parsedDateTime.isValid() ? parsedDateTime.format("h:mm A") : (dateTime || '');
+}
+
+function formatSecondsAsHHMMSS(seconds) {
+	if (String(seconds || '').indexOf(':') != -1) {
+		return seconds;
+	}
+	seconds = parseInt(seconds || 0, 10);
+	var hours = Math.floor(seconds / 3600);
+	var minutes = Math.floor((seconds % 3600) / 60);
+	var remainingSeconds = seconds % 60;
+	return padTo2Digits(hours) + ':' + padTo2Digits(minutes) + ':' + padTo2Digits(remainingSeconds);
+}
+
+function escapeHtml(value) {
+	return String(value || '')
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#039;');
+}
+
 function getSaveAttendanceRequest(attendanceid, attendminuts,remark,  calltype){
 	if(calltype=='save'){
 		if($('#atttimeHrsFrom').val()=='' || $('#atttimeHrsFrom').val()==undefined){
