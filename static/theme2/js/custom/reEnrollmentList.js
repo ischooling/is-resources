@@ -174,6 +174,9 @@ function bindReEnrollmentEvents() {
         .on('change', '#reelCardCountry, #reelCardGrade, #reelCardProgress, #reelCardAdv', function () {
             if (REEL_CARD_FILTERS_READY) { reelCardListFetch(0); }
         });
+    $(document).off('keydown', '#reelCardSearch').on('keydown', '#reelCardSearch', function (e) {
+        if (e.which === 13 && REEL_CARD_FILTERS_READY) { reelCardListFetch(0); }
+    });
     // grade/country breakup number -> open popup filtered to that grade/country + metric
     $(document).off('click', '.reel-bclick').on('click', '.reel-bclick', function () {
         var id = $(this).attr('data-id');
@@ -182,11 +185,13 @@ function bindReEnrollmentEvents() {
         var metric = $(this).attr('data-metric');
         var name = $(this).attr('data-name') || '';
         var label = (metric === 'total' ? 'Active' : (metric === 'reEnrolledNext' ? 'Re-enrolled' : 'Pending')) + ' · ' + name;
-        var preset = (kind === 'grade') ? { grade: [id] } : (kind === 'country') ? { country: [id] } : { progress: id };
+        // id can be a CSV of ids (a grade/country name may map to several ids) -> filter by ALL of them
+        var ids = String(id).split(',');
+        var preset = (kind === 'grade') ? { grade: ids } : (kind === 'country') ? { country: ids } : { progress: id };
         reelCardListOpen(metric, '', label, preset);
     });
     $(document).off('click', '#reelCardFilterReset').on('click', '#reelCardFilterReset', function () {
-        $('#reelCardProgress').val(''); $('#reelCardAdv').val('');
+        $('#reelCardProgress').val(''); $('#reelCardAdv').val(''); $('#reelCardSearch').val('');
         try { $('#reelCardCountry').val(null).trigger('change.select2'); $('#reelCardGrade').val(null).trigger('change.select2'); }
         catch (e) { $('#reelCardCountry').val([]); $('#reelCardGrade').val([]); }
         reelCardListFetch(0);
@@ -277,7 +282,7 @@ function reEnrollOpenStudentDetail(ssid, uid, roll, name, grade, reg, enrol) {
 
 function reEnrollFetch(pageNumber) {
     REEL_PAGE = pageNumber || 0;
-    $('#reelBody').html('<tr><td colspan="18" class="reel-empty">Loading…</td></tr>');
+    $('#reelBody').html('<tr><td colspan="20" class="reel-empty">Loading…</td></tr>');
     var req = getRequestForReEnrollment(REEL_PAGE);
     $.ajax({
         type: 'POST',
@@ -290,7 +295,7 @@ function reEnrollFetch(pageNumber) {
         success: function (data) {
             if (data['status'] == '3') { redirectLoginPage(); return; }
             if (data['status'] == '0' || data['status'] == '2') {
-                $('#reelBody').html('<tr><td colspan="18" class="reel-empty">Unable to load data.</td></tr>');
+                $('#reelBody').html('<tr><td colspan="20" class="reel-empty">Unable to load data.</td></tr>');
                 return;
             }
             if (!REEL_SESSIONS_LOADED) {
@@ -316,7 +321,7 @@ function reEnrollFetch(pageNumber) {
         },
         error: function () {
             if (typeof checkonlineOfflineStatus === 'function' && checkonlineOfflineStatus()) { return; }
-            $('#reelBody').html('<tr><td colspan="18" class="reel-empty">Unable to load data. Please retry.</td></tr>');
+            $('#reelBody').html('<tr><td colspan="20" class="reel-empty">Unable to load data. Please retry.</td></tr>');
         }
     });
 }
@@ -412,12 +417,13 @@ function reEnrollRenderCards(s) {
 // numeric cells are clickable -> open the popup list filtered to that grade/country + metric
 function reEnrollBreakupSection(title, nameCol, kind, rows) {
     if (!rows) { return ''; }
-    var body = '';
+    var body = '', tActive = 0, tRe = 0, tPend = 0;
     for (var i = 0; i < rows.length; i++) {
         var r = rows[i];
         var active = Number(r.active || 0);
         var re = Number(r.reEnroll || 0);
         var pend = Number(r.pending || 0);
+        tActive += active; tRe += re; tPend += pend;
         var pct = active > 0 ? (re / active * 100) : 0;
         var tier = pct >= 50 ? 'reel-b5' : pct >= 40 ? 'reel-b4' : pct >= 30 ? 'reel-b3' : pct >= 20 ? 'reel-b2' : pct > 0 ? 'reel-b1' : '';
         var id = reEnrollEsc(r.id || '');
@@ -434,12 +440,35 @@ function reEnrollBreakupSection(title, nameCol, kind, rows) {
             + '</tr>';
     }
     if (!body) { body = '<tr><td colspan="5" class="reel-bempty">No data</td></tr>'; }
+    var tPct = tActive > 0 ? (tRe / tActive * 100) : 0;
+    // grand totals sit in their own grey row above the blue heading row
+    var totalRow = '<tr class="reel-btotr">'
+        + '<th>Total</th>'
+        + '<th>' + tActive.toLocaleString() + '</th>'
+        + '<th>' + tRe.toLocaleString() + '</th>'
+        + '<th>' + tPct.toFixed(1) + '%</th>'
+        + '<th>' + tPend.toLocaleString() + '</th>'
+        + '</tr>';
     return '<div class="reel-breakcol">'
         + '<div class="reel-bhead">' + reEnrollEsc(title) + '</div>'
-        + '<div class="reel-bwrap"><table class="reel-btbl"><thead><tr>'
+        + '<div class="reel-bwrap"><table class="reel-btbl"><thead>'
+        + totalRow
+        + '<tr class="reel-blblr">'
         + '<th>' + reEnrollEsc(nameCol) + '</th><th>Active</th><th>Re-enrolled</th><th>%</th><th>Pending</th>'
         + '</tr></thead><tbody>' + body + '</tbody></table></div>'
         + '</div>';
+}
+
+// Advance column has three states: ADV = advance / seat booked, SUCCESS = paid re-enrollment
+// (normal fee on a real enrollment row), N = neither. 'Y' is the old flag, kept for safety.
+function reEnrollAdvLabel(v) {
+    if (v === 'ADV' || v === 'Y') { return 'Advance Paid'; }
+    if (v === 'SUCCESS') { return 'Success'; }
+    return 'No';
+}
+function reEnrollAdvBadge(v) {
+    var cls = (v === 'ADV' || v === 'Y') ? 'reel-adv-y' : (v === 'SUCCESS') ? 'reel-adv-s' : 'reel-adv-n';
+    return '<span class="reel-badge ' + cls + '">' + reEnrollAdvLabel(v) + '</span>';
 }
 
 // builds the <tr> rows HTML (shared by the main table and the count-box list drawer)
@@ -447,9 +476,7 @@ function reEnrollRowsHtml(rows, srBase) {
     var h = '';
     for (var i = 0; i < rows.length; i++) {
         var r = rows[i];
-        var adv = (r.advPayment === 'Y')
-            ? '<span class="reel-badge reel-adv-y">Advance Paid</span>'
-            : '<span class="reel-badge reel-adv-n">No</span>';
+        var adv = reEnrollAdvBadge(r.advPayment);
         var prog = (r.avgProgress === '' || r.avgProgress === null) ? '-' : (r.avgProgress + '%');
         var idCell = reEnrollEsc(r.rollNo || '-');
         if (r.studentStandardId) {
@@ -471,6 +498,7 @@ function reEnrollRowsHtml(rows, srBase) {
             + '<td>' + reEnrollEsc(r.payDate || '-') + '</td>'
             + '<td>' + reEnrollEsc(r.semStart || r.acadStart || '-') + '</td>'
             + '<td>' + reEnrollEsc(r.acadEnd || '-') + '</td>'
+            + '<td>' + reEnrollEsc(r.transcriptIssue || '-') + '</td>'
             + '<td>' + prog + '</td>'
             + '<td>' + reEnrollEsc(r.profileStatus || '-') + '</td>'
             + '<td>' + reEnrollEsc(r.lastLogout || '-') + '</td>'
@@ -482,7 +510,7 @@ function reEnrollRowsHtml(rows, srBase) {
 
 function reEnrollRenderRows(rows, pageNumber, pageSize) {
     if (!rows.length) {
-        $('#reelBody').html('<tr><td colspan="19" class="reel-empty">No students found for the selected filters.</td></tr>');
+        $('#reelBody').html('<tr><td colspan="20" class="reel-empty">No students found for the selected filters.</td></tr>');
         return;
     }
     $('#reelBody').html(reEnrollRowsHtml(rows, (pageNumber || 0) * (pageSize || 25)));
@@ -534,6 +562,7 @@ var REEL_EXPORT_COLS = [
     { h: 'Pay Date', k: 'payDate' },
     { h: 'Academic Start', k: 'semStart' },
     { h: 'Academic End', k: 'acadEnd' },
+    { h: 'Transcript Issue', k: 'transcriptIssue' },
     { h: 'Avg Progress', k: 'avgProgress' },
     { h: 'Profile Status', k: 'profileStatus' },
     { h: 'Last Logout', k: 'lastLogout' },
@@ -546,7 +575,7 @@ function reEnrollExportVal(r, col, idx) {
     if (col.h === 'Avg Progress') {
         return (r.avgProgress === '' || r.avgProgress === null || r.avgProgress === undefined) ? '' : (r.avgProgress + '%');
     }
-    if (col.h === 'Advance') { return (r.advPayment === 'Y') ? 'Advance Paid' : 'No'; }
+    if (col.h === 'Advance') { return reEnrollAdvLabel(r.advPayment); }
     var v = r[col.k];
     return (v === null || v === undefined) ? '' : String(v);
 }
@@ -664,7 +693,7 @@ function reelCardListOpen(cm, sess, title, preset) {
     REEL_CARD_LIST_TOTAL = 0;
     $('#reelListTitle').text(REEL_CARD_LIST_TITLE);
     $('#reelListSub').html('&nbsp;');
-    $('#reelCardBody').html('<tr><td colspan="19" class="reel-empty">Loading…</td></tr>');
+    $('#reelCardBody').html('<tr><td colspan="20" class="reel-empty">Loading…</td></tr>');
     $('#reelCardPager').html('');
     reelCardInitFilters(preset);
     $('#reelListOverlay').addClass('show');
@@ -688,6 +717,7 @@ function reelCardInitFilters(preset) {
     // (a progress preset from the "Progress wise" section overrides the inherited value)
     $('#reelCardProgress').val((preset && preset.progress != null) ? preset.progress : ($('#reelProgress').val() || ''));
     $('#reelCardAdv').val($('#reelAdv').val() || '');
+    $('#reelCardSearch').val($('#reelSearch').val() || '');
     var gradeVal = (preset && preset.grade) ? preset.grade : null;
     var countryVal = (preset && preset.country) ? preset.country : null;
     try {
@@ -714,8 +744,9 @@ function reelCardListFetch(pageNumber) {
     req.grade = ($('#reelCardGrade').val() || []);
     req.progress = ($('#reelCardProgress').val() || '');
     req.advPayment = ($('#reelCardAdv').val() || '');
+    req.search = (($('#reelCardSearch').val() || '').trim());
     if (page > 0) { req.knownTotal = REEL_CARD_LIST_TOTAL; } else { delete req.knownTotal; }
-    $('#reelCardBody').html('<tr><td colspan="19" class="reel-empty">Loading…</td></tr>');
+    $('#reelCardBody').html('<tr><td colspan="20" class="reel-empty">Loading…</td></tr>');
     $.ajax({
         type: 'POST',
         contentType: APPLICATION_JSON_VALUE,
@@ -727,14 +758,14 @@ function reelCardListFetch(pageNumber) {
         success: function (data) {
             if (data['status'] == '3') { redirectLoginPage(); return; }
             if (data['status'] == '0' || data['status'] == '2') {
-                $('#reelCardBody').html('<tr><td colspan="19" class="reel-empty">Unable to load data.</td></tr>');
+                $('#reelCardBody').html('<tr><td colspan="20" class="reel-empty">Unable to load data.</td></tr>');
                 return;
             }
             if (page === 0) { REEL_CARD_LIST_TOTAL = Number(data.count || 0); }
             var rows = data.data || [];
             var pageSize = req.pageSize || 25;
             if (!rows.length) {
-                $('#reelCardBody').html('<tr><td colspan="19" class="reel-empty">No students found.</td></tr>');
+                $('#reelCardBody').html('<tr><td colspan="20" class="reel-empty">No students found.</td></tr>');
             } else {
                 $('#reelCardBody').html(reEnrollRowsHtml(rows, page * pageSize));
             }
@@ -746,7 +777,7 @@ function reelCardListFetch(pageNumber) {
         },
         error: function () {
             if (typeof checkonlineOfflineStatus === 'function' && checkonlineOfflineStatus()) { return; }
-            $('#reelCardBody').html('<tr><td colspan="19" class="reel-empty">Unable to load data. Please retry.</td></tr>');
+            $('#reelCardBody').html('<tr><td colspan="20" class="reel-empty">Unable to load data. Please retry.</td></tr>');
         }
     });
 }

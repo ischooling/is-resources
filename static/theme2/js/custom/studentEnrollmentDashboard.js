@@ -206,6 +206,19 @@ function sedRenderReadiness(o) {
             { n: o.acadDateSet, label: 'chosen', color: SED_COLORS.good, metric: 'acadDateSet' },
             { n: o.acadDateNone, label: 'not chosen', color: SED_COLORS.crit, metric: 'acadDateNone' } ] }
     ];
+    // Fee overdue + Re-enroll pending (moved here from the removed "Action needed" card)
+    var feeOverdue = Number((SED_STATE.fee || {}).overdueStudents || 0);
+    var reEnrollPending = Number((SED_STATE.insights || {}).reEnrollPending || 0);
+    rows.push({ name: 'Fee', segs: [
+        { n: Math.max(0, total - feeOverdue), label: 'on time', color: SED_COLORS.good, metric: '' },
+        { n: feeOverdue, label: 'overdue', color: SED_COLORS.crit, metric: 'feeOverdue' } ] });
+    rows.push({ name: 'Re-enroll · next grade', note: 'eligible, no next-grade payment', segs: [
+        { n: reEnrollPending, label: 'pending', color: SED_COLORS.brand, metric: 'reEnrollPending' },
+        { n: Math.max(0, total - reEnrollPending), label: '', color: '#eef1f7', metric: '' } ] });
+    // Contact: student/parent phone valid vs invalid (bad code like "+ma" / empty)
+    rows.push({ name: 'Contact', note: 'student & parent phone', segs: [
+        { n: o.contactValid, label: 'valid', color: SED_COLORS.good, metric: 'contactValid' },
+        { n: o.contactInvalid, label: 'invalid', color: SED_COLORS.crit, metric: 'contactInvalid' } ] });
     var html = '';
     for (var r = 0; r < rows.length; r++) {
         var row = rows[r], parts = [], vtxt = [];
@@ -213,6 +226,7 @@ function sedRenderReadiness(o) {
         for (var i = 0; i < row.segs.length; i++) {
             var seg = row.segs[i];
             parts.push({ w: sedPct(seg.n, rowDenom), color: seg.color });
+            if (!seg.label) { continue; }   // spacer segment (bar only, no value text)
             vtxt.push('<span class="sed-onb-v" data-sed-onb="' + seg.metric + '" data-sed-label="' + row.name + ' · ' + seg.label + '">'
                 + '<b>' + Number(seg.n || 0).toLocaleString() + '</b> ' + seg.label + '</span>');
         }
@@ -326,6 +340,16 @@ function bindStudentEnrollmentDashboardEvents() {
     $(document).off('click', '#sedBatchBody .sed-brow').on('click', '#sedBatchBody .sed-brow', function () {
         var bid = $(this).attr('data-bid'); var bn = $(this).attr('data-bname') || 'Batch';
         if (bid) { sedOpenDrawer('batchStudents', 'Batch · ' + bn, { batchId: parseInt(bid, 10) }); }
+    });
+    // countries table: search filter + clickable Fresh/Re-Enrolled numbers
+    $(document).off('input', '#sedCountrySearch').on('input', '#sedCountrySearch', function () {
+        sedRenderCountryTable($(this).val());
+    });
+    $(document).off('click', '#sedCountryBody .sed-cnum').on('click', '#sedCountryBody .sed-cnum', function () {
+        var cid = parseInt($(this).attr('data-cid'), 10) || 0;
+        var cn = $(this).attr('data-cn') || '';
+        var cm = $(this).attr('data-cm');
+        sedOpenDrawer(cm, (cm === 'mapNew' ? 'New' : 'Re-Enroll') + ' · ' + cn, cid ? { country: cid } : null);
     });
 }
 
@@ -549,37 +573,43 @@ function sedRenderTrend(trend) {
     SED_CHARTS[sel] = chart;
 }
 
+var SED_COUNTRY_LIST = [];   // full country list (for the searchable table)
+
+function sedCEsc(v) {
+    return (v === null || v === undefined) ? '' : String(v)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// countries shown as a searchable table (Sr.No | Country | Fresh | Re-Enrolled) instead of a bar chart
 function sedRenderCountry(list) {
-    if (typeof ApexCharts === 'undefined') { return; }
-    var sel = '#sedCountryChart';
-    if (SED_CHARTS[sel]) { try { SED_CHARTS[sel].destroy(); } catch (e) {} }
-    var cats = [], fresh = [], re = [];
-    for (var i = 0; i < list.length; i++) {
-        cats.push(list[i].country || 'Unknown');
-        fresh.push(Number(list[i].fresh || 0));
-        re.push(Number(list[i].reEnroll || 0));
+    SED_COUNTRY_LIST = list || [];
+    sedRenderCountryTable($('#sedCountrySearch').val() || '');
+}
+
+function sedRenderCountryTable(query) {
+    var q = (query || '').toLowerCase().trim();
+    var rows = SED_COUNTRY_LIST || [];
+    var h = '', sr = 0, totFresh = 0, totRe = 0;
+    for (var i = 0; i < rows.length; i++) {
+        var name = rows[i].country || 'Unknown';
+        if (q && name.toLowerCase().indexOf(q) === -1) { continue; }
+        sr++;
+        var cid = SED_COUNTRY_MAP[name] || 0;
+        var fresh = Number(rows[i].fresh || 0);
+        var re = Number(rows[i].reEnroll || 0);
+        totFresh += fresh; totRe += re;
+        h += '<tr>'
+            + '<td>' + sr + '</td>'
+            + '<td class="sed-cname">' + sedCEsc(name) + '</td>'
+            + '<td class="sed-cnum" data-cm="mapNew" data-cid="' + cid + '" data-cn="' + sedCEsc(name) + '">' + fresh.toLocaleString() + '</td>'
+            + '<td class="sed-cnum" data-cm="mapRe" data-cid="' + cid + '" data-cn="' + sedCEsc(name) + '">' + re.toLocaleString() + '</td>'
+            + '</tr>';
     }
-    if (cats.length === 0) { cats = ['No data']; fresh = [0]; re = [0]; }
-    var opt = {
-        chart: { type: 'bar', height: 260, stacked: true, fontFamily: 'inherit', toolbar: { show: false },
-            events: { dataPointSelection: function (e, c, cfg) {
-                var cn = cats[cfg.dataPointIndex]; var cid = SED_COUNTRY_MAP[cn];
-                var metric = cfg.seriesIndex === 0 ? 'mapNew' : 'mapRe';
-                sedOpenDrawer(metric, (cfg.seriesIndex === 0 ? 'New' : 'Re-Enroll') + ' · ' + cn, cid ? { country: cid } : null);
-            } } },
-        series: [{ name: 'New', data: fresh }, { name: 'Re-Enroll', data: re }],
-        colors: [SED_COLORS.teal, SED_COLORS.violet],
-        plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '62%' } },
-        dataLabels: { enabled: true, style: { fontSize: '9px', fontWeight: '600', colors: ['#fff'] } },
-        xaxis: { categories: cats, labels: { style: { colors: '#5b6577', fontSize: '11px' } }, axisBorder: { show: false }, axisTicks: { show: false } },
-        yaxis: { labels: { style: { colors: '#1a2233', fontSize: '11px' } } },
-        legend: { position: 'top', horizontalAlign: 'right', labels: { colors: '#5b6577' }, markers: { width: 9, height: 9, radius: 3 } },
-        grid: { show: false },
-        tooltip: { theme: 'light' }
-    };
-    var chart = new ApexCharts(document.querySelector(sel), opt);
-    chart.render();
-    SED_CHARTS[sel] = chart;
+    if (!h) { h = '<tr><td colspan="4" style="text-align:center;color:#98a2b3;padding:18px;">No countries found</td></tr>'; }
+    $('#sedCountryBody').html(h);
+    // totals row sits in the thead and follows the search filter
+    $('#sedCTotFresh').text(totFresh.toLocaleString());
+    $('#sedCTotRe').text(totRe.toLocaleString());
 }
 
 function sedRenderGrade(list) {
@@ -594,7 +624,7 @@ function sedRenderGrade(list) {
     }
     if (cats.length === 0) { cats = ['No data']; fresh = [0]; re = [0]; }
     var opt = {
-        chart: { type: 'bar', height: 280, stacked: true, fontFamily: 'inherit', toolbar: { show: false },
+        chart: { type: 'bar', height: 430, stacked: true, fontFamily: 'inherit', toolbar: { show: false },
             events: { dataPointSelection: function (e, c, cfg) {
                 var gn = cats[cfg.dataPointIndex]; var gid = SED_GRADE_MAP[gn];
                 var metric = cfg.seriesIndex === 0 ? 'mapNew' : 'mapRe';
@@ -654,25 +684,10 @@ function sedActionRow(color, pillLabel, title, desc, count) {
         + '</div>';
 }
 
+// "Action needed" card was removed; its Fee-overdue + Re-enroll-pending now live in Onboarding readiness.
+// Re-render readiness whenever fee / insights arrive so those two bars fill in.
 function sedTryRenderActions() {
-    var o = SED_STATE.onboarding, f = SED_STATE.fee, ins = SED_STATE.insights;
-    if (!o && !f && !ins) { return; }
-    var html = '';
-    if (o) {
-        html += sedActionRow(SED_COLORS.crit, 'Critical', 'LMS account not created', 'enrolled but can\'t access classes', o.lmsNone);
-        html += sedActionRow(SED_COLORS.crit, 'Critical', 'Subject not mapped', 'can\'t be scheduled into classes', o.subjectNone);
-        html += sedActionRow(SED_COLORS.warn, 'Warning', 'Teacher not mapped', 'no teacher assigned yet', o.teacherNone);
-        html += sedActionRow(SED_COLORS.warn, 'Warning', 'Batch not mapped', 'group student not in a batch', o.batchNone);
-        html += sedActionRow(SED_COLORS.warn, 'Warning', 'System training pending', 'onboarding session not completed', o.trainingPending);
-        html += sedActionRow(SED_COLORS.crit, 'Critical', 'Academic date not chosen', 'SEMESTER_START_DATE not set', o.acadDateNone);
-    }
-    if (f) {
-        html += sedActionRow(SED_COLORS.crit, 'Critical', 'Fee overdue', 'payment past scheduled date', f.overdueStudents);
-    }
-    if (ins) {
-        html += sedActionRow(SED_COLORS.brand, 'Target', 'Re-enroll pending · next grade', 'eligible, no next-grade payment yet', ins.reEnrollPending);
-    }
-    $('#sedActions').html(html || '<div style="font-size:11px;color:#98a2b3;">No actions.</div>');
+    if (SED_STATE.onboarding) { sedRenderReadiness(SED_STATE.onboarding); }
 }
 
 // delegated click on action rows -> student list (Phase-2 hook)
@@ -718,7 +733,9 @@ function sedCloseDrawer() {
     $('#sedDrawerOverlay').removeClass('show');
 }
 
+var SED_DRAWER_METRIC = '';
 function sedOpenDrawer(metric, title, extra) {
+    SED_DRAWER_METRIC = metric || '';
     $('#sedDrawerTitle').text(title || 'Students');
     $('#sedDrawerCount').html('&nbsp;');
     $('#sedDrawerBody').html('<div class="sed-dload">Loading…</div>');
@@ -742,7 +759,7 @@ function sedOpenDrawer(metric, title, extra) {
                 $('#sedDrawerBody').html('<div class="sed-dload">Unable to load list.</div>');
                 return;
             }
-            sedRenderDrawerList(data.students || []);
+            sedRenderDrawerList(data.students || [], data.proofHeader || '', !!data.proofDate, !!data.proofContact);
         },
         error: function (xhr, status, error) {
             if (checkonlineOfflineStatus()) { return; }
@@ -751,7 +768,16 @@ function sedOpenDrawer(metric, title, extra) {
     });
 }
 
-function sedRenderDrawerList(rows) {
+// red if the session-end/proof date is today or already passed (i.e. eligible / overdue), green if still upcoming
+function sedProofDateColor(txt) {
+    var d = new Date(txt);
+    if (isNaN(d.getTime())) { return '#16a34a'; }
+    var t = new Date(); t.setHours(0, 0, 0, 0);
+    d.setHours(0, 0, 0, 0);
+    return (d.getTime() <= t.getTime()) ? '#dc2626' : '#16a34a';
+}
+
+function sedRenderDrawerList(rows, proofHeader, proofDate, proofContact) {
     $('#sedDrawerCount').text(rows.length.toLocaleString() + ' student' + (rows.length === 1 ? '' : 's'));
     // tear down any previous DataTable before replacing the DOM
     try { if ($.fn.DataTable && $.fn.DataTable.isDataTable('#sedStudentTable')) { $('#sedStudentTable').DataTable().destroy(); } } catch (e) {}
@@ -759,14 +785,31 @@ function sedRenderDrawerList(rows) {
         $('#sedDrawerBody').html('<div class="sed-dload">No students found.</div>');
         return;
     }
+    function sedCEsc(v) { return (v === null || v === undefined) ? '' : String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    // per-metric proof column(s). Contact metric = TWO columns (Student Contact / Parent Contact), invalid one in red.
+    var showProof = !!proofHeader;
+    var proofHead = !showProof ? ''
+        : (proofContact ? '<th>Student Contact</th><th>Parent Contact</th>'
+            : ('<th>' + proofHeader + (proofDate ? ' <span style="font-weight:400;color:#98a2b3;">(eligible)</span>' : '') + '</th>'));
     var h = '<div class="sed-dtwrap"><table id="sedStudentTable" class="sed-dtable" style="width:100%"><thead><tr>'
-        + '<th class="n">Sr. No.</th><th>Student ID</th><th>Student Name</th><th>Grade</th><th>Register Type</th><th>Enrollment Type</th><th>Country</th>'
+        + '<th class="n">Sr. No.</th><th>Student ID</th><th>Student Name</th><th>Grade</th><th>Register Type</th><th>Enrollment Type</th><th>Country</th>' + proofHead
         + '</tr></thead><tbody>';
     for (var i = 0; i < rows.length; i++) {
         var r = rows[i];
         var rollCell = (r.rollNo || '-');
         if (r.studentStandardId) {
             rollCell = '<a href="javascript:void(0)" class="sed-stu-link" data-ssid="' + r.studentStandardId + '" data-uid="' + (r.userId || '') + '" data-roll="' + (r.rollNo || '') + '">' + (r.rollNo || '-') + '</a>';
+        }
+        var proofCells = '';
+        if (showProof && proofContact) {
+            var p = String(r.proof || '').split('~~');   // [studentContact, studentBad, parentContact, parentBad]
+            var sC = sedCEsc(p[0] || '-'), sBad = (p[1] === '1');
+            var pC = sedCEsc(p[2] || '-'), pBad = (p[3] === '1');
+            proofCells = '<td style="white-space:nowrap;font-weight:600;color:' + (sBad ? '#dc2626' : '#16a34a') + ';">' + sC + '</td>'
+                + '<td style="white-space:nowrap;font-weight:600;color:' + (pBad ? '#dc2626' : '#16a34a') + ';">' + pC + '</td>';
+        } else if (showProof) {
+            var proofColor = proofDate ? sedProofDateColor(r.proof) : '#5b6577';
+            proofCells = '<td style="color:' + proofColor + ';font-weight:600;white-space:nowrap;">' + sedCEsc(r.proof || '-') + '</td>';
         }
         h += '<tr>'
             + '<td class="n">' + (r.sr || (i + 1)) + '</td>'
@@ -775,7 +818,7 @@ function sedRenderDrawerList(rows) {
             + '<td>' + (r.grade || '-') + '</td>'
             + '<td>' + sedRegLabel(r.regType) + '</td>'
             + '<td>' + sedEnrolLabel(r.enrolType) + '</td>'
-            + '<td>' + (r.country || '-') + '</td>'
+            + '<td>' + (r.country || '-') + '</td>' + proofCells
             + '</tr>';
     }
     h += '</tbody></table></div>';
