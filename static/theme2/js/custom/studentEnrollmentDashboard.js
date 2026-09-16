@@ -777,6 +777,102 @@ function sedProofDateColor(txt) {
     return (d.getTime() <= t.getTime()) ? '#dc2626' : '#16a34a';
 }
 
+var SED_DRAWER_DT = null;   // drawer DataTable, so an edited contact cell can be written back
+
+// ---- Contact · invalid drawer: inline edit of the student / parent number -------------------------
+// The cell shows the number (red = invalid) plus a pencil; the pencil swaps it for a code + number editor.
+function sedContactCell(kind, val, bad, sid, pid) {
+    var canEdit = (kind === 'stu') ? (sid > 0) : (pid > 0);
+    var h = '<span class="sed-cval" style="font-weight:600;color:' + (bad ? '#dc2626' : '#16a34a') + ';">' + val + '</span>';
+    if (canEdit) {
+        h += ' <a href="javascript:void(0)" class="sed-cedit" title="Edit number" data-kind="' + kind + '"'
+            + ' data-sid="' + sid + '" data-pid="' + pid + '"><i class="fa fa-pencil"></i></a>';
+    }
+    return h;
+}
+
+// "+971 504326614" -> ['971','504326614'];  a lone 6+ digit chunk is the number, not the code
+function sedSplitContact(txt) {
+    var raw = String(txt || '').replace(/^\+/, '').trim();
+    if (!raw || raw === '-') { return ['', '']; }
+    var parts = raw.split(/\s+/);
+    if (parts.length === 1) {
+        var d = parts[0].replace(/\D/g, '');
+        return (d.length > 5) ? ['', d] : [d, ''];
+    }
+    return [parts[0].replace(/\D/g, ''), parts.slice(1).join('').replace(/\D/g, '')];
+}
+
+function sedContactEditor(kind, sid, pid, cur) {
+    var cc = sedSplitContact(cur);
+    return '<span class="sed-cbox" data-kind="' + kind + '" data-sid="' + sid + '" data-pid="' + pid + '">'
+        + '<input type="text" class="sed-cin sed-ccode" value="' + cc[0] + '" maxlength="5" placeholder="Code">'
+        + '<input type="text" class="sed-cin sed-cnum" value="' + cc[1] + '" maxlength="15" placeholder="Number">'
+        + '<a href="javascript:void(0)" class="sed-cok" title="Save"><i class="fa fa-check"></i></a>'
+        + '<a href="javascript:void(0)" class="sed-cno" title="Cancel"><i class="fa fa-times"></i></a>'
+        + '</span>';
+}
+
+function sedBindContactEdit() {
+    $(document).off('click', '#sedStudentTable .sed-cedit').on('click', '#sedStudentTable .sed-cedit', function () {
+        var $a = $(this), $td = $a.closest('td');
+        $td.data('sedPrev', $td.html());
+        $td.html(sedContactEditor($a.attr('data-kind'), $a.attr('data-sid'), $a.attr('data-pid'), $td.find('.sed-cval').text()));
+        $td.find('.sed-ccode').focus();
+    });
+    $(document).off('click', '#sedStudentTable .sed-cno').on('click', '#sedStudentTable .sed-cno', function () {
+        var $td = $(this).closest('td');
+        if ($td.data('sedPrev')) { $td.html($td.data('sedPrev')); }
+    });
+    $(document).off('keydown', '#sedStudentTable .sed-cin').on('keydown', '#sedStudentTable .sed-cin', function (e) {
+        if (e.which === 13) { $(this).closest('td').find('.sed-cok').trigger('click'); }
+        else if (e.which === 27) { $(this).closest('td').find('.sed-cno').trigger('click'); }
+    });
+    $(document).off('click', '#sedStudentTable .sed-cok').on('click', '#sedStudentTable .sed-cok', function () {
+        var $td = $(this).closest('td'), $box = $td.find('.sed-cbox');
+        var kind = $box.attr('data-kind');
+        var code = String($box.find('.sed-ccode').val() || '').replace(/\D/g, '');
+        var num = String($box.find('.sed-cnum').val() || '').replace(/\D/g, '');
+        if (!code || num.length < 4) {
+            if (typeof showMessageTheme2 === 'function') { showMessageTheme2(0, 'Enter a valid country code and number', '', true); }
+            return;
+        }
+        var req = getRequestForStudentEnrollmentDashboard();
+        req['studentId'] = parseInt($box.attr('data-sid'), 10) || 0;
+        req['parentId'] = parseInt($box.attr('data-pid'), 10) || 0;
+        if (kind === 'stu') { req['studentCode'] = code; req['studentNumber'] = num; }
+        else { req['parentCode'] = code; req['parentNumber'] = num; }
+        $box.find('.sed-cok, .sed-cno').css('pointer-events', 'none');
+        $.ajax({
+            type: 'POST',
+            contentType: APPLICATION_JSON_VALUE,
+            url: getURLForHTML('dashboard', 'student-enrollment-dashboard-contact-save'),
+            data: JSON.stringify(req),
+            dataType: 'json',
+            cache: false,
+            timeout: 600000,
+            success: function (data) {
+                if (data['status'] == '3') { redirectLoginPage(); return; }
+                if (data['status'] == '0' || data['status'] == '2') {
+                    $box.find('.sed-cok, .sed-cno').css('pointer-events', '');
+                    if (typeof showMessageTheme2 === 'function') { showMessageTheme2(0, data['message'] || 'Could not save', '', true); }
+                    return;
+                }
+                var html = sedContactCell(kind, '+' + code + ' ' + num, false, req['studentId'], req['parentId']);
+                // write it back through DataTables so a redraw (sort / filter / page) keeps the new number
+                try { SED_DRAWER_DT.cell($td).data(html).draw(false); }
+                catch (e) { $td.html(html); }
+                if (typeof showMessageTheme2 === 'function') { showMessageTheme2(1, data['message'] || 'Contact updated', '', true); }
+            },
+            error: function () {
+                $box.find('.sed-cok, .sed-cno').css('pointer-events', '');
+                if (typeof checkonlineOfflineStatus === 'function' && checkonlineOfflineStatus()) { return; }
+                if (typeof showMessageTheme2 === 'function') { showMessageTheme2(0, 'Could not save. Please retry', '', true); }
+            }
+        });
+    });
+}
+
 function sedRenderDrawerList(rows, proofHeader, proofDate, proofContact) {
     $('#sedDrawerCount').text(rows.length.toLocaleString() + ' student' + (rows.length === 1 ? '' : 's'));
     // tear down any previous DataTable before replacing the DOM
@@ -802,11 +898,13 @@ function sedRenderDrawerList(rows, proofHeader, proofDate, proofContact) {
         }
         var proofCells = '';
         if (showProof && proofContact) {
-            var p = String(r.proof || '').split('~~');   // [studentContact, studentBad, parentContact, parentBad]
+            // [studentContact, studentBad, parentContact, parentBad, studentId, parentId]
+            var p = String(r.proof || '').split('~~');
             var sC = sedCEsc(p[0] || '-'), sBad = (p[1] === '1');
             var pC = sedCEsc(p[2] || '-'), pBad = (p[3] === '1');
-            proofCells = '<td style="white-space:nowrap;font-weight:600;color:' + (sBad ? '#dc2626' : '#16a34a') + ';">' + sC + '</td>'
-                + '<td style="white-space:nowrap;font-weight:600;color:' + (pBad ? '#dc2626' : '#16a34a') + ';">' + pC + '</td>';
+            var sid = parseInt(p[4], 10) || 0, pid = parseInt(p[5], 10) || 0;
+            proofCells = '<td class="sed-cc" style="white-space:nowrap;">' + sedContactCell('stu', sC, sBad, sid, pid) + '</td>'
+                + '<td class="sed-cc" style="white-space:nowrap;">' + sedContactCell('par', pC, pBad, sid, pid) + '</td>';
         } else if (showProof) {
             var proofColor = proofDate ? sedProofDateColor(r.proof) : '#5b6577';
             proofCells = '<td style="color:' + proofColor + ';font-weight:600;white-space:nowrap;">' + sedCEsc(r.proof || '-') + '</td>';
@@ -831,11 +929,11 @@ function sedRenderDrawerList(rows, proofHeader, proofDate, proofContact) {
             // is unreliable at open time and made the table too short.
             var vh = window.innerHeight || $(window).height() || 800;
             var scrollY = Math.max(240, vh - 275); // drawer header + toolbar(Show/Country/Grade/Search) + scrollHead + info/paginate + paddings
-            var dt = $('#sedStudentTable').DataTable({
+            var dt = SED_DRAWER_DT = $('#sedStudentTable').DataTable({
                 pageLength: 25,
                 lengthMenu: [[10, 25, 50, 100, 200, 500], [10, 25, 50, 100, 200, 500]],
                 order: [[2, 'asc']],
-                columnDefs: [{ orderable: false, targets: 0 }, { visible: false, targets: 6 }], // 6 = Country (filter only)
+                columnDefs: [{ orderable: false, targets: 0 }], // 6 = Country (shown, and used by the Country filter)
                 autoWidth: false,
                 destroy: true,
                 scrollY: scrollY,
@@ -853,6 +951,7 @@ function sedRenderDrawerList(rows, proofHeader, proofDate, proofContact) {
                 language: { search: '', searchPlaceholder: 'Search students…' }
             });
             sedAddDrawerFilters(dt, rows);
+            sedBindContactEdit();
         } catch (e) { console.error('sed DataTable init', e); }
     }
 }

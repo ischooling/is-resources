@@ -101,8 +101,11 @@ function getRequestForReEnrollment(pageNumber) {
         startDate: reEnrollToYmd($('#reelStart').val()),
         endDate: reEnrollToYmd($('#reelEnd').val()),
         enrolType: $('#reelEnrolType').val() || '',
+        regType: $('#reelRegType').val() || '',
         advPayment: $('#reelAdv').val() || '',
         progress: $('#reelProgress').val() || '',
+        grade: ($('#reelGrade').val() || []),
+        gradeMode: $('#reelGradeMode').val() || 'in',
         search: ($('#reelSearch').val() || '').trim(),
         parentSearch: ($('#reelParent').val() || '').trim(),
         cardMetric: REEL_CARD_METRIC || '',
@@ -111,6 +114,26 @@ function getRequestForReEnrollment(pageNumber) {
     };
     if ((pageNumber || 0) > 0) { req.knownTotal = REEL_TOTAL; }
     return req;
+}
+
+// page-level Grade filter options (kept in sync with the school's grade list, selection preserved)
+function reEnrollFillGradeFilter() {
+    var $sel = $('#reelGrade');
+    if (!$sel.length) { return; }
+    var keep = $sel.val() || [];
+    var h = '';
+    for (var i = 0; i < (REEL_GRADES || []).length; i++) {
+        h += '<option value="' + reEnrollEsc(REEL_GRADES[i].id) + '">' + reEnrollEsc(REEL_GRADES[i].text) + '</option>';
+    }
+    $sel.html(h);
+    try {
+        if ($.fn && $.fn.select2) {
+            if (!$sel.hasClass('select2-hidden-accessible')) {
+                $sel.select2({ theme: 'bootstrap4', width: '100%', placeholder: 'All grades', allowClear: true });
+            }
+            $sel.val(keep).trigger('change.select2');
+        } else { $sel.val(keep); }
+    } catch (e) { $sel.val(keep); }
 }
 
 function reEnrollClearCard() { REEL_CARD_METRIC = ''; $('.reel-card-click').removeClass('reel-card-active'); }
@@ -136,7 +159,9 @@ function bindReEnrollmentEvents() {
         $('#reelDateType').val('PAYMENT_DATE');
         $('#reelStart').val(''); $('#reelEnd').val('');
         try { if ($.fn && $.fn.datepicker) { $('#reelStart').datepicker('update', ''); $('#reelEnd').datepicker('update', ''); } } catch (e) {}
-        $('#reelEnrolType').val(''); $('#reelAdv').val(''); $('#reelProgress').val('');
+        $('#reelEnrolType').val(''); $('#reelRegType').val(''); $('#reelAdv').val(''); $('#reelProgress').val('');
+        $('#reelGradeMode').val('in');
+        try { $('#reelGrade').val(null).trigger('change.select2'); } catch (e) { $('#reelGrade').val([]); }
         $('#reelSearch').val(''); $('#reelPageSize').val('25');
         try { $('#reelParent').val(null).trigger('change.select2'); } catch (e) { $('#reelParent').val(''); }
         if ($('#reelSession').hasClass('select2-hidden-accessible')) { $('#reelSession').trigger('change.select2'); }
@@ -312,7 +337,7 @@ function reEnrollFetch(pageNumber) {
             REEL_TOTAL = Number(data.count || 0);
             if (data.summary && Object.keys(data.summary).length) {
                 if (data.summary.filterCountries) { REEL_COUNTRIES = data.summary.filterCountries; }
-                if (data.summary.filterGrades) { REEL_GRADES = data.summary.filterGrades; }
+                if (data.summary.filterGrades) { REEL_GRADES = data.summary.filterGrades; reEnrollFillGradeFilter(); }
                 reEnrollRenderCards(data.summary);
             }
             reEnrollRenderRows(data.data || [], req.pageNumber, req.pageSize);
@@ -376,6 +401,16 @@ function reEnrollRenderCards(s) {
             ? card(s.freshAdvance, 'Fresh → Re-Enrolled (same year)', '#fff4e5', '#b26a00', 'freshAdvance', '', 'Fresh → Re-Enrolled (same year)' + (selName ? (' · ' + selName) : ''))
             : '';
         var activeCard = card(pbase, 'Active Students', '#eef2ff', '#3730a3', 'total', '', 'Active Students' + (selName ? (' · ' + selName) : ''));
+        // Grade 12 count (subset of Active) — clickable, filters the list to Grade 12
+        // s.grade12 is counted independently of the page-level Grade filter, so the card survives "Exclude Grade 12";
+        // the breakup row is only a fallback for an older response.
+        var g12 = s.grade12 || null;
+        if (!g12 && s.gradeBreakup) { for (var gi = 0; gi < s.gradeBreakup.length; gi++) { if ((s.gradeBreakup[gi].name || '') === 'Grade 12') { g12 = s.gradeBreakup[gi]; break; } } }
+        var g12Card = (g12 && g12.id)
+            ? '<div class="reel-card reel-bclick" data-bk="grade" data-id="' + reEnrollEsc(g12.id) + '" data-metric="total" data-name="Grade 12" style="background:#eef7ee">'
+                + '<div class="reel-cnum" style="color:#1f7a4d">' + Number(g12.active || 0).toLocaleString() + '</div>'
+                + '<div class="reel-clab" style="color:#1f7a4d">Grade 12</div></div>'
+            : '';
         if (s.progHasNext == 1) {
             var pre = Number(s.progReEnroll || 0);
             var ppend = Number(s.progPending || 0);
@@ -385,6 +420,7 @@ function reEnrollRenderCards(s) {
             var head = 'Re-Enrollment Progression' + (selName ? (' · ' + selName) : '') + ' → ' + nextName;
             g2 = '<div class="reel-cgrp"><div class="reel-clabel">' + reEnrollEsc(head) + '</div><div class="reel-cards">'
                 + activeCard
+                + g12Card
                 + card(pre, 'Re-Enrolled · ' + rePct.toFixed(1) + '%', '#e7f6ec', '#16a34a', 'reEnrollment', (s.progNextId || ''), 'Re-Enrolled · ' + nextName)
                 + card(ppend, 'Pending · ' + pendPct.toFixed(1) + '%', '#fdeaea', '#c0392b', 'pendingNext', '', 'Pending · ' + (selName || 'selected session'))
                 + faCard
@@ -393,6 +429,7 @@ function reEnrollRenderCards(s) {
             var head2 = 'Re-Enrollment Progression' + (selName ? (' · ' + selName) : '') + ' → no next session';
             g2 = '<div class="reel-cgrp"><div class="reel-clabel">' + reEnrollEsc(head2) + '</div><div class="reel-cards">'
                 + activeCard
+                + g12Card
                 + pcard('—', 'Re-Enrolled', '#eef1f4', '#98a2b3')
                 + pcard('—', 'Pending', '#eef1f4', '#98a2b3')
                 + faCard
@@ -741,7 +778,8 @@ function reelCardListFetch(pageNumber) {
     if (REEL_CARD_LIST_SESS) { req.sessionId = parseInt(REEL_CARD_LIST_SESS, 10) || req.sessionId; }
     // popup's own filters
     req.country = ($('#reelCardCountry').val() || []);
-    req.grade = ($('#reelCardGrade').val() || []);
+    var cardGrades = ($('#reelCardGrade').val() || []);
+    if (cardGrades.length) { req.grade = cardGrades; req.gradeMode = 'in'; }
     req.progress = ($('#reelCardProgress').val() || '');
     req.advPayment = ($('#reelCardAdv').val() || '');
     req.search = (($('#reelCardSearch').val() || '').trim());

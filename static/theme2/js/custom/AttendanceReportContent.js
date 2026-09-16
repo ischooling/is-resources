@@ -81,7 +81,9 @@ function getAttendanceReportContent() {
 					statCard('s-classes', 'Classes Conducted', 'school', 'bg-primary', 'text-primary') +
 					statCard('s-ontime', 'On-time Rate', 'schedule', 'bg-success', 'text-success') +
 					statCard('s-duration', 'Avg Duration', 'timer', 'bg-warning', 'text-warning') +
+					/* Avg Talk Time stat card hidden per request — restore by uncommenting the line below
 					statCard('s-talk', 'Avg Talk Time', 'record_voice_over', 'bg-info', 'text-info') +
+					*/
 				'</div>' +
 
 				'<!-- Filters -->' +
@@ -111,11 +113,11 @@ function getAttendanceReportContent() {
 						'<select id="f-grade" class="form-control" onchange="loadDependentOptions()"><option value="all">All Grades</option></select>' +
 						'<label for="f-grade">Grade</label>' +
 					'</div>' +
-					'<div class="custom-field mb-2" style="flex:1 1 180px;min-width:150px;max-width:260px">' +
+					'<div class="custom-field mb-2" style="display:none;flex:1 1 180px;min-width:150px;max-width:260px">' +
 						'<select id="f-batch" class="form-control" disabled><option value="all">All Batches</option></select>' +
 						'<label for="f-batch">Assigned Batch</label>' +
 					'</div>' +
-					'<div class="custom-field mb-2" style="flex:1 1 180px;min-width:150px;max-width:260px">' +
+					'<div class="custom-field mb-2" style="display:none;flex:1 1 180px;min-width:150px;max-width:260px">' +
 						'<select id="f-course" class="form-control"><option value="all">All Courses</option></select>' +
 						'<label for="f-course">Course</label>' +
 					'</div>' +
@@ -167,8 +169,8 @@ function getAttendanceReportContent() {
 								'<th>Join &ndash; Leave</th>' +
 								'<th>Status</th>' +
 								'<th>Duration</th>' +
-								'<th>Present/Total Student</th>' +
-								'<th></th>' +
+								'<th>Present/Total Student/External User</th>' +
+								/* Details column hidden per request — restore '<th></th>' + here if it needs to come back */
 							'</tr>' +
 						'</thead>' +
 						'<tbody id="table-body"></tbody>' +
@@ -195,7 +197,7 @@ function getAttendanceReportContent() {
 					'<input type="text" id="sm-search" class="form-control mb-2" placeholder="Search student name..." oninput="filterStudents()"/>' +
 					'<div class="table-responsive">' +
 						'<table class="table table-bordered table-striped">' +
-							'<thead><tr><th>Student</th><th>Join</th><th>Leave</th><th>Status</th><th>Duration</th><th>Talk Time</th></tr></thead>' +
+							'<thead><tr><th>Student</th><th>Join</th><th>Leave</th><th>Status</th><th>Duration</th><!-- Talk Time column hidden per request — restore <th>Talk Time</th> here if it needs to come back --></tr></thead>' +
 							'<tbody id="sm-body"></tbody>' +
 						'</table>' +
 					'</div>' +

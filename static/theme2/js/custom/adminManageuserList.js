@@ -333,18 +333,18 @@ function getRequestForNewUser(formId) {
   signupStudentDTO["position"] = $("#" + formId + " #position").val();
   signupStudentDTO["countryIsdCode"] = $("#" + formId + " #isdCode").val();
   if ($("#" + formId + " #password").length) {
-    signupStudentDTO["password"] = encode($("#" + formId + " #password").val());
+    signupStudentDTO["password"] = encode($("#" + formId + " #password").val().trim());
   }
   if ($("#" + formId + " #confirmPassword").length) {
     signupStudentDTO["confirmPassword"] = encode(
-      $("#" + formId + " #confirmPassword").val()
+      $("#" + formId + " #confirmPassword").val().trim()
     );
   }
   if (
     $("#" + formId + " #reset").length > 0 &&
     $("#" + formId + " #reset").val() != ""
   ) {
-    signupStudentDTO["reset"] = encode($("#" + formId + " #reset").val());
+    signupStudentDTO["reset"] = encode($("#" + formId + " #reset").val().trim());
   }
   signupStudentDTO["dob"] = $("#" + formId + " #dob").val();
   signupStudentDTO["schoolId"] = $("#" + formId + " #schoolId").val();

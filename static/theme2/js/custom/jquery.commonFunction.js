@@ -1,3 +1,52 @@
+(function () {
+  if (window.__SMS_SPACE_GUARD_INIT__) {
+    return;
+  }
+  window.__SMS_SPACE_GUARD_INIT__ = true;
+
+  function markPasswordField(el) {
+    if (el && el.tagName === "INPUT" && el.type === "password" && !el.hasAttribute("data-space-guard")) {
+      el.setAttribute("data-space-guard", "1");
+    }
+  }
+
+  function scan(root) {
+    if (!root || !root.querySelectorAll) {
+      return;
+    }
+    if (root.matches && root.matches('input[type="password"]')) {
+      markPasswordField(root);
+    }
+    root.querySelectorAll('input[type="password"]').forEach(markPasswordField);
+  }
+
+  scan(document);
+
+  var spaceGuardObserver = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+      mutation.addedNodes && mutation.addedNodes.forEach(function (node) {
+        if (node.nodeType === 1) {
+          scan(node);
+        }
+      });
+    });
+  });
+  spaceGuardObserver.observe(document.documentElement, { childList: true, subtree: true });
+
+  // data-space-guard is set once from the field's ORIGINAL type="password" and is never
+  // removed, so the block still applies after the eye-icon toggles type to "text".
+  $(document).on("keydown", 'input[data-space-guard="1"]', function (e) {
+    if (e.key === " " || e.keyCode === 32 || e.which === 32) {
+      e.preventDefault();
+      return false;
+    }
+  });
+  $(document).on("input", 'input[data-space-guard="1"]', function () {
+    if (this.value.indexOf(" ") > -1) {
+      this.value = this.value.replace(/ /g, "");
+    }
+  });
+})();
 var APPLICATION_JSON_VALUE = "application/json";
 var BASE_TIMEZONE = "Asia/Singapore";
 var API_VERSION = CONTEXT_PATH + SCHOOL_UUID + "/" + "api/v1/";

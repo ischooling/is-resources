@@ -307,9 +307,9 @@ function changePassword(dashboardFor) {
 		$(this).removeAttr('disabled');
 	});
 	var data = {};
-	data['oldpassword'] = encode($('#oldpassword').val());
-	data['newpassword'] = encode($('#newpassword').val());
-	data['confirmpassword'] = encode($('#confirmpassword').val());
+	data['oldpassword'] = encode($('#oldpassword').val().trim());
+	data['newpassword'] = encode($('#newpassword').val().trim());
+	data['confirmpassword'] = encode($('#confirmpassword').val().trim());
 	$(".disabledFields").each(function () {
 		$(this).attr('disabled', 'disabled');
 	});

@@ -15,6 +15,9 @@ var talkChart = null;
 var currentPage = 1;
 var currentStudents = [];
 var activeStuFilter = null;
+// Keyed by index into currentStudents — which multi-session students have their raw
+// join/leave entries (behind the eye icon) currently expanded in the student-wise modal.
+var expandedSessions = {};
 let AI_MODEL= "gemma2:2b-instruct-q4_K_M";
 
 function collectFilters(page) {
@@ -117,7 +120,7 @@ function esc(v) { return $("<div>").text(v == null ? "" : v).html(); }
 function renderRows(rows) {
 	var body = $("#table-body");
 	if (!rows.length) {
-		var cols = ADMIN_VIEW ? 9 : 8;
+		var cols = ADMIN_VIEW ? 8 : 7; // was 9 : 8 before the Details column was hidden
 		body.html('<tr><td colspan="' + cols + '" class="text-center text-muted p-4">No classes found for the selected filters.</td></tr>');
 		return;
 	}
@@ -125,7 +128,9 @@ function renderRows(rows) {
 	for (var i = 0; i < rows.length; i++) {
 		var c = rows[i];
 		html += "<tr>";
-		html += '<td><div class="font-weight-bold">' + esc(formatClassTitle(c.classTitle)) + '</div><div class="font-11 text-muted mt-1">' + esc(c.grade) + '</div></td>';
+		html += '<td><div class="font-weight-bold">' + esc(formatClassTitle(c.classTitle)) + '</div>' +
+			(c.batchName ? '<div class="font-11 text-dark mt-1">' + esc(c.batchName) + '</div>' : '') +
+			'<div class="font-11 text-muted mt-1">' + esc(c.grade) + '</div></td>';
 		if (ADMIN_VIEW) { html += '<td>' + esc(c.teacherName) + '</td>'; }
 		html += '<td>' + typePill(c.classType) + '</td>';
 		html += '<td>' + esc(c.meetingDate) + '<div class="font-11 text-muted mt-1">' + esc(c.meetingTime) + '</div></td>';
@@ -133,8 +138,10 @@ function renderRows(rows) {
 		html += '<td>' + statusPill(c.status) + '</td>';
 		html += '<td>' + (c.durationMin || 0) + ' min</td>';
 		var vmid = (c.vendorMeetingId || "").replace(/'/g, "");
-		html += '<td><span class="text-primary font-weight-bold text-underline" style="cursor:pointer" onclick="openStudentWise(\'' + vmid + '\')">' + (c.presentCount || 0) + '/' + (c.totalCount || 0) + '</span></td>';
-		html += '<td><button class="btn btn-sm btn-outline-primary" onclick="openDetails(' + c.meetingId + ',\'' + vmid + '\')">Details</button></td>';
+		var guestSuffix = c.guestCount ? ('/' + c.guestCount) : '';
+		html += '<td><span class="text-primary font-weight-bold text-underline" style="cursor:pointer" onclick="openStudentWise(\'' + vmid + '\')">' + (c.presentCount || 0) + '/' + (c.totalCount || 0) + guestSuffix + '</span></td>';
+		// Details column hidden per request — restore this line if it needs to come back:
+		// html += '<td><button class="btn btn-sm btn-outline-primary" onclick="openDetails(' + c.meetingId + ',\'' + vmid + '\')">Details</button></td>';
 		html += "</tr>";
 	}
 	body.html(html);
@@ -445,7 +452,7 @@ function openStudentWise(vendorMeetingId) {
 		if (!res) { return; }
 		$("#sm-title").text(formatClassTitle(res.classTitle) || "");
 		$("#sm-sub").text((res.date || "") + "  " + (res.time || "") + "  |  " + (res.totalStudents || 0) + " students");
-		currentStudents = res.students || []; activeStuFilter = null;
+		currentStudents = res.students || []; activeStuFilter = null; expandedSessions = {};
 		$("#sm-att-summary").html(
 			'<div class="card border-0 bg-light-success rounded-10 d-flex flex-row align-items-center p-3 mr-3 mb-2" data-key="present" data-stat style="cursor:pointer;flex:2;min-width:280px" onclick="toggleStuFilter(\'present\')">' +
 				'<div class="text-center pr-3 mr-3 border-right"><span class="font-26 font-weight-bold d-block">' + (res.presentCount || 0) + '</span><span class="font-12 font-weight-bold">Present</span></div>' +
@@ -479,10 +486,35 @@ function renderStudents() {
 		}
 		if (q && (st.name || "").toLowerCase().indexOf(q) < 0) { continue; }
 		var dur = st.status === "absent" ? "&mdash;" : (st.durationMin || 0) + " min";
-		var talk = st.status === "absent" ? "&mdash;" : (st.talkPct || 0) + "%<div class='font-11 text-muted mt-1'>" + (st.talkMin || 0) + " min</div>";
-		rows += "<tr><td><span class='d-flex align-items-center'><span class='rounded-circle bg-primary text-white font-12 font-weight-bold d-inline-flex align-items-center justify-content-center mr-2' style='width:30px;height:30px;flex-shrink:0'>" + initials(st.name) + "</span>" + esc(st.name) + "</span></td><td>" + esc(st.joinTime || "—") + "</td><td>" + esc(st.leaveTime || "—") + "</td><td>" + miniPill(st.status) + "</td><td>" + dur + "</td><td>" + talk + "</td></tr>";
+		// Talk Time column hidden per request — restore the 'talk' variable + its <td> below if it needs to come back:
+		// var talk = st.status === "absent" ? "&mdash;" : (st.talkPct || 0) + "%<div class='font-11 text-muted mt-1'>" + (st.talkMin || 0) + " min</div>";
+		var hasSessions = st.sessions && st.sessions.length > 1;
+		if (hasSessions) {
+			dur += ' <i class="material-icons text-primary" style="cursor:pointer;font-size:15px;vertical-align:middle" title="View individual join/leave entries" onclick="toggleSessionDetail(' + i + ')">visibility</i>';
+		}
+		// Guest = attended but not on this class's roster (e.g. an admin who joined to observe) —
+		// text-colored only (no background/badge) so it stays easy to spot in the list.
+		var guestStyle = st.guest ? " style='color:#e67e22' title='Not enrolled in this class'" : "";
+		rows += "<tr" + guestStyle + "><td><span class='d-flex align-items-center'><span class='rounded-circle bg-primary text-white font-12 font-weight-bold d-inline-flex align-items-center justify-content-center mr-2' style='width:30px;height:30px;flex-shrink:0'>" + initials(st.name) + "</span>" + esc(st.name) + "</span></td><td>" + esc(st.joinTime || "—") + "</td><td>" + esc(st.leaveTime || "—") + "</td><td>" + miniPill(st.status) + "</td><td>" + dur + "</td></tr>";
+		if (hasSessions) {
+			rows += '<tr class="sm-session-detail-row" style="' + (expandedSessions[i] ? "" : "display:none;") + 'background:#f8f9fa"><td colspan="5" class="p-2">' + sessionDetailTable(st.sessions) + '</td></tr>';
+		}
 	}
-	$("#sm-body").html(rows || '<tr><td colspan="6" class="text-center text-muted p-4">No students.</td></tr>');
+	$("#sm-body").html(rows || '<tr><td colspan="5" class="text-center text-muted p-4">No students.</td></tr>');
+}
+/** Mini table (Join/Leave/Duration — no status) for a multi-session student's raw entries. */
+function sessionDetailTable(sessions) {
+	var html = '<table class="table table-sm table-bordered mb-0 bg-white"><thead><tr><th>Join</th><th>Leave</th><th>Duration</th></tr></thead><tbody>';
+	for (var j = 0; j < sessions.length; j++) {
+		var s = sessions[j];
+		html += '<tr><td>' + esc(s.joinTime || "—") + '</td><td>' + esc(s.leaveTime || "—") + '</td><td>' + (s.durationMin || 0) + ' min</td></tr>';
+	}
+	html += '</tbody></table>';
+	return html;
+}
+function toggleSessionDetail(i) {
+	expandedSessions[i] = !expandedSessions[i];
+	renderStudents();
 }
 function initials(name) {
 	var p = $.trim(name || "").split(/\s+/);
