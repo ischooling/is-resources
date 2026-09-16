@@ -33,6 +33,7 @@ async function rendereDashboardContent(isParent){
             $("#graduationCeremonyModal").modal("show");
         }, 2000);
     }
+    var dashboardData=getStudentDashboardDetails();
     if(data.studentGraduate == 'N'){
 		//student dashboard content
         if(data.showBatchImpAnnouncementModal=='Y'){
@@ -49,7 +50,7 @@ async function rendereDashboardContent(isParent){
             $('#welcomeNoteModal').modal('show');
             window.setTimeout(function(){$('#welcomeNoteModal').modal('hide');},8000)
         }
-        var dashboardData=getStudentDashboardDetails();
+        
         if(dashboardData.showGraduationCeremonyPopup == "Y"){
             if($("#enrollPaymentModal").length >= 1){
                 $("#enrollPaymentModal").remove();
@@ -164,6 +165,9 @@ async function rendereDashboardContent(isParent){
         );
         
         $("head").append(`<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js">`);
+        if(!isDummyDashboard) {
+            renderProfileDataInModal(dashboardData);
+        }
 	}  
     if (isParent!=="true") {
         if(data.lastPassUpdatedDate){

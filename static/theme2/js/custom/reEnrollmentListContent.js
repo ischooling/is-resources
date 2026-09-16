@@ -84,7 +84,7 @@ function getReEnrollmentListStyles() {
         + '.reel-drawer-x:hover{color:#dc2626;}'
         + '.reel-drawer-body{flex:1;overflow:auto;padding:10px 12px;}'
         // count-box list drawer: wider, and BELOW the student-detail drawer so a Roll-No click opens on top
-        + '.reel-list-drawer{width:1150px;}'
+        + '.reel-list-drawer{width:100vw;max-width:100vw;}'
         + '#reelListOverlay{z-index:1048;}'
         + '#reelListDrawer{z-index:1049;}'
         + '#reelListDrawer .reel-table th{top:0;}'

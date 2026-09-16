@@ -14,6 +14,18 @@ function signupStudentOnLoad() {
 	console.log("signupCommon");
 	$("#signupButton").click(function (event) {
 		event.preventDefault();
+		if ($("#email").val().trim() == "") {
+			validEndInvalidField(false, "email");
+		}
+		if ($("#confirmEmail").val().trim() == "") {
+			validEndInvalidField(false, "confirmEmail");
+		}
+		if ($("#password").val().trim() == "") {
+			validEndInvalidField(false, "password");
+		}
+		if ($("#confirmPassword").val().trim() == "") {
+			validEndInvalidField(false, "confirmPassword");
+		}
 		if ($("#captcha").val().trim() == "") {
 			validEndInvalidField(false, "captcha");
 		}
@@ -40,11 +52,7 @@ function signupStudentOnLoad() {
 					callEmailCheck('userSignupForm', moduleId);
 					if ($("#confirmEmail").val().trim() != '' && $("#email").val().trim() != $("#confirmEmail").val().trim() && $("#email").val().trim().length > 0) {
 						validEndInvalidField(false, "email");
-						if ("STUDENT" == moduleId) {
-							showElementErrorMessage(false, 'email', role + 'email and confirm ' + role + ' email are not same');
-						} else {
-							showElementErrorMessage(false, 'email', 'Email and confirm email are not same');
-						}
+						showElementErrorMessage(false, 'email', 'Email and confirm email are not same');
 
 					} else if ($("#email").val().trim() == $("#confirmEmail").val().trim() && $("#email").val().trim() != "") {
 						validEndInvalidField(true, "email");
@@ -64,7 +72,7 @@ function signupStudentOnLoad() {
 			} else {
 				validEndInvalidField(false, "email");
 				if ("STUDENT" == moduleId) {
-					showElementErrorMessage(false, 'email', 'Student email is either empty or invalid.');
+					showElementErrorMessage(false, 'email', 'Email is either empty or invalid.');
 				} else {
 					showElementErrorMessage(false, 'email', 'Email is either empty or invalid');
 				}
@@ -75,11 +83,7 @@ function signupStudentOnLoad() {
 		if (validateEmail($("#userSignupForm #confirmEmail").val().trim())) {
 			if ($("#email").val().trim() != '' && $("#email").val().trim() != $("#confirmEmail").val().trim() && $("#confirmEmail").val().trim().length > 0) {
 				validEndInvalidField(false, "confirmEmail");
-				if ("STUDENT" == moduleId) {
-					showElementErrorMessage(false, 'confirmEmail', role + ' email and confirm ' + role.toLowerCase() + ' email are not same');
-				} else {
-					showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email are not same');
-				}
+				showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email are not same');
 
 			} else if ($("#email").val().trim() == $("#confirmEmail").val().trim() && $("#confirmEmail").val().trim() != "") {
 				validEndInvalidField(true, "email");
@@ -94,9 +98,9 @@ function signupStudentOnLoad() {
 			if ($("#confirmEmail").val().trim().length > 0) {
 				validEndInvalidField(false, "confirmEmail");
 				if ("STUDENT" == moduleId) {
-					showElementErrorMessage(false, 'confirmEmail', 'Confirm Student email empty or invalid.');
+					showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email should be same.');
 				} else {
-					showElementErrorMessage(false, 'confirmEmail', 'Confirm email is either empty or invalid');
+					showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email should be same.');
 				}
 
 			} else {
@@ -142,6 +146,38 @@ function signupStudentOnLoad() {
 	// 		showElementErrorMessage(false, 'confirmEmail', '');
 	// 	}
 	// });
+	$("#email").on("keyup", function () {
+		var emailVal = $(this).val().trim();
+		var confirmEmailVal = $("#confirmEmail").val().trim();
+		if (emailVal.length > 0) {
+			if (emailVal != confirmEmailVal) {
+				validEndInvalidField(false, "confirmEmail");
+				showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email are not same');
+			} else {
+				validEndInvalidField(true, "confirmEmail");
+				showElementErrorMessage(false, 'confirmEmail', '');
+			}
+		} else if (confirmEmailVal.length == 0) {
+			validEndInvalidField(null, "confirmEmail");
+			showElementErrorMessage(false, 'confirmEmail', '');
+		}
+	});
+	$("#confirmEmail").on("keyup", function () {
+		var emailVal = $("#email").val().trim();
+		var confirmEmailVal = $(this).val().trim();
+		if (confirmEmailVal.length > 0) {
+			if (emailVal != confirmEmailVal) {
+				validEndInvalidField(false, "confirmEmail");
+				showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email are not same');
+			} else {
+				validEndInvalidField(true, "confirmEmail");
+				showElementErrorMessage(false, 'confirmEmail', '');
+			}
+		} else {
+			validEndInvalidField(null, "confirmEmail");
+			showElementErrorMessage(false, 'confirmEmail', '');
+		}
+	});
 	// $("#confirmEmail").blur(function() {
 	// 	//event.preventDefault();
 	// 	if($(this).val().length > 0){
@@ -178,12 +214,12 @@ function signupStudentOnLoad() {
 				"P"
 			);
 			if (!isPasswordStrong) {
-				showElementErrorMessage(false, 'password', 'Create your own password must match all requirements.');
+				showElementErrorMessage(false, 'password', '');
 				if ($(this).val().trim() != $("#userSignupForm #confirmPassword").val().trim() && $("#userSignupForm #confirmPassword").val().trim().length > 0) {
 					showElementErrorMessage(false, 'confirmPassword', 'Create your own password and Confirm y our own Password do not match');
 					validEndInvalidField(false, "confirmPassword");
 				} else {
-					showElementErrorMessage(false, 'password', 'Create your own password must match all requirements.')
+					showElementErrorMessage(false, 'password', '')
 					validEndInvalidField(null, "confirmPassword");
 				}
 				validEndInvalidField(false, "password");
@@ -198,7 +234,7 @@ function signupStudentOnLoad() {
 				showElementErrorMessage(true, 'password', '');
 				if ($(this).val().trim() != $("#confirmPassword").val().trim() && $("#confirmPassword").val().trim().length > 0) {
 					validEndInvalidField(false, "confirmPassword");
-					showElementErrorMessage(false, 'confirmPassword', 'Create your own password and Confirm your own Password do not match');
+					showElementErrorMessage(false, 'confirmPassword', 'Create your password and Confirm your Password do not match');
 				} else if ($("#confirmPassword").val().trim().length == 0) {
 					validEndInvalidField(null, "confirmPassword");
 				} else {
@@ -211,28 +247,40 @@ function signupStudentOnLoad() {
 			validEndInvalidField(null, "password");
 		}
 	});
+	$("#password").on("keyup", function () {
+		var passwordVal = $(this).val().trim();
+		var confirmPasswordVal = $("#confirmPassword").val().trim();
+		if (passwordVal.length > 0) {
+			if (passwordVal != confirmPasswordVal) {
+				validEndInvalidField(false, "confirmPassword");
+				showElementErrorMessage(false, 'confirmPassword', 'Create your password and Confirm your password do not match');
+			} else {
+				validEndInvalidField(true, "confirmPassword");
+				showElementErrorMessage(false, 'confirmPassword', '');
+			}
+		} else if (confirmPasswordVal.length == 0) {
+			validEndInvalidField(null, "confirmPassword");
+			showElementErrorMessage(false, 'confirmPassword', '');
+		}
+	});
 	$("#confirmPassword").blur(function () {
 		if ($(this).val().length > 0) {
 
-			if (!validPassword($("#userSignupForm #confirmPassword").val().trim())) {
-				$("#userSignupForm #confirmPassword").css('color', '#a9a9a9');
-				showElementErrorMessage(false, 'confirmPassword', 'Confirm password is either empty or invalid');
-				validEndInvalidField(false, "confirmPassword");
-				flag = false;
-			} else if (!checkPasswordStrength(
+			if (!validPassword($("#userSignupForm #confirmPassword").val().trim()) || !checkPasswordStrength(
 				$("#userSignupForm #confirmPassword").get(0),
 				"userSignupForm",
 				"confirmPassword",
 				"CP",
 				"password"
 			)) {
-				showElementErrorMessage(false, 'confirmPassword', 'Confirm your own Passwords must match all requirements.');
+				$("#userSignupForm #confirmPassword").css('color', '#a9a9a9');
+				showElementErrorMessage(false, 'confirmPassword', 'Create your password and Confirm your password do not match');
 				validEndInvalidField(false, "confirmPassword");
-				flag = false
+				flag = false;
 			} else if ($("#userSignupForm #password").val().trim() != $("#userSignupForm #confirmPassword").val().trim()) {
 				$("#userSignupForm #password").css('color', '#a9a9a9');
 				$("#userSignupForm #confirmPassword").css('color', '#a9a9a9');
-				showElementErrorMessage(false, 'confirmPassword', 'Create your own password and Confirm your own Password do not match');
+				showElementErrorMessage(false, 'confirmPassword', 'Create your password and Confirm your password do not match');
 				validEndInvalidField(false, "confirmPassword");
 				flag = false
 			} else {
@@ -359,7 +407,7 @@ function validateRequestForSignup(formId, moduleId) {
 	if (!validateEmail($("#" + formId + " #email").val().trim())) {
 		$("#" + formId + " #email").css('color', '#a9a9a9');
 		if ("STUDENT" == moduleId) {
-			showElementErrorMessage(false, 'email', 'Student email is either empty or invalid.');
+			showElementErrorMessage(false, 'email', 'Email is either empty or invalid');
 		} else {
 			showElementErrorMessage(false, 'email', 'Email is either empty or invalid');
 		}
@@ -367,19 +415,21 @@ function validateRequestForSignup(formId, moduleId) {
 	}
 	if (!validateEmail($("#" + formId + " #confirmEmail").val().trim())) {
 		$("#" + formId + " #confirmEmail").css('color', '#a9a9a9');
-		if ("STUDENT" == moduleId) {
-			showElementErrorMessage(false, 'confirmEmail', 'Confirm Student email empty or invalid.');
-		} else {
-			showElementErrorMessage(false, 'confirmEmail', 'Confirm email is either empty or invalid');
+		if ($("#" + formId + " #confirmEmail").val().trim() != "") {
+			if ("STUDENT" == moduleId) {
+				showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email should be same');
+			} else {
+				showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email should be same');
+			}
 		}
 		flag = false
 	} else if ($("#" + formId + " #email").val().trim() != $("#" + formId + " #confirmEmail").val().trim()) {
 		$("#" + formId + " #email").css('color', '#a9a9a9');
 		$("#" + formId + " #confirmEmail").css('color', '#a9a9a9');
 		if ("STUDENT" == moduleId) {
-			showElementErrorMessage(false, 'confirmEmail', 'Student email and confirm student email are not same');
-		} else {
 			showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email are not same');
+		} else {
+		showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email are not same');
 		}
 		flag = false
 	}
@@ -390,7 +440,12 @@ function validateRequestForSignup(formId, moduleId) {
 		"P"
 	);
 	if (!isPasswordStrong) {
-		showElementErrorMessage(false, 'password', 'Create your own password must match all requirements.');
+		if ($("#password").val().trim() == "") {
+			validEndInvalidField(false, "password");
+			showElementErrorMessage(false, 'password', 'Password is either empty or invalid');
+		} else {
+			showElementErrorMessage(false, 'password', 'Password is either empty or invalid');
+		}
 		flag = false
 	} else if (!validPassword($("#" + formId + " #password").val().trim())) {
 		$("#" + formId + " #password").css('color', '#a9a9a9');
@@ -398,28 +453,27 @@ function validateRequestForSignup(formId, moduleId) {
 		flag = false
 	}
 
-	if (!validPassword($("#" + formId + " #confirmPassword").val().trim())) {
-		$("#" + formId + " #confirmPassword").css('color', '#a9a9a9');
-		showElementErrorMessage(false, 'confirmPassword', 'Confirm password is either empty or invalid');
-		flag = false;
-	} else if (!checkPasswordStrength(
+	if (!validPassword($("#" + formId + " #confirmPassword").val().trim()) || !checkPasswordStrength(
 		$("#" + formId + " #confirmPassword").get(0),
 		formId,
 		"confirmPassword",
 		"CP",
 		"password"
 	)) {
-		showElementErrorMessage(false, 'confirmPassword', 'Confirm your own Passwords must match all requirements.');
-		flag = false
+		$("#" + formId + " #confirmPassword").css('color', '#a9a9a9');
+		if ($("#" + formId + " #confirmPassword").val().trim() != "") {
+			showElementErrorMessage(false, 'confirmPassword', 'Password and confirm password should be same');
+		}
+		flag = false;
 	} else if ($("#" + formId + " #password").val().trim() != $("#" + formId + " #confirmPassword").val().trim()) {
 		$("#" + formId + " #password").css('color', '#a9a9a9');
 		$("#" + formId + " #confirmPassword").css('color', '#a9a9a9');
-		showElementErrorMessage(false, 'confirmPassword', 'Create your own password and Confirm your own Password do not match');
+		showElementErrorMessage(false, 'confirmPassword', 'Create your password and Confirm your password do not match');
 		flag = false
 	}
 	if (!validateCaptcha($("#" + formId + " #captcha").val().trim())) {
 		$("#" + formId + " #captcha").css('color', '#a9a9a9');
-		showElementErrorMessage(false, 'captcha', 'Captcha is either empty or invalid');
+		showElementErrorMessage(false, 'captcha', 'Please enter captcha');
 		flag = false
 	}
 
@@ -558,11 +612,7 @@ function validMailPermission(flag, elementID) {
 			validEndInvalidField(true, "email");
 			validEndInvalidField(false, "confirmEmail");
 			showElementErrorMessage(false, 'email', '');
-			if ("STUDENT" == moduleId) {
-				showElementErrorMessage(false, 'confirmEmail', role + ' email and confirm student email are not same');
-			} else {
-				showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email are not same');
-			}
+			showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email are not same');
 
 		}
 	} else {

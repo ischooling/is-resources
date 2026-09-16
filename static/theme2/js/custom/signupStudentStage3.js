@@ -524,28 +524,43 @@ async function showPaymentTermCondMode(src) {
 async function showPaymentModal() {
 	hideModalMessage('');
 	if($('#signupType').val() == 'Online' ){
-		var payload = {
-			'userId' : USER_ID
-		}; 
-		var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'get-commission-pay-by',payload,'student/enrollment');
+		var responseData = await getCommissionPayByData();
 		SHOW_PAYMENT_OPTION = responseData.showPaymentOption;
 		if(SHOW_PAYMENT_OPTION=='Y'){
 			await callLocationForPaymentPromise();
-			// if ($("#payMode").val() == 'registration') {
-			// 	// $('#courseFeeModalTNC').modal('hide');
-			// 	// $('#bookAnEnrollmentTNC').modal('show');
-			// 	// $("#bookAnEnrollmentTNC .modal-dialog").css({"transform":"translateY(-45%)"})
-			// 	var schoolId = $('.payabledetails').attr('schoolId');
-			// 	var userPaymentDetailsId = $('.payabledetails').attr('userPaymentDetailsId');
-			// 	checkPayment("", userPaymentDetailsId, schoolId);
-			// } else {
+			if(window.__lastReviewData && window.__lastReviewData.customPaymentEnabled){
+				// Custom/advance fee plan: fixed server-side, nothing for choose-payment-plan to
+				// persist (see feePaymentReview's customPaymentEnabled branch) -- go straight to
+				// the payment gateway instead of through choosePaymentOption().
 				var schoolId = $('.payabledetails').attr('schoolId');
 				var userPaymentDetailsId = $('.payabledetails').attr('userPaymentDetailsId');
 				var entityType = $('.payabledetails').attr('entityType');
 				var entityId = $('.payabledetails').attr('entityId');
 				var paidByUserId = $('.payabledetails').attr('paidByUserId');
 				getPaymentGatewaysOptions(schoolId, schoolId, userPaymentDetailsId, entityType, entityId, paidByUserId);
-			// }
+			}else{
+				// The "Selected Fee Plan" section (see getPaymentSelectionBodyContent) no longer has
+				// its own Next button to persist the chosen plan -- Final Step does it here first,
+				// and only proceeds to the payment gateway once choose-payment-plan succeeds.
+				choosePaymentOption(false, function(data){
+					// if ($("#payMode").val() == 'registration') {
+					// 	// $('#courseFeeModalTNC').modal('hide');
+					// 	// $('#bookAnEnrollmentTNC').modal('show');
+					// 	// $("#bookAnEnrollmentTNC .modal-dialog").css({"transform":"translateY(-45%)"})
+					// 	var schoolId = $('.payabledetails').attr('schoolId');
+					// 	var userPaymentDetailsId = $('.payabledetails').attr('userPaymentDetailsId');
+					// 	checkPayment("", userPaymentDetailsId, schoolId);
+					// } else {
+						var schoolId = $('.payabledetails').attr('schoolId');
+						// var userPaymentDetailsId = $('.payabledetails').attr('userPaymentDetailsId');
+						var userPaymentDetailsId = data.userPaymentDetailsId
+						var entityType = $('.payabledetails').attr('entityType');
+						var entityId = $('.payabledetails').attr('entityId');
+						var paidByUserId = $('.payabledetails').attr('paidByUserId');
+						getPaymentGatewaysOptions(schoolId, schoolId, userPaymentDetailsId, entityType, entityId, paidByUserId);
+					// }
+				});
+			}
 		} else {
 			$('#submitApplicationWarning').modal({ backdrop: 'static', keyboard: false })
 			$('#goToDashboardWarningMessage').hide();
@@ -556,6 +571,12 @@ async function showPaymentModal() {
 	}
 }
 
+// Returns the jqXHR (thenable) so a caller that needs the course content to actually be in the
+// DOM before continuing (see renderEnrollmentPage's Step 4 direct-load case, which needs #payMode
+// -- rendered by this response -- to exist before it renders the review screen) can `await` it,
+// instead of blocking the whole page with async:false (which also stops the loader shown below
+// from ever painting until the request finishes). Every other caller is unaffected -- a returned
+// promise nobody awaits behaves exactly like the old fire-and-forget call.
 function getAllCourseDetails(isGradeChange, courseId) {
 	// showSkeleton(true, "step3");
 	$("#commonloaderId, #commonloaderBody").show();
@@ -567,9 +588,9 @@ function getAllCourseDetails(isGradeChange, courseId) {
 	if (standardId == '' || standardId == 0) {
 		$('#courseSubjectDetails').html('')
 	}
-	
+
 	//$("#addAndRemoveLoader").css({ "display": "block" });
-	$.ajax({
+	return $.ajax({
 		type: "POST",
 		contentType: APPLICATION_JSON_VALUE,
 		url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID +'/student/enrollment/course-details-by-standard-id',
@@ -776,9 +797,18 @@ function validateRequestForPaymentOption(formId) {
 }
 
 
-function choosePaymentOption() {
+// skipValidation (optional): true bypasses the checked-radio check below -- used right after
+// callForPaymentModeSelection(..., true) silently picks the response's default plan (no modal,
+// no radios rendered yet), so the Step 3 -> Step 4 transition can persist that default plan and
+// move straight to the review screen. Omitted (falsy), behaves exactly as before.
+// onSuccess (optional): when provided, called with the choose-payment-plan response INSTEAD of
+// the default "hide modal, re-render review" handling below -- used by showPaymentModal() so
+// Final Step can persist whichever plan is selected in "Selected Fee Plan" (there is no longer a
+// separate Next button there) and only then move on to the payment gateway. Omitted, behaves
+// exactly as before.
+function choosePaymentOption(skipValidation, onSuccess) {
 	var flag=true;
-	if(SHOW_PAYMENT_OPTION=='Y'){
+	if(SHOW_PAYMENT_OPTION=='Y' && !skipValidation){
 		if ($("#pay-one").prop("checked") == true || $("#pay-three").prop("checked") == true || $("#pay-registration").prop("checked") == true || $("#pay-custom").prop("checked") == true) {
 			hideModalMessage('');
 		} else {
@@ -786,8 +816,10 @@ function choosePaymentOption() {
 			flag=false;
 		}
 	}
-	setActiveStep(4);
-	showSkeleton(true, "step4");
+	if(typeof onSuccess !== "function"){
+		setActiveStep(4);
+		showSkeleton(true, "step4");
+	}
 	if(flag){
 		$.ajax({
 			type: "POST",
@@ -816,6 +848,8 @@ function choosePaymentOption() {
 							//setActiveStep(3);
 						}
 					}
+				} else if(typeof onSuccess === "function"){
+					onSuccess(data);
 				} else {
 					if(SHOW_PAYMENT_OPTION=='Y'){
 						$("#studentPaymentModal").modal("hide");
@@ -1261,7 +1295,13 @@ function getRequestForPaymentModeSelection(formId, courseId) {
 	return studentCourseDetailsInfoDTO;
 }
 
-function callForPaymentModeSelection(formId, callFrom) {
+// silent (optional): when true, skip the #studentPaymentModal popup entirely and go straight
+// to the default plan the response marks -- used from the Step 3 -> Step 4 transition, where
+// the review screen's "Selected Fee Plan" section (feePaymentReview/getPaymentSelectionBodyContent)
+// now shows this same picker under the review step itself instead of a popup (see
+// handleCourseSelectionStepThreeProceed / moveStep). Omitted (falsy), it behaves exactly as
+// before -- shows the modal for the student to pick a plan.
+function callForPaymentModeSelection(formId, callFrom, silent) {
 	hideMessage('');
 	if (!validateRequestForPaymentModeSelection(formId, callFrom)) {
 		return false;
@@ -1298,16 +1338,17 @@ function callForPaymentModeSelection(formId, callFrom) {
 					}
 				}
 			} else {
-				renderPaymentMode();
-				showSkeleton(true, "fee-details-modal");
-				paymentModalContentWithData(data);
-				$(".step-feeDetails-skeleton").hide();
-				$(".feeDetailsContentDiv").show();
-				$('#payMode').val(data.paymentMode);
-				$(".radio-payment-option input:radio[name=payModeCheckboxes]").unbind().bind("change", function () {
-					radioBtnChecked();
-				});
-				selectPaymentmentMethod(true);
+				if(silent){
+					$('#payMode').val(data.paymentMode);
+					choosePaymentOption(true);
+				}else{
+					renderPaymentMode();
+					showSkeleton(true, "fee-details-modal");
+					paymentModalContentWithData(data);
+					$(".step-feeDetails-skeleton").hide();
+					$(".feeDetailsContentDiv").show();
+					initPaymentSelectionUI(data.paymentMode);
+				}
 			}
 		},
 		error: function(e){
@@ -1392,6 +1433,15 @@ function callForReviewAndPaymentSelection(reloadRequired) {
 				$(".step-4-skeleton").html('');
 				$(".step-4-skeleton").hide('');
 				$("#signupStage4Content").show();
+				if(SHOW_PAYMENT_OPTION=='Y'){
+					// The review screen's "Selected Fee Plan" section now reuses the same body
+					// markup (and therefore the same #pay-one/#pay-three/.../table ids) as
+					// #studentPaymentModal (see feePaymentReview/getPaymentSelectionBodyContent).
+					// Remove the modal instance first so the two never coexist with duplicate ids --
+					// callForPaymentModeSelection() fully rebuilds the modal fresh (via
+					// getPaymentModeContent()) the next time Step 3 -> Step 4 payment selection runs.
+					$("#studentPaymentModal").remove();
+				}
 				getReviewAndPayRendered(data);
 			}
 			$(".prev-btn, .next-btn, .finish-btn").removeClass("disabled");
@@ -1972,10 +2022,11 @@ async function handleCourseSelectionStepThreeProceed(){
 		}
 	}
 	if(SHOW_PAYMENT_OPTION=='Y'){
-		if(!$('#studentPaymentModal').is(':visible')){
-			callForPaymentModeSelection('signupStage3','');
-			return false;
-		}
+		// No modal popup: go straight to the review step, where "Selected Fee Plan" (see
+		// feePaymentReview) shows the same picker under the same SHOW_PAYMENT_OPTION=='Y'
+		// condition -- callForPaymentModeSelection(..., true) persists the response's default
+		// plan silently and moves on.
+		callForPaymentModeSelection('signupStage3','', true);
 	}else{
 		if (!validateRequestForPaymentModeSelection('signupStage3', 'signup')) {
 			return false;

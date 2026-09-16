@@ -257,7 +257,7 @@ button:focus {
 .wrapper-style {
 	width: calc(100% - 20px);
 	/*height: 620px;*/
-	padding-top:151px;
+	padding-top:171px;
 	background: #fff;
 	position: relative;
 	padding-bottom: 0px;
@@ -904,7 +904,7 @@ input::placeholder {
 	letter-spacing: 2px;
 	margin-bottom: 15px
 }
-.page-heading{text-transform: inherit;display: inline-block;padding: 5px 10px;margin: 0 auto;float:none;width: fit-content;border-radius: 20px;}
+.page-heading{text-transform: inherit;display: inline-block;padding:10px;margin: 0 auto;float:none;width: fit-content;border-radius: 25px;font-size: 28px;}
 
 .select-option-input {
 	width: 100%;
@@ -2769,7 +2769,7 @@ label.error {
 /* responsive css */
 
 @media ( max-width: 580px) {
-	.tab-and-mobile-logout-btn i.zmdi-power{display: none;}
+	.tab-and-mobile-logout-btn svg{display: none;}
 	.wrapper-style {
 		padding-top:95px;
 	}
@@ -3098,6 +3098,9 @@ label.error {
 		line-height:20px;
 	}
 	.radio.radio-payment-option .checked-font-style[style]{font-size: 13px !important;}
+	.fixed-footer .whatsapp_button{font-size: 14px !important;}
+	.tab-and-mobile-logout-btn svg{display: block;}
+	.mobile-view-logout{display: none;}
 }
 
 /* payment modal responsive css */
@@ -3586,3 +3589,130 @@ border-top: 7px solid rgba(0,0,0,.1);
 .review-td-editing .custom-field{margin-bottom: 0px !important;}
 .custom-field sup.sup{color:red;font-size: 14px;font-weight: bold;top: 4px;right: -1px;}
 .mobile-responsive-table .custom-field:not(.has-value) .form-control-field{border:1px solid #cecece !important}
+
+/* ============================================================
+   Fee-plan chooser body (radios + fee table) -- shared markup.
+   Same content getPaymentSelectionBodyContent() builds for BOTH
+   #studentPaymentModal (styled in style-payment-modal.css, scoped to
+   #studentPaymentModal.ps-modal-v2) and the Step 4 review screen's
+   "Selected Fee Plan" section (plain page, no modal wrapper). These
+   rules mirror that modal styling but scoped to .feeDetailsContentDiv
+   -- the wrapper div present in both places -- instead of the modal
+   id/class, so the review screen gets the same design.
+   ============================================================ */
+.feeDetailsContentDiv{padding:0;}
+.feeDetailsContentDiv .feePayMode > .p-0{padding:0 !important;}
+
+/* plan option cards */
+.feeDetailsContentDiv .payment-item{
+	display:flex;flex-wrap:wrap;gap:16px;justify-content:stretch;margin-bottom:6px;
+}
+.feeDetailsContentDiv .radio.radio-payment-option{
+	flex:1 1 0;min-width:240px;width:auto;height:auto;
+	margin:0 0 6px !important;padding:0 !important;
+	background:transparent;box-shadow:none;border:0;border-radius:14px;
+}
+.feeDetailsContentDiv .radio.radio-payment-option:hover{background:transparent;box-shadow:none;}
+.feeDetailsContentDiv .radio.radio-payment-option [type="radio"]{display: none;}
+.feeDetailsContentDiv .radio-payment-option label{
+	position:relative;display:flex;align-items:center;gap:14px;width:100%;height:auto;margin:0;
+	padding:16px 18px 16px 46px !important;border:2px solid #e5e9f2 !important;border-radius:14px;
+	background:#fff;color:#1f2542;cursor:pointer;transition:all .18s ease;
+}
+.feeDetailsContentDiv .radio-payment-option label:hover{
+	border-color:var(--pc) !important;box-shadow:0 6px 18px rgba(15,23,42,.08);
+}
+/* radio indicator */
+.feeDetailsContentDiv .radio-payment-option label .circle{
+	position:absolute;left:16px;top:50%;transform:translateY(-50%);
+	width:20px;height:20px;margin:0;background:#fff;border:2px solid #c7cede !important;
+}
+.feeDetailsContentDiv .radio-payment-option label .check{
+	position:absolute;left:20px;top:50%;transform:translateY(-50%) scale(0);
+	width:12px;height:12px;margin:0;background:#24b724;
+}
+.feeDetailsContentDiv .radio-payment-option input[type=radio]:checked ~ label .check{
+	transform:translateY(-50%) scale(1) !important;
+}
+.feeDetailsContentDiv .radio-payment-option input[type=radio]:checked ~ label .circle{border-color:#fff !important;}
+/* option icon */
+.feeDetailsContentDiv .ps-opt-icon{
+	flex:0 0 auto;width:42px;height:42px;border-radius:10px;
+	background:#eef2fb;color:var(--pc);font-size:18px;
+	display:inline-flex;align-items:center;justify-content:center;
+}
+.feeDetailsContentDiv .ps-opt-icon i{position:static;font-size:18px;}
+/* option text */
+.feeDetailsContentDiv .radio-payment-option label .checked-font-style{
+	position:static !important;left:auto !important;top:auto !important;
+	margin-left:0 !important;flex:1 1 auto;display:block;line-height:1.3 !important;color:#1f2542;margin-right: 15px;
+}
+.feeDetailsContentDiv .radio-payment-option .checked-font-style b{font-size:14px;font-weight:700;display:inline-block;}
+.feeDetailsContentDiv .radio-payment-option .pay-amount-text{font-size:20px;font-weight:800;margin-top:2px;line-height:1.2;}
+/* selected card */
+.feeDetailsContentDiv .radio-payment-option input[type=radio]:checked ~ label{
+	background:var(--pc) !important;border-color:var(--pc) !important;color:#fff;
+	box-shadow:0 10px 26px rgba(37,56,235,.28);
+}
+.feeDetailsContentDiv .radio-payment-option input[type=radio]:checked ~ label .checked-font-style,
+.feeDetailsContentDiv .radio-payment-option input[type=radio]:checked ~ label .checked-font-style b,
+.feeDetailsContentDiv .radio-payment-option input[type=radio]:checked ~ label .pay-amount-text{color:#fff !important;}
+.feeDetailsContentDiv .radio-payment-option input[type=radio]:checked ~ label .ps-opt-icon{background:rgba(255,255,255,.22);color:#fff;}
+
+/* fee table */
+.feeDetailsContentDiv .scholarship-details{margin-top:8px;}
+.feeDetailsContentDiv .scholarship-details .table-responsive{
+	border:1px solid #e8ebf2 !important;border-radius:12px;overflow:hidden;
+}
+.feeDetailsContentDiv .scholarship-details table{margin:0;width:100%;border-collapse:collapse;}
+.feeDetailsContentDiv .scholarship-details thead th{
+	background:#eef2fb !important;color:#141b34 !important;
+	border:0 !important;border-bottom:1px solid #e0e5f1 !important;
+	font-weight:700;font-size:13px;padding:12px 16px;
+}
+.feeDetailsContentDiv .scholarship-details tbody td{
+	border:1px solid #cad5ee !important;border-bottom:1px solid #eef1f6 !important;
+	padding:12px 16px;font-size:14px;color:#3a4256;vertical-align:middle;background:#fff;
+	font-weight: 500;
+}
+.feeDetailsContentDiv .scholarship-details tbody tr:nth-of-type(even) td{background:#fafbfe;}
+.feeDetailsContentDiv .scholarship-details tbody tr:last-child td{border-bottom:0 !important;}
+.feeDetailsContentDiv .scholarship-details ol{margin:4px 0 0;padding-left:20px;}
+.feeDetailsContentDiv .scholarship-details ol li{font-size:13px;}
+/* highlighted payable-fee row */
+.feeDetailsContentDiv .scholarship-details tbody tr.ps-payable-row td{
+	background:#e9f0ff !important;border-top:1px solid #cfe0ff !important;border-bottom:0 !important;font-size:15px;
+}
+.feeDetailsContentDiv .scholarship-details tbody tr.ps-payable-row strong,
+.feeDetailsContentDiv .scholarship-details tbody tr.ps-payable-row b{color:#141b34;font-weight:700;}
+
+/* note */
+.feeDetailsContentDiv .ps-note{
+	display:flex;align-items:start;justify-content:center;gap:8px;
+	margin:2px 0 0 !important;color:#181b1e;font-size:13px;
+}
+.feeDetailsContentDiv .ps-note-ico{
+	flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:var(--pc);color:#fff;
+	font-size:11px;display:inline-flex;align-items:center;justify-content:center;
+}
+.feeDetailsContentDiv .ps-note-ico i{position:static;font-size:11px;line-height: 20px;}
+
+/* responsive */
+@media (max-width:767px){
+	.feeDetailsContentDiv .payment-item{flex-direction:column;gap:12px;}
+	.feeDetailsContentDiv .radio.radio-payment-option{width:100% !important;min-width:0;height:auto !important;margin:0 0 4px !important;}
+	.feeDetailsContentDiv .radio-payment-option label{padding:14px 14px 14px 46px !important;border:2px solid #e5e9f2 !important;display:flex !important;align-items:center;}
+	.feeDetailsContentDiv .radio-payment-option input[type=radio]:checked ~ label{border-color:var(--pc) !important;}
+	.feeDetailsContentDiv .radio-payment-option label .circle{left:15px !important;top:50% !important;}
+	.feeDetailsContentDiv .radio-payment-option label .check{left:19px;top:50% !important;}
+	.feeDetailsContentDiv .radio.radio-payment-option .checked-font-style[style]{margin-left:0 !important;font-size:inherit;line-height:1.3 !important;}
+	.feeDetailsContentDiv .radio-payment-option .checked-font-style b{font-size:13px;}
+	.feeDetailsContentDiv .radio-payment-option .pay-amount-text{font-size:18px;}
+	.feeDetailsContentDiv .ps-opt-icon{width:38px;height:38px;font-size:16px;}
+	.feeDetailsContentDiv .scholarship-details thead th,
+	.feeDetailsContentDiv .scholarship-details tbody td{padding:10px 10px;font-size:12px;}
+	.feeDetailsContentDiv .ps-next-btn{width:100% !important;justify-content:center;padding:12px 20px !important;}
+}
+@media (max-width:550px){
+	.feeDetailsContentDiv .radio-payment-option label{padding: 14px 14px 14px 44px !important;}
+}

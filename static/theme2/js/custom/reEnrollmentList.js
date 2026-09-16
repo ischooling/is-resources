@@ -421,7 +421,7 @@ function reEnrollRenderCards(s) {
             g2 = '<div class="reel-cgrp"><div class="reel-clabel">' + reEnrollEsc(head) + '</div><div class="reel-cards">'
                 + activeCard
                 + g12Card
-                + card(pre, 'Re-Enrolled · ' + rePct.toFixed(1) + '%', '#e7f6ec', '#16a34a', 'reEnrollment', (s.progNextId || ''), 'Re-Enrolled · ' + nextName)
+                + card(pre, 'Re-Enrolled · ' + rePct.toFixed(1) + '%', '#e7f6ec', '#16a34a', 'reEnrolledNext', '', 'Re-Enrolled · ' + nextName)
                 + card(ppend, 'Pending · ' + pendPct.toFixed(1) + '%', '#fdeaea', '#c0392b', 'pendingNext', '', 'Pending · ' + (selName || 'selected session'))
                 + faCard
                 + '</div></div>';

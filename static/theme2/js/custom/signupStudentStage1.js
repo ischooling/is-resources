@@ -687,10 +687,12 @@ async function moveStep(moveType){
 				return await handleCourseSelectionStepThreeProceed();
 			}
 			if(SHOW_PAYMENT_OPTION=='Y'){
-				if(!$('#studentPaymentModal').is(':visible')){
-					callForPaymentModeSelection('signupStage3','');
-					return false;
-				}
+				// No modal popup: go straight to the review step, where "Selected Fee Plan"
+				// (see feePaymentReview) shows the same picker under the same
+				// SHOW_PAYMENT_OPTION=='Y' condition -- callForPaymentModeSelection(..., true)
+				// persists the response's default plan silently and moves on.
+				callForPaymentModeSelection('signupStage3','', true);
+				return false;
 			}else{
 				choosePaymentOption();
 			}

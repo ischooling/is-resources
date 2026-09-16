@@ -33649,6 +33649,7 @@ input:checked + .small-switch-slider:before {
 	-moz-appearance: none;
 	position: relative;
 	width: 20px;
+	min-width: 20px;
 	height: 20px;
 	border: 2px solid var(--pc) !important;
 	border-radius: 5px;

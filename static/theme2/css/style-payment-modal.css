@@ -198,7 +198,7 @@ a, a:hover, a:focus{text-decoration: none;}
 
 /* main heading */
 .pg-modal-v2 .pg-title{font-size:26px;line-height:1.2;font-weight:800;color:#141b34;margin:0 0 6px;letter-spacing: 0;}
-.pg-modal-v2 .pg-subtitle{font-size:14px;color:#7a8194;margin:0 0 20px;}
+.pg-modal-v2 .pg-subtitle{font-size:14px;color:#060c1b;margin:0 0 20px;}
 
 /* gateway banner */
 .pg-modal-v2 .pg-gateway-banner{display:flex;align-items:center;background:#f5f7fb;border:1px solid #eef1f6;border-radius:12px;padding:18px 24px;margin-bottom:22px;}
@@ -219,12 +219,32 @@ a, a:hover, a:focus{text-decoration: none;}
 .pg-modal-v2 .pg-convera h3{font-size:16px;color:#141b34;}
 .pg-modal-v2 .pg-convera h4{font-size:14px;color:var(--pc);}
 
+/* "Choose currency" card shown once above the gateway tabs/panels */
+.pg-modal-v2 .pg-currency-chooser{border:1px solid #dbeafe;border-radius:14px;background:#eff6ff;padding:16px 18px;margin-bottom:18px;}
+.pg-modal-v2 .pg-currency-head{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#1d4ed8;margin-bottom:14px;}
+.pg-modal-v2 .pg-currency-body{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+.pg-modal-v2 .pg-currency-convert{display:flex;align-items:center;gap:12px;}
+.pg-modal-v2 .pg-currency-card{display:inline-flex;align-items:center;gap:10px;padding:10px 16px;border:1px solid #e5e9f2;border-radius:10px;background:#fff;font-size:16px;font-weight:700;color:#141b34;}
+.pg-modal-v2 .pg-currency-card-text{display:flex;flex-direction:column;line-height:1.2;}
+.pg-modal-v2 .pg-currency-card-text small{font-size:11px;font-weight:600;color:#697386;}
+.pg-modal-v2 .pg-currency-flag{width:22px;height:16px;object-fit:cover;border-radius:2px;flex:0 0 auto;}
+.pg-modal-v2 .pg-currency-arrow{display:inline-flex;color:#1d4ed8;flex:0 0 auto;}
+.pg-modal-v2 .pg-currency-divider{width:1px;align-self:stretch;background:#dbeafe;}
+.pg-modal-v2 .pg-currency-rateblock{flex:1 1 220px;}
+.pg-modal-v2 .pg-currency-rate-head{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#1d4ed8;margin-bottom:6px;}
+.pg-modal-v2 .pg-currency-rate{font-size:15px;font-weight:700;color:#141b34;margin-bottom:6px;}
+.pg-modal-v2 .pg-currency-note{display:flex;align-items:flex-start;gap:6px;font-size:12px;color:#697386;}
+.pg-modal-v2 .pg-currency-note svg{flex:0 0 auto;margin-top:1px;}
+.pay_for_selected_gradd{font-weight: 500;font-family: 'Open Sans';font-size: 16px;color: #141b34;}
+
 /* actions / pay now */
-.pg-modal-v2 .pg-actions{display:flex;justify-content:flex-end;margin-top:26px;}
+.pg-modal-v2 .pg-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-top:26px;}
 .pg-modal-v2 .pg-paynow{display:inline-flex;align-items:center;gap:10px;padding:12px 26px;border-radius:12px;background:var(--pc);color:#fff;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 10px 24px rgba(37,56,235,.3);transition:transform .15s ease, box-shadow .15s ease;}
 .pg-modal-v2 .pg-paynow:hover{transform:translateY(-1px);box-shadow:0 14px 30px rgba(37,56,235,.4);}
 .pg-modal-v2 .pg-paynow .pg-paynow-text{color:#fff;}
-/* The footer + its Pay Now button are mobile-only (see mobile media query). */
+.pg-modal-v2 .pg-back{gap:10px; flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;padding:12px 22px;border-radius:12px;background:#fff;border:2px solid #e5e9f2;color:#1f2542;font-size:15px;font-weight:700;cursor:pointer;transition:all .15s ease;}
+.pg-modal-v2 .pg-back:hover{border-color:var(--pc);color:var(--pc);}
+/* The footer + its Pay Now/Back buttons are mobile-only (see mobile media query). */
 .pg-modal-v2 .pg-footer{display:none;}
 
 /* keep offline payment form fields readable in new layout */
@@ -242,7 +262,7 @@ a, a:hover, a:focus{text-decoration: none;}
 	.pg-modal-v2 .choose_payment_title_on_mobile{display:block}
 	.pg-modal-v2 .pg-dialog{width:98%;margin:1rem auto;}
 	.pg-modal-v2 .pg-layout{flex-direction:column;}
-	.pg-modal-v2 .pg-sidebar{flex-basis:auto;max-width:none;width:100%;border-right:0;border-bottom:1px solid #eef1f6;}
+	.pg-modal-v2 .pg-sidebar{flex-basis:auto;max-width:none;width:100%;border-right:0;border-bottom:1px solid #eef1f6;padding-top: 0px;}
 	.pg-modal-v2 .pg-tablist{flex-direction:row;gap:10px;padding-bottom:4px;-webkit-overflow-scrolling:touch;}
 	.pg-modal-v2 .pg-tab-item{flex:0 0 auto;}
 	.pg-modal-v2 .pg-tab{min-width:210px;justify-content: center;}
@@ -258,13 +278,23 @@ a, a:hover, a:focus{text-decoration: none;}
 	.pg-modal-v2 .pg-content{display:flex;flex-direction:column;overflow:hidden;margin-top:0 !important;border-top-left-radius:20px;border-top-right-radius:20px;max-height:calc(100vh - 1.5rem);max-height:calc(100dvh - 1.5rem);}
 	.pg-modal-v2 .modal-header{flex:0 0 auto;border-top-left-radius:20px;border-top-right-radius:20px;}
 	.pg-modal-v2 .modal-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-	/* Hide the in-panel (desktop) Pay Now; the footer holds the mobile Pay Now. */
+	/* Hide the in-panel (desktop) Pay Now/Back; the footer holds the mobile pair. */
 	.pg-modal-v2 .pg-actions{display:none;}
-	.pg-modal-v2 .modal-footer.pg-footer{flex:0 0 auto;display:flex;align-items:center;justify-content:center;padding:12px 14px;margin:0;background:#fff;border-top:1px solid #eef1f6;box-shadow:0 -4px 16px rgba(15,23,42,.08);}
+	.pg-modal-v2 .modal-footer.pg-footer{flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 14px;margin:0;background:#fff;border-top:1px solid #eef1f6;box-shadow:0 -4px 16px rgba(15,23,42,.08);}
 	.pg-modal-v2 .modal-footer.pg-footer > *{margin:0;}
-	.pg-modal-v2 .pg-pay-mobile{display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px 16px;border:0;border-radius:12px;background:var(--pc);color:#fff;font-size:16px;font-weight:700;box-shadow:0 10px 24px rgba(37,56,235,.3);cursor:pointer;}
+	.pg-modal-v2 .pg-pay-mobile{display:inline-flex;align-items:center;justify-content:center;gap:10px;flex:1 1 auto;padding:13px 16px;border:0;border-radius:12px;background:var(--pc);color:#fff;font-size:16px;font-weight:700;box-shadow:0 10px 24px rgba(37,56,235,.3);cursor:pointer;}
 	.pg-modal-v2 .pg-pay-mobile .pg-paynow-text{color:#fff;}
+	.pg-modal-v2 .pg-back-mobile{flex:0 0 auto;padding:13px 18px;}
+	.pg-modal-v2 .pg-currency-body{flex-direction:column;align-items:stretch;gap:14px;}
+	.pg-modal-v2 .pg-currency-convert{justify-content:center;}
+	.pg-modal-v2 .pg-currency-divider{width:100%;height:1px;}
 	.pg-modal-v2 .pg-gateway-banner{justify-content:center}
+	.pg-modal-v2 .pg-currency-rateblock{flex:inherit}
+	.pay_for_selected_gradd{margin-top: 20px;}
+	.pg-modal-v2 .pg-currency-chooser{padding: 8px;}
+	.pg-modal-v2 .pg-currency-card{font-size: 12px;padding: 8px;}
+	.pg-modal-v2 .modal-body{padding:25px 10px;}
+	
 }
 @media (max-width:480px){
 	.pg-modal-v2 .pg-main{padding:0px 16px;}

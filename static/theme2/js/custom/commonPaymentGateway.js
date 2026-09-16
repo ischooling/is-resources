@@ -393,7 +393,11 @@ async function getPaymentGatewaysOptions(schoolIdOfPaymentGateway, schoolId, use
 		if($('#paymentOptionsModal').length > 0) {
 			$('#paymentOptionsModal').remove();
 		}
-		$("body").append(await getPaymentGatewayOptionsModal(responseData.details));
+		// Pass the actual IP-detected country (countryCode, above) through so the currency card
+		// can show that exact country's flag -- e.g. Croatia and Spain both use EUR, but a payer
+		// detected in Spain should see Spain's flag, not a generic Eurozone one. Mirrors how
+		// Stripe's own Adaptive Pricing shows the detected country, not just its currency.
+		$("body").append(await getPaymentGatewayOptionsModal(responseData.details, countryCode));
 		bindPaymentOptionMobileScroll();
 		syncMobilePayButton();
 		await callLocationForPaymentPromise();
@@ -461,7 +465,181 @@ function syncMobilePayButton(){
 	footer.style.display = hasPayBtn ? '' : 'none';
 }
 
-async function getPaymentGatewayOptionsModal(details){
+// ISO2 country -> its official currency (ISO 4217). Covers every country (and the historical/
+// disputed ones a country dropdown may still list), so a real IP-detected country can be
+// cross-checked against a conversion's currency before that country's own flag is trusted (see
+// getPaymentCurrencyCardContent) -- e.g. confirming "ES" (Spain) really does use EUR before
+// showing Spain's flag instead of a generic Eurozone one for a EUR conversion.
+var FLAG_COUNTRY_TO_CURRENCY = {
+	AD:'EUR', AE:'AED', AF:'AFN', AG:'XCD', AI:'XCD', AL:'ALL', AM:'AMD', AO:'AOA', AQ:'USD', AR:'ARS', AS:'USD', AT:'EUR', AU:'AUD', AW:'AWG', AX:'EUR', AZ:'AZN',
+	BA:'BAM', BB:'BBD', BD:'BDT', BE:'EUR', BF:'XOF', BG:'BGN', BH:'BHD', BI:'BIF', BJ:'XOF', BL:'EUR', BM:'BMD', BN:'BND', BO:'BOB', BQ:'USD', BR:'BRL', BS:'BSD', BT:'BTN', BV:'NOK', BW:'BWP', BY:'BYN', BZ:'BZD',
+	CA:'CAD', CC:'AUD', CD:'CDF', CF:'XAF', CG:'XAF', CH:'CHF', CI:'XOF', CK:'NZD', CL:'CLP', CM:'XAF', CN:'CNY', CO:'COP', CR:'CRC', CU:'CUP', CV:'CVE', CW:'ANG', CX:'AUD', CY:'EUR', CZ:'CZK',
+	DE:'EUR', DJ:'DJF', DK:'DKK', DM:'XCD', DO:'DOP', DZ:'DZD',
+	EC:'USD', EE:'EUR', EG:'EGP', EH:'MAD', ER:'ERN', ES:'EUR', ET:'ETB',
+	FI:'EUR', FJ:'FJD', FK:'FKP', FM:'USD', FO:'DKK', FR:'EUR',
+	GA:'XAF', GB:'GBP', GD:'XCD', GE:'GEL', GF:'EUR', GG:'GBP', GH:'GHS', GI:'GIP', GL:'DKK', GM:'GMD', GN:'GNF', GP:'EUR', GQ:'XAF', GR:'EUR', GS:'GBP', GT:'GTQ', GU:'USD', GW:'XOF', GY:'GYD',
+	HK:'HKD', HM:'AUD', HN:'HNL', HR:'EUR', HT:'HTG', HU:'HUF',
+	ID:'IDR', IE:'EUR', IL:'ILS', IM:'GBP', IN:'INR', IO:'USD', IQ:'IQD', IR:'IRR', IS:'ISK', IT:'EUR',
+	JE:'GBP', JM:'JMD', JO:'JOD', JP:'JPY',
+	KE:'KES', KG:'KGS', KH:'KHR', KI:'AUD', KM:'KMF', KN:'XCD', KP:'KPW', KR:'KRW', KW:'KWD', KY:'KYD', KZ:'KZT',
+	LA:'LAK', LB:'LBP', LC:'XCD', LI:'CHF', LK:'LKR', LR:'LRD', LS:'LSL', LT:'EUR', LU:'EUR', LV:'EUR', LY:'LYD',
+	MA:'MAD', MC:'EUR', MD:'MDL', ME:'EUR', MF:'EUR', MG:'MGA', MH:'USD', MK:'MKD', ML:'XOF', MM:'MMK', MN:'MNT', MO:'MOP', MP:'USD', MQ:'EUR', MR:'MRU', MS:'XCD', MT:'EUR', MU:'MUR', MV:'MVR', MW:'MWK', MX:'MXN', MY:'MYR', MZ:'MZN',
+	NA:'NAD', NC:'XPF', NE:'XOF', NF:'AUD', NG:'NGN', NI:'NIO', NL:'EUR', NO:'NOK', NP:'NPR', NR:'AUD', NU:'NZD', NZ:'NZD',
+	OM:'OMR',
+	PA:'PAB', PE:'PEN', PF:'XPF', PG:'PGK', PH:'PHP', PK:'PKR', PL:'PLN', PM:'EUR', PN:'NZD', PR:'USD', PS:'ILS', PT:'EUR', PW:'USD', PY:'PYG',
+	QA:'QAR',
+	RE:'EUR', RO:'RON', RS:'RSD', RU:'RUB', RW:'RWF',
+	SA:'SAR', SB:'SBD', SC:'SCR', SD:'SDG', SE:'SEK', SG:'SGD', SH:'SHP', SI:'EUR', SJ:'NOK', SK:'EUR', SL:'SLE', SM:'EUR', SN:'XOF', SO:'SOS', SR:'SRD', SS:'SSP', ST:'STN', SV:'USD', SX:'ANG', SY:'SYP', SZ:'SZL',
+	TC:'USD', TD:'XAF', TF:'EUR', TG:'XOF', TH:'THB', TJ:'TJS', TK:'NZD', TL:'USD', TM:'TMT', TN:'TND', TO:'TOP', TR:'TRY', TT:'TTD', TV:'AUD', TW:'TWD', TZ:'TZS',
+	UA:'UAH', UG:'UGX', UM:'USD', US:'USD', UY:'UYU', UZ:'UZS',
+	VA:'EUR', VC:'XCD', VE:'VES', VG:'USD', VI:'USD', VN:'VND', VU:'VUV',
+	WF:'XPF', WS:'WST',
+	XK:'EUR',
+	YE:'YER', YT:'EUR',
+	ZA:'ZAR', ZM:'ZMW', ZW:'ZWL'
+};
+
+// Currency code (ISO 4217) -> ISO2 country code, for the flag images already shipped under
+// PATH_FOLDER_FONT2 (theme2/fonts/*.svg -- one file per ISO 3166-1 alpha-2 country, ~all of
+// them present, e.g. IN.svg, US.svg, AE.svg, EU.svg). A currency without an obvious single
+// country (XOF/XAF/XCD/XPF) maps to one representative member country. Anything genuinely
+// missing here still falls back safely to no flag (see getPaymentCurrencyCardContent) rather
+// than guessing a country.
+var CURRENCY_TO_FLAG_COUNTRY = {
+	AED:'AE', AFN:'AF', ALL:'AL', AMD:'AM', ANG:'CW', AOA:'AO', ARS:'AR', AUD:'AU', AWG:'AW',
+	AZN:'AZ', BAM:'BA', BBD:'BB', BDT:'BD', BGN:'BG', BHD:'BH', BIF:'BI', BMD:'BM', BND:'BN',
+	BOB:'BO', BRL:'BR', BSD:'BS', BTN:'BT', BWP:'BW', BYN:'BY', BZD:'BZ', CAD:'CA', CDF:'CD',
+	CHF:'CH', CLP:'CL', CNY:'CN', COP:'CO', CRC:'CR', CUP:'CU', CVE:'CV', CZK:'CZ', DJF:'DJ',
+	DKK:'DK', DOP:'DO', DZD:'DZ', EGP:'EG', ERN:'ER', ETB:'ET', EUR:'EU', FJD:'FJ', FKP:'FK',
+	GBP:'GB', GEL:'GE', GHS:'GH', GIP:'GI', GMD:'GM', GNF:'GN', GTQ:'GT', GYD:'GY', HKD:'HK',
+	HNL:'HN', HRK:'HR', HTG:'HT', HUF:'HU', IDR:'ID', ILS:'IL', INR:'IN', IQD:'IQ', IRR:'IR',
+	ISK:'IS', JMD:'JM', JOD:'JO', JPY:'JP', KES:'KE', KGS:'KG', KHR:'KH', KMF:'KM', KPW:'KP',
+	KRW:'KR', KWD:'KW', KYD:'KY', KZT:'KZ', LAK:'LA', LBP:'LB', LKR:'LK', LRD:'LR', LSL:'LS',
+	LYD:'LY', MAD:'MA', MDL:'MD', MGA:'MG', MKD:'MK', MMK:'MM', MNT:'MN', MOP:'MO', MRU:'MR',
+	MUR:'MU', MVR:'MV', MWK:'MW', MXN:'MX', MYR:'MY', MZN:'MZ', NAD:'NA', NGN:'NG', NIO:'NI',
+	NOK:'NO', NPR:'NP', NZD:'NZ', OMR:'OM', PAB:'PA', PEN:'PE', PGK:'PG', PHP:'PH', PKR:'PK',
+	PLN:'PL', PYG:'PY', QAR:'QA', RON:'RO', RSD:'RS', RUB:'RU', RWF:'RW', SAR:'SA', SBD:'SB',
+	SCR:'SC', SDG:'SD', SEK:'SE', SGD:'SG', SHP:'SH', SLE:'SL', SOS:'SO', SRD:'SR', SSP:'SS',
+	STN:'ST', SYP:'SY', SZL:'SZ', THB:'TH', TJS:'TJ', TMT:'TM', TND:'TN', TOP:'TO', TRY:'TR',
+	TTD:'TT', TWD:'TW', TZS:'TZ', UAH:'UA', UGX:'UG', USD:'US', UYU:'UY', UZS:'UZ', VES:'VE',
+	VND:'VN', VUV:'VU', WST:'WS', XAF:'CM', XCD:'AG', XOF:'SN', XPF:'PF', YER:'YE', ZAR:'ZA',
+	ZMW:'ZM', ZWL:'ZW'
+};
+// Currency code -> display symbol. Falls back to the currency code itself (e.g. "AED 100.00")
+// when there's no common single-glyph symbol, or where the glyph is ambiguous across
+// currencies (e.g. "$" alone is used by USD/CAD/AUD/SGD/... and several others) -- those still
+// use the plain "$" since that's how they're actually written locally.
+var CURRENCY_TO_SYMBOL = {
+	USD:'$', CAD:'$', AUD:'$', NZD:'$', SGD:'$', HKD:'$', MXN:'$', ARS:'$', CLP:'$', COP:'$',
+	NAD:'$',
+	INR:'₹', NPR:'₨', PKR:'₨', LKR:'₨', SCR:'₨',
+	GBP:'£', EGP:'£',
+	EUR:'€',
+	JPY:'¥', CNY:'¥',
+	KRW:'₩',
+	VND:'₫',
+	THB:'฿',
+	PHP:'₱',
+	NGN:'₦',
+	GHS:'₵',
+	ILS:'₪',
+	TRY:'₺',
+	UAH:'₴',
+	RUB:'₽',
+	KZT:'₸',
+	PLN:'zł',
+	CZK:'Kč',
+	HUF:'Ft',
+	SEK:'kr', NOK:'kr', DKK:'kr', ISK:'kr',
+	CHF:'Fr',
+	BRL:'R$',
+	ZAR:'R'
+};
+function getCurrencyDisplaySymbol(currencyCode){
+	return CURRENCY_TO_SYMBOL[currencyCode] || (currencyCode + ' ');
+}
+function formatMoneyWithCommas(amount){
+	return Number(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// The "Choose currency" card shown once above the gateway tabs (see screenshot reference):
+// local-currency amount (details.payAmountWithCurrency / details.currencyConversion) next to
+// the USD amount (details.payAmount), with the live rate below. Empty string when there's no
+// conversion to show (local currency same as base, or the conversion call didn't succeed).
+// payerCountryCode (optional): the ISO2 country actually IP-detected for this payer (see
+// getPayerCountryCodePromise / getPaymentGatewaysOptions). Several countries share one
+// currency (all Eurozone members use EUR, most West African states use XOF, etc.), so a flag
+// derived only from the currency code can't tell them apart and falls back to one arbitrary
+// representative country. When the detected country's own currency actually matches
+// conversion.to, showing that exact country's flag instead is both more accurate and matches
+// how Stripe's own Adaptive Pricing displays the detected country, not just its currency.
+function getPaymentCurrencyCardContent(details, payerCountryCode){
+	var conversion = details.currencyConversion;
+	if(!conversion || conversion.status !== 'success' || !conversion.to || conversion.to === conversion.base){
+		return '';
+	}
+	var localFlagCountry = (payerCountryCode && CURRENCY_TO_FLAG_COUNTRY[conversion.to] && FLAG_COUNTRY_TO_CURRENCY[payerCountryCode] === conversion.to)
+		? payerCountryCode
+		: CURRENCY_TO_FLAG_COUNTRY[conversion.to];
+	// No hardcoded 'US' fallback here -- conversion.base isn't always USD, so guessing a flag
+	// for an unmapped base currency would show the wrong country. Omit the flag instead (same
+	// as localFlagCountry above) when it isn't in the map.
+	var usdFlagCountry = CURRENCY_TO_FLAG_COUNTRY[conversion.base];
+	// additionalFee is per payment-option (gateway); this card renders once above every
+	// gateway's panel, so it shows the first option's fee -- omitted entirely when 0/absent
+	// rather than showing a made-up percentage.
+	var additionalFeePercent = (details.paymentOptions && details.paymentOptions.length > 0) ? details.paymentOptions[0].additionalFee : 0;
+	var pgInfoIco = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+	var pgSwapIco = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3L21 7L17 11"></path><path d="M21 7H9"></path><path d="M7 13L3 17L7 21"></path><path d="M3 17H15"></path></svg>`;
+	var pgArrowIco = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`;
+	var html =
+	`<div class="pg-currency-chooser">
+		<div class="pg-currency-head">${pgInfoIco} <span>Payment Amount</span></div>
+		<div class="pg-currency-body">
+			<div class="pg-currency-convert">
+				<div class="pg-currency-card">`;
+					if(localFlagCountry){
+						html+=`<img class="pg-currency-flag" src="${PATH_FOLDER_FONT2}${localFlagCountry}.svg" alt="${conversion.to}"/>`;
+					}
+					html+=
+					`<span>${getCurrencyDisplaySymbol(conversion.to)}${formatMoneyWithCommas(details.payAmountWithCurrency)}</span>
+				</div>
+				<span class="pg-currency-arrow">${pgArrowIco}</span>
+				<div class="pg-currency-card">`;
+					if(usdFlagCountry){
+						html+=`<img class="pg-currency-flag" src="${PATH_FOLDER_FONT2}${usdFlagCountry}.svg" alt="${conversion.base}"/>`;
+					}
+					html+=
+					`<div class="pg-currency-card-text">
+						<span>${getCurrencyDisplaySymbol(conversion.base)}${formatMoneyWithCommas(details.payAmount)}</span>
+						<small>(${conversion.base})</small>
+					</div>
+				</div>
+			</div>
+			<div class="pg-currency-divider"></div>
+			<div class="pg-currency-rateblock">
+				<div class="pg-currency-rate-head">${pgSwapIco} Conversion Rate</div>
+				<div class="pg-currency-rate">1 ${conversion.base} = ${conversion.rate} ${conversion.to}</div>
+				<div class="pg-currency-note">${pgInfoIco} <span>Exchange rate and fees of your bank may apply`;
+					if(additionalFeePercent > 0){
+						html+=` (includes ${additionalFeePercent}% conversion fee)`;
+					}
+					html+=
+				`</span></div>
+			</div>
+		</div>
+	</div>`;
+	return html;
+}
+
+// "Grade 11 - Instalments Payment" line shown just below the Payment Amount card. Reads the
+// grade badge rendered in Step 3 (renderCourseSelectionContent's .change-grade span) and the
+// #payMode hidden field -- both only present in the student enrollment/signup flow, so this
+// is silently omitted (returns '') for other payment flows (teacher payouts, etc.) that reuse
+// this same modal without those elements.
+
+
+async function getPaymentGatewayOptionsModal(details, payerCountryCode){
 	schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
 	var currencyIsoCode = (schoolSettingsTechnical && schoolSettingsTechnical.currencyIsoCode) ? schoolSettingsTechnical.currencyIsoCode : 'USD';
 	var subHeading = SCHOOL_ID == 1
@@ -469,17 +647,13 @@ async function getPaymentGatewayOptionsModal(details){
 		: (details.schoolNameOfPaymentGateway + ' is trusted by the safest and most reputed payment gateway and bank');
 	// Reusable green tick used in the trust column
 	var pgTick = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big text-green-500 fill-green-200"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>`;
+	var currencyCardContent = getPaymentCurrencyCardContent(details, payerCountryCode);
+	
 
 	var html=
 	`<div id="paymentOptionsModal" class="modal fade pg-modal-v2" role="dialog" data-backdrop="static" data-keyboard="false">
 		<div class="modal-dialog pg-dialog" role="document">
 			<div class="modal-content pg-content">
-				
-				<div class="modal-header primary-bg white-txt-color">
-					<button type="button" class="close close-with-red-color ml-auto" aria-label="Close" data-dismiss="modal" style="margin-right: 5px;">
-						<span style="color: #fff;">&times;</span>
-					</button>
-				</div>
 				<div class="modal-body"> 
 					<div class="pg-layout">
 						<aside class="pg-sidebar">
@@ -519,6 +693,8 @@ async function getPaymentGatewayOptionsModal(details){
 								<h3 class="pg-title text-left">Choose Your Payment Method</h3>
 								<p class="pg-subtitle">${subHeading}</p>
 							</div>
+							<div class="pg-currency-note mb-3"><span class="pay_for_selected_gradd">${details.paymentLabel}</div>
+							${currencyCardContent}
 							<div class="tab-content pg-panels">`;
 								$.each(details.paymentOptions, function(k,v){
 									html+=
@@ -700,6 +876,12 @@ async function getPaymentGatewayOptionsModal(details){
 										if(v.name=='Airwallex'){
 											html+=`
 											<div class="pg-actions">
+												<div class="pg-back" onclick="$('#paymentOptionsModal').modal('hide');">
+												<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+													<path d="M19 12H5"></path>
+													<path d="m12 19-7-7 7-7"></path>
+												</svg>Back
+											</div>
 												<div id="payButton${k+1}" class="pg-paynow" onclick="invokePaymentGateway('signupStage4','${details.upid}','${details.paidByUserId}','${details.schoolId}','${v.name}','${details.schoolIdOfPaymentGateway}');">
 													<span class="pg-paynow-text">Pay Now</span>
 													<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
@@ -709,6 +891,12 @@ async function getPaymentGatewayOptionsModal(details){
 										else if(v.name=='YOCO'){
 											html+=`
 											<div class="pg-actions" style="display:none;">
+												<div class="pg-back" onclick="$('#paymentOptionsModal').modal('hide');">
+													<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+														<path d="M19 12H5"></path>
+														<path d="m12 19-7-7 7-7"></path>
+													</svg>Back
+												</div>
 												<div id="payButton${k+1}" class="pg-paynow">
 													<span class="pg-paynow-text">Pay Now</span>
 													<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
@@ -718,6 +906,12 @@ async function getPaymentGatewayOptionsModal(details){
 										else if(v.name=='STRIPE' || v.name=='CONVERA' || v.name=='AFS'){
 											html+=`
 											<div class="pg-actions">
+												<div class="pg-back" onclick="$('#paymentOptionsModal').modal('hide');">
+													<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+														<path d="M19 12H5"></path>
+														<path d="m12 19-7-7 7-7"></path>
+													</svg>Back
+												</div>
 												<div id="payButton${k+1}" class="pg-paynow" onclick="invokePaymentGateway('signupStage4','${details.upid}','${details.paidByUserId}','${details.schoolId}','${v.name}','${details.schoolIdOfPaymentGateway}');">
 													<span class="pg-paynow-text">Pay Now</span>
 													<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
@@ -733,6 +927,7 @@ async function getPaymentGatewayOptionsModal(details){
 					</div>
 				</div>
 				<div class="modal-footer pg-footer">
+					<button type="button" class="pg-back pg-back-mobile" onclick="$('#paymentOptionsModal').modal('hide');">Back</button>
 					<button type="button" class="pg-pay-mobile" onclick="payActivePaymentOption()">
 						<span class="pg-paynow-text">Pay Now</span>
 						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>

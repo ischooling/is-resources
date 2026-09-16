@@ -209,7 +209,7 @@ function getStudentEnrollmentDashboardContent(title) {
             + '<div>'
                 + '<h4 style="margin:0;font-weight:700;color:#1a2233;">' + (title || 'Enrollment Dashboard') + '</h4>'
                 + '<div style="font-size:12px;color:#98a2b3;">Current session snapshot · <span id="sedSessionLabel">—</span></div>'
-                + '<div class="sed-tip"><i class="fa fa-hand-pointer-o"></i>&nbsp;Har count / bar / tile click karein &rarr; student list drawer khulti hai</div>'
+                + '<div class="sed-tip"><i class="fa fa-hand-pointer-o"></i>&nbsp;Click any count, bar or tile to open the student list</div>'
             + '</div>'
             + '<a href="javascript:void(0)" class="btn btn-sm btn-outline-secondary" id="sedRefreshAll"><i class="fa fa-refresh"></i>&nbsp;Refresh</a>'
         + '</div>'

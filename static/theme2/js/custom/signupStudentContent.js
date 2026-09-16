@@ -2,6 +2,22 @@ var PREVIOUS_LEARNING_PROGRAM_INDEX;
 var STUDENT_SINGUP_CURRENT_STEP;
 var IS_PARENT_COUNTRY_CHANGE = false;
 
+// get-commission-pay-by response, cached after the first call so every place that needs
+// SHOW_PAYMENT_OPTION (generateEnrollmentContent, callForParentSelection, showPaymentModal) reads
+// the same result instead of re-hitting the endpoint on every page load / step transition. Call
+// getCommissionPayByData() everywhere this was previously fetched inline.
+var COMMISSION_PAY_BY_DATA = null;
+async function getCommissionPayByData(){
+	if(COMMISSION_PAY_BY_DATA != null){
+		return COMMISSION_PAY_BY_DATA;
+	}
+	var payload = {
+		'userId' : USER_ID
+	};
+	COMMISSION_PAY_BY_DATA = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'get-commission-pay-by',payload,'student/enrollment');
+	return COMMISSION_PAY_BY_DATA;
+}
+
 // ── Recent-enrollment social-proof toast (same design as studentMigration.js) ──
 // Uses the global toastr library (loaded on theme2 pages). Unique names/classes so it
 // never collides with studentMigration.js if both ever load on the same page.
@@ -470,7 +486,14 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 	if (signupPage >= 3) {
 		setActiveStep(3);
 		showSkeleton(true, "step3");
-	    getAllCourseDetails('N', '');
+		if(signupPage == 4){
+			// Landing straight on Step 4: the review screen's reused "Selected Fee Plan" init
+			// (see getReviewAndPayRendered) needs #payMode -- rendered by this response -- to
+			// already exist, so wait for it here instead of firing it and moving on.
+			await getAllCourseDetails('N', '');
+		}else{
+			getAllCourseDetails('N', '');
+		}
 	}
 	if (signupPage == 4) {
 	    callForReviewAndPaymentSelection('N');
@@ -565,10 +588,7 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
 	const schoolSettingsLinks = await getSchoolSettingsLinks(SCHOOL_ID);
 	const schoolSettingsTechnical = await getSchoolSettingsTechnical(SCHOOL_ID);
 	const schoolSettingsOffice = await getSchoolSettingsOffice(SCHOOL_ID);
-	var payload = {
-				'userId' : USER_ID
-			};
-	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'get-commission-pay-by',payload,'student/enrollment');
+	var responseData = await getCommissionPayByData();
 	// if(responseData.commissionPayBy == "PWP" || responseData.commissionPayBy == ""){
 	// 	SHOW_PAYMENT_OPTION = "N";
 	// }
@@ -579,7 +599,20 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
 				if(signupType == "Online" || studentUserId == USER_ID){
 					html+=
 					`<a class="tab-and-mobile-logout-btn" href="javascript:void(0)" onclick="signupLogout()">
-						<i class="zmdi zmdi-power"></i> <span class="mobile-view-logout">Log out</span>
+						<svg xmlns="http://www.w3.org/2000/svg"
+							width="18"
+							height="18"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round">
+							<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+							<polyline points="16 17 21 12 16 7"></polyline>
+							<line x1="21" y1="12" x2="9" y2="12"></line>
+						</svg> 
+						<span class="mobile-view-logout">Log out</span>
 					</a>`
 				}
 				if((signupType == "Offline") && studentUserId != USER_ID){
@@ -603,9 +636,22 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
 									<img src="${PATH_FOLDER_IMAGE2}is_fav_logo_200.png${SCRIPT_VERSION}" alt="${schoolSettingsLinks.schoolWebsite}" target="blank">
 								</a>
 								<section class="full text-center">
-									<h1 class="form-heading white-txt-color secondary-bg page-heading learingProgramHeader" val="${learningProgram}">`;
+									<h1 class="form-heading white-txt-color primary-bg page-heading learingProgramHeader" val="${learningProgram}">`;
 										if(moduleId == 'STUDENT'){
-											html+=programLabel;
+											if (programLabel == 'One-To-One Learning') {
+												learningTypeLabel = 'One-to-One Enrollment';
+											} else if (programLabel == 'Group Learning') {
+												learningTypeLabel = 'Group Learning Enrollment';
+											} else if (programLabel == 'Self Study') {
+												learningTypeLabel = 'Self Learning Enrollment';
+											} else if (programLabel == 'Self Study Plus') {
+												learningTypeLabel = 'Self Plus Enrollment';
+											} else if (programLabel == 'Flexy Program') {
+												learningTypeLabel = 'Flexy Enrollment';
+											} else if (programLabel == 'Dual Diploma') {
+												learningTypeLabel = 'Dual Diploma Enrollment';
+											}
+											html+=learningTypeLabel;
 										}else{
 											html+=moduleName;
 										}
@@ -615,9 +661,22 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
 							</div>`
 						}
 						html+=`<section class="full text-center desktop-view">
-							<h1 class="form-heading white-txt-color secondary-bg page-heading learingProgramHeader" val="${learningProgram}">`;
+							<h1 class="form-heading white-txt-color primary-bg page-heading learingProgramHeader" val="${learningProgram}">`;
 								if (moduleId == 'STUDENT') {
-									html += programLabel;
+									if (programLabel == 'One-To-One Learning') {
+											learningTypeLabel = 'One-to-One Enrollment';
+										} else if (programLabel == 'Group Learning') {
+											learningTypeLabel = 'Group Learning Enrollment';
+										} else if (programLabel == 'Self Study') {
+											learningTypeLabel = 'Self Learning Enrollment';
+										} else if (programLabel == 'Self Study Plus') {
+											learningTypeLabel = 'Self Plus Enrollment';
+										} else if (programLabel == 'Flexy Program') {
+											learningTypeLabel = 'Flexy Enrollment';
+										} else if (programLabel == 'Dual Diploma') {
+											learningTypeLabel = 'Dual Diploma Enrollment';
+										}
+									html += learningTypeLabel;
 								} else {
 									html += moduleName;
 								}
@@ -755,10 +814,10 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
 					</a>
 				</div>
 				<div class="fixed-footer">
-					<p class="copyRights">${schoolSettingsTechnical.isCoPoweredBy != null ? 'Powered by ' + schoolSettingsTechnical.copyrightName : 'Copyright © ' + schoolSettingsTechnical.copyrightYear + ' - ' + schoolSettingsTechnical.copyrightName + ' - All Rights Reserved.'}</p>
 					<div class="whatsapp_button_wrapper d-flex flex-wrap">
-						<a target="_blank" rel="noopener noreferrer" class="flex items-center justify-center py-2 text-white whatsapp_button" href="https://api.whatsapp.com/send?phone=${schoolSettingsOffice.whatsAppCode}${schoolSettingsOffice.whatsAppContact}"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 1.8a8.2 8.2 0 1 1-4.2 15.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 0 1 12 3.8zm4.7 10.3c-.3-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.1-.2 0-.4.1-.5l.4-.5c.1-.2.2-.3.3-.5v-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.9.9-1 2.1-.4 3.4a11 11 0 0 0 4.5 4.5c1.9.9 2.7.8 3.4.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.6-.3z"></path></svg>Need support for enrolment</a>
+						<a target="_blank" rel="noopener noreferrer" class="flex items-center justify-center py-2 text-white whatsapp_button" href="https://api.whatsapp.com/send?phone=${schoolSettingsOffice.whatsAppCode}${schoolSettingsOffice.whatsAppContact}">Enrollment Support on&nbsp;<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 1.8a8.2 8.2 0 1 1-4.2 15.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 0 1 12 3.8zm4.7 10.3c-.3-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.1-.2 0-.4.1-.5l.4-.5c.1-.2.2-.3.3-.5v-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.9.9-1 2.1-.4 3.4a11 11 0 0 0 4.5 4.5c1.9.9 2.7.8 3.4.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.6-.3z"></path></svg> WhatsApp</a>
 					</div>
+					<p class="copyRights">${schoolSettingsTechnical.isCoPoweredBy != null ? 'Powered by ' + schoolSettingsTechnical.copyrightName : 'Copyright © ' + schoolSettingsTechnical.copyrightYear + ' - ' + schoolSettingsTechnical.copyrightName + ' - All Rights Reserved.'}</p>
 				</div>
 		</div>`;
 		html += logOutModalContent();
@@ -1171,7 +1230,7 @@ function changeLearningProgramOfPartner(studyingGradeId) {
 		$("#learningProgramPartnerStudent").attr("data-prevSelectedLearningProgram", $("#learningProgramPartnerStudent").val());
 	}
 function getStudentDetailsContent(data, signupType) {
-    var tabindex = 0;
+	var tabindex = 0;
     var signupStudent = data.signupStudent;
     var html = `
 		<h3 class="alternate-txt-color">Student Details</h3>
@@ -2991,8 +3050,13 @@ function getPaymentModeContent(){
 	return html;
 }
 
-function paymentModalContentWithData(cdrDTO){
-	$(".feeDetailsContentDiv").remove();
+// Shared body markup for pay-mode selection (radios + per-mode fee tables + Next button).
+// Used by BOTH #studentPaymentModal (Step 3 -> Step 4 transition, see paymentModalContentWithData
+// below) and the Step 4 review screen's "Selected Fee Plan" section (see feePaymentReview) --
+// both are gated by the SAME SHOW_PAYMENT_OPTION=='Y' condition, so the fee-calculation/table
+// markup and mode-switch behaviour (displayScholorshipDetails/choosePaymentOption) live in one
+// place instead of being duplicated across the two UIs.
+function getPaymentSelectionBodyContent(cdrDTO){
 	var html =
 	'<div class="col-md-12 col-sm-12 col-xs-12 feeDetailsContentDiv">'
 		+'<div class="label-floating feePayMode">'
@@ -3093,7 +3157,7 @@ function paymentModalContentWithData(cdrDTO){
 												+getBookAnEnrollmentTable(cdrDTO)
 											+'</tbody>'
 										+'</table>'
-										+'<div id="BookEnrollmentSeat">Reserve an Enrollment Seat Fee of&nbsp;<b>'+cdrDTO.enrollmentFee.enrollmentFeeString+'</b>&nbsp;is non-refundable.</div>';
+										+'<div id="BookEnrollmentSeat" class="p-2">Reserve an Enrollment Seat Fee of&nbsp;<b>'+cdrDTO.enrollmentFee.enrollmentFeeString+'</b>&nbsp;is non-refundable.</div>';
 									}
 									if(cdrDTO.oneTimePayment!=''){
 										html+=
@@ -3113,6 +3177,9 @@ function paymentModalContentWithData(cdrDTO){
 									if(cdrDTO.monthlyFeeDetails!=null && cdrDTO.monthlyFeeDetails!=''){
 										html+=
 										'<table id="installment3-course-fee-details" class="installment3-course-fee-details table table-bordered table-striped without_h_scroll" style="display: none;">'
+											// Same colgroup widths as the FEE SCHEDULE table below so their Description/Fee/Total
+											// columns line up -- two separate <table>s otherwise auto-size independently by content.
+											+'<colgroup><col style="width:60%"><col style="width:20%"><col style="width:20%"></colgroup>'
 											+'<thead class="theme-bg primary-bg white-txt-color">'
 												+'<tr>'
 													+'<th>Description</th>'
@@ -3129,6 +3196,7 @@ function paymentModalContentWithData(cdrDTO){
 												+'<h3 class="secondary-bg text-white py-2" style="margin-bottom:0 !important;text-align:left;letter-spacing:1px;padding-left:15px;font-size:16px">FEE SCHEDULE</h3>'
 											+'</div>'
 											+'<table class="table table-bordered table-striped without_h_scroll">'
+												+'<colgroup><col style="width:60%"><col style="width:20%"><col style="width:20%"></colgroup>'
 												+'<thead class="theme-bg primary-bg white-txt-color">'
 													// +'<tr>'
 													// 	+'<th>Description</th>'
@@ -3170,7 +3238,11 @@ function paymentModalContentWithData(cdrDTO){
 						+'<div class="row">'
 							// +'<div class="col-md-10"></div>'
 							+'<div class="col-md-12 text-center mt-2">'
-								+'<button type="button" class="cutom-btn primary-bg white-txt-color" style="width:auto !important;" onclick="choosePaymentOption();">Next</button>'
+								// No submit button here anymore -- this used to call
+								// choosePaymentOption() to persist the chosen plan. That is now
+								// done by the page's "Final Step" button itself (see
+								// showPaymentModal()), which calls choosePaymentOption() first and
+								// only proceeds to the payment gateway on success.
 							+'</div>'
 						+'</div>'
 					+'</div>'
@@ -3178,8 +3250,28 @@ function paymentModalContentWithData(cdrDTO){
 			+'</div>'
 		+'</div>'
 	+'</div>';
-	$("#studentPaymentModal .modal-body").append(html);
+	return html;
+}
 
+function paymentModalContentWithData(cdrDTO){
+	$(".feeDetailsContentDiv").remove();
+	$("#studentPaymentModal .modal-body").append(getPaymentSelectionBodyContent(cdrDTO));
+}
+
+// Re-applies the same radio-state/table-visibility wiring callForPaymentModeSelection() applies
+// after building the modal's body, so a reused copy of getPaymentSelectionBodyContent() (e.g. on
+// the review screen, via feePaymentReview) shows the correct mode checked and its matching table
+// visible instead of everything hidden.
+function initPaymentSelectionUI(payMode){
+	// .feeDetailsContentDiv is display:none by default (style.css) -- callForPaymentModeSelection()
+	// always reveals it explicitly after building the modal's body; do the same here so a reused
+	// copy (e.g. the review screen's "Selected Fee Plan" section) isn't left hidden.
+	$(".feeDetailsContentDiv").show();
+	$('#payMode').val(payMode);
+	$(".radio-payment-option input:radio[name=payModeCheckboxes]").unbind().bind("change", function () {
+		radioBtnChecked();
+	});
+	selectPaymentmentMethod(true);
 }
 
 function getReviewAndPayRendered(data){
@@ -3192,6 +3284,12 @@ function getReviewAndPayRendered(data){
 	window.__lastReviewData = data;
 	$('#signupStage4Content').show();
 	$('#signupStage4Content').html(getReviewAndPayContent(data));
+	// Reused #studentPaymentModal body content (see feePaymentReview/getPaymentSelectionBodyContent)
+	// needs the same post-render init the modal itself gets in callForPaymentModeSelection, so the
+	// correct mode shows checked and its matching fee table visible instead of all hidden.
+	if(SHOW_PAYMENT_OPTION=='Y' && data.signupCourse!=null && data.feePaymentDetailsResponse!=null && !data.customPaymentEnabled){
+		initPaymentSelectionUI(data.signupCourse.payMode);
+	}
 	// $("#reference_number, #logout_modal_logout, #goToDashboardWarningMessage").remove();
 	// $("body").append();
 	
@@ -3296,17 +3394,17 @@ function getReviewAndPayRendered(data){
 					</a>
 				</div>
 				<div class="fixed-footer">
-					<p class="copyRights">${copyrightText}</p>
 					<div class="whatsapp_button_wrapper d-flex flex-wrap">
 						<a target="_blank" rel="noopener noreferrer"
 						class="flex items-center justify-center py-2 text-white whatsapp_button"
 						href="https://api.whatsapp.com/send?phone=${schoolSettingsOffice.whatsAppCode}${schoolSettingsOffice.whatsAppContact}">
-							<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="#fff">
+							
+							Enrollment Support on&nbsp;<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="#fff">
 								<path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 1.8a8.2 8.2 0 1 1-4.2 15.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 0 1 12 3.8zm4.7 10.3c-.3-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.1-.2 0-.4.1-.5l.4-.5c.1-.2.2-.3.3-.5v-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.9.9-1 2.1-.4 3.4a11 11 0 0 0 4.5 4.5c1.9.9 2.7.8 3.4.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.6-.3z"></path>
-							</svg>
-							Need support for enrolment
+							</svg> WhatsApp
 						</a>
 					</div>
+					<p class="copyRights">${copyrightText}</p>
 				</div>`
 			);
 		});
@@ -3354,7 +3452,7 @@ function getReviewAndPayContent(data){
 			+'</div>'
 		+'</div>'
 	+'</section>';
-	html+='<div class="text-center font-sm-12 mt-4 full review_currency_note"><b>Note:</b> All fees mentioned above are in US Dollars</div>';
+	// html+='<div class="text-center font-sm-12 mt-4 full review_currency_note"><b>Note:</b> All fees mentioned above are in US Dollars</div>';
 	// +bookAnEnrollmentTNCModal(data)
 	html += referenceNumberModal(data);
 	html += logoutModalLogout(data);
@@ -4180,61 +4278,95 @@ function feePaymentReview(data){
 	var cdrDTO=data.feePaymentDetailsResponse;
 	var html=
 	'<div class="full amount-description payabledetails" schoolId="'+data.schoolId+'" userPaymentDetailsId="'+data.userPaymentDetailsId+'" entityType="'+data.entityType+'" entityId="'+data.entityId+'" paidByUserId="'+data.userId+'" >'
-		+'<h3 style="margin-bottom:15px;" class="alternate-txt-color">'
-			+data.feeSetionTitile;
-			if(!data.customPaymentEnabled){
-				// if(cdrDTO.monthlyFeeDetails!=null && cdrDTO.monthlyFeeDetails.monthlyFees.length>0){
-				// 	html+='<span class="primary-bg change-grade" onclick="moveStep(\'prev\')">Change Plan <i class="fa fa-exchange"></i></span>';
-				// }
-			}
+		// +'<h3 style="margin-bottom:15px;" class="alternate-txt-color">'
+		// 	+data.feeSetionTitile;
+		// 	if(!data.customPaymentEnabled){
+		// 		// if(cdrDTO.monthlyFeeDetails!=null && cdrDTO.monthlyFeeDetails.monthlyFees.length>0){
+		// 		// 	html+='<span class="primary-bg change-grade" onclick="moveStep(\'prev\')">Change Plan <i class="fa fa-exchange"></i></span>';
+		// 		// }
+		// 	}
 
-		html+='</h3>'
-		+'<div class="table-responsive">'
-			+'<table class="table-style">'
-				+'<thead>'
-					+'<tr>'
-						+'<th class="th" style="width:60%">Description</th>'
-						+'<th class="th" style="text-align:center;width:20%">Fee</th>'
-						+'<th class="th" style="text-align:center;width:20%">Total</th>'
-					+'</tr>'
-				+'</thead>'
-				+'<tbody>';
-				if(signupCourse.payMode == 'registration'){
-					html+=getBookAnEnrollmentTable(cdrDTO);
-				}else if(signupCourse.payMode == 'annually'){
-					html+=getAnnualPaymentTable(cdrDTO);
-				}else if(signupCourse.payMode == 'twoMonthly' || signupCourse.payMode == 'threeMonthly' || signupCourse.payMode == 'sixMonthly'){
-					html+=getMonthlyPaymentTable(cdrDTO);
-				}else if(signupCourse.payMode == 'c_installment' || signupCourse.payMode == 'c_annually'){
-					html+=getCustomizedPaymentTable(cdrDTO);
-				}
-				html+=
-				'</tbody>'
-			+'</table>';
-			if(signupCourse.payMode == 'twoMonthly' || signupCourse.payMode == 'threeMonthly' || signupCourse.payMode == 'sixMonthly'){
-				html+=
-				'<div>'
-					+'<br/>'
-					+'<h3 class="primary-txt-color" style="margin-bottom:0 !important;text-align:left">FEE SCHEDULE</h3>'
-				+'</div>'
+		// html+='</h3>';
+		// Previously this rendered a single, read-only table for the already-chosen
+		// signupCourse.payMode only (no mode picker). It is now replaced below by the SAME
+		// body markup as #studentPaymentModal -- reused via getPaymentSelectionBodyContent()
+		// -- so the "Selected Fee Plan" section and the modal are never both shown for the
+		// same SHOW_PAYMENT_OPTION=='Y' condition (see getReviewAndPayContent). Left here,
+		// commented, for reference:
+		// html+=
+		// '<div class="table-responsive">'
+		// 	+'<table class="table-style">'
+		// 		+'<thead>'
+		// 			+'<tr>'
+		// 				+'<th class="th" style="width:60%">Description</th>'
+		// 				+'<th class="th" style="text-align:center;width:20%">Fee</th>'
+		// 				+'<th class="th" style="text-align:center;width:20%">Total</th>'
+		// 			+'</tr>'
+		// 		+'</thead>'
+		// 		+'<tbody>';
+		// 		if(signupCourse.payMode == 'registration'){
+		// 			html+=getBookAnEnrollmentTable(cdrDTO);
+		// 		}else if(signupCourse.payMode == 'annually'){
+		// 			html+=getAnnualPaymentTable(cdrDTO);
+		// 		}else if(signupCourse.payMode == 'twoMonthly' || signupCourse.payMode == 'threeMonthly' || signupCourse.payMode == 'sixMonthly'){
+		// 			html+=getMonthlyPaymentTable(cdrDTO);
+		// 		}else if(signupCourse.payMode == 'c_installment' || signupCourse.payMode == 'c_annually'){
+		// 			html+=getCustomizedPaymentTable(cdrDTO);
+		// 		}
+		// 		html+=
+		// 		'</tbody>'
+		// 	+'</table>';
+		// 	if(signupCourse.payMode == 'twoMonthly' || signupCourse.payMode == 'threeMonthly' || signupCourse.payMode == 'sixMonthly'){
+		// 		html+=
+		// 		'<div>'
+		// 			+'<br/>'
+		// 			+'<h3 class="primary-txt-color" style="margin-bottom:0 !important;text-align:left">FEE SCHEDULE</h3>'
+		// 		+'</div>'
+		// 		+'<table class="table-style">'
+		// 			+'<thead>'
+		// 			+'</thead>'
+		// 			+'<tbody>';
+		// 				html+=monthlyFeeShchedule(cdrDTO)
+		// 			+'</tbody>'
+		// 		+'</table>'
+		// 	}
+		// html+='</div>'
+
+		if(data.customPaymentEnabled){
+			// Custom/advance fee plan: the schedule is fixed server-side (set by
+			// counselor/admin), not something the student picks -- so show its schedule
+			// (getCustomizedPaymentTable, the same calc/table logic the plan-picker body also
+			// reuses) instead of the one-time/installments radio picker, with its own
+			// Confirm & Pay button going straight to the payment gateway. Same .payabledetails
+			// attributes on this wrapper that other "Pay Now"-style buttons across the app use.
+			html+=
+			'<div class="table-responsive">'
 				+'<table class="table-style">'
 					+'<thead>'
-						// +'<tr>'
-						// 	+'<th class="th" style="width:60%">Description</th>'
-						// 	+'<th class="th" style="text-align:center;width:20%">Total</th>'
-						// 	+'<th class="th" style="text-align:center;width:20%">Paying</th>'
-						// +'</tr>'
+						+'<tr>'
+							+'<th class="th" style="width:60%">Description</th>'
+							+'<th class="th" style="text-align:center;width:20%">Fee</th>'
+							+'<th class="th" style="text-align:center;width:20%">Total</th>'
+						+'</tr>'
 					+'</thead>'
-					+'<tbody>';
-						html+=monthlyFeeShchedule(cdrDTO)
+					+'<tbody>'
+						+getCustomizedPaymentTable(cdrDTO)
 					+'</tbody>'
 				+'</table>'
-			}
-		
-		html+='</div>'
-		
-	+'</div>';
-	
+			+'</div>'
+			+'<div class="col-md-12 col-sm-12 col-xs-12 text-center mt-2">'
+				// getCustomizedPaymentTable(data) above calls $('#custom-payment-button').show() --
+				// harmless here since this button is rendered visible already (no inline
+				// display:none to undo); that call runs while this is still a string being
+				// built, before the button exists in the DOM to hide/show in the first place.
+				// +'<button type="button" id="custom-payment-button" class="cutom-btn primary-bg white-txt-color" style="width:auto !important;" onclick="getPaymentGatewaysOptions(\''+data.schoolId+'\',\''+data.schoolId+'\',\''+data.userPaymentDetailsId+'\',\''+data.entityType+'\',\''+data.entityId+'\',\''+data.userId+'\');">Confirm & Pay</button>'
+			+'</div>';
+		}else{
+			html += getPaymentSelectionBodyContent(cdrDTO);
+		}
+
+	html+='</div>';
+
 	return html;
 }
 

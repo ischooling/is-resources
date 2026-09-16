@@ -72,11 +72,19 @@ var IGNORECOUNTRYARRAY = [
   "HM",
   "TF",
   "UM",
+  "AN",
+  "YU",
+  "PN",
+  "GS",
   "aq",
   "bv",
   "hm",
   "tf",
   "um",
+  "an",
+  "yu",
+  "pn",
+  "gs",
 ];
 var ACTIVITY_CLASS_START_TIME=[];
 var globalEntityId = "";
@@ -1519,7 +1527,7 @@ function validateRequestForEmailCheck(formId) {
   ) {
     $("#" + formId + " #email").css("color", "#a9a9a9");
     validEndInvalidField(false, "email");
-    showMessageTheme2(false, "email", "Student email is either empty or invalid.");
+    showMessageTheme2(false, "email", "Email is either empty or invalid.");
     return false;
   }
   validEndInvalidField(true, "email");
@@ -6278,33 +6286,6 @@ function hasSequentialChars(password) {
   return false;
 }
 
-function hasKeyboardPattern(password) {
-  var value = (password || "").toLowerCase();
-  var keyboardPatterns = [
-    "qwertyuiop",
-    "poiuytrewq",
-    "asdfghjkl",
-    "lkjhgfdsa",
-    "zxcvbnm",
-    "mnbvcxz",
-    "1234567890",
-    "0987654321",
-  ];
-  for (var i = 0; i < keyboardPatterns.length; i++) {
-    var sequence = keyboardPatterns[i];
-    for (var j = 0; j <= sequence.length - 4; j++) {
-      if (value.includes(sequence.substring(j, j + 4))) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-function hasRepeatedChars(password) {
-  return /(.)\1\1/.test(password || "");
-}
-
 // function checkPasswordStrength(
 //   src,
 //   formID,
@@ -6443,50 +6424,60 @@ elementId,
 passwordType,
 matchElementId
 ) {
-var passwodSuggessionHTML =
+var isConfirmOnlyPasswordBox = passwordType == "CP" && formID == "userSignupForm";
+
+if (isConfirmOnlyPasswordBox) {
+var password = $("#" + formID + " #" + elementId).val();
+var confirmPassword = matchElementId ? $("#" + formID + " #" + matchElementId).val() : "";
+var isPasswordValid = password === confirmPassword;
+
+if (password.length === 0) {
+if (typeof validEndInvalidField === "function") validEndInvalidField(null, elementId);
+showElementErrorMessage(true, elementId, "");
+return false;
+}
+
+showElementErrorMessage(isPasswordValid, elementId, isPasswordValid ? "" : "Password and confirm password should be same");
+if (typeof validEndInvalidField === "function") validEndInvalidField(isPasswordValid, elementId);
+return isPasswordValid;
+}
+
+var passwodSuggessionHTML;
+
+passwodSuggessionHTML =
 '<div class="password-sugession">' +
 '<h6 class="password-sugession-title"><b>Password must include at least:</b></h6>' +
 
 
-'<p class="password-sugession-type password-uppercase-letter">' +
+'<p class="password-sugession-type password-case">' +
 '<span class="ps-valid" style="display:none"><i class="fa fa-check"></i></span>' +
 '<span class="ps-invalid" style="display:none"><i class="fa fa-times"></i></span>' +
-'<span class="ps-dot">.</span> 1 uppercase letter</p>' +
+'<span class="ps-dot">.</span> 1 UPPER and lower case letter (A-Z , a-z)</p>' +
 
-'<p class="password-sugession-type password-lowercase-letter">' +
+'<p class="password-sugession-type password-number-special">' +
 '<span class="ps-valid" style="display:none"><i class="fa fa-check"></i></span>' +
 '<span class="ps-invalid" style="display:none"><i class="fa fa-times"></i></span>' +
-'<span class="ps-dot">.</span> 1 lowercase letter</p>' +
-
-'<p class="password-sugession-type password-special-letter">' +
-'<span class="ps-valid" style="display:none"><i class="fa fa-check"></i></span>' +
-'<span class="ps-invalid" style="display:none"><i class="fa fa-times"></i></span>' +
-'<span class="ps-dot">.</span> 1 special character (! @ # $ % & *)</p>' +
-
-'<p class="password-sugession-type password-number">' +
-'<span class="ps-valid" style="display:none"><i class="fa fa-check"></i></span>' +
-'<span class="ps-invalid" style="display:none"><i class="fa fa-times"></i></span>' +
-'<span class="ps-dot">.</span> 1 number</p>' +
+'<span class="ps-dot">.</span> 1 number and 1 special character (! @ # $ % & *)</p>' +
 
 '<p class="password-sugession-type password-length">' +
 '<span class="ps-valid" style="display:none"><i class="fa fa-check"></i></span>' +
 '<span class="ps-invalid" style="display:none"><i class="fa fa-times"></i></span>' +
-'<span class="ps-dot">.</span> min 8 characters & max 20 characters</p>' +
+'<span class="ps-dot">.</span> Minimum 8 to 20 characters</p>' +
 
 '<p class="password-sugession-type password-sequence">' +
 '<span class="ps-valid" style="display:none"><i class="fa fa-check"></i></span>' +
 '<span class="ps-invalid" style="display:none"><i class="fa fa-times"></i></span>' +
-'<span class="ps-dot">.</span> no consecutive sequences (e.g. 123, abc, zyx)</p>' +
+'<span class="ps-dot">.</span> No back-to-back patterns (123, abc, zyx)</p>';
 
-'<p class="password-sugession-type password-keyboard-pattern">' +
-'<span class="ps-valid" style="display:none"><i class="fa fa-check"></i></span>' +
-'<span class="ps-invalid" style="display:none"><i class="fa fa-times"></i></span>' +
-'<span class="ps-dot">.</span> no keyboard patterns (e.g. qwerty, asdf)</p>' +
+// '<p class="password-sugession-type password-keyboard-pattern">' +
+// '<span class="ps-valid" style="display:none"><i class="fa fa-check"></i></span>' +
+// '<span class="ps-invalid" style="display:none"><i class="fa fa-times"></i></span>' +
+// '<span class="ps-dot">.</span> no keyboard patterns (qwerty, asdf)</p>' +
 
-'<p class="password-sugession-type password-repeat">' +
-'<span class="ps-valid" style="display:none"><i class="fa fa-check"></i></span>' +
-'<span class="ps-invalid" style="display:none"><i class="fa fa-times"></i></span>' +
-'<span class="ps-dot">.</span> no repeated characters (e.g. aaa, 111)</p>';
+// '<p class="password-sugession-type password-repeat">' +
+// '<span class="ps-valid" style="display:none"><i class="fa fa-check"></i></span>' +
+// '<span class="ps-invalid" style="display:none"><i class="fa fa-times"></i></span>' +
+// '<span class="ps-dot">.</span> no repeated characters (e.g. aaa, 111)</p>';
 
 
 if (passwordType == "CP") {
@@ -6511,7 +6502,11 @@ parentElement.append(passwodSuggessionHTML);
 }
 
 var suggestionBox = parentElement.find(".password-sugession");
+var isActiveField = document.activeElement === inputElement.get(0);
+if (isActiveField) {
 $(".password-sugession").not(suggestionBox).hide();
+$("#" + formID + " #" + elementId + "-error-message").html("");
+}
 
 var password = inputElement.val();
 var confirmPassword = matchElementId
@@ -6531,11 +6526,9 @@ var isSpecialCharValid = specialCharRegex.test(password);
 var isLengthValid = password.length >= 8 && password.length <= 20;
 
 var hasSequence = hasSequentialChars(password);
-var hasKeyboard = hasKeyboardPattern(password);
-var hasRepeat = hasRepeatedChars(password);
 
 if (password.length === 0) {
-suggestionBox.show();
+suggestionBox.hide();
 resetValidationUI(suggestionBox);
 if (typeof validEndInvalidField === "function") {
 validEndInvalidField(null, elementId);
@@ -6545,26 +6538,14 @@ return false;
 
 updateValidationUI(
 suggestionBox,
-".password-lowercase-letter",
-isLowercaseValid
+".password-case",
+isLowercaseValid && isUppercaseValid
 );
 
 updateValidationUI(
 suggestionBox,
-".password-uppercase-letter",
-isUppercaseValid
-);
-
-updateValidationUI(
-suggestionBox,
-".password-number",
-isDigitValid
-);
-
-updateValidationUI(
-suggestionBox,
-".password-special-letter",
-isSpecialCharValid
+".password-number-special",
+isDigitValid && isSpecialCharValid
 );
 
 updateValidationUI(
@@ -6577,18 +6558,6 @@ updateValidationUI(
 suggestionBox,
 ".password-sequence",
 !hasSequence
-);
-
-updateValidationUI(
-suggestionBox,
-".password-keyboard-pattern",
-!hasKeyboard
-);
-
-updateValidationUI(
-suggestionBox,
-".password-repeat",
-!hasRepeat
 );
 
 if (passwordType == "CP") {
@@ -6605,9 +6574,7 @@ isUppercaseValid &&
 isDigitValid &&
 isSpecialCharValid &&
 isLengthValid &&
-!hasSequence &&
-!hasKeyboard &&
-!hasRepeat;
+!hasSequence;
 
 if (passwordType == "CP") {
 isPasswordValid =
@@ -6615,10 +6582,12 @@ isPasswordValid &&
 password === confirmPassword;
 }
 
+if (isActiveField) {
 if (isPasswordValid) {
 suggestionBox.hide();
 } else {
 suggestionBox.show();
+}
 }
 if (typeof validEndInvalidField === "function") {
 validEndInvalidField(isPasswordValid, elementId);
@@ -8975,4 +8944,41 @@ function getCurrentDateTimeByUserTimeZone(currentTime) {
     }
 
     return currentDateTimeByUserTimeZone;
+}
+/** Detects the visitor's country by IP and returns the currency conversion DTO.
+ * Usage: const conversion = await getBrowserCurrencyConversion();
+ * amount is in USD and defaults to 1. Rejects if detection or conversion fails.
+ */
+async function getBrowserCurrencyConversion(amount = 1) {
+    if ((typeof amount !== 'number' && typeof amount !== 'string') ||
+            String(amount).trim() === '' || !Number.isFinite(Number(amount)) || Number(amount) < 0) {
+        throw new Error('USD amount must be a non-negative number');
+    }
+
+    let locationData;
+    if (typeof LOCATION_SERVICE_BYPASS !== 'undefined' && String(LOCATION_SERVICE_BYPASS) === 'true') {
+        locationData = JSON.parse(DEFAULT_LOCATION);
+    } else {
+        locationData = await $.ajax({
+            global: false,
+            type: 'GET',
+            url: PRO_IP_API_URL,
+            dataType: 'json',
+            timeout: 15000
+        });
+    }
+
+    const countryCode = String(locationData && locationData.countryCode || '').trim().toUpperCase();
+    if (!/^[A-Z]{2}$/.test(countryCode) || locationData.status === 'fail') {
+        throw new Error('Unable to detect the browser country');
+    }
+
+    return await $.ajax({
+        global: false,
+        type: 'GET',
+        url: BASE_URL + CONTEXT_PATH + 'common/currency-conversion',
+        data: { countryCode: countryCode, amount: String(amount).trim() },
+        dataType: 'json',
+        timeout: 35000
+    });
 }

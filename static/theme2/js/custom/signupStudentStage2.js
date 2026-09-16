@@ -207,7 +207,7 @@ function validateRequestForSignupParent(){
 	if(pcModeWhatsapp == "Y" || pcModeCall == "Y" || pcModeEmail == "Y"){
 		
 	}else{
-		showMessageTheme2(0, 'How to Contact You? is required');
+		showMessageTheme2(0, 'Please select how you would like to be contacted.');
 		return false
 	}
 //	if ($("#signupStage2 #countryCodeParent").val()==null) {
@@ -645,10 +645,7 @@ function callForParentSelection(studentUserId) {
 					}
 				}
             	} else {
-					var payload = {
-						'userId' : USER_ID
-					};	
-					var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,true,'get-commission-pay-by',payload,'student/enrollment');
+					var responseData = await getCommissionPayByData();
 					SHOW_PAYMENT_OPTION = responseData.showPaymentOption;
 					if(responseData.signupType == 'Online' ){
 						if (SHOW_PAYMENT_OPTION == 'Y') {
