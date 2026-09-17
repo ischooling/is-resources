@@ -351,7 +351,7 @@ position:relative;
 }
 
 .custom-field-scope .custom-field .iti .iti__selected-flag{
-    height:44px;
+    height:43px;
     align-items:center;
     padding:0 8px 0 10px;
 }
@@ -823,6 +823,49 @@ function refreshCustomFieldState(context) {
     customField.toggleClass("has-value", hasValue);
   });
 }
+function initTooltipLongPressForTouch() {
+  if (window.__tooltipLongPressBound) {
+    return;
+  }
+  window.__tooltipLongPressBound = true;
+  var LONG_PRESS_MS = 500;
+  var touchTimer = null;
+  var activeTooltipEl = null;
+
+  function clearTouchTimer() {
+    if (touchTimer) {
+      clearTimeout(touchTimer);
+      touchTimer = null;
+    }
+  }
+  function hideActiveTooltip() {
+    if (activeTooltipEl) {
+      $(activeTooltipEl).tooltip('hide');
+      activeTooltipEl = null;
+    }
+  }
+  $(document).on('touchstart', '[data-toggle="tooltip"]', function () {
+    var el = this;
+    clearTouchTimer();
+    touchTimer = setTimeout(function () {
+      hideActiveTooltip();
+      $(el).tooltip('show');
+      activeTooltipEl = el;
+    }, LONG_PRESS_MS);
+  });
+  $(document).on('touchmove touchcancel', '[data-toggle="tooltip"]', function () {
+    clearTouchTimer();
+  });
+  $(document).on('touchend', '[data-toggle="tooltip"]', function () {
+    clearTouchTimer();
+    setTimeout(hideActiveTooltip, 1200);
+  });
+  $(document).on('touchstart', function (e) {
+    if (activeTooltipEl && !$(e.target).closest('[data-toggle="tooltip"]').is(activeTooltipEl)) {
+      hideActiveTooltip();
+    }
+  });
+}
 $(document).ready(function () {
   var stickyHeaderHeight = $('.sticky-header').height();
   $('.app-container').css({ "margin-top": stickyHeaderHeight - 59 });
@@ -878,6 +921,7 @@ $(document).ready(function () {
     $("head").append(`<style>.loader-style.hide-loader{display: none !important;}</style>`)
   }
   //$('[data-toggle="tooltip"]').tooltip();
+  initTooltipLongPressForTouch();
   $('.daterange').on('apply.daterangepicker', function(ev, picker) {
       $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
     });
@@ -6660,6 +6704,10 @@ $(document).on("submit", "form", function (event) {
     event.preventDefault();
     return false;
   }
+});
+
+$(document).on("click", function (event) {
+  $('body').find('[data-toggle="tooltip"]').tooltip("hide");
 });
 
 $(document).on("click", "#changepassword", function (event) {

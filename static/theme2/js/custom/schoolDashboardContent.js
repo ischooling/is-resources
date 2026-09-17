@@ -27,7 +27,7 @@ async function renderSchoolDashboard(title, roleAndModule, SCHOOL_ID, USER_ID,US
 	if(SCHOOL_DIARY_INITIATES_ROLE){
 		renderSchoolDaiaryBtnCount();
 	}
-	
+	$('body').find('[data-toggle="tooltip"]').tooltip();
 }
 
 function getSchoolDashboardContent(title, userCountList){

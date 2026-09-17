@@ -90,10 +90,10 @@ textarea.form-control-field{height: inherit !important;}
 .actions ul {display: flex;justify-content: space-between;}
 .actions ul.step-4 {justify-content: center;}
 .actions ul.step-4 li:first-child {display: none}
-.actions li a {border: none;display: inline-flex;height: 42px;width: 132px;align-items: center;color: #fff;cursor: pointer;background: var(--pc);text-transform: capitalize;justify-content: center;letter-spacing: 1px;font-size: 14px;border-radius: 3px;box-shadow: 0 0px 2px 0px rgba(0, 0, 0, 0.5), 0 7px 10px -10px rgb(221 217 221 / 40%);border: 1px solid transparent;transition: all 0.5s ease-in-out;-webkit-transition: all 0.5s ease-in-out}
+.actions li a {border: none;display: inline-flex;padding:0.1rem .5rem;align-items: center;color: #fff;cursor: pointer;background: var(--pc);text-transform: capitalize;justify-content: center;letter-spacing: 1px;font-size: 14px;border-radius: 3px;box-shadow: 0 0px 2px 0px rgba(0, 0, 0, 0.5), 0 7px 10px -10px rgb(221 217 221 / 40%);border: 1px solid transparent;transition: all 0.5s ease-in-out;-webkit-transition: all 0.5s ease-in-out}
 .actions li a:hover {/*background: #fff !important;color: var(--pc) !important;*/ background: #fff;color: var(--pc); border-color: var(--pc);transition: all 0.5s ease-in-out;-webkit-transition: all 0.5s ease-in-out}
-.actions li:first-child a {width: 97px;}
-.actions li:last-child a {width: 234px;}
+
+
 /* .courses-category-wrapper{min-height:200px;} */
 @media (max-width: 991px) {
   .steps ul li .step-arrow {top: 33%;left: 145%;}
@@ -246,7 +246,7 @@ textarea.form-control-field{height: inherit !important;}
 .table-responsive .table-style tr th.th {background: #fff;color: #333;border-right: #d2d2d2}
 .table-responsive .table-style tr th.th:last-child {border-right-color: rgba(0, 0, 0, 0.1)}
 .edit-btn {width: 100%;float: left;text-align: right;margin-top: 12px;}
-.edit-btn button,.edit-btn a {display: inline-block;padding: 8px 24px;border-radius: 4px;background: var(--pc);color: #fff;border: 0;width: auto;}
+.edit-btn button,.edit-btn a {display: inline-block;padding: 0.1rem 0.5rem;border-radius: 4px;background: var(--pc);color: #fff;border: 0;width: auto;}
 .edit-btn a {width: 100% !important;text-align: center}
 .edit-btn a:hover,.edit-btn a:focus{color: white !important}
 .edit-btn a i,.edit-btn button i {line-height: 20px;position: relative;top: inherit;right: inherit;transform: translate(0);}
@@ -482,8 +482,8 @@ label.error {top: 100%;position: absolute;left: 0;color: red !important;font-siz
 .k8-theme-text-alt{color:var(--pc);}
 
 .upload-btn-wrapper{width: 100%;text-align: right;display:flex;position: relative;margin-top: 5px;}
-.upload-btn-wrapper .file-input{width:37px;height: 37px;font-size: 0;cursor: pointer;display: inline-block;position: absolute;right: 0;top: 0;opacity: 0;z-index: 2}
-.upload-btn-wrapper .upload-btn{background: #fff;color: var(--pc);display: inline-block;padding: 8px;width: 37px;text-align: center;box-shadow: 0 0 2px 1px rgba(0, 0, 0, 0.1);position: relative;z-index: 1;cursor: pointer;}
+.upload-btn-wrapper .file-input{width:37px;height: 100%;font-size: 0;cursor: pointer;display: inline-block;position: absolute;right: 0;top: 0;opacity: 0;z-index: 2}
+.upload-btn-wrapper .upload-btn{background: #fff;color: var(--pc);display: inline-flex;padding: 8px;align-items: center; justify-content: center; width: 37px;text-align: center;box-shadow: 0 0 2px 1px rgba(0, 0, 0, 0.1);position: relative;z-index: 1;cursor: pointer;}
 .upload-btn i{position: relative;right: inherit;top:inherit;transform: translateY(0);}
 .uploaded-file{box-shadow: 0 0 2px 1px rgba(0, 0, 0, 0.1);padding: 8px;flex: 1;margin-right: 5px;  text-align: left;}
 .add-upload-btn{cursor: pointer;}

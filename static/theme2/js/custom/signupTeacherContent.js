@@ -686,7 +686,7 @@ function getTeacherProfessionalDetailsContent(stup){
                 </div>
             </div>
         </div>
-        <div class="form-row">
+        <div class="form-row mb-4">
             <div class="form-holder">
                 <div class="icon-field">
                     <a href="javascript:void(0)" class="select_grade custom-btn primary-bg white-txt-color"

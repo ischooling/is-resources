@@ -191,80 +191,81 @@ async function renderCounselorDashboard(title, roleAndModule, schoolId, userId, 
 
 		initEditor(1, 'description','Please start here', false);
 	}
+
+	$('body').find('[data-toggle="tooltip"]').tooltip();
 }
 {/* <div class="page-title-subheading">${title}</div> */}
 function dashboardCounselorContent(title, roleAndModule, schoolId, userId, role, commissionRate){
-	var html = '';
-	if(USER_ROLE=='B2B_LEAD'){
-		html+=`<div class="app-page-title mb-3 py-2">
-				<div class="page-title-wrapper">
-					<div class="page-title-heading">
-						<div class="page-title-icon"><i class="pe-7s-users text-primary"></i></div>
-						<div>
-							<span class="text-primary welcome-name-text">Welcome ${USER_FULL_NAME}</span>
-							
-						</div>
-					</div>
-				</div>
-			</div>`;
-		html+=getCounselorB2BContent1();
-	}else{
-		var dataReview = getCounselorReviewDetails("CUSTOM","reviewCounselor",'','', USER_ID);
-		var data=getCounselorDetails(userId);
-		localStorage.setItem('convertYear',data.counselor.convertYear);
-		localStorage.setItem('referralCode'+USER_ID,data.schoolServiceLinks.referralCode);
-		localStorage.setItem('originalPartnerType'+USER_ID,data.originalPartnerType);
-		html += 
-			`<div class="app-page-title mb-3 py-2">
-				<div class="page-title-wrapper">
-					<div class="page-title-heading">
-					  <div class="page-title-icon">
-					    <img src="${PATH_FOLDER_IMAGE2}/Icon/sidebar/Dashboard.png" style="max-width:200px; width: 90%; margin-right: auto; display: flex;"></i>
-						</div>
-
-						<div>
-							<span class="text-primary welcome-name-text">Welcome ${data.userFullName}</span>
-						</div>
-					</div>
-					<div class="page-title-actions mr-auto position-relative">
-						
-					</div>
-					<div class="bg-primary text-white px-3 py-1 rounded-10">
-						<div class="d-flex flex-wrap align-items-center">
-							<span class="float-left font-weight-semi-bold font-size-14 mr-2">Enrollment Partner Code</span>
-							<span class="float-right font-14 ml-3">${data.cityName} | ${data.countryName}</span>    
-						</div>
-						<div>
-							<style>.referral-code-chip{color:#fff !important;}.referral-code-chip:hover,.referral-code-chip:focus{color:#fff !important;}</style>
-							<a href="javascript:void(0)" class="referral-code-chip rounded-10 font-weight-semi-bold py-0 px-2 d-inline-flex align-items-center mt-1 text-decoration-none" style="background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.6);" onclick="copyURL('copyCode1','copy-msg-1')">${data.schoolServiceLinks.referralCode} <i class="fa fa-copy float-right ml-3"></i></a>    
-							<b class="copy-msg-1 text-white ml-1" style="color:#fff !important"></b>
-							<div style="top:18px;left:0;position:absolute;">
-								<input type="text" id="copyCode1" value="${data.schoolServiceLinks.referralCode}" style="opacity:0;height:0px">
+	var html = '<div class="main-card mb-3 pr-4">';
+		if(USER_ROLE=='B2B_LEAD'){
+			html+=`<div class="app-page-title mb-3 py-2">
+					<div class="page-title-wrapper">
+						<div class="page-title-heading">
+							<div class="page-title-icon"><i class="pe-7s-users text-primary"></i></div>
+							<div>
+								<span class="text-primary welcome-name-text">Welcome ${USER_FULL_NAME}</span>
+								
 							</div>
 						</div>
 					</div>
-				</div>
-			</div>
-	
-			<div class="main-card mb-3">`
-			// Name/Email/WhatsApp account-manager strip — visible only for USER_ROLE 'B2B_PARTNER'
-			// for now; kept commented (not removed) for every other role in case this gets opened
-			// up again later.
-			if(USER_ROLE=='B2B_PARTNER'){
-				html+=`<div class="mb-3 card border rounded-10">
-					<div class="card-body">`
-						+getAccountManagerDetailsContent(data)
-					html+=`</div>
 				</div>`;
-			}
-			// else{
-			// 	html+=`<div class="mb-3 card border rounded-10">
-			// 		<div class="card-body">`
-			// 			+getAccountManagerDetailsContent(data)
-			// 		html+=`</div>
-			// 	</div>`;
-			// }
-			html+=`<div class="mb-3">`
+			html+=getCounselorB2BContent1();
+		}
+		else{
+			var dataReview = getCounselorReviewDetails("CUSTOM","reviewCounselor",'','', USER_ID);
+			var data=getCounselorDetails(userId);
+			localStorage.setItem('convertYear',data.counselor.convertYear);
+			localStorage.setItem('referralCode'+USER_ID,data.schoolServiceLinks.referralCode);
+			localStorage.setItem('originalPartnerType'+USER_ID,data.originalPartnerType);
+			html += 
+				`<div class="app-page-title mb-3 py-2">
+					<div class="page-title-wrapper">
+						<div class="page-title-heading">
+						<div class="page-title-icon">
+							<img src="${PATH_FOLDER_IMAGE2}/Icon/sidebar/Dashboard.png" style="max-width:200px; width: 90%; margin-right: auto; display: flex;"></i>
+							</div>
+
+							<div>
+								<span class="text-primary welcome-name-text">Welcome ${data.userFullName}</span>
+							</div>
+						</div>
+						<div class="page-title-actions mr-auto position-relative">
+							
+						</div>
+						<div class="bg-primary text-white px-3 py-1 rounded-10">
+							<div class="d-flex flex-wrap align-items-center">
+								<span class="float-left font-weight-semi-bold font-size-14 mr-2">Enrollment Partner Code</span>
+								<span class="float-right font-14 ml-3">${data.cityName} | ${data.countryName}</span>    
+							</div>
+							<div>
+								<style>.referral-code-chip{color:#fff !important;}.referral-code-chip:hover,.referral-code-chip:focus{color:#fff !important;}</style>
+								<a href="javascript:void(0)" class="referral-code-chip rounded-10 font-weight-semi-bold py-0 px-2 d-inline-flex align-items-center mt-1 text-decoration-none" style="background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.6);" onclick="copyURL('copyCode1','copy-msg-1')">${data.schoolServiceLinks.referralCode} <i class="fa fa-copy float-right ml-3"></i></a>    
+								<b class="copy-msg-1 text-white ml-1" style="color:#fff !important"></b>
+								<div style="top:18px;left:0;position:absolute;">
+									<input type="text" id="copyCode1" value="${data.schoolServiceLinks.referralCode}" style="opacity:0;height:0px">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>`
+				// Name/Email/WhatsApp account-manager strip — visible only for USER_ROLE 'B2B_PARTNER'
+				// for now; kept commented (not removed) for every other role in case this gets opened
+				// up again later.
+				if(USER_ROLE=='B2B_PARTNER'){
+					html+=`<div class="mb-3 card border rounded-10">
+						<div class="card-body">`
+							+getAccountManagerDetailsContent(data)
+						html+=`</div>
+					</div>`;
+				}
+				// else{
+				// 	html+=`<div class="mb-3 card border rounded-10">
+				// 		<div class="card-body">`
+				// 			+getAccountManagerDetailsContent(data)
+				// 		html+=`</div>
+				// 	</div>`;
+				// }
+				html+=`<div class="mb-3">`
 					+getLeadDemoCalendarDashboardContent()
 				html+=`</div>
 				<div class="mb-3 card border rounded-10">
@@ -279,37 +280,36 @@ function dashboardCounselorContent(title, roleAndModule, schoolId, userId, role,
 				+`</div>`
 				+getCounselorRevenueContent()
 				+getCounselorEnrollmentStatisticsContent()
-			html+=`</div>`;
-			html+=getRatingPopup();
-			html+=getSelfCounselorReport();
-			html+=getCounselorAddTask(data.timeslotlist);
-			if(data.smsNotificationStatus){
-				var u = new SpeechSynthesisUtterance("");
-					u.volume = 0;
-					speechSynthesis.speak(u);
-				var roleUSER = (data.userRoleStatus)?'ADMIN':'COUNSELOR';
-				CRMNotify.initByRole({ userId: USER_ID, role: roleUSER, apiUrl: '/api/crm/alerts',
-					times: CRMNotify.generateTimes(data.notifySecond, data.startNotiFyTime, data.endNotiFyTime)
-				});
+			
+				html+=getRatingPopup();
+				html+=getSelfCounselorReport();
+				html+=getCounselorAddTask(data.timeslotlist);
+				if(data.smsNotificationStatus){
+					var u = new SpeechSynthesisUtterance("");
+						u.volume = 0;
+						speechSynthesis.speak(u);
+					var roleUSER = (data.userRoleStatus)?'ADMIN':'COUNSELOR';
+					CRMNotify.initByRole({ userId: USER_ID, role: roleUSER, apiUrl: '/api/crm/alerts',
+						times: CRMNotify.generateTimes(data.notifySecond, data.startNotiFyTime, data.endNotiFyTime)
+					});
 
-				// New lead polling — ye initByRole ke baad lagao
-				// notification Close
-				// setInterval(function() {
-				// 	fetch('/api/crm/new-leads?userId=' + USER_ID)
-				// 		.then(function(r) { return r.json(); })
-				// 		.then(function(data) {
-				// 			(data.leads || []).forEach(function(lead) {
-				// 				CRMNotify.newLead(lead.leadNo, lead.leadName, lead.source);
-				// 			});
-				// 			if ((data.leads || []).length > 0) {
-				// 				_lastCheck = new Date().toISOString();
-				// 			}
-				// 		});
-				// }, 10000);
-			}
-
-
-	}
+					// New lead polling — ye initByRole ke baad lagao
+					// notification Close
+					// setInterval(function() {
+					// 	fetch('/api/crm/new-leads?userId=' + USER_ID)
+					// 		.then(function(r) { return r.json(); })
+					// 		.then(function(data) {
+					// 			(data.leads || []).forEach(function(lead) {
+					// 				CRMNotify.newLead(lead.leadNo, lead.leadName, lead.source);
+					// 			});
+					// 			if ((data.leads || []).length > 0) {
+					// 				_lastCheck = new Date().toISOString();
+					// 			}
+					// 		});
+					// }, 10000);
+				}
+		}
+	html+=`</div>`;
 	
 	return html;
 								
@@ -914,8 +914,8 @@ function counselorListContent(title, referralCode){
 
 function pageTitleEnrolledCounselorContent(title){
 	var html = 
-		'<div class="app-page-title mb-3 py-2">'
-			+'<div class="page-title-wrapper">'
+		'<div class="app-page-title mb-3 py-2 pr-4">'
+			+'<div class="page-title-wrapper" style="padding-right:30px">'
 				+'<div class="page-title-heading">'
 					+'<div class="page-title-icon"><i class="pe-7s-users text-primary"></i></div>'
 					+'<h4>'+title+'</h4>'
@@ -927,7 +927,7 @@ function pageTitleEnrolledCounselorContent(title){
 
 function mainCounselorCardEnrolled(referralCode){
 	var html= 
-	'<div class="main-card mb-3 card">'
+	'<div class="main-card mb-3">'
 		+'<div class="card-body">'
 			//+B2BStudentListfilterFormSkeleton()
 			+B2CStudentListfilterForm(referralCode)
@@ -1528,8 +1528,7 @@ function B2CStudentListCommission(studentList){
 
 function getCounselorB2BContent1(){
 	var html='';
-	html+='<div class="main-card mb-3 card">'
-		+'<div class="no-gutters row">'
+	html+='<div class="no-gutters row">'
 		+'	<div class="col-md-6 col-xl-3">'
 		+'		<div class="widget-content">'
 		+'			<div class="widget-content-wrapper">'
@@ -1582,8 +1581,7 @@ function getCounselorB2BContent1(){
 		+'			</div>'
 		+'		</div>'
 		+'	</div>'
-		+'</div>'
-	+'</div>';
+		+'</div>';
 	return html;
 }
 

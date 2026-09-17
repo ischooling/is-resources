@@ -233,7 +233,7 @@ function loginFormContent(userName, fromSpoof){
                 <input name="password" id="password" class="form-control" autocomplete="off"
                     type="password" maxlength="20" value="" describedby="describedby" placeholder=" ">
                 <label class="control-label" for="password">Password</label>
-                <button type="button" class="login-field-action login-field-toggle" aria-label="Show password" onclick="showPassWord('password', 'icon-change')" data-toggle="tooltip" data-placement="auto" title="Show password">
+                <button type="button" class="login-field-action login-field-toggle" aria-label="Show Password" onclick="showPassWord('password', 'icon-change')" data-toggle="tooltip" data-placement="auto" title="Show Password">
                     <i class="fa fa-eye-slash" id="icon-change"></i>
                 </button>
             </div>
@@ -265,7 +265,7 @@ function loginFormContent(userName, fromSpoof){
             </div>
 
             <div class="form-group text-center login-actions">
-                <button type="submit" class="btn primary-bg btn-shadow white-txt-color login-submit-btn" id="loginButton" data-toggle="tooltip" data-placement="auto" title="Click to login">
+                <button type="submit" class="btn primary-bg btn-shadow white-txt-color login-submit-btn" id="loginButton" data-toggle="tooltip" data-placement="auto" title="Click to log in">
                     <span>Log in</span>
                 </button>
                 <div class="login-footer-links">

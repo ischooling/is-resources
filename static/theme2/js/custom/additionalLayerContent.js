@@ -43,7 +43,7 @@ function addtionalLayerContentHeader(){
                     <div style="align-items: center;display: flex; margin-left: auto;padding-right:20px;">
                         <a href="javascript:void(0);"
                             data-toggle="modal" data-target="#logoutWarning"
-                            class="btn-pill btn-shine btn btn-primary">
+                            class="btn-shine btn btn-primary">
                             Log out
                         </a>
                     </div>

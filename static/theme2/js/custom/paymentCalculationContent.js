@@ -7,7 +7,7 @@ function notEligibleForRequest(userId, schoolWebsite, logoUrl, copyrightYear, co
 					<a href="${schoolWebsite}" target="blank" class="logo-src" style="background:url(${logoUrl}${SCRIPT_VERSION});"></a>
 				</div>
 				<div style="align-items: center; display: flex; margin-left: auto; padding-right: 20px;">
-					<a href="${CONTEXT_PATH}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}?from=dashboard" class="btn-pill  btn-shine btn btn-primary">Log out</a>
+					<a href="${CONTEXT_PATH}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}?from=dashboard" class="btn-shine btn btn-primary">Log out</a>
 				</div>
 			</div>
 		</div>
@@ -77,7 +77,7 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 						<a href="${schoolWebsite}" target="blank" class="logo-src" style="background:url(${logoUrl}${SCRIPT_VERSION});"></a>
 					</div>
 					<div style="align-items: center;display: flex; margin-left: auto;padding-right:20px;">
-						<a href="${CONTEXT_PATH}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}?from=dashboard" class="btn-pill  btn-shine btn btn-primary">Log out</a>
+						<a href="${CONTEXT_PATH}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}?from=dashboard" class="btn-shine btn btn-primary">Log out</a>
 					</div>
 				</div>
 			</div>
@@ -509,7 +509,7 @@ function customAdvanceContent(responseData, userId, studentStandardId, schoolWeb
 					<a href="${schoolWebsite}" target="blank" class="logo-src" style="background:url(${logoUrl}${SCRIPT_VERSION});"></a>
 				</div>
 				<div style="align-items: center;display: flex; margin-left: auto;padding-right:20px;">
-					<a href="${CONTEXT_PATH}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}?from=dashboard" class="btn-pill  btn-shine btn btn-primary">Log out</a>
+					<a href="${CONTEXT_PATH}${SCHOOL_UUID}/common/logout/${UNIQUEUUID}?from=dashboard" class="btn-shine btn btn-primary">Log out</a>
 				</div>
 			</div>
 		</div>

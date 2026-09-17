@@ -32,7 +32,6 @@ $(document).ready(function () {
 	scan(document);
 
 	var spaceGuardObserver = new MutationObserver(function (mutations) {
-		debugger
 		mutations.forEach(function (mutation) {
 			mutation.addedNodes && mutation.addedNodes.forEach(function (node) {
 				if (node.nodeType === 1) {

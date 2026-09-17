@@ -48,7 +48,7 @@ function sessionOutPermissionContent(data){
                                 <p class="error" id="captchaError" style="color:red;font-weight:600"></p>
                             </div>
                             <div class="col-md-12">'
-                                <input type="submit" class="btn btn-info " id="continueSession" value="Submit">
+                                <input type="submit" class="btn btn-primary btn-lg px-2 py-2 rounded-20" id="continueSession" value="Submit">
                             </div>
                         </div>
                     </form>

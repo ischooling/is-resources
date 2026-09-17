@@ -8,6 +8,15 @@ function cartDetailsOnLoadEvent(){
     }
 }
 
+function toggleCartCountVisibility(data){
+	var count = parseInt((data && (data.cartCount || data.length)) || 0);
+	if(count > 0){
+		$("#cartCounts").show();
+	}else{
+		$("#cartCounts").hide();
+	}
+}
+
 async function getCartCount(userId) {
 	var payload = {};
 	payload['schoolId'] = SCHOOL_ID;
@@ -15,6 +24,7 @@ async function getCartCount(userId) {
 	var data = await getDashboardDataBasedUrlAndPayload(true, true,'get-cart-count', payload);
 	$("#cartCounts").html(cartCountContent(data, userId));
 	$('#cartCounts [data-toggle="tooltip"]').tooltip();
+	toggleCartCountVisibility(data);
 }
 async function getCartDetails(userId) {
     var payload = {};
@@ -34,6 +44,7 @@ async function updateCartDetails(userId, type, bookId){
     $("#dashboardContentInHTML").html(cartHeaderContent(data.details)+cartDetailContent(data.details, userId));
     $("#cartCounts").html(cartCountContent(data.details, userId));
     $('#cartCounts [data-toggle="tooltip"]').tooltip();
+    toggleCartCountVisibility(data.details);
 }
 
 async function addToCartPayment(amount, bookingIds, subjectId){

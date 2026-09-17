@@ -295,8 +295,8 @@ function dashboardContent(data) {
         <div class="page-title-wrapper">
             <div class="page-title-actions mt-0 mb-1">
                 <div class="d-inline-block">
-                    <label class="switch">
-                        <input class="switch-input redirectLmsUrl" type="checkbox" value="yes" onclick="redirectLms(this, '${data.isPayLmsPaymentPending}');" changeUrl="${data.lmsProviderURL}" data-toggle="tooltip" data-placement="auto" title="Switch to LMS" />
+                    <label class="switch" data-toggle="tooltip" data-placement="auto" title="Switch to LMS">
+                        <input class="switch-input redirectLmsUrl" type="checkbox" value="yes" onclick="redirectLms(this, '${data.isPayLmsPaymentPending}');" changeUrl="${data.lmsProviderURL}" />
                         <span class="switch-label" data-on="" data-off="LMS"></span>
                         <span class="switch-handle"></span>
                     </label>

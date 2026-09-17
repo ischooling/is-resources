@@ -67,7 +67,7 @@
         completed:    { label: "Completed",         color: "#1b5e20" },
         noShow:       { label: "No Show",           color: "#d93025" },
         pending:      { label: "No Status",         color: "#1a73e8" },
-        cancelled:    { label: "Cancelled",         color: "#5f6368" },
+        cancelled:    { label: "Cancelled",         color: "#171717" },
         reschedule:   { label: "Reschedule",        color: "#ff6d00" },
         confirmed:    { label: "Demo Confirmed",    color: "#0d2a64" },
         notConfirmed: { label: "Demo Not Confirmed", color: "#6f42c1" }
@@ -390,16 +390,16 @@
                                         <span class="ct font-weight-semi-bold text-dark" id="leadCalendarLiveClock">--:--:-- --</span>
                                     </div>
                                     <div class="lead-cal-nav-pill">
-                                        <button type="button" id="leadCalendarPrev" aria-label="Previous">&lsaquo;</button>
+                                        <button type="button" id="leadCalendarPrev" aria-label="Previous" data-toggle="tooltip" data-placement="auto" title="Previous">&lsaquo;</button>
                                         <span class="lead-cal-nav-view-label">Day</span>
-                                        <button type="button" id="leadCalendarNext" aria-label="Next">&rsaquo;</button>
+                                        <button type="button" id="leadCalendarNext" aria-label="Next" data-toggle="tooltip" data-placement="auto" title="Next">&rsaquo;</button>
                                     </div>
                                     <span class="lead-cal-topbar-month" id="leadCalendarTitle"></span>
                                     <div class="lead-cal-spacer"></div>
                                     <div class="lead-cal-view-pill">
-                                        <button type="button" class="lead-cal-vp-btn active" data-lead-view="today">Today</button>
-                                        <button type="button" class="lead-cal-vp-btn" data-lead-view="week">Week</button>
-                                        <button type="button" class="lead-cal-vp-btn" data-lead-view="month">Month</button>
+                                        <button type="button" class="lead-cal-vp-btn active" data-lead-view="today" data-toggle="tooltip" data-placement="auto" title="Today View">Today</button>
+                                        <button type="button" class="lead-cal-vp-btn" data-lead-view="week" data-toggle="tooltip" data-placement="auto" title="Weekly View">Week</button>
+                                        <button type="button" class="lead-cal-vp-btn" data-lead-view="month" data-toggle="tooltip" data-placement="auto" title="Monthly View">Month</button>
                                     </div>
                                 </div>
                                 <div class="lead-cal-legend-strip">
@@ -446,19 +446,19 @@
                 .lead-cal-clock-pill { display: flex; align-items: center; gap: 8px; background: #f1f3f4; border-radius: 4px; padding: 5px 12px; font-size: 12px; margin-left: 16px; }
                 .lead-cal-clock-pill .tz { color: #555; }
                 .lead-cal-nav-pill { display: flex; align-items: center; gap: 2px; background: #f1f3f4; border-radius: 24px; padding: 3px 5px; }
-                .lead-cal-nav-pill button { border: 0; background: transparent; cursor: pointer; border-radius: 50%; width: 28px; height: 28px; font-size: 18px; color: #5f6368; display: flex; align-items: center; justify-content: center; box-shadow: none; }
+                .lead-cal-nav-pill button { border: 0; background: transparent; cursor: pointer; border-radius: 50%; width: 28px; height: 28px; font-size: 18px; color: #171717; display: flex; align-items: center; justify-content: center; box-shadow: none; }
                 .lead-cal-nav-pill button:hover { background: #e0e0e0; }
                 .lead-cal-nav-view-label { min-width: 46px; text-align: center; font-size: 12px; font-weight: 600; color: var(--pc); white-space: nowrap; padding: 0 4px; }
                 .lead-cal-today-btn { border: 0; border-radius: 24px; background: #e8f0fe; padding: 6px 16px; font-size: 12px; cursor: pointer; color: var(--pc); font-weight: 500; box-shadow: none; }
                 .lead-cal-topbar-month { font-family: "Google Sans", Arial, sans-serif; font-size: 15px; font-weight: 400; color: #202124; white-space: nowrap; }
                 .lead-cal-spacer { flex: 1; }
-                .lead-cal-view-pill { display: flex; background: #f1f3f4; border-radius: 24px; padding: 3px; gap: 2px; margin-right: 16px; }
-                .lead-cal-vp-btn { border: 0; background: transparent; border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 500; cursor: pointer; color: #5f6368; box-shadow: none; }
-                .lead-cal-vp-btn.active { background: #fff; color: var(--pc); box-shadow: 0 1px 4px rgba(60,64,67,0.2); }
+                .lead-cal-view-pill { display: flex; background: #e3f2e3; border-radius: 24px; padding: 3px; gap: 2px; margin-right: 16px; }
+                .lead-cal-vp-btn { border: 0; background: transparent; border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 500; cursor: pointer; color: #171717; box-shadow: none; }
+                .lead-cal-vp-btn.active { background: green; color: #fff; box-shadow: 0 1px 4px rgba(60,64,67,0.2); }
                 .lead-cal-legend-strip { display: flex; align-items: center; justify-content: flex-end; gap: 14px; padding: 5px 16px; background: #fff; border-bottom: 1px solid #e8eaed; flex-shrink: 0; flex-wrap: wrap; }
-                .lead-cal-legend-strip span { font-size: 10px; font-weight: 700; color: #9aa0a6; text-transform: uppercase; letter-spacing: 0.8px; }
-                .lead-cal-leg-item { display: flex; align-items: center; gap: 4px; font-size: 11px; }
-                .lead-cal-leg-box { width: 15px; height: 15px; border-radius: 3px; flex-shrink: 0; border: 2px solid #888; background: #fff; }
+                .lead-cal-legend-strip span { font-size: 10px; font-weight: 700; color: #5f6368; text-transform: uppercase; letter-spacing: 0.8px; }
+                .lead-cal-leg-item { display: flex; align-items: center; gap: 4px; font-size: 13px;font-weight:700}
+                .lead-cal-leg-box { width: 20px; height: 20px; border-radius: 3px; flex-shrink: 0; border: 3px solid #888; background: #fff; }
                 .lead-cal-layout { display: flex; flex: 1; overflow: hidden; min-height: 0; }
                 .lead-cal-sidebar { width: 300px; padding: 12px; display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; background: #fff; border-right: 1px solid #e8eaed; }
                 .lead-cal-main { flex: 1; overflow-y: auto; overflow-x: hidden; background: #f8faff; min-width: 0; padding: 0; }
@@ -467,14 +467,14 @@
                 .lead-cal-date-has-event { position: relative; font-weight: 700; color: var(--pc); }
                 .lead-cal-date-has-event:after { content: ""; position: absolute; left: 50%; bottom: 3px; width: 4px; height: 4px; transform: translateX(-50%); border-radius: 50%; background: var(--pc); }
                 .lead-cal-sb-divider { height: 1px; background: #f1f3f4; margin: 12px 0; }
-                .lead-cal-sb-section h5 { font-size: 9px; font-weight: 700; color: #9aa0a6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+                .lead-cal-sb-section h5 { font-size: 9px; font-weight: 700; color: #5f6368; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
                 .lead-cal-row { display: flex; align-items: center; gap: 8px; padding: 5px 6px; cursor: pointer; border-radius: 10px; transition: background 0.12s; }
                 .lead-cal-row:hover { background: #f1f3f4; }
                 .lead-cal-check { width: 16px; height: 16px; border-radius: 4px; border: 2px solid; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
                 .lead-cal-check.on:after { content: ""; width: 8px; height: 8px; background: #fff; clip-path: polygon(14% 44%,0 65%,50% 100%,100% 16%,80% 0%,43% 62%); display: block; }
                 .lead-cal-label { font-size: 12px; color: #3c4043; flex: 1; }
                 .lead-cal-today-summary-group { margin-bottom: 10px; }
-                .lead-cal-today-summary-title { font-size: 11px; font-weight: 700; color: #5f6368; margin-bottom: 5px; }
+                .lead-cal-today-summary-title { font-size: 11px; font-weight: 700; color: #171717; margin-bottom: 5px; }
                 .lead-cal-today-summary-item { text-align: center; font-size: 11px; color: #3c4043; padding: 5px 7px; border: 1px solid #e8eaed; border-radius: 8px; margin-bottom: 4px; background: #fff; cursor: pointer; }
                 .lead-cal-today-view { height: 100%; overflow-y: auto; padding: 18px 22px; background: #f8faff; }
                 .lead-cal-today-group { display: flex; width: 100%; margin-bottom: 18px; }
@@ -484,18 +484,33 @@
                 .lead-cal-today-dow { display: block; font-size: 10px; color: #9aa0a6; font-weight: 700; letter-spacing: 0.5px; }
                 .lead-cal-today-day { display: block; font-size: 24px; font-weight: 300; line-height: 1.1; }
                 .lead-cal-today-items { flex: 1; display: flex; flex-direction: column; gap: 9px; min-width: 0; }
-                .lead-cal-today-event { position: relative; display: flex; align-items: flex-start; gap: 12px; min-height: 50px; background: #fff; box-shadow: 0 1px 4px rgba(60,64,67,0.07); cursor: pointer; border-style: dashed; border-width: 2px; border-radius: 10px; padding: 10px; text-align: center; }
+                .lead-cal-today-event {
+                    position: relative; display: flex; align-items: flex-start; gap: 12px; min-height: 50px;
+                    background: #fff; box-shadow: 0 1px 4px rgba(60,64,67,0.07); cursor: pointer;
+                    border: 0; border-radius: 10px; padding: 10px; text-align: center;
+                    background-image:
+                        repeating-linear-gradient(90deg, var(--dash-color, #999) 0, var(--dash-color, #999) 8px, transparent 8px, transparent 16px),
+                        repeating-linear-gradient(90deg, var(--dash-color, #999) 0, var(--dash-color, #999) 8px, transparent 8px, transparent 16px),
+                        repeating-linear-gradient(0deg, var(--dash-color, #999) 0, var(--dash-color, #999) 8px, transparent 8px, transparent 16px),
+                        repeating-linear-gradient(0deg, var(--dash-color, #999) 0, var(--dash-color, #999) 8px, transparent 8px, transparent 16px);
+                    background-size: 100% 2px, 100% 2px, 2px 100%, 2px 100%;
+                    background-position: 0 0, 0 100%, 0 0, 100% 0;
+                    background-repeat: no-repeat;
+                    animation: leadCalendarMarchingAnts 0.6s linear infinite;
+                }
                 .lead-cal-today-event:hover { box-shadow: 0 4px 12px rgba(60,64,67,0.13); transform: translateY(-1px); }
                 .lead-cal-today-dot { width: 11px; height: 11px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
                 .lead-cal-today-content { min-width: 0; flex: 1; }
                 .lead-cal-today-title { font-size: 14px; line-height: 1.25; }
-                .lead-cal-today-subtitle { font-size: 12px; margin-top: 4px; line-height: 1.35; color: #5f6368; }
+                .lead-cal-today-subtitle { font-size: 12px; margin-top: 4px; line-height: 1.35; color: #171717; }
                 .lead-cal-today-badge { display: inline-block; vertical-align: 1px; line-height: 12px; font-size: 9px; padding: 2px 8px; border-radius: 4px; margin-right: 6px; text-transform: uppercase; color: #fff; }
                 .lead-cal-live-badge { display: inline-block; line-height: 12px; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-right: 6px; text-transform: uppercase; color: #fff; background: #e53935; animation: leadCalendarPulse 1.4s ease-in-out infinite; }
                 .lead-cal-today-empty { padding: 42px; text-align: center; color: #9aa0a6; font-size: 14px; }
                 @keyframes leadCalendarPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
-                .lead-cal-today-event.is-live { animation: leadCalendarPulse 1.4s ease-in-out infinite; }
-                .lead-cal-slot-event { border-style: dashed; opacity: 0.9; }
+                @keyframes leadCalendarMarchingAnts { to { background-position: -16px 0, 16px 100%, 0 16px, 100% -16px; } }
+                /* Live demos march AND pulse — both animations run together (mirrors dashboardCalendarNew.js). */
+                .lead-cal-today-event.is-live { animation: leadCalendarMarchingAnts 0.6s linear infinite, leadCalendarPulse 1.4s ease-in-out infinite; }
+                .lead-cal-slot-event { opacity: 0.9; }
                 #leadCalendarDatepicker > .datepicker table tr td.active, #leadCalendarDatepicker > .datepicker table tr td.active:hover, #leadCalendarDatepicker > .datepicker table tr td.active:focus { background: var(--pc) !important; color: #fff !important; }
                 #leadCalendarDatepicker > .datepicker td, #leadCalendarDatepicker > .datepicker th:not(.datepicker-switch) { width: 36px; height: 36px; line-height: 36px; text-align: center; }
                 /* ── Week view ── */
@@ -548,13 +563,13 @@
                 .lead-cal-modal-body { padding: 24px 26px; overflow-y: auto; }
                 .lead-cal-modal-title { font-size: 20px; font-weight: 700; margin: 0 0 16px; }
                 .lead-cal-modal-field { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; font-size: 14px; }
-                .lead-cal-modal-label { width: 110px; flex-shrink: 0; color: #5f6368; font-weight: 600; }
+                .lead-cal-modal-label { width: 110px; flex-shrink: 0; color: #171717; font-weight: 600; }
                 .lead-cal-modal-value { color: #202124; }
                 .lead-cal-modal-subheading { font-size: 11px; font-weight: 700; color: #9aa0a6; text-transform: uppercase; letter-spacing: 0.6px; margin: 18px 0 8px; }
                 .lead-cal-modal-empty { font-size: 13px; color: #9aa0a6; padding: 10px 0; }
                 .lead-cal-modal-table-wrap { max-height: 220px; overflow-y: auto; border: 1px solid #e8eaed; border-radius: 8px; }
                 .lead-cal-modal-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-                .lead-cal-modal-table th { position: sticky; top: 0; background: #f8faff; text-align: left; padding: 8px 10px; border-bottom: 1px solid #e8eaed; color: #5f6368; font-weight: 700; }
+                .lead-cal-modal-table th { position: sticky; top: 0; background: #f8faff; text-align: left; padding: 8px 10px; border-bottom: 1px solid #e8eaed; color: #171717; font-weight: 700; }
                 .lead-cal-modal-table td { padding: 8px 10px; border-bottom: 1px solid #f1f3f4; vertical-align: top; }
                 .lead-cal-modal-join-meta { color: #9aa0a6; font-size: 10px; margin-top: 2px; }
                 .lead-cal-modal-footer { display: flex; justify-content: flex-end; margin-top: 20px; }
@@ -619,7 +634,7 @@
             ? `Assigned To: ${escapeHtml(meeting.assignName)} <br/>`
             : "";
         return `
-            <div class="lead-cal-today-event ${isLive ? "is-live" : ""}" data-lead-meeting-id="${meeting.id}" style="border-color:${meeting.statusColor} !important;">
+            <div class="lead-cal-today-event ${isLive ? "is-live" : ""}" data-lead-meeting-id="${meeting.id}" style="border-color:${meeting.statusColor} !important; --dash-color:${meeting.statusColor};">
                 <div class="lead-cal-today-content">
                     <div class="lead-cal-today-title font-weight-semi-bold" style="color:${meeting.statusColor};">
                         ${isLive ? '<span class="lead-cal-live-badge">LIVE</span>' : ""}
@@ -648,7 +663,7 @@
             ? `<b>Counselor's: ${escapeHtml(slot.counselorName)}</b><br/>`
             : "";
         return `
-            <div class="lead-cal-today-event lead-cal-slot-event" data-lead-slot-id="${slot.id}" style="border-color:${AVAILABLE_SLOT_COLOR} !important;">
+            <div class="lead-cal-today-event lead-cal-slot-event" data-lead-slot-id="${slot.id}" style="border-color:${AVAILABLE_SLOT_COLOR} !important; --dash-color:${AVAILABLE_SLOT_COLOR};">
                 <div class="lead-cal-today-content">
                     <div class="lead-cal-today-title font-weight-semi-bold" style="color:${AVAILABLE_SLOT_COLOR};">
                         <span class="lead-cal-today-badge d-block" style="background:${AVAILABLE_SLOT_COLOR};width:fit-content;margin:4px auto 0;">AVAILABLE SLOT</span>
@@ -956,6 +971,12 @@
         $(".lead-cal-nav-view-label").text(label);
         $(".lead-cal-vp-btn").removeClass("active");
         $(".lead-cal-vp-btn[data-lead-view='" + leadCalendarState.viewName + "']").addClass("active");
+        // Prev/next tooltips track the active view ("Previous Day"/"Next Week"...). Update
+        // data-original-title (what the Bootstrap tooltip shows once inited) and blank the native
+        // title so the browser's own tooltip doesn't also fire (avoids a double tooltip) — same as
+        // dashboardCalendarNew.js's updateActiveViewLabel().
+        $("#leadCalendarPrev").attr("data-original-title", "Previous " + label).attr("title", "");
+        $("#leadCalendarNext").attr("data-original-title", "Next " + label).attr("title", "");
     }
 
     function updateDatepicker() {
@@ -977,6 +998,32 @@
                 leadCalendarState.selectedDate = moment(event.date).format("YYYY-MM-DD");
                 fetchAndRenderLeadCalendar(leadCalendarState.selectedDate);
             });
+            // Tooltips on the mini-datepicker prev / next arrows. Delegated via `selector` so they
+            // survive bootstrap-datepicker re-rendering its header, and trigger:"hover" so the
+            // tooltip never lingers after a click. Mirrors dashboardCalendarNew.js.
+            if ($.fn.tooltip) {
+                $datepicker.tooltip({
+                    selector: ".prev, .next",
+                    container: "body",
+                    placement: "top",
+                    trigger: "hover",
+                    title: function() {
+                        // The arrows step by whatever the datepicker's current view is, not
+                        // always a month: days view -> Month, months -> Year, years -> Decade,
+                        // decades/centuries -> Century. Label the tooltip to match the view the
+                        // clicked arrow belongs to, so it never wrongly says "Month" in, e.g.,
+                        // the decade/year view.
+                        var dir = $(this).hasClass("prev") ? "Previous" : "Next";
+                        var $view = $(this).closest(".datepicker-days, .datepicker-months, .datepicker-years, .datepicker-decades, .datepicker-centuries");
+                        var unit = "Month";
+                        if ($view.hasClass("datepicker-months"))         { unit = "Year"; }
+                        else if ($view.hasClass("datepicker-years"))     { unit = "Decade"; }
+                        else if ($view.hasClass("datepicker-decades"))   { unit = "Century"; }
+                        else if ($view.hasClass("datepicker-centuries")) { unit = "Century"; }
+                        return dir + " " + unit;
+                    }
+                });
+            }
             leadCalendarState.datepickerReady = true;
         }
         var selected = leadCalendarState.selectedDate || moment().tz(getLeadTimezone()).format("YYYY-MM-DD");
@@ -1080,6 +1127,14 @@
         $(document).on("click.leadCalendarMeetingModalOverlay", "#leadCalMeetingModalOverlay", function(clickEvent) {
             if (clickEvent.target.id === "leadCalMeetingModalOverlay") { closeLeadMeetingModal(); }
         });
+        // Init the topbar tooltips (prev/next + view pills). The view pills switch view on click, so
+        // trigger:"hover" keeps a tooltip from lingering over the button afterwards; the prev/next
+        // buttons stay put, and updateActiveViewLabel() keeps their titles in sync with the view.
+        if ($.fn.tooltip) {
+            $("#leadCalendarPrev, #leadCalendarNext").tooltip();
+            $(".lead-cal-view-pill").tooltip({ selector: ".lead-cal-vp-btn", trigger: "hover" });
+        }
+        updateActiveViewLabel();
     }
 
     // ── Data fetch — POST to /dashboard/school-demo-list, same body shape as leads.js:getRequestForLeadDemo ──

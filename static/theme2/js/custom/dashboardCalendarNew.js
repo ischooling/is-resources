@@ -768,7 +768,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                                 <div class="legend-strip">
                                     <div class="mx-auto d-inline-flex align-items-center gap-10 flex-wrap">
                                         <span>Legend:</span>
-                                        ${USER_ROLE != "TEACHER" ? `<div class="leg-item"><div class="leg-box"></div>Assignment</div>`:``}
+                                        ${USER_ROLE != "TEACHER" ? `<div class="leg-item"><div class="leg-box" style="background:#888"></div>Assignment</div>`:``}
                                         <div class="leg-item"><div class="leg-box btn-dashed"></div>Class</div>
                                         <div class="leg-item" style="color:#2267f0;"><div class="leg-box school-event"></div>School Activity</div>
                                         <div class="leg-item" style="color:#1b5e20;"><div class="leg-box holiday"></div>Holiday</div>
@@ -861,7 +861,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                 .legend-strip { display: flex; align-items: center; justify-content: flex-end; gap: 14px; padding: 5px 16px; background: #fff; border-bottom: 1px solid #e8eaed; flex-shrink: 0; }
                 .legend-strip span { font-size: 10px; font-weight: 700; color: #5f6368; text-transform: uppercase; letter-spacing: 0.8px; }
                 .leg-item { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #5f6368; font-weight:700;}
-                .leg-box { width: 20px; height: 20px; border-radius: 3px; flex-shrink: 0; border: 3px solid #888; }
+                .leg-box { width: 20px; height: 20px; border-radius: 3px; flex-shrink: 0; border: 3px solid #888;}
                 .leg-box.school-event { background: #e7ebf4; border-color: #2267f0;background:#2267f0}
                 .leg-box.holiday { background: #e6f4ea; border-color: #1b5e20;background:#1b5e20 }
                 .leg-box.active-event { background: #fff; border: 2px dashed #e53935; }
@@ -872,9 +872,11 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                         repeating-linear-gradient(90deg, #888 0, #888 4px, transparent 4px, transparent 8px),
                         repeating-linear-gradient(0deg, #888 0, #888 4px, transparent 4px, transparent 8px),
                         repeating-linear-gradient(0deg, #888 0, #888 4px, transparent 4px, transparent 8px);
+
                     background-size: 100% 2px, 100% 2px, 2px 100%, 2px 100%;
                     background-position: 0 0, 0 100%, 0 0, 100% 0;
                     background-repeat: no-repeat;
+
                     animation: legMarchingAnts 0.5s linear infinite;
                 }
                 .dashboard-calendar-layout { display: flex; flex: 1; overflow: hidden; min-height: 0; }
@@ -981,8 +983,8 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                 .fc-event .event-start-Time, .fc-event .event-end-Time { font-size: 11px; }
                 .fc-scroller.fc-time-grid-container[style]{height:100% !important}
                 @keyframes dashboardCalendarPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
-                @keyframes dashboardMarchingAnts { to { background-position: -16px 0, 16px 100%, 0 16px, 100% -16px; } }
-                @keyframes legMarchingAnts { to { background-position: -8px 0, 8px 100%, 0 8px, 100% -8px; } }
+                @keyframes dashboardMarchingAnts { to { background-position: 16px 0, -16px 100%, 0 -16px, 100% 16px; } }
+                @keyframes legMarchingAnts {to {background-position: 8px 0, -8px 100%, 0 -8px, 100% 8px;}}
                 #dashboardCalendarDatepicker > .datepicker table tr td.active, #dashboardCalendarDatepicker > .datepicker table tr td.active:hover {background-image: none !important;background-color: #007bff !important;color: #fff !important;font-weight: 600;}
                 #dashboardCalendarDatepicker > .datepicker td, #dashboardCalendarDatepicker > .datepicker th:not(.datepicker-switch) {width: 36px;height: 36px;line-height: 36px;text-align: center;}
                 #dashboardCalendarDatepicker > .datepicker th.datepicker-title{border-radius:8px}
@@ -1002,7 +1004,6 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                 }
             </style>`);
     }
-
     // Time-of-day glyph for the live clock, keyed on the local hour:
     //   05:00–11:59 -> morning (sun), 12:00–19:59 -> evening (sunset), else night (moon).
     // FontAwesome 4.7 (the project's version) has no sunset / moon-with-stars glyph, so we
@@ -1575,6 +1576,32 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                     $(STUDENT_CALENDAR_SELECTOR).fullCalendar("gotoDate", studentCalendarState.selectedDate);
                 }
             });
+            // Tooltips on the mini-datepicker prev / next arrows. Delegated via `selector`
+            // so they keep working after bootstrap-datepicker re-renders its header, and
+            // trigger:"hover" so the tooltip never lingers after a click.
+            if ($.fn.tooltip) {
+                $datepicker.tooltip({
+                    selector: ".prev, .next",
+                    container: "body",
+                    placement: "top",
+                    trigger: "hover",
+                    title: function() {
+                        // The arrows step by whatever the datepicker's current view is, not
+                        // always a month: days view -> Month, months -> Year, years -> Decade,
+                        // decades/centuries -> Century. Label the tooltip to match the view the
+                        // clicked arrow belongs to, so it never wrongly says "Month" in, e.g.,
+                        // the decade/year view.
+                        var dir = $(this).hasClass("prev") ? "Previous" : "Next";
+                        var $view = $(this).closest(".datepicker-days, .datepicker-months, .datepicker-years, .datepicker-decades, .datepicker-centuries");
+                        var unit = "Month";
+                        if ($view.hasClass("datepicker-months"))         { unit = "Year"; }
+                        else if ($view.hasClass("datepicker-years"))     { unit = "Decade"; }
+                        else if ($view.hasClass("datepicker-decades"))   { unit = "Century"; }
+                        else if ($view.hasClass("datepicker-centuries")) { unit = "Century"; }
+                        return dir + " " + unit;
+                    }
+                });
+            }
             studentCalendarState.datepickerReady = true;
         }
         var selected = studentCalendarState.selectedDate || moment().tz(getStudentTimezone()).format("YYYY-MM-DD");

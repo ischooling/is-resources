@@ -335,7 +335,7 @@ function partnerDashboardContent(title, roleAndModule, schoolId, userId, role, c
 	localStorage.setItem('referralCode'+USER_ID,data.schoolServiceLinks.referralCode);
 	localStorage.setItem('originalPartnerType'+USER_ID,data.originalPartnerType);
 	var html = 
-		`<div class="app-page-title mb-3 py-2">
+		`<div class="app-page-title mb-3 py-2 pr-4">
 			<div class="page-title-wrapper">
 				<div class="page-title-heading">
                     <div class="page-title-icon"><img src="${PATH_FOLDER_IMAGE2}/Icon/sidebar/Dashboard.png" style="max-width:200px; width: 90%; margin-right: auto; display: flex;"></i></div>

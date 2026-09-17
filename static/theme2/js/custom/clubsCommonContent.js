@@ -58,7 +58,7 @@ function getClubsCommonCard(title){
                 <div class="d-flex justify-content-center align-items-center flex-column">
                     <img src="${PATH_FOLDER_IMAGE2}clubs/${imageName}" class="rounded-10" style="max-width: 65%;">
                     <h4 class="mt-3 font-weight-bold text-dark" style="max-width: 100%;">Be part of our ${title}!${subtitleHtml}</h4>
-                    <p class="rounded-20 py-2 px-4 mt-3 font-weight-semi-bold" style="color:#C2410C; background-color:#FFEDD5;"><i class="fa fa-rocket" aria-hidden="true"></i> Sign up today.</p>
+                    <p class="rounded-20 py-1 px-2 mt-3 font-weight-semi-bold" style="color:#C2410C; background-color:#FFEDD5;"><i class="fa fa-rocket" aria-hidden="true"></i> Sign up today.</p>
                     <a href="javascript:void(0);" onclick="applyForClub('${title}')" class="btn text-white font-18 mt-4 rounded-10" style="background: linear-gradient(90deg, #027FFE 0%, #02B9CB 100%);">Register Now</a>
                 </div>
             </div>

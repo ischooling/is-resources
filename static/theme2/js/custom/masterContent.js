@@ -2919,43 +2919,36 @@ function getLearningProgramLabel(registrationType) {
 
 
 function getAnnouncementAndNewsContent() {
-  var showOnlyReleaseNote = SHOW_ONLY_RELEASE_NOTE === true;
+	var showOnlyReleaseNote = SHOW_ONLY_RELEASE_NOTE === true;
   var html = 
     `<div class="right_fixed_action">
       <!-- Deliberately still the old app. Diary was not migrated and lives
            there; the new support app serves no /iframe/diary-bridge, so
            "fixing" this URL alongside the others would silently break diary. -->
       <iframe src="https://is-chat-react.vercel.app/iframe/diary-bridge?userId=${USER_ID}"  style="height:0px"/>`;
-      if(!showOnlyReleaseNote && USER_ROLE != "DIRECTOR"){
-        html+=
-        `<button type="button" class="custom-btn-open-options btn btn-primary" onclick="openRightSideBar(\'announcement_side_wrapper\')" data-toggle="tooltip" title="Announcement">
-          <i class="fa fa-bullhorn fa-w-16"></i>
-          <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="announcementBadge">10</span>
-        </button>`;
-      }
-      if(!showOnlyReleaseNote && USER_ROLE != "PARENT" && USER_ROLE != "DIRECTOR"){
-          html+=
-          `<button type="button" class="custom-btn-open-options btn btn-primary" id="newsBtn" onclick="openRightSideBar(\'news_side_wrapper\')" data-toggle="tooltip" title="News">
-            <i class="fa fa-newspaper-o fa-w-16"></i>
-            <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="newsBadge"></span>
-          </button>`;
-      }
-      html +=
-        `<button type="button" class="custom-btn-open-options btn btn-primary" id="releaseNoteBtn" onclick="openRightSideBar(\'releaseNote_side_wrapper\');loadDashboardReleaseNotePanel(true);" data-toggle="tooltip" title="Release Notes">
-          <i class="fa fa-rocket fa-w-16"></i>
-          <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2 d-none" id="releaseNoteBadge"></span>
-        </button>`;
-      if(!showOnlyReleaseNote && CHAT_URL != "" && USER_ROLE != "DIRECTOR") {
+
+	//   if(!showOnlyReleaseNote && CHAT_URL != "" && USER_ROLE != "DIRECTOR") {
+    //     var data = {u: UNIQUEUUID, e: DEPLOYMENT_MODE, d: new Date().getTime()};
+    //     var jsonString = JSON.stringify(data);
+    //     var chatPayload = btoa(unescape(encodeURIComponent(jsonString)));
+    //     var chatUrl = `${CHAT_URL}/signIn?uuid=${UNIQUEUUID}+&p=` + chatPayload;
+    //     html += 
+    //       `<a href="${chatUrl}" type="button" target="_blank" class="custom-btn-open-options btn bg-success text-white"  data-toggle="tooltip" data-placement="left" title="Talk to Us!">
+    //           <img src="${PATH_FOLDER_IMAGE2}chat.gif" width="30" />
+    //           <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="chatUnseenCoutn"></span>
+    //       </a>`;
+    //   }
+	
+	if(!showOnlyReleaseNote && CHAT_URL != "" && USER_ROLE != "DIRECTOR") {
         var data = {u: UNIQUEUUID, e: DEPLOYMENT_MODE, d: new Date().getTime()};
         var jsonString = JSON.stringify(data);
         var chatPayload = btoa(unescape(encodeURIComponent(jsonString)));
         var chatUrl = `${CHAT_URL}/sign-in?uuid=${UNIQUEUUID}+&p=` + chatPayload;
         html += 
-          `<a href="${chatUrl}" type="button" target="_blank" class="custom-btn-open-options btn btn-primary" data-toggle="tooltip" title="Talk to Us!">
-              <i class="fa fa-comments fa-w-16"></i>
+          `<a href="${chatUrl}" type="button" target="_blank" class="custom-btn-open-options btn bg-success text-white" data-toggle="tooltip" data-toggle="tooltip" data-placement="left" title="Talk to Us!">
+              <img src="${PATH_FOLDER_IMAGE2}chat.gif" width="30" />
               <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="chatUnseenCoutn"></span>
           </a>`;
-
         // Badge rendered means badge populated. The count was fetched from the
         // student, teacher and parent dashboards and from nowhere else, while
         // this markup renders for every role except DIRECTOR — so a member of
@@ -2974,7 +2967,27 @@ function getAnnouncementAndNewsContent() {
             getChat(typeof GLOBAL_EMAIL !== "undefined" ? GLOBAL_EMAIL : "", USER_ROLE);
           }, 0);
         }
+	}
+      if(!showOnlyReleaseNote && USER_ROLE != "DIRECTOR"){
+        html+=
+        `<button type="button" class="custom-btn-open-options btn btn-primary" onclick="openRightSideBar(\'announcement_side_wrapper\')" data-toggle="tooltip" data-placement="left" title="Announcement">
+          <i class="fa fa-bullhorn fa-w-16"></i>
+          <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="announcementBadge">10</span>
+        </button>`;
       }
+      if(!showOnlyReleaseNote && USER_ROLE != "PARENT" && USER_ROLE != "DIRECTOR"){
+          html+=
+          `<button type="button" class="custom-btn-open-options btn btn-primary" id="newsBtn" onclick="openRightSideBar(\'news_side_wrapper\')" data-toggle="tooltip" data-placement="left" title="News">
+            <i class="fa fa-newspaper-o fa-w-16"></i>
+            <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2" id="newsBadge"></span>
+          </button>`;
+      }
+      html +=
+        `<button type="button" class="custom-btn-open-options btn btn-primary" id="releaseNoteBtn" onclick="openRightSideBar(\'releaseNote_side_wrapper\');loadDashboardReleaseNotePanel(true);" data-toggle="tooltip" data-placement="left" title="Release Notes">
+          <i class="fa fa-rocket fa-w-16"></i>
+          <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2 d-none" id="releaseNoteBadge"></span>
+        </button>`;
+      
       if (
         !showOnlyReleaseNote &&
         (
@@ -2984,7 +2997,7 @@ function getAnnouncementAndNewsContent() {
           SCHOOL_DIARY_INITIATES_ROLE
         )
       ) {
-        html += `<button type="button" class="custom-btn-open-options btn btn-primary" id="schoolDiaryBtn" onclick="openRightSideBar(\'schoolDiary_side_wrapper\', false)" data-toggle="tooltip" title="${USER_ROLE == "TEACHER" ? "Teacher Diary" : USER_ROLE == "PARENT" || USER_ROLE == "STUDENT" ? "Student Diary" : "School Diary"}">
+        html += `<button type="button" class="custom-btn-open-options btn btn-primary" id="schoolDiaryBtn" onclick="openRightSideBar(\'schoolDiary_side_wrapper\', false)" data-toggle="tooltip" data-placement="left" title="${USER_ROLE == "TEACHER" ? "Teacher Diary" : USER_ROLE == "PARENT" || USER_ROLE == "STUDENT" ? "Student Diary" : "School Diary"}">
             <i class="fa fa-address-book fa-w-16"></i>
             <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2 d-none" id="schoolDiaryBadge"></span>
           </button>`;
@@ -3015,27 +3028,53 @@ function getAnnouncementAndNewsContent() {
               <div class="text-muted p-3">Loading release notes...</div>
           </div>
       </div>`;
-      if (
-        !showOnlyReleaseNote &&
-        (
-          USER_ROLE == "PARENT" ||
-          USER_ROLE == "TEACHER" ||
-          USER_ROLE == "STUDENT" || 
-          SCHOOL_DIARY_INITIATES_ROLE
-        )
-      ) {
+	 
+	if (!showOnlyReleaseNote && ( USER_ROLE == "PARENT" || USER_ROLE == "TEACHER" || USER_ROLE == "STUDENT" ||  SCHOOL_DIARY_INITIATES_ROLE)) {
         html += `<div class="ui-theme-settings custome-ui-theme-settings" id="schoolDiary_side_wrapper">
           <button type="button" class="custom-btn-open-options close-right-slide-bar-btn border text-white mb-0" onclick="openRightSideBar(\'schoolDiary_side_wrapper\', true)" style="position: absolute;left: -18px;top: 20px;z-index: 99;background:red;">
             <i class="fa fa-times"></i>
           </button>
           <div class="full" id="schoolDiaryDiv"></div>
         </div>`;
-      }
+	}
   html += `<div class="custome-ui-theme-settings-overlay" onclick="openRightSideBar(\'settings-overlay\')"></div>`;
   setTimeout(function () {
       loadDashboardReleaseNotePanel(true);
+      initNotificationBadgeObservers();
   }, 250);
   return html;
+}
+
+// Toggle a notification badge based on its count: hide when 0/empty, show otherwise.
+// For the chat badge, add the shake animation when the unseen count is greater than 1.
+function updateNotificationBadge(el) {
+  if (!el) return;
+  var count = parseInt($(el).text(), 10);
+  if (isNaN(count) || count <= 0) {
+    $(el).addClass("d-none");
+    $(el).removeClass("shake_animation");
+    return;
+  }
+  $(el).removeClass("d-none");
+  if (el.id === "chatUnseenCoutn") {
+    $(el).toggleClass("shake_animation", count > 1);
+  }
+}
+
+// Watch the notification badges so their visibility stays in sync with the count,
+// which is set asynchronously from several other scripts.
+function initNotificationBadgeObservers() {
+  var ids = ["chatUnseenCoutn", "announcementBadge", "newsBadge", "schoolDiaryBadge"];
+  ids.forEach(function (id) {
+    var el = document.getElementById(id);
+    if (!el || el.dataset.badgeObserved === "true") return;
+    el.dataset.badgeObserved = "true";
+    updateNotificationBadge(el);
+    var observer = new MutationObserver(function () {
+      updateNotificationBadge(el);
+    });
+    observer.observe(el, { childList: true, characterData: true, subtree: true });
+  });
 }
 
 function openRightSideBar(eleId, closeFlag) {
