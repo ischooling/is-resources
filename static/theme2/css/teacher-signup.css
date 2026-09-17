@@ -283,7 +283,7 @@ textarea.form-control-field{height: inherit !important;}
 .course-selection-wrapper {display: none;width: 100%;float: left;}
 .selected-course-view .use-credit {text-align: center;font-size: 14px;font-weight: 600;color: #333;margin-bottom: 10px;letter-spacing: inherit;padding: 10px 10px;background: var(--pc);color: #fff !important;}
 .select2-container--default .select2-selection--single .select2-selection__arrow b {display: none !important;}
-.select2-container--default .select2-selection--single .select2-selection__rendered{color:#8e8e8e !important;}
+/* .select2-container--default .select2-selection--single .select2-selection__rendered{color:#8e8e8e !important;} */
 .use-all-credit {-webkit-animation: shake-animation 2.72s ease infinite;animation: shake-animation 2.72s ease infinite;transform-origin: 50% 50%;display: inline-block;}
 /* @keyframes shake-animation {
   0% {transform: translate(0, 0)}

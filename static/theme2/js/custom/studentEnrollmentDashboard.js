@@ -80,7 +80,6 @@ function renderStudentEnrollmentDashboardData(data) {
     sedRenderNewReChart(s);
     sedRenderRegMixChart(data.registrationMix || []);
     sedRenderReadiness(onb);
-    sedRenderFunnel(onb);
     sedRenderBatchKpis(data.batchSummary || {});
     SED_STATE.onboarding = onb;
     sedTryRenderActions();
@@ -204,7 +203,10 @@ function sedRenderReadiness(o) {
             { n: o.transcriptPending, label: 'pending', color: '#e6e9f0', metric: 'transcriptPending' } ] },
         { name: 'Academic Date', segs: [
             { n: o.acadDateSet, label: 'chosen', color: SED_COLORS.good, metric: 'acadDateSet' },
-            { n: o.acadDateNone, label: 'not chosen', color: SED_COLORS.crit, metric: 'acadDateNone' } ] }
+            { n: o.acadDateNone, label: 'not chosen', color: SED_COLORS.crit, metric: 'acadDateNone' } ] },
+        { name: 'Documents', note: 'age / address / parent passport / last academic', segs: [
+            { n: o.docsComplete, label: 'complete', color: SED_COLORS.good, metric: 'docsComplete' },
+            { n: o.docsIncomplete, label: 'incomplete', color: SED_COLORS.crit, metric: 'docsIncomplete' } ] }
     ];
     // Fee overdue + Re-enroll pending (moved here from the removed "Action needed" card)
     var feeOverdue = Number((SED_STATE.fee || {}).overdueStudents || 0);
@@ -244,35 +246,6 @@ function sedRenderReadiness(o) {
     $('#sedReadiness').html(html);
 }
 
-/* ---------- funnel ---------- */
-function sedRenderFunnel(o) {
-    var steps = [
-        { lab: 'Enrolled', n: o.activeTotal, c: SED_COLORS.brand, metric: 'enrolledActive' },
-        { lab: 'Subject mapped', n: o.subjectMapped, c: SED_COLORS.teal, metric: 'subjectMapped' },
-        { lab: 'LMS created', n: o.lmsActive, c: SED_COLORS.teal, metric: 'lmsActive' },
-        { lab: 'Teacher mapped', n: o.teacherMapped, c: SED_COLORS.violet, metric: 'teacherMapped' },
-        { lab: 'Training done', n: o.trainingDone, c: SED_COLORS.warn, metric: 'trainingDone' },
-        { lab: 'Fully onboarded', n: o.learningActive, c: SED_COLORS.good, metric: 'learningActive' }
-    ];
-    var max = Number(steps[0].n || 0) || 1;
-    var html = '';
-    for (var i = 0; i < steps.length; i++) {
-        var n = Number(steps[i].n || 0);
-        var pct = Math.round(n / max * 100);
-        var prev = i === 0 ? n : Number(steps[i - 1].n || 0);
-        var conv = i === 0 ? 100 : (prev > 0 ? Math.round(n / prev * 100) : 0);
-        html += '<div class="sed-fstep" style="cursor:pointer;" data-sed-metric="' + steps[i].metric + '" data-sed-label="' + steps[i].lab + '">'
-            + '<div class="sed-lab"><span class="sed-dot" style="background:' + steps[i].c + '"></span>' + steps[i].lab + '</div>'
-            + '<div class="sed-track"><div class="sed-fill" data-w="' + pct + '" style="width:0;background:' + steps[i].c + '">' + pct + '%</div></div>'
-            + '<div class="sed-rt"><b>' + n.toLocaleString() + '</b><span>' + (i === 0 ? 'start' : conv + '% of prev') + '</span></div>'
-            + '</div>';
-    }
-    $('#sedFunnel').html(html);
-    // animate widths
-    setTimeout(function () {
-        $('#sedFunnel .sed-fill').each(function () { $(this).css('width', $(this).attr('data-w') + '%'); });
-    }, 60);
-}
 
 /* ---------- events ---------- */
 function bindStudentEnrollmentDashboardEvents() {
@@ -308,11 +281,6 @@ function bindStudentEnrollmentDashboardEvents() {
     $(document).off('click', '.sed-adv-link').on('click', '.sed-adv-link', function (e) {
         e.stopPropagation();
         sedOpenDrawer('advance', 'Advance next-grade re-enrollments');
-    });
-    // onboarding funnel step -> student list for that step
-    $(document).off('click', '#sedFunnel .sed-fstep').on('click', '#sedFunnel .sed-fstep', function () {
-        var metric = $(this).attr('data-sed-metric');
-        if (metric) { sedOpenDrawer(metric, $(this).attr('data-sed-label')); }
     });
     // onboarding readiness value (e.g. "142 not mapped") -> student list for that segment
     $(document).off('click', '.sed-onb-v').on('click', '.sed-onb-v', function () {
@@ -622,6 +590,10 @@ function sedRenderGrade(list) {
         fresh.push(Number(list[i].fresh || 0));
         re.push(Number(list[i].reEnroll || 0));
     }
+    // totals in the header, so this chart can be compared with the Countries table and the KPI cards
+    var tf = 0, tr = 0;
+    for (var t = 0; t < fresh.length; t++) { tf += fresh[t]; tr += re[t]; }
+    $('#sedGradeTot').text('New ' + tf.toLocaleString() + ' · Re-Enroll ' + tr.toLocaleString());
     if (cats.length === 0) { cats = ['No data']; fresh = [0]; re = [0]; }
     var opt = {
         chart: { type: 'bar', height: 430, stacked: true, fontFamily: 'inherit', toolbar: { show: false },
