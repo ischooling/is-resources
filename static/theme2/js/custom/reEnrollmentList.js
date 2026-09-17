@@ -13,6 +13,8 @@ var REEL_CARD_LIST_TITLE = '';
 var REEL_CARD_LIST_TOTAL = 0;
 var REEL_COUNTRIES = [];      // popup filter options (from summary)
 var REEL_GRADES = [];
+var REEL_CARD_LIST_PREV = '';   // session the page was on, for the "returning / new" drill
+var REEL_CARD_LIST_REG = '';    // learning program forced by a split-line click (GROUP / ONE_TO_ONE / OTHER)
 var REEL_CARD_FILTERS_READY = false;
 
 function renderReEnrollmentList(title, roleAndModule, schoolId, userId, userRole) {
@@ -106,11 +108,12 @@ function getRequestForReEnrollment(pageNumber) {
         progress: $('#reelProgress').val() || '',
         grade: ($('#reelGrade').val() || []),
         gradeMode: $('#reelGradeMode').val() || 'in',
+        exWithdrawn: $('#reelExWd').is(':checked') ? 1 : 0,
         search: ($('#reelSearch').val() || '').trim(),
         parentSearch: ($('#reelParent').val() || '').trim(),
         cardMetric: REEL_CARD_METRIC || '',
         pageNumber: pageNumber || 0,
-        pageSize: parseInt($('#reelPageSize').val(), 10) || 25
+        pageSize: 25
     };
     if ((pageNumber || 0) > 0) { req.knownTotal = REEL_TOTAL; }
     return req;
@@ -144,14 +147,20 @@ function bindReEnrollmentEvents() {
         $('#reelFilterBox').stop(true, true).slideToggle(150);
         $(this).toggleClass('active');
     });
+    $(document).off('change', '#reelExWd').on('change', '#reelExWd', function () { reEnrollClearCard(); reEnrollFetch(0); });
     $(document).off('click', '#reelApply').on('click', '#reelApply', function () { reEnrollClearCard(); reEnrollFetch(0); });
     $(document).off('keydown', '#reelSearch').on('keydown', '#reelSearch', function (e) { if (e.which === 13) { reEnrollClearCard(); reEnrollFetch(0); } });
-    $(document).off('change', '#reelPageSize').on('change', '#reelPageSize', function () { reEnrollFetch(0); });
     $(document).off('click', '#reelExportExcel').on('click', '#reelExportExcel', function () { reEnrollExport('excel'); });
     $(document).off('click', '#reelExportCsv').on('click', '#reelExportCsv', function () { reEnrollExport('csv'); });
     // click a count box -> open the right-side list drawer for that metric
     $(document).off('click', '.reel-card-click').on('click', '.reel-card-click', function () {
-        reelCardListOpen($(this).attr('data-cm') || '', $(this).attr('data-sess') || '', $(this).attr('data-title') || 'Students');
+        reelCardListOpen($(this).attr('data-cm') || '', $(this).attr('data-sess') || '', $(this).attr('data-title') || 'Students', null, $(this).attr('data-sp') || '');
+    });
+    // a split-line value opens its card's list, narrowed to that learning program
+    $(document).off('click', '.reel-mixlink').on('click', '.reel-mixlink', function (e) {
+        e.stopPropagation();
+        reelCardListOpen($(this).attr('data-cm') || '', $(this).attr('data-sess') || '',
+            $(this).attr('data-title') || 'Students', { regType: $(this).attr('data-rt') || '' });
     });
     $(document).off('click', '#reelReset').on('click', '#reelReset', function () {
         reEnrollClearCard();
@@ -160,9 +169,9 @@ function bindReEnrollmentEvents() {
         $('#reelStart').val(''); $('#reelEnd').val('');
         try { if ($.fn && $.fn.datepicker) { $('#reelStart').datepicker('update', ''); $('#reelEnd').datepicker('update', ''); } } catch (e) {}
         $('#reelEnrolType').val(''); $('#reelRegType').val(''); $('#reelAdv').val(''); $('#reelProgress').val('');
-        $('#reelGradeMode').val('in');
+        $('#reelGradeMode').val('in'); $('#reelExWd').prop('checked', false);
         try { $('#reelGrade').val(null).trigger('change.select2'); } catch (e) { $('#reelGrade').val([]); }
-        $('#reelSearch').val(''); $('#reelPageSize').val('25');
+        $('#reelSearch').val('');
         try { $('#reelParent').val(null).trigger('change.select2'); } catch (e) { $('#reelParent').val(''); }
         if ($('#reelSession').hasClass('select2-hidden-accessible')) { $('#reelSession').trigger('change.select2'); }
         reEnrollFetch(0);
@@ -195,8 +204,8 @@ function bindReEnrollmentEvents() {
         if (!isNaN(p)) { reelCardListFetch(p); }
     });
     // popup filters -> refetch from page 0
-    $(document).off('change', '#reelCardCountry, #reelCardGrade, #reelCardProgress, #reelCardAdv')
-        .on('change', '#reelCardCountry, #reelCardGrade, #reelCardProgress, #reelCardAdv', function () {
+    $(document).off('change', '#reelCardCountry, #reelCardGrade, #reelCardProgress, #reelCardAdv, #reelCardPageSize, #reelCardExWd')
+        .on('change', '#reelCardCountry, #reelCardGrade, #reelCardProgress, #reelCardAdv, #reelCardPageSize, #reelCardExWd', function () {
             if (REEL_CARD_FILTERS_READY) { reelCardListFetch(0); }
         });
     $(document).off('keydown', '#reelCardSearch').on('keydown', '#reelCardSearch', function (e) {
@@ -216,7 +225,7 @@ function bindReEnrollmentEvents() {
         reelCardListOpen(metric, '', label, preset);
     });
     $(document).off('click', '#reelCardFilterReset').on('click', '#reelCardFilterReset', function () {
-        $('#reelCardProgress').val(''); $('#reelCardAdv').val(''); $('#reelCardSearch').val('');
+        $('#reelCardProgress').val(''); $('#reelCardAdv').val(''); $('#reelCardSearch').val(''); $('#reelCardPageSize').val('25'); $('#reelCardExWd').prop('checked', false);
         try { $('#reelCardCountry').val(null).trigger('change.select2'); $('#reelCardGrade').val(null).trigger('change.select2'); }
         catch (e) { $('#reelCardCountry').val([]); $('#reelCardGrade').val([]); }
         reelCardListFetch(0);
@@ -371,20 +380,32 @@ function reEnrollEsc(v) {
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+// Second line under a Re-Enrollment card: its Group / 1:1 / Other split.
+// Label stays light, the number is bold — so "1:1" never reads as part of its count.
+// Each part opens the same list, filtered to that learning program.
+function reEnrollMixLine(g, o, x, metric, sess, titleBase) {
+    function part(label, val, rt) {
+        return '<a href="javascript:void(0)" class="reel-mixlink" data-cm="' + metric + '" data-sess="' + (sess || '') + '"'
+            + ' data-rt="' + rt + '" data-title="' + reEnrollEsc(titleBase + ' · ' + label) + '">'
+            + '<span class="reel-mixlab">' + label + '</span>'
+            + '<b class="reel-mixval">' + Number(val || 0).toLocaleString() + '</b></a>';
+    }
+    return part('Group', g, 'GROUP') + part('1:1', o, 'ONE_TO_ONE') + part('Other', x, 'OTHER');
+}
+
 function reEnrollRenderCards(s) {
     // clickable count box -> opens the right-side list drawer for that metric
-    function card(num, label, bg, color, metric, sess, title) {
-        return '<div class="reel-card reel-card-click" data-cm="' + (metric || '') + '" data-sess="' + (sess || '') + '" data-title="' + reEnrollEsc(title || label) + '" style="background:' + bg + '">'
+    function card(num, label, bg, color, metric, sess, title, prevSess, sub) {
+        return '<div class="reel-card reel-card-click" data-cm="' + (metric || '') + '" data-sess="' + (sess || '') + '" data-sp="' + (prevSess || '') + '" data-title="' + reEnrollEsc(title || label) + '" style="background:' + bg + '">'
             + '<div class="reel-cnum" style="color:' + color + '">' + Number(num || 0).toLocaleString() + '</div>'
-            + '<div class="reel-clab" style="color:' + color + '">' + label + '</div></div>';
+            + '<div class="reel-clab" style="color:' + color + '">' + label + '</div>'
+            + (sub ? '<div class="reel-cmix" style="color:' + color + '">' + sub + '</div>' : '')
+            + '</div>';
     }
     var g1 = '<div class="reel-cgrp"><div class="reel-clabel">Total Students</div><div class="reel-cards">'
         + card(s.total, 'Total Students', '#eef2ff', '#3730a3', 'total')
-        + card(s.group, 'Group', '#e7f0ff', '#1e5fd6', 'group')
-        + card(s.oneToOne, 'One-to-One', '#e6f7f4', '#0e8a7d', 'oneToOne')
-        + card(s.other, 'Other', '#f3f0fb', '#6d4bb3', 'other')
-        + card(s.fresh, 'Fresh', '#e9f7ee', '#1f9d55', 'fresh')
-        + card(s.totalReEnroll, 'Re-Enrollment', '#eaf1ff', '#2b62d6', 'reEnrollment')
+        + card(s.fresh, 'Fresh', '#e9f7ee', '#1f9d55', 'fresh', '', 'Fresh', '', reEnrollMixLine(s.frGroup, s.frOneToOne, s.frOther, 'fresh', '', 'Fresh'))
+        + card(s.totalReEnroll, 'Re-Enrollment', '#eaf1ff', '#2b62d6', 'reEnrollment', '', 'Re-Enrollment', '', reEnrollMixLine(s.reGroup, s.reOneToOne, s.reOther, 'reEnrollment', '', 'Re-Enrollment'))
         + '</div></div>';
     // ---- Progression row : selected session base -> next session re-enrolled / pending (display-only) ----
     function pcard(num, label, bg, color) {
@@ -399,7 +420,7 @@ function reEnrollRenderCards(s) {
         // clickable box: fresh students of the SAME year who booked advance / next-grade
         var faCard = (s.freshAdvance !== undefined && s.freshAdvance !== null)
             ? card(s.freshAdvance, 'Fresh → Re-Enrolled (same year)', '#fff4e5', '#b26a00', 'freshAdvance', '', 'Fresh → Re-Enrolled (same year)' + (selName ? (' · ' + selName) : ''))
-            : '';
+            : pcard('—', 'Fresh → Re-Enrolled (same year)', '#fff4e5', '#c8a26a');
         var activeCard = card(pbase, 'Active Students', '#eef2ff', '#3730a3', 'total', '', 'Active Students' + (selName ? (' · ' + selName) : ''));
         // Grade 12 count (subset of Active) — clickable, filters the list to Grade 12
         // s.grade12 is counted independently of the page-level Grade filter, so the card survives "Exclude Grade 12";
@@ -410,7 +431,7 @@ function reEnrollRenderCards(s) {
             ? '<div class="reel-card reel-bclick" data-bk="grade" data-id="' + reEnrollEsc(g12.id) + '" data-metric="total" data-name="Grade 12" style="background:#eef7ee">'
                 + '<div class="reel-cnum" style="color:#1f7a4d">' + Number(g12.active || 0).toLocaleString() + '</div>'
                 + '<div class="reel-clab" style="color:#1f7a4d">Grade 12</div></div>'
-            : '';
+            : pcard('—', 'Grade 12', '#eef7ee', '#93b9a4');
         if (s.progHasNext == 1) {
             var pre = Number(s.progReEnroll || 0);
             var ppend = Number(s.progPending || 0);
@@ -421,12 +442,12 @@ function reEnrollRenderCards(s) {
             g2 = '<div class="reel-cgrp"><div class="reel-clabel">' + reEnrollEsc(head) + '</div><div class="reel-cards">'
                 + activeCard
                 + g12Card
-                + card(pre, 'Re-Enrolled · ' + rePct.toFixed(1) + '%', '#e7f6ec', '#16a34a', 'reEnrolledNext', '', 'Re-Enrolled · ' + nextName)
+                + card(pre, 'Re-Enrolled · ' + rePct.toFixed(1) + '%', '#e7f6ec', '#16a34a', 'reEnrolledNext', '', 'Re-Enrolled · ' + (selName || 'selected session'), '', reEnrollMixLine(s.nxGroup, s.nxOneToOne, s.nxOther, 'reEnrolledNext', '', 'Re-Enrolled'))
                 + card(ppend, 'Pending · ' + pendPct.toFixed(1) + '%', '#fdeaea', '#c0392b', 'pendingNext', '', 'Pending · ' + (selName || 'selected session'))
                 + faCard
                 + '</div></div>';
         } else {
-            var head2 = 'Re-Enrollment Progression' + (selName ? (' · ' + selName) : '') + ' → no next session';
+            var head2 = 'Re-Enrollment Progression' + (s.progPrevName ? (' · ' + s.progPrevName + ' → ') : ' · ') + (selName || '') + ' · no next session';
             g2 = '<div class="reel-cgrp"><div class="reel-clabel">' + reEnrollEsc(head2) + '</div><div class="reel-cards">'
                 + activeCard
                 + g12Card
@@ -603,7 +624,7 @@ var REEL_EXPORT_COLS = [
     { h: 'Avg Progress', k: 'avgProgress' },
     { h: 'Profile Status', k: 'profileStatus' },
     { h: 'Last Logout', k: 'lastLogout' },
-    { h: 'Advance', k: 'advance' }
+    { h: 'Payment', k: 'advance' }
 ];
 
 function reEnrollExportVal(r, col, idx) {
@@ -612,7 +633,7 @@ function reEnrollExportVal(r, col, idx) {
     if (col.h === 'Avg Progress') {
         return (r.avgProgress === '' || r.avgProgress === null || r.avgProgress === undefined) ? '' : (r.avgProgress + '%');
     }
-    if (col.h === 'Advance') { return reEnrollAdvLabel(r.advPayment); }
+    if (col.h === 'Payment') { return reEnrollAdvLabel(r.advPayment); }
     var v = r[col.k];
     return (v === null || v === undefined) ? '' : String(v);
 }
@@ -723,9 +744,11 @@ function reEnrollFillHeaderFromCard() {
 /* ============================================================
    Count-box list drawer — opens the paged list for a clicked box.
    ============================================================ */
-function reelCardListOpen(cm, sess, title, preset) {
+function reelCardListOpen(cm, sess, title, preset, prevSess) {
     REEL_CARD_LIST_CM = cm || '';
     REEL_CARD_LIST_SESS = sess || '';
+    REEL_CARD_LIST_PREV = prevSess || '';
+    REEL_CARD_LIST_REG = (preset && preset.regType) || '';
     REEL_CARD_LIST_TITLE = title || 'Students';
     REEL_CARD_LIST_TOTAL = 0;
     $('#reelListTitle').text(REEL_CARD_LIST_TITLE);
@@ -754,6 +777,7 @@ function reelCardInitFilters(preset) {
     // (a progress preset from the "Progress wise" section overrides the inherited value)
     $('#reelCardProgress').val((preset && preset.progress != null) ? preset.progress : ($('#reelProgress').val() || ''));
     $('#reelCardAdv').val($('#reelAdv').val() || '');
+    $('#reelCardExWd').prop('checked', $('#reelExWd').is(':checked'));
     $('#reelCardSearch').val($('#reelSearch').val() || '');
     var gradeVal = (preset && preset.grade) ? preset.grade : null;
     var countryVal = (preset && preset.country) ? preset.country : null;
@@ -776,10 +800,14 @@ function reelCardListFetch(pageNumber) {
     var req = getRequestForReEnrollment(page);
     req.cardMetric = REEL_CARD_LIST_CM;                       // the clicked box's metric
     if (REEL_CARD_LIST_SESS) { req.sessionId = parseInt(REEL_CARD_LIST_SESS, 10) || req.sessionId; }
+    if (REEL_CARD_LIST_PREV) { req.prevSessionId = parseInt(REEL_CARD_LIST_PREV, 10) || 0; }
     // popup's own filters
     req.country = ($('#reelCardCountry').val() || []);
     var cardGrades = ($('#reelCardGrade').val() || []);
     if (cardGrades.length) { req.grade = cardGrades; req.gradeMode = 'in'; }
+    req.pageSize = parseInt($('#reelCardPageSize').val(), 10) || 25;
+    req.exWithdrawn = $('#reelCardExWd').is(':checked') ? 1 : 0;
+    if (REEL_CARD_LIST_REG) { req.regType = REEL_CARD_LIST_REG; }
     req.progress = ($('#reelCardProgress').val() || '');
     req.advPayment = ($('#reelCardAdv').val() || '');
     req.search = (($('#reelCardSearch').val() || '').trim());
