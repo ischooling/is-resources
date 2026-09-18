@@ -619,7 +619,7 @@ function phoneNumberElement(data) {
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center" onclick="applyChanges('phoneNumber', 'phoneNumber', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',0)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
                 <i class="fa fa-check"></i>
             </a>
-            <a href="javascript:void(0)" class="btn btn-sm btn-danger rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="cancelChanges('phoneNumber',\'${data.phoneNumber != "" && data.phoneNumber != undefined? data.phoneNumber:""}\','inputPhone','phoneNumber','phoneNumberWhatsAppStatus', 0)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
+            <a href="javascript:void(0)" class="btn btn-sm btn-danger rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="cancelChanges('phoneNumber',\'${data.phoneNumber != "" && data.phoneNumber != undefined? data.phoneNumber:""}\','inputPhone','phoneNumber','phoneNumberWhatsAppStatus', '', 0)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
                 <i class="fa fa-times"></i>
             </a>
     </div>
@@ -650,7 +650,7 @@ function altPhoneNumberElement(data) {
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center" onclick="applyChanges('altPhoneNumber', 'altPhoneNumber', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',0)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
                 <i class="fa fa-check"></i>
             </a>
-            <a href="javascript:void(0)" class="btn btn-sm btn-danger rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="cancelChanges('altPhoneNumber',\'${data.altPhoneNumber !="" && data.altPhoneNumber != undefined ? data.altPhoneNumber:""}\','inputPhone','altPhoneNumber', 'altPhoneNumberWhatsAppStatus',0)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
+            <a href="javascript:void(0)" class="btn btn-sm btn-danger rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="cancelChanges('altPhoneNumber',\'${data.altPhoneNumber !="" && data.altPhoneNumber != undefined ? data.altPhoneNumber:""}\','inputPhone','altPhoneNumber', 'altPhoneNumberWhatsAppStatus','', 0)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
                 <i class="fa fa-times"></i>
             </a>
         </div>

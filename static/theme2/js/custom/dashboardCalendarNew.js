@@ -2112,9 +2112,21 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
         // 
         $(document).off("click.dashboardCalendarFilters", "[data-filter-course]");
         $(document).on("click.dashboardCalendarFilters", "[data-filter-course]", function(event) {
-            //  
+            //
             event.stopPropagation();
             var courseId = $(this).attr("data-filter-course");
+            studentCalendarState.filters.courseVisibility[courseId] = !studentCalendarState.filters.courseVisibility[courseId];
+            refreshUIOnly();
+        });
+        $(document).off("click.dashboardCalendarFilters", "#dashboardCalendarCourseFilters .course-row");
+        $(document).on("click.dashboardCalendarFilters", "#dashboardCalendarCourseFilters .course-row", function(event) {
+            // Clicking anywhere on the row toggles the course filter, except the swatch/color-picker
+            // which have their own click behavior (open/pick color) handled above.
+            if ($(event.target).closest(".c-swatch, .cpop").length) {
+                return;
+            }
+            event.stopPropagation();
+            var courseId = $(this).attr("data-course-id");
             studentCalendarState.filters.courseVisibility[courseId] = !studentCalendarState.filters.courseVisibility[courseId];
             refreshUIOnly();
         });

@@ -865,6 +865,17 @@ function initTooltipLongPressForTouch() {
       hideActiveTooltip();
     }
   });
+  $(document).on('click', '[data-toggle="tooltip"]', function () {
+    clearTouchTimer();
+    activeTooltipEl = null;
+    $(this).tooltip('hide');
+    this.blur();
+  });
+  $(window).on('blur', function () {
+    if (document.activeElement && $(document.activeElement).is('[data-toggle="tooltip"]')) {
+      document.activeElement.blur();
+    }
+  });
 }
 $(document).ready(function () {
   var stickyHeaderHeight = $('.sticky-header').height();

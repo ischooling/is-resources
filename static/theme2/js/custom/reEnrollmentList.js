@@ -281,6 +281,11 @@ function reEnrollOpenStudentDetail(ssid, uid, roll, name, grade, reg, enrol) {
             req.paymentReportRequestDTO['type'] = 2;
             // enrollStatus makes the report LEFT JOIN payments so a student without a current payment row still loads
             req.paymentReportRequestDTO['enrollStatus'] = [0, 1, 2, 3, 4];
+            // One student by id: no referral / counselor filter. The hidden form has no counselor selected, so
+            // getRequestForPaymentReport sends refferalCode [undefined] -> the server builds REFERRAL_CODE IN('null')
+            // and finds nothing ("Unable to generate reports") for every student that has a referral code.
+            req.paymentReportRequestDTO['refferalCode'] = [];
+            req.paymentReportRequestDTO['userId'] = [];
         }
         $.ajax({
             type: 'POST',

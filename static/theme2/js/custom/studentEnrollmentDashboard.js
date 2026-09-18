@@ -206,7 +206,10 @@ function sedRenderReadiness(o) {
             { n: o.acadDateNone, label: 'not chosen', color: SED_COLORS.crit, metric: 'acadDateNone' } ] },
         { name: 'Documents', note: 'age / address / parent passport / last academic', segs: [
             { n: o.docsComplete, label: 'complete', color: SED_COLORS.good, metric: 'docsComplete' },
-            { n: o.docsIncomplete, label: 'incomplete', color: SED_COLORS.crit, metric: 'docsIncomplete' } ] }
+            { n: o.docsIncomplete, label: 'incomplete', color: SED_COLORS.crit, metric: 'docsIncomplete' } ] },
+        { name: 'Parent Login', note: 'parent user account', segs: [
+            { n: o.parentUserCreated, label: 'created', color: SED_COLORS.good, metric: 'parentUserCreated' },
+            { n: o.parentUserNone, label: 'not created', color: SED_COLORS.crit, metric: 'parentUserNone' } ] }
     ];
     // Fee overdue + Re-enroll pending (moved here from the removed "Action needed" card)
     var feeOverdue = Number((SED_STATE.fee || {}).overdueStudents || 0);
@@ -860,7 +863,8 @@ function sedRenderDrawerList(rows, proofHeader, proofDate, proofContact) {
         : (proofContact ? '<th>Student Contact</th><th>Parent Contact</th>'
             : ('<th>' + proofHeader + (proofDate ? ' <span style="font-weight:400;color:#98a2b3;">(eligible)</span>' : '') + '</th>'));
     var h = '<div class="sed-dtwrap"><table id="sedStudentTable" class="sed-dtable" style="width:100%"><thead><tr>'
-        + '<th class="n">Sr. No.</th><th>Student ID</th><th>Student Name</th><th>Grade</th><th>Register Type</th><th>Enrollment Type</th><th>Country</th>' + proofHead
+        + '<th class="n">Sr. No.</th><th>Student ID</th><th>Student Name</th><th>Grade</th><th>Register Type</th><th>Enrollment Type</th><th>Country</th>'
+        + '<th>Pay Date</th><th>Academic Start</th><th>Academic End</th>' + proofHead
         + '</tr></thead><tbody>';
     for (var i = 0; i < rows.length; i++) {
         var r = rows[i];
@@ -888,7 +892,10 @@ function sedRenderDrawerList(rows, proofHeader, proofDate, proofContact) {
             + '<td>' + (r.grade || '-') + '</td>'
             + '<td>' + sedRegLabel(r.regType) + '</td>'
             + '<td>' + sedEnrolLabel(r.enrolType) + '</td>'
-            + '<td>' + (r.country || '-') + '</td>' + proofCells
+            + '<td>' + (r.country || '-') + '</td>'
+            + '<td style="white-space:nowrap;">' + (r.payDate || '-') + '</td>'
+            + '<td style="white-space:nowrap;">' + (r.acadStart || '-') + '</td>'
+            + '<td style="white-space:nowrap;">' + (r.acadEnd || '-') + '</td>' + proofCells
             + '</tr>';
     }
     h += '</tbody></table></div>';
@@ -910,7 +917,9 @@ function sedRenderDrawerList(rows, proofHeader, proofDate, proofContact) {
                 destroy: true,
                 scrollY: scrollY,
                 scrollCollapse: true,
-                scrollX: false,
+                // scrollX keeps the separate header table scrolling WITH the body; without it a wide list
+                // (Pay Date / Academic Start / Academic End / proof) scrolls the rows but leaves the headings behind
+                scrollX: true,
                 dom: '<"sed-toolbar"lf>rtip', // length+filters (left) and search (right) in one flex row
                 // Sr. No. always follows the displayed (sorted/filtered/paged) order, so it never jumps
                 drawCallback: function () {
@@ -924,6 +933,8 @@ function sedRenderDrawerList(rows, proofHeader, proofDate, proofContact) {
             });
             sedAddDrawerFilters(dt, rows);
             sedBindContactEdit();
+            // the drawer slides in (0.25s): measure column widths again once it is fully open
+            setTimeout(function () { try { dt.columns.adjust(); } catch (e) {} }, 320);
         } catch (e) { console.error('sed DataTable init', e); }
     }
 }
@@ -1074,6 +1085,11 @@ function sedOpenStudentDetail(ssid, uid, roll) {
             // while its OR-filter still matches all students, so a student without a current payment row
             // (e.g. session already ended) loads instead of showing "not found".
             req.paymentReportRequestDTO['enrollStatus'] = [0, 1, 2, 3, 4];
+            // One student by id: no referral / counselor filter. The hidden form has no counselor selected, so
+            // getRequestForPaymentReport sends refferalCode [undefined] -> the server builds REFERRAL_CODE IN('null')
+            // and finds nothing ("Unable to generate reports") for every student that has a referral code.
+            req.paymentReportRequestDTO['refferalCode'] = [];
+            req.paymentReportRequestDTO['userId'] = [];
         }
         $.ajax({
             type: 'POST',

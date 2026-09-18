@@ -1281,7 +1281,7 @@ input::placeholder {
 	position: relative;
 	z-index: 1;
 }
-.modal .close:not(.close-with-red-color):after{content: '';width: 35px;height: 35px;background-color: red;position: absolute;right: 0;z-index: -1;top:11px;right:5px}
+.modal .close:not(.close-with-red-color):after{content: '';width: 35px;height: 35px;background-color: red;position: absolute;right: 0;z-index: -1;}
 .modal .close-with-red-color {
 	opacity: 1;
     width: 27px;

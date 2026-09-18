@@ -290,7 +290,14 @@ function userApplicationTableContent(){
             <table id="userApplicationTable" class="table table-bordered font-12">
                 <thead class="bg-primary text-white">
                     <tr>
-                        <th>S.No.</th>
+                        <th style="white-space: nowrap;" class="text-center">
+                            <span class="user-application-sort-icons d-block mb-1">
+                                <i class="fa fa-arrow-up user-application-sort-icon text-white" data-sort="id" title="Ascending" style="cursor:pointer;" onclick="applyUserApplicationSort('id');"></i>
+                                <i class="fa fa-arrow-down user-application-sort-icon text-white" data-sort="latestEntry" title="Latest Entry" style="cursor:pointer;" onclick="applyUserApplicationSort('latestEntry');"></i>
+                                <i class="fa fa-undo user-application-sort-icon text-white" data-sort="" title="Default" style="cursor:pointer;" onclick="applyUserApplicationSort('');"></i>
+                            </span>
+                            S.No.
+                        </th>
                         <th style="min-width: 130px;">
                             Applied Date<br/>
                             Name<br/>

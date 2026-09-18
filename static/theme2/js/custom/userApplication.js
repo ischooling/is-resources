@@ -7,6 +7,10 @@ var USER_APPLICATION_PAGINATION_STATE = {
     callFrom: 'onLoad',
     isTeaching: null
 };
+// Sorting filter se bilkul alag rakhi gayi hai. Default "" (jaisa onLoad chalta hai).
+var USER_APPLICATION_SORT_STATE = {
+    sortBy: ""
+};
 var ORIGINAL_ORDER_BACKUP = {};
 var sortableInstances = {};
 var FINAL_INTERVIEW_SLOTS_COUNT;
@@ -60,6 +64,7 @@ async function userApplicationProfileOnloadFunction(){
     initUserApplicationSelect2Fields("#userScreeningFilterForm");
     $("#userScreeningFilterForm #filterGrades").val("").trigger("change");
     $("#userScreeningFilterForm #filterCourses").val("").trigger("change");
+    USER_APPLICATION_SORT_STATE.sortBy = "";
     loadUserApplicationData(false, "onLoad");
     if($("#cropModalChatSuport").length == 1){
         $("#cropModalChatSuport").remove();
@@ -215,11 +220,11 @@ function bindUserApplicationData(responseData) {
                                     </li>
                                 </ul>
                             </div>`
-                            if(user.status != "Approved for Selection Process"){
+                            // if(user.status != "Approved for Selection Process"){
                                 row += `<div data-toggle="tooltip" data-placement="top" title="Discard">
                                     <i class="fa fa-trash text-danger font-20" aria-hidden="true" style="cursor:pointer;" onclick="showWarningMessage('Are you sure you want to discard this application?', &quot;updateUserApplicationProfile(${user.id}, 'Discard')&quot;)"></i>
                                 </div>`
-                            }
+                            // }
                         row +=`</div>
                     </td>
                 </tr>`;
@@ -280,6 +285,18 @@ async function loadUserApplicationData(isToday, callFrom, isTeaching) {
         payload['assignTo'] = USER_APPLICATION_FILTER_STATE.filterValues.assignTo || "";
         payload['country'] = USER_APPLICATION_FILTER_STATE.filterValues.country || "";
         payload['status'] = USER_APPLICATION_FILTER_STATE.filterValues.status || "";
+        // Sorting filter se alag chalti hai — S.No. header icons se control hoti hai.
+        var sortBy = USER_APPLICATION_SORT_STATE.sortBy;
+        if (sortBy === "id") {
+            payload['sortBy'] = "id";
+            payload['sortOrder'] = "ASC";
+        } else if (sortBy === "latestEntry") {
+            payload['sortBy'] = "latestEntry";
+            payload['sortOrder'] = "DESC";
+        } else {
+            payload['sortBy'] = "";
+            payload['sortOrder'] = "";
+        }
         var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-user-screening-data', payload, '/teacher/signup');
         if(responseData.statusCode == "SUCCESS"){
             bindUserApplicationData(responseData);
@@ -305,6 +322,28 @@ function applyFilterUserApplication() {
     CURRENT_PAGE_USER_APPLICATION = 1;
     updateFormState();
     loadUserApplicationData(false, "filter");
+}
+
+// S.No. header ke sort icons ke liye. Filter se alag chalti hai, current
+// filter/pagination state ko chhue bina sirf sort apply karke data reload karti hai.
+function applyUserApplicationSort(sortBy) {
+    USER_APPLICATION_SORT_STATE.sortBy = sortBy;
+    updateUserApplicationSortIcons();
+    CURRENT_PAGE_USER_APPLICATION = 1;
+    loadUserApplicationData();
+}
+
+// Active sort icon ko glow karti hai, baaki ko dim. Default ("") par koi glow nahi.
+function updateUserApplicationSortIcons() {
+    var active = USER_APPLICATION_SORT_STATE.sortBy;
+    $(".user-application-sort-icon").each(function () {
+        var iconSort = $(this).data("sort");
+        if (active && String(iconSort) === String(active)) {
+            $(this).addClass("text-warning").removeClass("text-white");
+        } else {
+            $(this).removeClass("text-warning").addClass("text-white");
+        }
+    });
 }
 
 function resetUserApplication() {
@@ -1142,6 +1181,18 @@ async function openQAModal(entityId){
 function setFilterDatesAccordingly(src, startDateId, endDateId) {
     const value = $(src).val();
     const today = new Date();
+
+    // Custom par hi Start/End date fields dikhein, baaki options par invisible.
+    // visibility use kar rahe hain (display nahi) taaki Duration ka size same rahe.
+    const startFieldWrapper = $(startDateId).closest(".user-application-date-field");
+    const endFieldWrapper = $(endDateId).closest(".user-application-date-field");
+    if (value === "Custom") {
+        startFieldWrapper.css("visibility", "visible");
+        endFieldWrapper.css("visibility", "visible");
+    } else {
+        startFieldWrapper.css("visibility", "hidden");
+        endFieldWrapper.css("visibility", "hidden");
+    }
 
     const getStartOfWeek = (date) => {
         const diff = date.getDate() - date.getDay();
