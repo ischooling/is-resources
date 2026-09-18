@@ -115,6 +115,7 @@ const contentHandlers = {
     'withdrawal-requests': () => renderWithdrawalRequests('Withdrawal Requests', roleAndModule),
     'manage-cron': () => renderManageCron('Manage CRON', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'manage-motivational-quotes': () => renderMotivationalQuotesDashboard('Motivational Quotes', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'financial-cost': () => renderFinancialCost('Cost Distribution', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'event-discount': () => initEventDiscount(),
     'user-screening-profiles': () => initUserScreeningProfiles(),
     'teacher-home': () => { CALENDAR_EVENT = false; rendereTeacherHomeContent();},
