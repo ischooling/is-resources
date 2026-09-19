@@ -759,6 +759,21 @@ function fcRenderStudentReport(res) {
 	$('#fcStudentItemsTable').DataTable({ order: [[4, 'desc']], pageLength: 25, searching: false, paging: false, info: false });
 }
 
+/**
+ * Hide a Bootstrap modal and run `then` only after it is fully hidden.
+ * loadFinancialCost() rebuilds #dashboardContentInHTML, which destroys the modal
+ * DOM. If we reload while the fade-out is still animating, `hidden.bs.modal` never
+ * fires and Bootstrap's .modal-backdrop (appended to <body>, outside the rebuilt
+ * container) is left orphaned — a stuck overlay. Deferring the reload lets the
+ * backdrop be cleaned up first. A timeout guards the case where the event is missed.
+ */
+function fcHideModalThen(selector, then) {
+	var $m = $(selector), done = false;
+	var run = function () { if (done) { return; } done = true; then(); };
+	$m.off('hidden.bs.modal.fc').one('hidden.bs.modal.fc', run);
+	$m.modal('hide');
+	setTimeout(run, 500);
+}
 function fcOpenItemModal(itemId) {
 	var item = itemId ? (__financialCostData.items || []).find(function (i) { return i.id === itemId; }) : null;
 	$('#fcModalTitle').text(item ? 'Edit cost item' : 'Add cost item');
@@ -796,7 +811,7 @@ function fcSaveItem() {
 	$.ajax({
 		url: financialCostUrl('save'), type: 'POST', contentType: 'application/json', data: JSON.stringify(payload),
 		beforeSend: function (xhr) { xhr.setRequestHeader('UNIQUEUUID', UNIQUEUUID); },
-		success: function (res) { if (res && res.status == '1') { $('#fcItemModal').modal('hide'); showMessageTheme2(1, res.message || 'Saved.'); loadFinancialCost(__fcCurrentSessionId); } else { showMessageTheme2(0, (res && res.message) ? res.message : 'Could not save the cost item. Please try again.'); } },
+		success: function (res) { if (res && res.status == '1') { fcHideModalThen('#fcItemModal', function () { showMessageTheme2(1, res.message || 'Saved.'); loadFinancialCost(__fcCurrentSessionId, $('#fcTopMonth').val() || 'ALL', '#fcTabItems'); }); } else { showMessageTheme2(0, (res && res.message) ? res.message : 'Could not save the cost item. Please try again.'); } },
 		error: function () { showMessageTheme2(0, 'Could not save the cost item. Please try again.'); },
 	});
 }
@@ -805,7 +820,7 @@ function fcDeleteItem(itemId, itemName) {
 	$.ajax({
 		url: financialCostUrl('delete', itemId), type: 'POST',
 		beforeSend: function (xhr) { xhr.setRequestHeader('UNIQUEUUID', UNIQUEUUID); },
-		success: function (res) { if (res && res.status == '1') { showMessageTheme2(1, res.message || 'Removed.'); loadFinancialCost(__fcCurrentSessionId); } else { showMessageTheme2(0, (res && res.message) ? res.message : 'Could not remove the cost item. Please try again.'); } },
+		success: function (res) { if (res && res.status == '1') { showMessageTheme2(1, res.message || 'Removed.'); loadFinancialCost(__fcCurrentSessionId, $('#fcTopMonth').val() || 'ALL', '#fcTabItems'); } else { showMessageTheme2(0, (res && res.message) ? res.message : 'Could not remove the cost item. Please try again.'); } },
 		error: function () { showMessageTheme2(0, 'Could not remove the cost item. Please try again.'); },
 	});
 }
@@ -827,7 +842,7 @@ function fcSaveCategory() {
 	$.ajax({
 		url: financialCostUrl('category/save'), type: 'POST', contentType: 'application/json', data: JSON.stringify(payload),
 		beforeSend: function (xhr) { xhr.setRequestHeader('UNIQUEUUID', UNIQUEUUID); },
-		success: function (res) { if (res && res.status == '1') { $('#fcCatModal').modal('hide'); showMessageTheme2(1, res.message || 'Saved.'); loadFinancialCost(__fcCurrentSessionId); } else { showMessageTheme2(0, (res && res.message) ? res.message : 'Could not save the category. Please try again.'); } },
+		success: function (res) { if (res && res.status == '1') { fcHideModalThen('#fcCatModal', function () { showMessageTheme2(1, res.message || 'Saved.'); loadFinancialCost(__fcCurrentSessionId, $('#fcTopMonth').val() || 'ALL', '#fcTabCats'); }); } else { showMessageTheme2(0, (res && res.message) ? res.message : 'Could not save the category. Please try again.'); } },
 		error: function () { showMessageTheme2(0, 'Could not save the category. Please try again.'); },
 	});
 }
