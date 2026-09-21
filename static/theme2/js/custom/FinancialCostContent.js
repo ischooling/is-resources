@@ -38,6 +38,15 @@ function fcMoney(amount, currency) {
 	return fcEsc(currency || __fcCurrency) + ' ' + num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+/** Format a small per-second money rate with up to 6 decimals; 0/empty -> em dash. */
+function fcRate(amount) {
+	if (amount === undefined || amount === null || amount === '') { return '<span class="text-muted">—</span>'; }
+	var num = Number(amount);
+	if (isNaN(num)) { return fcEsc(amount); }
+	if (num === 0) { return '<span class="text-muted">—</span>'; }
+	return fcEsc(__fcCurrency) + ' ' + num.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 6 });
+}
+
 /** Format a seconds count as hh:mm:ss (hours are not zero-padded; 0 -> 00:00:00). */
 function fcDuration(seconds) {
 	var s = Math.max(0, Math.round(Number(seconds) || 0));
@@ -395,7 +404,7 @@ function fcRenderReport(res) {
 		+ '  </tbody></table></div></div></div>'
 		+ '<h6 class="mt-3">Per-student cost sheet <small class="text-muted" id="fcStudentSheetCount">(' + students.length + ' shown)</small></h6>'
 		+ '<div class="table-responsive"><table id="fcStudentTable" class="table table-hover table-striped" style="width:100%">'
-		+ '  <thead><tr><th>Student</th><th>Learning program</th><th>Grade</th><th class="text-right">Engagement (Duration)</th><th class="text-right">Teaching cost</th><th class="text-right">Shared cost</th><th class="text-right">Total</th></tr></thead><tbody></tbody></table></div>';
+		+ '  <thead><tr><th>Student</th><th>Learning program</th><th>Grade</th><th class="text-right">Engagement (Duration)</th><th class="text-right">Teaching cost</th><th class="text-right">Shared cost</th><th class="text-right">Total</th><th class="text-right" title="Effective teacher cost per engaged second under the learning-program weighting (1:1/Flexy/Dual/Self Study Plus ×1.0, Group ×(1÷monthly batch size), Self Study ×0.0)">Teacher $/sec</th></tr></thead><tbody></tbody></table></div>';
 	$('#fcReportBody').html(html);
 
 	fcDestroyChart('fcProductChart');
@@ -430,7 +439,8 @@ function fcRenderStudentSheet(students, ccy) {
 		return '<tr><td>' + fcEsc(s.studentName || ('#' + s.studentId)) + '</td><td>' + fcEsc(s.lpLabel || '—') + '</td><td>' + fcEsc(s.gradeName || '—')
 			+ '</td><td class="text-right" data-order="' + (s.basisSeconds || 0) + '">' + fcDuration(s.basisSeconds)
 			+ '</td><td class="text-right">' + fcMoney(s.teachingCost, ccy) + '</td><td class="text-right">' + fcMoney(s.sharedCost, ccy)
-			+ '</td><td class="text-right"><strong>' + fcMoney(s.total, ccy) + '</strong></td></tr>';
+			+ '</td><td class="text-right"><strong>' + fcMoney(s.total, ccy) + '</strong>'
+			+ '</td><td class="text-right" data-order="' + (Number(s.perSecondTeacherCost) || 0) + '">' + fcRate(s.perSecondTeacherCost) + '</td></tr>';
 	}).join('');
 	if ($.fn.DataTable.isDataTable('#fcStudentTable')) { $('#fcStudentTable').DataTable().destroy(); }
 	$('#fcStudentTable tbody').html(rows);
