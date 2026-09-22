@@ -2,7 +2,7 @@ var IS_INTERNATIONAL_SCHOOLING = Number(SCHOOL_ID) === 1;
 var SHOW_GRADUATION_LOGIN_DESIGN = IS_INTERNATIONAL_SCHOOLING && isGraduationLoginDesignVisible();
 
 function isGraduationLoginDesignVisible(){
-    var graduationHideFromDate = new Date(2026, 9, 22);
+    var graduationHideFromDate = new Date(2026, 11, 12);
     return new Date() < graduationHideFromDate;
 }
 
