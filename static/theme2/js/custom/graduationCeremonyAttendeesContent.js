@@ -208,7 +208,7 @@ function getGraduationCeremonyAttendeesContent(title, roleAndModule, schoolId, u
                     <thead>
                         <tr class="bg-primary text-white">
                             <th style="width:4%;">S.No.</th>
-                            <th style="width:23%;">Student Info<br><small>(Name, Email, Attend As, Age, Phone, Alt Phone, Country, Timezone)</small></th>
+                            <th style="width:23%;">Student Info<br><small>(Name, Email, Date Filled, Attend As, Age, Phone, Alt Phone, Country, Timezone)</small></th>
                             <th style="width:17%;">Latest Remark</th>
                             <th class="d-none">Callback Info<br><small>(Status, Time Slot)</small></th>
                             <th style="width:30%;">Attendees</th>
