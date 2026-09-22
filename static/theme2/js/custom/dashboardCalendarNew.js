@@ -1003,6 +1003,9 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                     .dashboard-week-day-view { padding: 14px 10px; }
                     .dashboard-today-date { width: 54px; }
                 }
+                @media (max-width: 420px) {
+                    [data-week-day] { width: 30px !important; height: 30px !important; font-size: 16px !important; }
+                }
             </style>`);
     }
     // Time-of-day glyph for the live clock, keyed on the local hour:
@@ -1249,7 +1252,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
             var numStyle = isToday
                 ? "background:#1a73e8;color:#fff;font-weight:500;border-radius:50%;"
                 : "color:#202124;font-weight:300;";
-            hdr += '<div style="flex:1;text-align:center;padding:8px 4px;">'
+            hdr += '<div style="flex:1;min-width:0;text-align:center;padding:8px 4px;">'
                 + '<div style="font-size:11px;color:' + (isToday ? 'var(--pc,#1a73e8)' : '#70757a') + ';text-transform:uppercase;font-weight:' + (isToday ? '700' : '600') + ';letter-spacing:0.5px;">' + day.format("ddd").toUpperCase() + '</div>'
                 + '<div data-week-day="' + dk + '" style="font-size:22px;' + numStyle + 'width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;margin:2px auto 0;border-radius:50%;">' + day.format("D") + '</div>'
                 + '</div>';
@@ -1270,7 +1273,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                     + escapeHtml(ev.title || "Holiday")
                     + '</div>';
             }).join('');
-            allDayRow += '<div style="flex:1;border-left:1px solid #e8eaed;padding:2px 0;min-height:22px;white-space:nowrap;overflow:hidden;">' + cellHtml + '</div>';
+            allDayRow += '<div style="flex:1;min-width:0;border-left:1px solid #e8eaed;padding:2px 0;min-height:22px;white-space:nowrap;overflow:hidden;">' + cellHtml + '</div>';
         });
         allDayRow += '</div>';
 
@@ -1294,7 +1297,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
             });
 
             if (!dayEvs.length) {
-                dayCols += '<div style="position:relative;flex:1;border-left:1px solid #e8eaed;">' + lines + '</div>';
+                dayCols += '<div style="position:relative;flex:1;min-width:0;border-left:1px solid #e8eaed;">' + lines + '</div>';
                 return;
             }
 
@@ -1368,7 +1371,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                 }
             });
 
-            dayCols += '<div style="position:relative;flex:1;border-left:1px solid #e8eaed;">' + html + '</div>';
+            dayCols += '<div style="position:relative;flex:1;min-width:0;border-left:1px solid #e8eaed;">' + html + '</div>';
         });
 
         var totalH = 24 * HOUR_H;

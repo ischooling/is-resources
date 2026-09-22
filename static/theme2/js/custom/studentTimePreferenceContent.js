@@ -40,7 +40,7 @@ function getStudentDashboardWelcomePopupContent(){
 function getStudentTimePreferencePopupContent(details){
     var html=
         `<div class="modal fade d-none" id="timePreferencePopup" data-backdrop="static">
-            <div class="modal-dialog modal-xl modal-dialog-centered box-shadow-none" role="document" style="max-width:480px;width:calc(100% - 32px);">
+            <div class="modal-dialog modal-xl modal-dialog-centered box-shadow-none mx-auto" role="document" style="max-width:480px;width:calc(100% - 32px);">
                 <div class="modal-content text-center">
                     <div class="modal-header pt-2 pb-2 bg-primary text-white justify-content-center">
                         <h5 class="text-white m-0 mr-auto" style="text-transform: none;" id="orientAndSemesterChangeSpanHeading"></h5>
@@ -125,7 +125,7 @@ function getStudentTimePreferencePopupContent(details){
                     <div class="modal-footer justify-content-center">
                         <button id="studentTimeSkipNext" type="button" class="btn btn-outline-primary font-size-lg py-1" onClick="showWarningMessage('Are you sure you want to skip your school system training? We recommend completing it to understand the functionalities of our platform.', 'orientationSkip()')">Skip System Training</button>
 						<button id="studentTimeSave" type="button" class="btn btn-outline-success font-size-lg py-1" onClick="saveTeacherTimePreference('${USER_ROLE}','timePreferencePopup',true);">Confirm</button>
-						<button id="closeButton" type="button" class="btn btn-outline-primary font-size-lg py-1 ml-auto" data-dismiss="modal" aria-label="Close">Close</button>
+						<button id="closeButton" type="button" class="btn btn-outline-primary ml-auto" data-dismiss="modal" aria-label="Close">Close</button>
                     </div>
                 </div>
             </div>

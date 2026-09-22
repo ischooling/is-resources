@@ -13,7 +13,7 @@ async function jobApplicationQAContent(){
         <div id="jobApplicationThankYouWrapper"style="display:none;">${qaThankYouContent()}</div>
         <div class="app-wrapper-footer position-fixed w-100 bg-white" style="bottom: 0; z-index: 20;">
             <div class="app-footer">
-                <div class="app-footer__inner">
+                <div class="app-footer__inner font-11">
                     <p class="text-center" style="margin: 0">Copyright © ${new Date().getFullYear()} - ${SCHOOL_NAME} - All Rights Reserved.</p>
                 </div>
             </div>

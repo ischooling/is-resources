@@ -195,6 +195,12 @@ function getManageUserListModals(meta) {
 									'<label for="mandatoryOption">Mandatory Option</label>' +
 								'</div>' +
 							'</div>' +
+							'<div class="col-xl-6 col-lg-8 col-md-12 col-sm-12 mb-3">' +
+								'<div class="input-group position-relative custom-field mb-2 mt-3 p-0">' +
+									'<textarea id="purpose" class="form-control" placeholder=" " style="min-height:inherit;resize:none"></textarea>' +
+									'<label for="purpose">Purpose</label>' +
+								'</div>' +
+							'</div>' +
 							'<div class="col-12 text-right mt-2">' +
 								'<a href="javascript:void(0)" class="btn btn-light mr-2" id="resetStudentProfileSetting" onclick="resetStudentProfileSettingForm()">Reset</a>' +
 								'<a href="javascript:void(0)" class="btn btn-success" id="saveStudentProfileSetting" onclick="saveStudentProfileSetting()">Save</a>' +
@@ -205,7 +211,7 @@ function getManageUserListModals(meta) {
 					'<div class="table-responsive">' +
 						'<table class="table table-bordered table-striped border-radius-table font-12 nowrap" id="studentProfileSettingTable" style="width:100% !important;">' +
 							'<thead class="bg-primary text-white">' +
-								'<tr><th>S.No</th><th>Learning Program</th><th>Grade</th><th>Profile Field</th><th>Schedule Type</th><th>Schedule Date Time</th><th>Mandatory</th><th>Status</th><th>Action</th></tr>' +
+								'<tr><th>S.No</th><th>Learning Program</th><th>Grade</th><th>Profile Field</th><th>Purpose</th><th>Schedule Type</th><th>Schedule Date Time</th><th>Mandatory</th><th>Status</th><th>Action</th></tr>' +
 							'</thead>' +
 							'<tbody></tbody>' +
 						'</table>' +

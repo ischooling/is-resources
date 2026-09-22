@@ -8,7 +8,7 @@ function renderTeacherTimepreferenceContent(details){
 function getTeacherTimePreferencePopupContent(details){
     var html=
         `<div class="modal fade fade-scale" id="timePreferencePopup" data-backdrop="static">
-            <div class="modal-dialog modal-lg  modal-dialog-centered box-shadow-none" role="document">
+            <div class="modal-dialog modal-lg  modal-dialog-centered box-shadow-none mx-auto" role="document">
                 <div class="modal-content text-center">
                     <div class="modal-header pt-2 pb-2 bg-primary text-white justify-content-center">
 					    <h5 class=" text-white m-0">Welcome to the ${SCHOOL_NAME} Family, ${USER_FULL_NAME}!</h5>

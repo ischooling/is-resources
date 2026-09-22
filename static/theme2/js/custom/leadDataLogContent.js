@@ -362,7 +362,7 @@ function renderLeadDataLogPage(containerId, pageConfig, leadData) {
   html += '  </div>';
   html += '  <div class="app-wrapper-footer">';
   html += '    <div class="app-footer">';
-  html += '      <div class="app-footer__inner">';
+  html += '      <div class="app-footer__inner font-11">';
   html += '        <p style="margin: 0">Copyright &copy; ' + safe(cfg.copyrightYear || '') + ' - ' + safe(cfg.copyrightName || '') + ' - All Rights Reserved.</p>';
   html += '      </div>';
   html += '    </div>';

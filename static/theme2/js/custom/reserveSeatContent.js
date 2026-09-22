@@ -226,8 +226,8 @@ function enrollReserveModalContent(data, nextGrade){
 						<p class="font-16 text-black mt-2">Now you are eligible for re-enrollment for the next grade</p>`;
 						if(data.eligibleFor == 'ADV' && ((data.progressionDiscount && data.progressionDiscount != 0 && data.progressionDiscount != '$0.00') || (data.planDiscount && data.planDiscount != 0 && data.planDiscount != '$0.00'))){
 							html+=`<div class="bg-light-primary rounded-10 p-3 mb-4 mt-2">
-							<div class="d-flex align-items-center" style="margin-left:32px;">
-								<div class="text-center px-2" style="margin-left:25px;">
+							<div class="d-flex align-items-center d-flex align-items-center justify-content-center flex-wrap">
+								<div class="text-center px-2">
 									<img src="${PATH_FOLDER_IMAGE2}reenrollement.png${SCRIPT_VERSION}" style="width: 90px;" />
 								</div>
 								<div class="border-left pl-4 ml-3 text-center flex-grow-2">
@@ -254,45 +254,48 @@ function enrollReserveModalContent(data, nextGrade){
 							</div>
 						</div>`;
 						if(data.progressionDiscountDueDate){
-							html+=`<div id="reserveSeatDiscountCountdownWrapper" class="d-flex align-items-center rounded-10 border border-warning mb-3 overflow-hidden" data-progression-discount-due-date="${data.progressionDiscountDueDate}" style="background:#fffaf0;">
-							<div class="d-flex align-items-center text-left px-2 py-2 flex-shrink-0" style="width:34%; min-width:260px;">
-								<div class="d-inline-flex align-items-center justify-content-center rounded-circle text-warning mr-2 flex-shrink-0" style="width:30px; height:30px; border:1px solid #ffd778; background:#fff7df;">
-									<i class="fas fa-calendar-alt"></i>
+							html+=
+							`<div id="reserveSeatDiscountCountdownWrapper" class="row rounded-10 border border-warning mb-3 overflow-hidden flex-wrap" data-progression-discount-due-date="${data.progressionDiscountDueDate}" style="background:#fffaf0;">
+								<div class="col-md-6 col-12 px-2 py-2">
+									<div class="d-flex justify-content-center justify-content-md-left align-items-center">
+										<div class="d-inline-flex align-items-center justify-content-center justify-content-md-left rounded-circle text-warning mr-2" style="width:30px; height:30px; border:1px solid #ffd778; background:#fff7df;">
+										<i class="fas fa-calendar-alt"></i>
+										</div>
+										<div class="font-14 font-weight-semi-bold text-dark text-left">This offer is valid for a limited time only!</div>
+									</div>
 								</div>
-								<div class="font-14 font-weight-semi-bold text-dark">This offer is valid for a limited time only!</div>
+								<div id="reserveSeatDiscountCountdown" class="col-md-6 col-12 px-2 py-2" style="min-width:0;"></div>
 							</div>
-							<div id="reserveSeatDiscountCountdown" class="d-flex align-items-center justify-content-end flex-grow-1 px-2 py-2" style="min-width:0;"></div>
-						</div>
-						<script>
-							if(window.RESERVE_SEAT_DISCOUNT_COUNTDOWN_INTERVAL){
-								clearInterval(window.RESERVE_SEAT_DISCOUNT_COUNTDOWN_INTERVAL);
-							}
-							var reserveSeatDiscountCycle = parseInt("${data.progressionDiscountDueDate}", 10) * 24 * 60 * 60 * 1000;
-							var reserveSeatDiscountEndTime = new Date().getTime() + reserveSeatDiscountCycle;
-							var reserveSeatDiscountCountdown = function(){
-								var distance = reserveSeatDiscountEndTime - new Date().getTime();
-								if(distance <= 0){
-									reserveSeatDiscountEndTime = new Date().getTime() + reserveSeatDiscountCycle;
-									distance = reserveSeatDiscountCycle;
+							<script>
+								if(window.RESERVE_SEAT_DISCOUNT_COUNTDOWN_INTERVAL){
+									clearInterval(window.RESERVE_SEAT_DISCOUNT_COUNTDOWN_INTERVAL);
 								}
-								var timeList = [
-									{value: Math.floor(distance / (1000 * 60 * 60 * 24)), label: "Days"},
-									{value: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)), label: "Hours"},
-									{value: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)), label: "Minutes"},
-									{value: Math.floor((distance % (1000 * 60)) / 1000), label: "Seconds"}
-								];
-								$("#reserveSeatDiscountCountdown").html($.map(timeList, function(timer, index){
-									return \`<div class="d-inline-flex align-items-center">
-										<div class="d-inline-flex flex-column rounded bg-white text-dark px-1 py-1 font-weight-bold border" style="min-width:50px;">
-											<div class="font-20 text-danger" style="line-height:20px">\${padTo2Digits(timer.value)}</div>
-											<span class="font-weight-semi-bold font-10 text-center">\${timer.label}</span>
-										</div>\${index < timeList.length - 1 ? '<span class="font-16 text-dark font-weight-bold d-inline-block px-1 pb-1">:</span>' : ''}
-									</div>\`;
-								}).join(""));
-							}
-							reserveSeatDiscountCountdown();
-							window.RESERVE_SEAT_DISCOUNT_COUNTDOWN_INTERVAL = setInterval(reserveSeatDiscountCountdown, 1000);
-						</script>`;
+								var reserveSeatDiscountCycle = parseInt("${data.progressionDiscountDueDate}", 10) * 24 * 60 * 60 * 1000;
+								var reserveSeatDiscountEndTime = new Date().getTime() + reserveSeatDiscountCycle;
+								var reserveSeatDiscountCountdown = function(){
+									var distance = reserveSeatDiscountEndTime - new Date().getTime();
+									if(distance <= 0){
+										reserveSeatDiscountEndTime = new Date().getTime() + reserveSeatDiscountCycle;
+										distance = reserveSeatDiscountCycle;
+									}
+									var timeList = [
+										{value: Math.floor(distance / (1000 * 60 * 60 * 24)), label: "Days"},
+										{value: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)), label: "Hours"},
+										{value: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)), label: "Minutes"},
+										{value: Math.floor((distance % (1000 * 60)) / 1000), label: "Seconds"}
+									];
+									$("#reserveSeatDiscountCountdown").html($.map(timeList, function(timer, index){
+										return \`<div class="d-inline-flex align-items-center">
+											<div class="d-inline-flex flex-column rounded bg-white text-dark px-1 py-1 font-weight-bold border" style="min-width:50px;">
+												<div class="font-20 text-danger" style="line-height:20px">\${padTo2Digits(timer.value)}</div>
+												<span class="font-weight-semi-bold font-10 text-center">\${timer.label}</span>
+											</div>\${index < timeList.length - 1 ? '<span class="font-16 text-dark font-weight-bold d-inline-block px-1 pb-1">:</span>' : ''}
+										</div>\`;
+									}).join(""));
+								}
+								reserveSeatDiscountCountdown();
+								window.RESERVE_SEAT_DISCOUNT_COUNTDOWN_INTERVAL = setInterval(reserveSeatDiscountCountdown, 1000);
+							</script>`;
 						}
 						html+=`
 						<div class="d-flex" style="gap:10px;">

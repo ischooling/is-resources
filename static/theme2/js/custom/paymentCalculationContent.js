@@ -40,7 +40,7 @@ function notEligibleForRequest(userId, schoolWebsite, logoUrl, copyrightYear, co
 			</div>
 			<div class="app-wrapper-footer">
 				<div class="app-footer">
-					<div class="app-footer__inner">
+					<div class="app-footer__inner font-11">
 						<p style="margin: 0">Copyright © ${copyrightYear} ${copyrightName} - All Rights Reserved.</p>
 					</div>
 				</div>
@@ -400,7 +400,7 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 			</div>
 			<div class="app-wrapper-footer">
 				<div class="app-footer">
-					<div class="app-footer__inner">
+					<div class="app-footer__inner font-11">
 						<p style="margin: 0">Copyright © ${copyrightYear} ${copyrightName} - All Rights Reserved.</p>
 					</div>
 				</div>
@@ -632,7 +632,7 @@ function customAdvanceContent(responseData, userId, studentStandardId, schoolWeb
 		</div>
 		<div class="app-wrapper-footer">
 			<div class="app-footer">
-				<div class="app-footer__inner">
+				<div class="app-footer__inner font-11">
 					<p style="margin: 0">Copyright © ${copyrightYear} ${copyrightName} - All Rights Reserved.</p>
 				</div>
 			</div>

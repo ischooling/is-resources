@@ -132,7 +132,7 @@ async function footerContent(data){
     var html=
         `<div class="app-wrapper-footer mt-sm-4">
             <div class="app-footer mt-sm-4">
-                <div class="app-footer__inner">
+                <div class="app-footer__inner font-11">
                     <p style="margin: 0">Copyright © ${schoolSettingsTechnical.copyrightYear} ${schoolSettingsTechnical.copyrightName} - All Rights Reserved.</p>
                 </div>
             </div>

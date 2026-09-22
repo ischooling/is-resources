@@ -134,7 +134,7 @@ async function dashboardFooterContent(){
 	var html=
 	'<div class="app-wrapper-footer">'
 		+'<div class="app-footer">'
-			+'<div class="app-footer__inner">'
+			+'<div class="app-footer__inner font-11">'
 				+'<div class="col">'
 					+'<p style="margin: 0">Copyright © '+schoolSettingsTechnical.copyrightYear+' '+schoolSettingsTechnical.copyrightName+' - All Rights Reserved.</p>'
 				+'</div>'

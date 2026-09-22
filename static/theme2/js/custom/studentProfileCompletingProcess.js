@@ -76,6 +76,7 @@ function resetStudentProfileSettingForm() {
 	$("#learningProgramIds").val(null).trigger("change");
 	$("#gradeIds").val(null).trigger("change");
 	$("#profileFieldId").val(null).trigger("change");
+	$("#purpose").val("");
 	$("#scheduleType").val("NOW").trigger("change");
 	$("#scheduleDate").datepicker("update", "");
 	$("#scheduleTime").val("").trigger("change");
@@ -165,6 +166,7 @@ function saveProfileSetting(){
 	var scheduleDateTime = `${scheduleDate} ${scheduleTime}`;
 	var scheduleDateUTC = "";
 	var mandatoryOption = $("#mandatoryOption").val();
+	var purpose = $("#purpose").val();
 	var recordId = $("#profileSettingId").val();
 	if(scheduleType == "SCHEDULE_LATER"){
 		scheduleDateUTC = convertLocalToUTCWithRequiredFormat(scheduleDateTime,DISPLAY_DATE_AND_TIME,USER_TIMEZONE,DATETIME_UTC_FORMATTER);
@@ -177,6 +179,7 @@ function saveProfileSetting(){
 		scheduleType: scheduleType,
 		scheduleDateTime: scheduleDateUTC,
 		mandatoryOption: mandatoryOption,
+		purpose: purpose,
 		forceSave: false
 	};
 
@@ -389,6 +392,7 @@ function renderStudentProfileSettingTable(dataList) {
 				+ "<td class='text-wrap'>" + learningProgramText + "</td>"
 				+ "<td class='text-wrap'>" + gradeText + "</td>"
 				+ "<td class='text-wrap'>" + profileFieldText + "</td>"
+				+ "<td class='text-wrap'>" + (item.purpose ? item.purpose : "") + "</td>"
 				+ "<td>" + scheduleTypeText + "</td>"
 				+ "<td>" + scheduleDateTimeText + "</td>"
 				+ "<td class='text-center'>" + (mandatoryText == "Y"? 'Yes':'No' ) + "</td>"
@@ -447,6 +451,7 @@ function editStudentProfileSetting(id) {
 	var scheduleParts = parseScheduleDateTime(scheduleDateTimeText);
 	$("#scheduleTime").val(scheduleParts.time).trigger("change");
 	$("#mandatoryOption").val(item.mandatoryOption).trigger("change");
+	$("#purpose").val(item.purpose || "");
 	$("#saveStudentProfileSetting").text("Update");
 }
 

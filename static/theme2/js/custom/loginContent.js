@@ -2,7 +2,7 @@ var IS_INTERNATIONAL_SCHOOLING = Number(SCHOOL_ID) === 1;
 var SHOW_GRADUATION_LOGIN_DESIGN = IS_INTERNATIONAL_SCHOOLING && isGraduationLoginDesignVisible();
 
 function isGraduationLoginDesignVisible(){
-    var graduationHideFromDate = new Date(2026, 6, 26);
+    var graduationHideFromDate = new Date(2026, 9, 22);
     return new Date() < graduationHideFromDate;
 }
 
@@ -10,8 +10,8 @@ async function loginContent(userName, fromSpoof){
     var html =``;
         html+=marqueeContent();
         html+=
-        `<div class="login-bg login-redesign bg-primary${SHOW_GRADUATION_LOGIN_DESIGN ? ' login-graduation-split' : ''}${!IS_INTERNATIONAL_SCHOOLING ? ' login-school-primary-bg' : ''}">
-            ${IS_INTERNATIONAL_SCHOOLING ? `
+        `<div class="login-bg login-redesign ${SHOW_GRADUATION_LOGIN_DESIGN ? ' login-graduation-split' : ''}${!IS_INTERNATIONAL_SCHOOLING ? ' login-school-primary-bg' : ''}"${SHOW_GRADUATION_LOGIN_DESIGN ? ` style="background-image:url('${PATH_FOLDER_IMAGE2}Login_grdbg.png');"` : ``}>
+            ${IS_INTERNATIONAL_SCHOOLING && !SHOW_GRADUATION_LOGIN_DESIGN ? `
                 <div class="login-orbs" aria-hidden="true">
                     <span class="login-orb login-orb-1"></span>
                     <span class="login-orb login-orb-2"></span>
@@ -24,20 +24,53 @@ async function loginContent(userName, fromSpoof){
             ${SHOW_GRADUATION_LOGIN_DESIGN ? `
                 <aside class="graduation-event graduation-event-side">
                     <div class="graduation-event-content">
-                        <p class="graduation-description graduation-main-title" style="font-size:24px; line-height:1.25; margin-bottom:10px; font-weight:800; white-space:nowrap; transform:translateX(-54px);">Celebrating Graduation Ceremony 2026 from <strong>190+ Countries</strong></p>
                         <div class="graduation-event-heading">
-                            <span class="graduation-event-badge" style="font-size:19px;">Graduation Ceremony, 2026</span>
+                            <img src="${PATH_FOLDER_IMAGE2}login_hat.gif${SCRIPT_VERSION}" alt="" width="60" height="60" loding="lazy" />
+                            <span class="graduation-event-badge">
+                                <span></span>
+                                GRADUATION CEREMONY 2026
+                            </span>
                         </div>
-                         <p class="graduation-location" style="font-size:18px;">
+                        <p class="graduation-location">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                 <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"></path>
                             </svg>
-                            Atlantis, The Palm Dubai - UAE
+                            The &Aacute;gora Bogot&aacute; Convention Center
                         </p>
-                        <h3 class="yellow-text graduation-event-date" style="margin-bottom:4px; font-size:18px; font-weight:600;">July 25, 2026 &bull; 2 PM UAE Time Onwards</h3>
-                        <p class="graduation-description graduation-attendee-types" style="margin:4px 0 10px; font-size:16px; font-weight:600;">Graduate | Non-Graduate | Performer | Teacher | Staff</p>
-                        <div class="graduation-event-heading mt-2">
-                            <span class="graduation-event-badge graduation-registration-deadline graduation-registration-closed" style="background:white;">Registration Closed!</span>
+                        <p class="graduation-location">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1V3a1 1 0 0 1 1-1Zm13 8H4v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9Z"></path>
+                            </svg>
+                            November 12, 2026
+                        </p>
+                        <h2>Graduation Ceremony<br/><span class="yellow-text">2026 Colombia</span></h2>
+                        <p class="graduation-description">Don't miss this milestone moment.<br/><strong>Register now</strong> to be part of the celebration!</p>
+                        <a href="https://event.internationalschooling.org/" target="_blank" rel="noopener noreferrer" class="graduation-register-btn graduation-register-blink">Register Now</a>
+                    </div>
+                    <div class="graduation-perks">
+                        <div class="graduation-perk">
+                            <span class="graduation-perk-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1V3a1 1 0 0 1 1-1Zm13 8H4v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9Z"></path></svg>
+                            </span>
+                            <span class="graduation-perk-text"><strong>Special day</strong>Unforgettable Memories</span>
+                        </div>
+                        <div class="graduation-perk">
+                            <span class="graduation-perk-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 2c-3.33 0-8 1.67-8 5v2h16v-2c0-3.33-4.67-5-8-5Zm8.5-2a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0-3.29 2.3 5.98 5.98 0 0 1 0 4.4A3.5 3.5 0 0 0 17.5 12Zm1.5 2.2c1.83.68 4 2.01 4 4.8v2h-3v-2c0-1.9-.68-3.42-1.68-4.6.23-.1.45-.15.68-.2Z"></path></svg>
+                            </span>
+                            <span class="graduation-perk-text"><strong>Connect</strong>With Friends &amp; Teachers</span>
+                        </div>
+                        <div class="graduation-perk">
+                            <span class="graduation-perk-icon">
+                                <svg width="19" height="20" viewBox="0 0 19 20" fill="none" aria-hidden="true"><path d="M5.53626 5.17107L5.63126 5.25407L14.1173 13.7391C14.2285 13.8502 14.3119 13.9859 14.3609 14.1353C14.4098 14.2848 14.4228 14.4436 14.3988 14.599C14.3749 14.7543 14.3146 14.9019 14.2229 15.0296C14.1313 15.1573 14.0108 15.2616 13.8713 15.3341L13.7553 15.3841L3.37026 19.2111C1.41826 19.9311 -0.48274 18.0961 0.11026 16.1471L0.16026 16.0011L3.98626 5.61607C4.03684 5.4785 4.11705 5.35373 4.22119 5.2506C4.32534 5.14747 4.45089 5.06849 4.58894 5.01926C4.727 4.97003 4.87419 4.95175 5.02009 4.96572C5.166 4.97968 5.30705 5.02555 5.43326 5.10007L5.53626 5.17107ZM14.5673 9.51507C15.4783 9.56307 16.7273 9.75507 17.8133 10.4071C18.0334 10.5376 18.1952 10.7476 18.2652 10.9937C18.3352 11.2399 18.3081 11.5036 18.1896 11.7304C18.071 11.9573 17.87 12.13 17.6279 12.2131C17.3858 12.2962 17.1211 12.2833 16.8883 12.1771L16.7843 12.1221C16.1023 11.7121 15.2303 11.5521 14.4623 11.5121C14.1458 11.4946 13.8286 11.4959 13.5123 11.5161L13.1963 11.5471C12.9354 11.5807 12.6718 11.5103 12.4625 11.3509C12.2532 11.1916 12.1152 10.9562 12.0782 10.6958C12.0412 10.4354 12.1084 10.1709 12.265 9.95962C12.4217 9.74835 12.6553 9.60731 12.9153 9.56707C13.4629 9.4964 14.0162 9.47865 14.5673 9.51407M16.5923 6.72807C16.8471 6.7286 17.092 6.82637 17.2772 7.00142C17.4623 7.17647 17.5737 7.41559 17.5885 7.66996C17.6033 7.92432 17.5204 8.17475 17.3568 8.37009C17.1933 8.56544 16.9613 8.69098 16.7083 8.72107L16.5923 8.72807H15.8843C15.6295 8.72753 15.3845 8.62976 15.1993 8.45471C15.0142 8.27966 14.9029 8.04054 14.888 7.78617C14.8732 7.53181 14.9561 7.28139 15.1197 7.08604C15.2833 6.89069 15.5152 6.76516 15.7683 6.73507L15.8843 6.72807H16.5923ZM13.4103 5.96107C13.5824 6.13326 13.6859 6.36236 13.7011 6.60539C13.7164 6.84841 13.6425 7.08866 13.4933 7.28107L13.4103 7.37507L12.3493 8.43607C12.1693 8.61541 11.9278 8.71954 11.6739 8.72729C11.4199 8.73505 11.1725 8.64585 10.982 8.47782C10.7914 8.30978 10.672 8.07551 10.6479 7.82259C10.6238 7.56967 10.6968 7.31706 10.8523 7.11607L10.9353 7.02207L11.9953 5.96207C12.0881 5.86909 12.1984 5.79533 12.3198 5.74501C12.4412 5.69468 12.5713 5.66878 12.7028 5.66878C12.8342 5.66878 12.9643 5.69468 13.0857 5.74501C13.2071 5.79533 13.3174 5.86809 13.4103 5.96107ZM10.8233 0.696067C11.2713 2.04207 11.0313 3.51607 10.7513 4.54607C10.5837 5.18843 10.3525 5.81251 10.0613 6.40907C9.94284 6.64644 9.73498 6.82704 9.4834 6.91115C9.23182 6.99526 8.95713 6.97599 8.71976 6.85757C8.48239 6.73915 8.30179 6.53128 8.21768 6.2797C8.13357 6.02812 8.15284 5.75344 8.27126 5.51607C8.50394 5.03695 8.68818 4.5358 8.82126 4.02007C9.04826 3.18807 9.16226 2.28507 8.98726 1.54507L8.92626 1.32907C8.88268 1.20401 8.86438 1.07153 8.87241 0.939341C8.88044 0.807148 8.91465 0.677868 8.97306 0.559005C9.03146 0.440142 9.11289 0.334063 9.21263 0.246928C9.31236 0.159793 9.42841 0.0933367 9.55404 0.0514168C9.67967 0.00949693 9.81237 -0.00705131 9.94444 0.0027327C10.0765 0.0125167 10.2053 0.048438 10.3234 0.108411C10.4415 0.168385 10.5465 0.251216 10.6323 0.352096C10.7181 0.452976 10.783 0.569895 10.8233 0.696067ZM16.2383 3.13407C16.4257 3.32159 16.531 3.5759 16.531 3.84107C16.531 4.10623 16.4257 4.36054 16.2383 4.54807L15.5313 5.25507C15.439 5.35058 15.3287 5.42676 15.2067 5.47917C15.0847 5.53158 14.9534 5.55916 14.8207 5.56032C14.6879 5.56147 14.5562 5.53617 14.4333 5.48589C14.3104 5.43561 14.1988 5.36135 14.1049 5.26746C14.011 5.17357 13.9367 5.06192 13.8864 4.93902C13.8362 4.81612 13.8109 4.68444 13.812 4.55167C13.8132 4.41889 13.8408 4.28767 13.8932 4.16566C13.9456 4.04366 14.0217 3.93331 14.1173 3.84107L14.8243 3.13407C15.0118 2.9466 15.2661 2.84128 15.5313 2.84128C15.7964 2.84128 16.0507 2.9466 16.2383 3.13407Z" fill="white"></path></svg>
+                            </span>
+                            <span class="graduation-perk-text"><strong>Celebrate</strong>Your Hard Work &amp; Success</span>
+                        </div>
+                        <div class="graduation-perk">
+                            <span class="graduation-perk-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 3 7.17 5H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3.17L15 3H9Zm3 5a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"></path></svg>
+                            </span>
+                            <span class="graduation-perk-text"><strong>Capture</strong>Every Precious Moment</span>
                         </div>
                     </div>
                 </aside>

@@ -4209,6 +4209,57 @@ function getReviewFieldSnapshot(type){
 	return '';
 }
 
+// Snapshot the RAW value of every editable field for a type, at Edit-open time. Distinct
+// from originalFieldValues (the transformed save-request DATA, used only to detect whether
+// anything changed) -- this is used to literally put back what the user typed/selected if
+// the edit is abandoned (navigated away from) WITHOUT clicking Save, so an unsaved change
+// never survives leaving the review screen. '__grade' and '__communication' expand to their
+// real underlying field ids.
+function captureRawFieldValues(type){
+	var cfg = REVIEW_EDIT_MAP[type];
+	var values = {};
+	if(!cfg){ return values; }
+	Object.keys(cfg.fields).forEach(function(key){
+		cfg.fields[key].forEach(function(fieldId){
+			if(fieldId === '__grade'){
+				values.learningLabel = $(cfg.formSel+' #learningLabel').val();
+				values.applyStandardId = $(cfg.formSel+' #applyStandardId').val();
+				return;
+			}
+			if(fieldId === '__communication'){
+				values.pcModeWhatsapp = $(cfg.formSel+' #pcModeWhatsapp').is(':checked');
+				values.pcModeCall = $(cfg.formSel+' #pcModeCall').is(':checked');
+				values.pcModeEmail = $(cfg.formSel+' #pcModeEmail').is(':checked');
+				return;
+			}
+			var $f = $(cfg.formSel+' #'+fieldId);
+			if($f.length){ values[fieldId] = $f.val(); }
+		});
+	});
+	return values;
+}
+
+// Put every field back to the RAW value captured by captureRawFieldValues, undoing any
+// unsaved edits. Works regardless of whether the field currently sits in the step form or
+// is still detached in the review-edit-wrapper (ids are unique either way), so it can run
+// before or after moveReviewFieldsBack().
+function restoreRawFieldValues(values){
+	if(!values){ return; }
+	Object.keys(values).forEach(function(fieldId){
+		var $f = $('#'+fieldId);
+		if($f.length === 0){ return; }
+		var value = values[fieldId];
+		if(typeof value === 'boolean'){
+			$f.prop('checked', value);
+		}else{
+			$f.val(value);
+			if($f.hasClass('select2-hidden-accessible')){
+				try{ $f.trigger('change.select2'); }catch(e){}
+			}
+		}
+	});
+}
+
 // Capture the current review-cell HTML for every editable cell. MUST run BEFORE the cells
 // are emptied by moveReviewFieldsToTable().
 function captureReviewValues(type){
@@ -4289,14 +4340,20 @@ function restoreReviewForm(type){
 }
 
 // If any section is mid-edit, undo the DOM move so a re-render/navigation can't
-// strand or destroy the step form.
+// strand or destroy the step form. This is an ABANDON, not a Save: any value the user
+// typed/selected but never saved must not survive leaving the review screen, so the
+// field(s) are first reverted to what they held when Edit was clicked.
 function restoreActiveReviewEditIfAny(){
 	var type = window.__activeReviewEdit;
 	if(!type){ return; }
 	if(type === 'course'){
 		try{ restoreReviewForm('course'); }catch(e){}
 	}else{
-		try{ moveReviewFieldsBack(); }catch(e){}
+		try{
+			var state = window.__reviewEditState && window.__reviewEditState[type];
+			if(state && state.rawFieldValues){ restoreRawFieldValues(state.rawFieldValues); }
+			moveReviewFieldsBack();
+		}catch(e){}
 	}
 	// Drop the snapshot for the section we just closed so it cannot leak into the next one.
 	if(window.__reviewEditState){ window.__reviewEditState[type] = null; }
@@ -4355,6 +4412,7 @@ function openReviewInlineEdit(type){
 	window.__reviewEditState[type] = {
 		originalValues: captureReviewValues(type),
 		originalFieldValues: getReviewFieldSnapshot(type),
+		rawFieldValues: captureRawFieldValues(type),
 		editing: true
 	};
 	try{
@@ -4375,7 +4433,12 @@ function cancelReviewInlineEdit(type){
 		$("#formSteps .actions.clearfix, .review-signup-details").show();
 		return;
 	}
-	// student/parent: discard edits and rebuild the table from the last data (no backend)
+	// student/parent: discard edits and rebuild the table from the last data (no backend).
+	// Revert the field(s) to their pre-Edit values first -- the review table below is
+	// re-rendered from server data either way, but the underlying step form fields must not
+	// keep an unsaved, discarded value either.
+	var cancelState = window.__reviewEditState && window.__reviewEditState[type];
+	if(cancelState && cancelState.rawFieldValues){ restoreRawFieldValues(cancelState.rawFieldValues); }
 	moveReviewFieldsBack();
 	window.__activeReviewEdit = null;
 	if(window.__lastReviewData){

@@ -376,7 +376,9 @@ function updateProfileContactVerificationUI(fieldId) {
         && whatsappState.verified === true
         && whatsappState.verifiedValue === currentValue;
     var isVerified = readyForVerification && ((state.verified === true && state.verifiedValue === currentValue) || verifiedByWhatsapp);
+    var showActionsRow = currentValue !== "" && (readyForVerification || isVerified || (state.sentValue && state.sentValue === currentValue) || whatsappChecked);
     $scope.attr("data-verified", isVerified ? "Y" : "N");
+    $scope.find(".profile-contact-verification-actions").toggleClass("d-none", !showActionsRow);
     $scope.find(".profile-contact-edit-action").toggleClass("d-none", !readyForVerification);
     $scope.find(".profile-contact-verified-badge").toggleClass("d-none", !isVerified);
     $scope.find(".profile-contact-send-otp").toggleClass("d-none", whatsappChecked || !readyForVerification || isVerified);
@@ -794,7 +796,7 @@ function initProfileContactVerificationForModal(missingFieldsData) {
         if ($scopeWrapper.length < 1) {
             $scopeWrapper = inputGroup.parent();
         }
-        $scopeWrapper.addClass("profile-contact-verification-scope");
+        $scopeWrapper.addClass("profile-contact-verification-scope mb-4");
         inputGroup.find(".input-group-append-hide").hide();
         inputGroup.after(
             '<div class="profile-contact-verification-actions d-flex align-items-center flex-wrap mb-2" style="gap:6px;">' +
@@ -872,6 +874,131 @@ function initProfileContactVerificationForModal(missingFieldsData) {
                 resetProfileWhatsappVerification(fieldId);
             }
         }
+    });
+}
+
+function getProfileContactVerificationActionHtml(fieldId, showEditAction) {
+    return '<div class="profile-contact-verification-actions d-flex align-items-center flex-wrap mb-2" style="gap:6px;">' +
+            (showEditAction ? '<button type="button" class="btn btn-light btn-sm border profile-contact-edit-action" onclick="enableProfileContactEdit(\'' + fieldId + '\')"><i class="fa fa-pencil mr-1"></i>Edit</button>' : '') +
+            '<button type="button" class="btn btn-primary btn-sm profile-contact-send-otp"><i class="fa fa-paper-plane mr-1"></i>Send OTP</button>' +
+            (isProfileWhatsappVerificationAvailable(fieldId) ? '<button type="button" class="btn btn-success btn-sm profile-whatsapp-send-otp d-none"><i class="fa fa-whatsapp mr-1"></i>WhatsApp OTP</button>' : '') +
+            '<span class="badge badge-success profile-contact-verified-badge d-none"><i class="fa fa-check mr-1"></i>Verified</span>' +
+            (isProfileWhatsappVerificationAvailable(fieldId) ? '<span class="badge badge-success profile-whatsapp-verified-badge d-none"><i class="fa fa-whatsapp mr-1"></i>WhatsApp Verified</span>' : '') +
+            '<small class="text-primary profile-contact-message"></small>' +
+            (isProfileWhatsappVerificationAvailable(fieldId) ? '<small class="text-success profile-whatsapp-message"></small>' : '') +
+        '</div>' +
+        '<div class="profile-contact-otp-row align-items-center flex-wrap mb-2 d-none" style="gap:6px;">' +
+            '<input type="text" class="form-control form-control-sm profile-contact-otp" maxlength="8" placeholder="OTP" style="max-width:120px;">' +
+            '<button type="button" class="btn btn-success btn-sm profile-contact-verify-otp"><i class="fa fa-check mr-1"></i>Verify</button>' +
+            '<button type="button" class="btn btn-link btn-sm p-0 profile-contact-resend-otp">Resend</button>' +
+        '</div>' +
+        (isProfileWhatsappVerificationAvailable(fieldId)
+            ? '<div class="profile-whatsapp-otp-row align-items-center flex-wrap mb-2 d-none" style="gap:6px;">' +
+                '<input type="text" class="form-control form-control-sm profile-whatsapp-otp" maxlength="8" placeholder="WhatsApp OTP" style="max-width:140px;">' +
+                '<button type="button" class="btn btn-success btn-sm profile-whatsapp-verify-otp"><i class="fa fa-check mr-1"></i>Verify WhatsApp</button>' +
+                '<button type="button" class="btn btn-link btn-sm p-0 profile-whatsapp-resend-otp">Resend</button>' +
+            '</div>'
+            : '');
+}
+
+function bindProfileContactVerificationActions($scope, fieldId) {
+    $scope.find(".profile-contact-send-otp").off("click.profileContact").on("click.profileContact", function () {
+        sendProfileContactOtp(fieldId, false);
+    });
+    $scope.find(".profile-contact-verify-otp").off("click.profileContact").on("click.profileContact", function () {
+        verifyProfileContactOtp(fieldId);
+    });
+    $scope.find(".profile-contact-resend-otp").off("click.profileContact").on("click.profileContact", function () {
+        sendProfileContactOtp(fieldId, true);
+    });
+    if (isProfileWhatsappVerificationAvailable(fieldId)) {
+        $scope.find(".profile-whatsapp-send-otp").off("click.profileContact").on("click.profileContact", function () {
+            sendProfileWhatsappOtp(fieldId, false);
+        });
+        $scope.find(".profile-whatsapp-verify-otp").off("click.profileContact").on("click.profileContact", function () {
+            verifyProfileWhatsappOtp(fieldId);
+        });
+        $scope.find(".profile-whatsapp-resend-otp").off("click.profileContact").on("click.profileContact", function () {
+            sendProfileWhatsappOtp(fieldId, true);
+        });
+    }
+}
+
+function canShowProfileContactVerificationActions() {
+    return typeof USER_ROLE !== "undefined" && USER_ROLE === "STUDENT";
+}
+
+function initProfileContactVerificationStateForField(fieldId) {
+    var value = getProfileContactValue(fieldId);
+    if (PROFILE_RESPONSE_DATA && isProfileContactFieldVerifiedFromResponse(PROFILE_RESPONSE_DATA.profileData, fieldId) && value !== "") {
+        PROFILE_CONTACT_VERIFICATION_STATE[getProfileContactVerificationKey(fieldId)] = {
+            sentValue: value,
+            verifiedValue: value,
+            verified: true,
+            channel: getProfileContactVerificationType(fieldId)
+        };
+    } else {
+        resetProfileContactVerification(fieldId);
+    }
+    if (isProfileWhatsappVerificationAvailable(fieldId)) {
+        var whatsappFieldId = getProfileWhatsappFieldId(fieldId);
+        if (PROFILE_RESPONSE_DATA && isProfileContactFieldVerifiedFromResponse(PROFILE_RESPONSE_DATA.profileData, whatsappFieldId) && value !== "") {
+            PROFILE_CONTACT_VERIFICATION_STATE[getProfileContactVerificationKey(whatsappFieldId)] = {
+                sentValue: value,
+                verifiedValue: value,
+                verified: true,
+                channel: "WHATSAPP"
+            };
+            PROFILE_CONTACT_VERIFICATION_STATE[getProfileContactVerificationKey(fieldId)] = {
+                sentValue: value,
+                verifiedValue: value,
+                verified: true,
+                channel: "PHONE"
+            };
+            markProfileContactVerifiedInResponse(fieldId, value);
+        } else {
+            resetProfileWhatsappVerification(fieldId);
+        }
+    }
+}
+
+function initProfileContactVerificationForProfilePage() {
+    if (!canShowProfileContactVerificationActions()) {
+        $("#profilePageView .profile-contact-verification-actions, #profilePageView .profile-contact-otp-row, #profilePageView .profile-whatsapp-otp-row").remove();
+        return;
+    }
+    var fields = PROFILE_CONTACT_VERIFICATION_FIELDS || [];
+    $.each(fields, function (_, fieldId) {
+        var $input = $("#profilePageView #" + fieldId).first();
+        if ($input.length < 1) {
+            return;
+        }
+        var $scope = $input.closest(".custom-field-scope");
+        if ($scope.length < 1) {
+            $scope = $input.closest(".input-group").parent();
+        }
+        if ($scope.length < 1) {
+            return;
+        }
+        $scope.addClass("profile-contact-verification-scope");
+        $scope.find(".profile-contact-status-labels, .profile-contact-verification-actions, .profile-contact-otp-row, .profile-whatsapp-otp-row").remove();
+        $input.closest(".input-group").after(getProfileContactVerificationActionHtml(fieldId, false));
+        bindProfileContactVerificationActions($scope, fieldId);
+        $input.off("input.profileContactVerification change.profileContactVerification")
+            .on("input.profileContactVerification change.profileContactVerification", function () {
+                resetProfileContactVerification(fieldId);
+                resetProfileWhatsappVerification(fieldId);
+            });
+        if (isProfileWhatsappVerificationAvailable(fieldId)) {
+            getProfileContactElement(getProfileWhatsappFieldId(fieldId))
+                .off("change.profileWhatsappVerification")
+                .on("change.profileWhatsappVerification", function () {
+                    resetProfileWhatsappVerification(fieldId);
+                });
+        }
+        initProfileContactVerificationStateForField(fieldId);
+        updateProfileContactVerificationUI(fieldId);
+        updateProfileWhatsappVerificationUI(fieldId);
     });
 }
 
@@ -2373,6 +2500,10 @@ function getSocialIcon(iconRequest) {
                     <path d="M154.904 230c7.607 0 13.775-6.117 13.775-13.662s-6.168-13.663-13.775-13.663h-.188c-7.607 0-13.774 6.118-13.774 13.663S147.109 230 154.716 230zm-6.792-13.662c0-3.67 3-6.643 6.7-6.643 3.697 0 6.697 2.973 6.697 6.643s-3 6.645-6.697 6.645c-3.7-.001-6.7-2.975-6.7-6.645z" fill="#ffffff"/>
                 </g>
             </svg>`,
+            "Telegram":
+            `<svg viewBox="0 0 24 24" fill="none" width="15px" height="15px" xmlns="http://www.w3.org/2000/svg"><g  stroke-width="0"></g><g  stroke-linecap="round" stroke-linejoin="round"></g><g > <path fill-rule="evenodd" clip-rule="evenodd" d="M23.1117 4.49449C23.4296 2.94472 21.9074 1.65683 20.4317 2.227L2.3425 9.21601C0.694517 9.85273 0.621087 12.1572 2.22518 12.8975L6.1645 14.7157L8.03849 21.2746C8.13583 21.6153 8.40618 21.8791 8.74917 21.968C9.09216 22.0568 9.45658 21.9576 9.70712 21.707L12.5938 18.8203L16.6375 21.8531C17.8113 22.7334 19.5019 22.0922 19.7967 20.6549L23.1117 4.49449ZM3.0633 11.0816L21.1525 4.0926L17.8375 20.2531L13.1 16.6999C12.7019 16.4013 12.1448 16.4409 11.7929 16.7928L10.5565 18.0292L10.928 15.9861L18.2071 8.70703C18.5614 8.35278 18.5988 7.79106 18.2947 7.39293C17.9906 6.99479 17.4389 6.88312 17.0039 7.13168L6.95124 12.876L3.0633 11.0816ZM8.17695 14.4791L8.78333 16.6015L9.01614 15.321C9.05253 15.1209 9.14908 14.9366 9.29291 14.7928L11.5128 12.573L8.17695 14.4791Z" fill="#27a2e1"></path> </g></svg>`,
+
+            
 
 
     };
@@ -6684,6 +6815,7 @@ function checkAndOrganizeFields(objectA, objectB) {
                                         groupId: groupId,
                                         elementType: "phoneNumber",
                                         labelName: field.labelName,
+                                        purpose: field.purpose,
                                         value: fieldValue
                                     });
                                 } else {
@@ -6700,6 +6832,7 @@ function checkAndOrganizeFields(objectA, objectB) {
                                             orderId: field.orderId,
                                             groupId: groupId,
                                             labelName: field.labelName,
+                                            purpose: field.purpose,
                                             value: fieldValue
                                         });
                                     }
@@ -6797,6 +6930,7 @@ function checkAndOrganizeFields(objectA, objectB) {
                                 orderId: field.orderId,
                                 groupId: groupId,
                                 labelName: field.labelName,
+                                purpose: field.purpose,
                                 value: getHobbiesData(objectA)
                             });
 
@@ -6809,6 +6943,7 @@ function checkAndOrganizeFields(objectA, objectB) {
                                     orderId: field.orderId,
                                     groupId: groupId,
                                     labelName: field.labelName,
+                                    purpose: field.purpose,
                                     value: value
                                 });
                             }
@@ -6821,6 +6956,7 @@ function checkAndOrganizeFields(objectA, objectB) {
                                 orderId: field.orderId,
                                 groupId: groupId,
                                 labelName: field.labelName,
+                                purpose: field.purpose,
                                 value: getExtracurricularActivitiesData(objectA, parseInt(section.index))
                             });
 
@@ -6838,6 +6974,7 @@ function checkAndOrganizeFields(objectA, objectB) {
                                 groupId: groupId,
                                 elementType: "phoneNumber",
                                 labelName: field.labelName,
+                                purpose: field.purpose,
                                 value: getFieldValue(objectA, field.fieldId, parseInt(section.index))
                             });
 
@@ -6848,6 +6985,7 @@ function checkAndOrganizeFields(objectA, objectB) {
                                 orderId: field.orderId,
                                 groupId: groupId,
                                 labelName: field.labelName,
+                                purpose: field.purpose,
                                 value: objectA?.studentProfile?.[field.index]?.prefTimeList
                             });
 
@@ -6870,6 +7008,7 @@ function checkAndOrganizeFields(objectA, objectB) {
                                         orderId: field.orderId,
                                         groupId: groupId,
                                         labelName: field.labelName,
+                                        purpose: field.purpose,
                                         value: getFieldValue(objectA, field.fieldId, parseInt(section.index))
                                     });
                                 }
@@ -7213,11 +7352,11 @@ async function renderMissingFieldsModal(missingFieldsData, scheduleSourceData) {
         $("body").append(getChunkProfileDataByUserModalContent());
     }
     $("#profileFielddModal .modal-body #requestProfileForm").html(html);
-    if (!allowClose) {
-        $("#profileFielddModal .modal-footer .btn-danger").hide();
-    } else {
-        $("#profileFielddModal .modal-footer .btn-danger").show();
-    }
+    // if (!allowClose) {
+    //     $("#profileFielddModal .modal-footer .btn-danger").hide();
+    // } else {
+    //     $("#profileFielddModal .modal-footer .btn-danger").show();
+    // }
     $("#profileFielddModal").modal({
         backdrop: allowClose ? true : 'static',
         keyboard: allowClose
@@ -7641,6 +7780,21 @@ function transformScheduleDates(data) {
 async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
     var fieldId;
     var fieldValue;
+    var fieldPurpose;
+    var shownPurposeKeys = new Set();
+    // dedupeKey identifies the visual section a purpose caption belongs to (a fieldId
+    // for a standalone field, or a fixed group name like "motherSection" for a group
+    // of fields rendered together). One admin row can set the SAME purpose text on
+    // several different fields/sections at once, so we must not dedupe by the text
+    // itself (that hid the caption on every field/section after the first one).
+    function resolvePurposeHtml(purposeText, dedupeKey) {
+        var key = dedupeKey || purposeText;
+        if (!purposeText || shownPurposeKeys.has(key)) {
+            return '';
+        }
+        shownPurposeKeys.add(key);
+        return `<h3 class="d-block text-primary font-italic font-weight-semi-bold font-16 mb-1">${purposeText}</h3>`;
+    }
     previousSchoolElementArray = [];
     inputPhoneNumberArray = [];
     sportEventDatepickerFlag = false;
@@ -7657,9 +7811,11 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
     $.each(missingFields, function (index, value) {
         // var keysList = Object.keys(missingFields);
         html +=
-            `<div class="form-row mb-2">
-                <div class="col-12 mb-2">${profileFormSectionTile(index)}</div>
-            <hr/>
+            `<div class="form-row mb-3">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm rounded-10 overflow-hidden">
+                        <div class="card-header bg-light-primary border-0 py-2 px-3 text-transform-none">${profileFormSectionTile(index)}</div>
+                        <div class="card-body p-3">
         `;
         $.each(value, function (key, val) {
             $.each(val, function (i, v) {
@@ -7667,6 +7823,7 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
                 if (sectionTitle)
                 fieldId = v['fieldId'];
                 fieldValue = v['value'];
+                fieldPurpose = v['purpose'];
                 if (shouldSkipProfileContactField(PROFILE_RESPONSE_DATA.profileData, fieldId)) {
                     return;
                 }
@@ -7676,7 +7833,7 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
                     }
                     var customFieldRenderIndex = typeof getProfileSectionRenderIndex === "function" ? getProfileSectionRenderIndex(sectionTitle) : 0;
                     html +=
-                        `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        `<div class="col-12">
                             ${renderDynamicFieldByUserID(v, v.fieldValue || "", customFieldRenderIndex, "PROFILE_MODAL")}
                         </div>`;
                     return;
@@ -7694,8 +7851,10 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
                             previousSchoolElementArray.push(fieldId);
                         }
                         
+                        var builtInPurposeHtml = resolvePurposeHtml(v.purpose, fieldId);
                         html+=
-                        `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12 ${documentProofElements.includes(fieldId) ? 'mb-3':''}">
+                        `<div class="col-12 ${documentProofElements.includes(fieldId) ? 'mb-3':''}">
+                            ${builtInPurposeHtml}
                             ${window[fieldId + 'Element'](fieldValue)}
                         </div>`;
                         if(fieldId == "weddingAnniversaryDate"){
@@ -7707,8 +7866,10 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
                     }
                     
                 }else if (fieldId === "previousCurrentGradeName" || fieldId === "previousCurrentSchoolGraduationYear" || fieldId === "previousCurrentSchoolCountry") {
+                    var previousCurrentPurposeHtml = resolvePurposeHtml(v.purpose, "previousCurrent");
                     html +=
-                        `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        `<div class="col-12">
+                        ${previousCurrentPurposeHtml}
                         ${window[fieldId + 'Element'](fieldValue)}
                     </div>`;
                     previousSchoolElementArray.push(fieldId)
@@ -7718,8 +7879,10 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
                             && fieldValue !== "" && fieldValue !== null && fieldValue !== undefined) {
                         personalPhoneData[fieldId] = fieldValue;
                     }
-                    html += `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
-                            ${window[fieldId + 'Element'](personalPhoneData, 'PROFILE_MODAL')}
+                    var personalPhonePurposeHtml = resolvePurposeHtml(v.purpose, "personalPhone");
+                    html += `<div class="col-12">
+                            ${personalPhonePurposeHtml}
+                            ${window[fieldId + 'Element'](personalPhoneData, "PROFILE_MODAL")}
                         </div>`;
                     var fatherPhoneIndex = PROFILE_RESPONSE_UPDATED_DATA.findIndex(obj => obj.hasOwnProperty(fieldId));
                     inputPhoneNumberArray.push({ "fieldId": fieldId, "index": fatherPhoneIndex });
@@ -7731,24 +7894,29 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
                     if(motherSectionFlag){
                         
                         if(motherSection){
+                            var motherFieldPurposeHtml = resolvePurposeHtml(v.purpose, "motherSection");
                             html+=
                             `<div class="col-12 mother_section">
+                                ${motherFieldPurposeHtml}
                                 <h6 class="text-black font-weight-bold mb-2 mt-2">Mother's Detail</h6>
                             </div>`;
                             motherSection=false;
                         }
                         if(typeof window[fieldId + 'Element'] === 'function') {
                             var parentFieldValue = emailFields.includes(fieldId) ? PROFILE_RESPONSE_DATA.profileData.studentProfile[1][fieldId] : fieldValue;
+                            
                             html+=
-                            `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
-                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PROFILE_RESPONSE_DATA.profileData.studentProfile[1]:parentFieldValue, 'PROFILE_MODAL')}
+                            `<div class="col-12">
+                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PROFILE_RESPONSE_DATA.profileData.studentProfile[1]:parentFieldValue, "PROFILE_MODAL")}
                             </div>`;
                         }
-                        
+
                     }else if(fatherSectionFlag){
                         if(fatherSection){
+                            var fatherFieldPurposeHtml = resolvePurposeHtml(v.purpose, "fatherSection");
                             html+=
                             `<div class="col-12 father_section">
+                                ${fatherFieldPurposeHtml}
                                 <h6 class="text-black font-weight-bold mb-2 mt-2">Father's Detail</h6>
                             </div>`;
                             fatherSection=false;
@@ -7756,23 +7924,27 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
                         if(typeof window[fieldId + 'Element'] === 'function') {
                             var parentFieldValue = emailFields.includes(fieldId) ? PROFILE_RESPONSE_DATA.profileData.studentProfile[1][fieldId] : fieldValue;
                             html+=
-                            `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
-                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PROFILE_RESPONSE_DATA.profileData.studentProfile[1]:parentFieldValue, 'PROFILE_MODAL')}
+                            `<div class="col-12">
+                                
+                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PROFILE_RESPONSE_DATA.profileData.studentProfile[1]:parentFieldValue, "PROFILE_MODAL")}
                             </div>`;
                         }
                     }else if(guardianSectionFlag){
                         if(guardianSection){
+                            var guardianFieldPurposeHtml = resolvePurposeHtml(v.purpose, "guardianSection");
                             html+=
                             `<div class="col-12 guardian_section">
+                                ${guardianFieldPurposeHtml}
                                 <h6 class="text-black font-weight-bold mb-2 mt-2">Guardian's Detail</h6>
                             </div>`;
                             guardianSection=false;
                         }
                         if(typeof window[fieldId + 'Element'] === 'function') {
                             var parentFieldValue = emailFields.includes(fieldId) ? PROFILE_RESPONSE_DATA.profileData.studentProfile[1][fieldId] : fieldValue;
+                            
                             html+=
-                            `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
-                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PROFILE_RESPONSE_DATA.profileData.studentProfile[1]:parentFieldValue, 'PROFILE_MODAL')}
+                            `<div class="col-12">
+                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PROFILE_RESPONSE_DATA.profileData.studentProfile[1]:parentFieldValue, "PROFILE_MODAL")}
                             </div>`;
                         }
                     }
@@ -7784,9 +7956,11 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
                         previousSchoolElementArray.push(fieldId);
                     }
                 }else if (fieldValue != "" && fieldId == "hobbies") {
+                    var hobbiesPurposeHtml = resolvePurposeHtml(v.purpose, "hobbies");
                     html +=
                         `<div class="col-12">
-                        ${window['hobbiesContent'](fieldValue)}
+                        ${hobbiesPurposeHtml}
+                        ${window['hobbiesContent'](fieldValue, 'Dashboard')}
                     </div>`;
                 }else if(fieldValue == "" && socialMedia.includes(fieldId)){
                     // var socialMediaData = PROFILE_RESPONSE_DATA.profileData.studentProfile[0].socialMedia.filter(function(item){
@@ -7798,7 +7972,8 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
                                 item => item.socMedLabel === field.labelName
                             );
                         }).filter(Boolean);
-                        html+=`<div class="col-12 mt-2">${window['socialMedaiLinksContent'](socialMediaData, false)}</div>`;
+                        var socialMediaPurposeHtml = resolvePurposeHtml(v.purpose, "socialMedia");
+                        html+=`<div class="col-12 mt-2">${socialMediaPurposeHtml}${window['socialMedaiLinksContent'](socialMediaData, false)}</div>`;
                         socialMediaLinkAdd=true;
                     }
                 }
@@ -7816,13 +7991,15 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
         }
         if (index == "Sport & Extra Curriculars") {
             if (fieldValue != "" && fieldId == "extracurricularActivities") {
+                var extracurricularPurposeHtml = resolvePurposeHtml(fieldPurpose, "extracurricular");
                 html +=
                     `<div class="col-12">
+                    ${extracurricularPurposeHtml}
                     ${window['extracurricularActivities' + 'Element'](fieldValue)}
                 </div>`;
             }
         }
-        html += `</div>`;
+        html += `</div></div></div></div>`;
     });
     return html;
 }
@@ -7831,42 +8008,42 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
 
 function profileFormSectionTile(sectionName) {
     var titleMap = {
-        "Personal Information": `<h5 class="text-dark font-weight-semi-bold d-flex align-items-center">
+        "Personal Information": `<h5 class="text-dark font-weight-semi-bold d-flex align-items-center mb-0">
             <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px">
-                <i class="fa fa-user font-12"></i>    
+                <i class="fa fa-user font-12"></i>
             </span>
             <span>Personal Information</span>
         </h5>`,
 
-        "Parent Information": `<h5 class="text-dark font-weight-semi-bold d-flex align-items-center">
+        "Parent Information": `<h5 class="text-dark font-weight-semi-bold d-flex align-items-center mb-0">
             <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px">
-                <i class="fa fa-users font-12"></i>    
+                <i class="fa fa-users font-12"></i>
             </span>
             <span>Parent/Guardian Information</span>
         </h5>`,
 
-        "Academic Information": `<h5 class="text-dark font-weight-semi-bold d-flex align-items-center">
+        "Academic Information": `<h5 class="text-dark font-weight-semi-bold d-flex align-items-center mb-0">
             <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px">
-                <i class="fa fa-graduation-cap font-12"></i>    
+                <i class="fa fa-graduation-cap font-12"></i>
             </span>
             <span>Academic Information</span>
         </h5>`,
-        "Live Classes Preferred Timing": `<h5 class="text-dark font-weight-semi-bold d-flex align-items-center">
+        "Live Classes Preferred Timing": `<h5 class="text-dark font-weight-semi-bold d-flex align-items-center mb-0">
             <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px">
-                <i class="fa fa-graduation-cap font-12"></i>    
+                <i class="fa fa-clock font-12"></i>
             </span>
             <span>Live Classes Preferred Timing</span>
         </h5>`,
 
-        "Sport & Extra Curriculars": `<h5 class="text-dark font-weight-semi-bold d-flex align-items-center">
+        "Sport & Extra Curriculars": `<h5 class="text-dark font-weight-semi-bold d-flex align-items-center mb-0">
             <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px">
-                <i class="fa fa-calendar font-12"></i>    
+                <i class="fa fa-calendar font-12"></i>
             </span>
             <span>Sport &amp; Extra Curriculars</span>
         </h5>`,
-        "Student School Email Account": `<h5 class="text-dark font-weight-semi-bold d-flex align-items-center">
+        "Student School Email Account": `<h5 class="text-dark font-weight-semi-bold d-flex align-items-center mb-0">
             <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px">
-                <i class="fa fa-envelope font-12"></i>    
+                <i class="fa fa-envelope font-12"></i>
             </span>
             <span>Student School Email Account</span>
         </h5>`

@@ -109,7 +109,7 @@ function addtionalLayerContentFooter() {
 
     var html= `<div class="app-wrapper-footer position-fixed w-100 bg-white" id="additionalLayerFooter" style="left: 0;bottom: 0;z-index:9;">
         <div class="app-footer">
-            <div class="app-footer__inner">
+            <div class="app-footer__inner font-11">
                 <p style="margin: 0">${copyrightText}</p>
             </div>
         </div>

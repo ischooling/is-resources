@@ -54,7 +54,7 @@ async function renderStudentProfilePage(extraParam) {
         $("#dashboardContentInHTMLAdditional").html(getProfilePageHeader() + html).show();
         checkJoinedSports(data[4]);
         profileViewPageLoadEvent(data);
-        appendProfileContactVerificationBadgesToProfilePage();
+        initProfileContactVerificationForProfilePage();
         if (USER_ROLE == "STUDENT" && typeof openWithdrawalRequestForStudent === "function") {
             initStudentWithdrawalSection();
         }
@@ -814,10 +814,10 @@ function addressElement(data) {
     return html;
 }
 
-function hobbiesContent(data) {
+function hobbiesContent(data, callfrom) {
     var html =
-        `<div class="d-flex flex-sm-nowrap flex-wrap">
-        <span class="font-weight-semi-bold">Hobbies:&nbsp;</span>
+        `<div class="d-flex ${callfrom != "Dashboard" ? 'flex-sm-nowrap':''} flex-wrap">
+        <span class="font-weight-semi-bold ${callfrom != "Dashboard" ? '':'mb-2'}">Hobbies:&nbsp;</span>
         <div class="hobbies-wrapper d-inline-flex flex-wrap bar_count">`;
     if (data.length > 0) {
         $.each(data, function (i, v) {
@@ -825,10 +825,10 @@ function hobbiesContent(data) {
                 // var key = Object.keys(v);
                 // key=key[0];
                 html +=
-                    `<div class="custom-checkbox custom-control float-left w-fit-content right-checkbox-align mr-3 mb-2 cursor hobbie-wrapper">
-                            <input type="checkbox" id="${v.id}" class="custom-control-input group-append-hide-input" ${v.status == "Y" ? 'checked' : ''} data-hobbie-keyId="${v.hobbiesId}" data-hobbie-label="${v.hobbiesLabel}" check-status="${v.status == "Y" ? true : false}" onchange="controlEditField(this,this,${v.status == "Y" ? true : false},'hobbies', '','', 0,'hobbies')">
-                            <label class="custom-control-label cursor" for="${v.id}">${v.hobbiesLabel}</label>
-                        </div>`;
+                `<div class="custom-checkbox custom-control float-left w-fit-content right-checkbox-align mr-3 mb-3 cursor hobbie-wrapper ${callfrom != "Dashboard" ? '':'py-1 bg-light-primary rounded-20'}" ${callfrom != "Dashboard" ? '':'style="padding-right:38px;padding-left:14px"'}>
+                    <input type="checkbox" id="${v.id}" class="custom-control-input group-append-hide-input" ${v.status == "Y" ? 'checked' : ''} data-hobbie-keyId="${v.hobbiesId}" data-hobbie-label="${v.hobbiesLabel}" check-status="${v.status == "Y" ? true : false}" onchange="controlEditField(this,this,${v.status == "Y" ? true : false},'hobbies', '','', 0,'hobbies')">
+                    <label class="custom-control-label cursor" for="${v.id}">${v.hobbiesLabel}</label>
+                </div>`;
             }
 
         });
@@ -3504,17 +3504,19 @@ function confirmSaveModalContent(data) {
 
 function getChunkProfileDataByUserModalContent(data) {
     var html =
-        `<div class="modal fade" id="profileFielddModal" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-        <div class="modal-dialog" style="max-width: 1100px;" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white py-2 px-3">
-                    <h5 class="modal-title">Complete Your Profile</h5>
+        `<div class="modal fade" id="profileFielddModal" tabindex="-1" role="dialog" aria-hidden="true" >
+        <div class="modal-dialog modal-md" role="document" style="max-width:650px;width:calc(100% - 20px)">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white py-2 px-4">
+                    <h5 class="modal-title d-flex align-items-center mb-0">
+                        <span>Complete Your Profile</span>
+                    </h5>
                 </div>
-                <div class="modal-body">
-                    <form method="post" autocomplete="off" action="javascript:void(0);" id="requestProfileForm"></form>
+                <div class="modal-body overflow-y-auto">
+                    <form method="post" autocomplete="off" action="javascript:void(0);" id="requestProfileForm" class="position-relative"></form>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" onclick="stopProfileDataInterval(\'profileFielddModal\')">Cancel</button>
+                <div class="modal-footer bg-white">
+                    <button type="button" class="btn btn-danger" onclick="stopProfileDataInterval(\'profileFielddModal\')">Later</button>
                     <a href="javascript:void(0);" onclick="saveBulkProfileData(\'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\',\'student\')" class="btn btn-success rounded"><i class="fa fa-save mr-1" aria-hidden="true"></i>Yes, Save</a>
                 </div>
             </div>
@@ -3551,10 +3553,12 @@ function renderDynamicFieldByUserID(fieldConfig, value = "", index, callFrom) {
         labelName,
         fieldType,
         inputType,
-        options
+        options,
+        purpose
     } = fieldConfig;
 
     const oldValue = value || '';
+    const purposeHtml = purpose ? `<h3 class="d-block text-primary font-italic font-weight-semi-bold font-16 mb-1">${purpose}</h3>` : '';
 
     let html = '';
 
@@ -3570,7 +3574,6 @@ function renderDynamicFieldByUserID(fieldConfig, value = "", index, callFrom) {
                 placeholder=" "
                 onkeyup="controlEditField(this,'${fieldId}','${oldValue}','input', '', '', ${index}, \'customProfileFieldId\','')" data-element-id="${callFrom == "PROFILE_PAGE" ? fieldConfig.id:fieldConfig.customProfileFieldId}">
             <label for="${fieldId}">${labelName}</label>
-
             <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
                 <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn"
                     onclick="applyChanges('${fieldId}','customProfileFieldId','${PROFILE_RESPONSE_DATA.userId}','${PROFILE_RESPONSE_DATA.studentStandardId}','${PROFILE_RESPONSE_DATA.moduleId}','student','false',0)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
@@ -3582,7 +3585,8 @@ function renderDynamicFieldByUserID(fieldConfig, value = "", index, callFrom) {
                 </a>
             </div>
         </div>
-        </div>`;
+        </div>
+        ${purposeHtml}`;
     }
 
     // ================= DATEPICKER =================
@@ -3597,8 +3601,7 @@ function renderDynamicFieldByUserID(fieldConfig, value = "", index, callFrom) {
                 placeholder=" "
                 readonly
                 onchange="controlEditField(this,'${fieldId}','${oldValue}','input', '', '', ${index}, \'customProfileFieldId\','')" data-element-id="${callFrom == "PROFILE_PAGE" ? fieldConfig.id:fieldConfig.customProfileFieldId}">
-            <label for="${fieldId}">${labelName}</label>
-
+            <label for="${fieldId}" style="left:${callFrom == "PROFILE_MODAL" ? "60px" : "12px"};">${labelName}</label>
             <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
                 <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn"
                     onclick="applyChanges('${fieldId}','customProfileFieldId','${PROFILE_RESPONSE_DATA.userId}','${PROFILE_RESPONSE_DATA.studentStandardId}','${PROFILE_RESPONSE_DATA.moduleId}','student','false',0)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
@@ -3610,7 +3613,8 @@ function renderDynamicFieldByUserID(fieldConfig, value = "", index, callFrom) {
                 </a>
             </div>
         </div>
-        </div>`;
+        </div>
+        ${purposeHtml}`;
     }
 
     // ================= FILE =================
@@ -3623,7 +3627,6 @@ function renderDynamicFieldByUserID(fieldConfig, value = "", index, callFrom) {
 		html = `
 		<div class="full mb-2">
 			<label class="font-weight-semi-bold text-primary">${labelName}:</label>
-
 			<div class="d-flex">
 
 				<!-- VIEW MODE -->
@@ -3688,7 +3691,8 @@ function renderDynamicFieldByUserID(fieldConfig, value = "", index, callFrom) {
 				</div>
 
 			</div>
-		</div>`;
+		</div>
+        ${purposeHtml}`;
 	}
 
     // ================= DROPDOWN =================
@@ -3708,7 +3712,8 @@ function renderDynamicFieldByUserID(fieldConfig, value = "", index, callFrom) {
                 onchange="controlEditField(this,'${fieldId}','${oldValue}','select', '', '', ${index}, \'customProfileFieldId\','')" data-element-id="${callFrom == "PROFILE_PAGE" ? fieldConfig.id:fieldConfig.customProfileFieldId}">
                 ${optionsHtml}
             </select>
-            <label for="${fieldId}">${labelName}</label>
+            <label for="${fieldId}" style="left:${callFrom == "PROFILE_MODAL" ? "60px" : "12px"};">${labelName}</label>
+            
 
             <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
                 <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn"
@@ -3721,7 +3726,8 @@ function renderDynamicFieldByUserID(fieldConfig, value = "", index, callFrom) {
                 </a>
             </div>
         </div>
-        </div>`;
+        </div>
+        ${purposeHtml}`;
     }
 
     // ================= CHECKBOX =================
@@ -3748,6 +3754,7 @@ function renderDynamicFieldByUserID(fieldConfig, value = "", index, callFrom) {
         html = 
         `<div>
             <span class="font-weight-semi-bold">${labelName}:</span>
+            
             <div class="d-flex flex-wrap">${optionsHtml}</div>
             <div class="text-right input-group-append-hide" id="custom_${labelNameTrim}_wrapper" style="display:none">
                 <a href="javascript:void(0)" class="btn btn-sm btn-success"
@@ -3759,7 +3766,8 @@ function renderDynamicFieldByUserID(fieldConfig, value = "", index, callFrom) {
                     Cancel
                 </a>
             </div>
-        </div>`;
+        </div>
+        ${purposeHtml}`;
     }
 
     // ================= RADIO =================
@@ -3788,6 +3796,7 @@ function renderDynamicFieldByUserID(fieldConfig, value = "", index, callFrom) {
         html = 
         `<div>
             <span class="font-weight-semi-bold">${labelName}:</span>
+            
             <div class="d-flex flex-wrap">${optionsHtml}</div>
 
             <div class="text-right input-group-append-hide" id="custom_${labelNameTrim}_wrapper" style="display:none">
@@ -3800,7 +3809,8 @@ function renderDynamicFieldByUserID(fieldConfig, value = "", index, callFrom) {
                     Cancel
                 </a>
             </div>
-        </div>`;
+        </div>
+        ${purposeHtml}`;
     }
 
     return html;

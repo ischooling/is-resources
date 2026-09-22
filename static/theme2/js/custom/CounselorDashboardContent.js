@@ -785,7 +785,7 @@ async function dashboardCounselorFooterContent(){
 	var html=
 	'<div class="app-wrapper-footer">'
 		+'<div class="app-footer">'
-			+'<div class="app-footer__inner">'
+			+'<div class="app-footer__inner font-11">'
 				+'<div class="col">'
 					// +'<p style="margin: 0">'+schoolSettingsTechnical.copyrightYear+' © '+schoolSettingsTechnical.copyrightUrl+'</p>'
 					+'<p style="margin: 0">'+getCopyright()+'</p>'
