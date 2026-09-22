@@ -128,24 +128,22 @@ function renderPartnerCotent(partnerTypeId, partnerDefaultSettings, partnerType)
 	}
 	schoolContactNumber = document.querySelector("#officeContactNumber");
 	schoolSupportNumber = document.querySelector("#supportNumber");
-	itiSchoolContactNumber = window.intlTelInput(schoolContactNumber);
-	itiSchoolContactNumber.setCountry('US');
-	$('#officeContactNumberCountryCode').val(itiSchoolContactNumber.getSelectedCountryData().iso2);
-	$('#officeContactNumberDailCode').val(itiSchoolContactNumber.getSelectedCountryData().dialCode);
-	schoolContactNumber.addEventListener('countrychange', function(e) {
-		$('#officeContactNumberCountryCode').val(itiSchoolContactNumber.getSelectedCountryData().iso2);
-		$('#officeContactNumberDailCode').val(itiSchoolContactNumber.getSelectedCountryData().dialCode);
-
+	itiSchoolContactNumber = initPhoneInputV29(schoolContactNumber, {
+		initialCountry: 'us',
+		onCountryChange: function (country) {
+			$('#officeContactNumberCountryCode').val(country ? country.iso2 : '');
+			$('#officeContactNumberDailCode').val(country ? country.dialCode : '');
+		}
 	});
-	itiSchoolSupportNumber = window.intlTelInput(schoolSupportNumber);
-	itiSchoolSupportNumber.setCountry('US');
-	$('#supportNumberCountryCode').val(itiSchoolSupportNumber.getSelectedCountryData().iso2);
-	$('#supportNumberDailCode').val(itiSchoolSupportNumber.getSelectedCountryData().dialCode);
-	schoolSupportNumber.addEventListener('countrychange', function(e) {
-		$('#supportNumberCountryCode').val(itiSchoolSupportNumber.getSelectedCountryData().iso2);
-		$('#supportNumberDailCode').val(itiSchoolSupportNumber.getSelectedCountryData().dialCode);
-
+	clearContactNumberOnCountryChange(schoolContactNumber);
+	itiSchoolSupportNumber = initPhoneInputV29(schoolSupportNumber, {
+		initialCountry: 'us',
+		onCountryChange: function (country) {
+			$('#supportNumberCountryCode').val(country ? country.iso2 : '');
+			$('#supportNumberDailCode').val(country ? country.dialCode : '');
+		}
 	});
+	clearContactNumberOnCountryChange(schoolSupportNumber);
 }
 
 function createPartnerAndSetCommissionModal(partnerTypeId, partnerType){

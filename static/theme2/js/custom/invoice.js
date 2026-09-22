@@ -22,26 +22,26 @@ async function invoiceOnLoad(payId, isAddEdit){
             todayHighlight: true
         }).datepicker("setDate", new Date());
         inputPayerContact = document.querySelector("#payerPhone");
-        itiPayerContcat = window.intlTelInput(inputPayerContact);
-        itiPayerContcat.setCountry('us');
-        $('#payerCountryData').val(itiPayerContcat.getSelectedCountryData().iso2);
-        $('#payerCountryIsd').val(itiPayerContcat.getSelectedCountryData().dialCode);
-        inputPayerContact.addEventListener('countrychange', function(e) {
-            $('#payerCountryData').val(itiPayerContcat.getSelectedCountryData().iso2);
-            $('#payerCountryIsd').val(itiPayerContcat.getSelectedCountryData().dialCode);
+        itiPayerContcat = initPhoneInputV29(inputPayerContact, {
+            initialCountry: 'us',
+            onCountryChange: function (country) {
+                $('#payerCountryData').val(country ? country.iso2 : '');
+                $('#payerCountryIsd').val(country ? country.dialCode : '');
+            }
         });
+        clearContactNumberOnCountryChange(inputPayerContact);
         inputRecipientContact = document.querySelector("#recipientPhone");
-        itiRecipientContcat = window.intlTelInput(inputRecipientContact);
-        itiRecipientContcat.setCountry('us');
-        $('#recipientCountryData').val(itiRecipientContcat.getSelectedCountryData().iso2);
-        $('#recipientCountryIsd').val(itiRecipientContcat.getSelectedCountryData().dialCode);
-        inputRecipientContact.addEventListener('countrychange', function(e) {
-            $('#recipientCountryData').val(itiRecipientContcat.getSelectedCountryData().iso2);
-            $('#recipientCountryIsd').val(itiRecipientContcat.getSelectedCountryData().dialCode);
+        itiRecipientContcat = initPhoneInputV29(inputRecipientContact, {
+            initialCountry: 'us',
+            onCountryChange: function (country) {
+                $('#recipientCountryData').val(country ? country.iso2 : '');
+                $('#recipientCountryIsd').val(country ? country.dialCode : '');
+            }
         });
+        clearContactNumberOnCountryChange(inputRecipientContact);
         $("#payerCountry").select2({
             theme:"bootstrap4",
-        });	
+        });
         $("#payerState").select2({
             theme:"bootstrap4",
         });
@@ -186,9 +186,10 @@ function resetInvoiceForm() {
     $("#payerPhone").val("");
 
     if (itiPayerContcat) {
-        itiPayerContcat.setCountry("us");
-        $('#payerCountryData').val(itiPayerContcat.getSelectedCountryData().iso2);
-        $('#payerCountryIsd').val(itiPayerContcat.getSelectedCountryData().dialCode);
+        itiSetCountry(itiPayerContcat, "us");
+        var payerCountryData = itiGetCountry(itiPayerContcat) || {};
+        $('#payerCountryData').val(payerCountryData.iso2);
+        $('#payerCountryIsd').val(payerCountryData.dialCode);
     }
 
     $("#recipientName, #recipientEmail, #recipientAddress, #recipientPIN").val("");
@@ -196,9 +197,10 @@ function resetInvoiceForm() {
     $("#recipientPhone").val("");
 
     if (itiRecipientContcat) {
-        itiRecipientContcat.setCountry("us");
-        $('#recipientCountryData').val(itiRecipientContcat.getSelectedCountryData().iso2);
-        $('#recipientCountryIsd').val(itiRecipientContcat.getSelectedCountryData().dialCode);
+        itiSetCountry(itiRecipientContcat, "us");
+        var recipientCountryData = itiGetCountry(itiRecipientContcat) || {};
+        $('#recipientCountryData').val(recipientCountryData.iso2);
+        $('#recipientCountryIsd').val(recipientCountryData.dialCode);
     }
 
     $("#itemsTable tbody").empty();
@@ -268,6 +270,15 @@ function validateInvoice() {
     var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(emailPayer)) return showMessageTheme2(0, "Please enter a valid email address!");
     // if (!$("#payerPhone").val().trim()) return showMessageTheme2(0, "Payer phone is required!");
+    if (typeof checkPhoneNumberLength === "function" && typeof itiPayerContcat !== "undefined" && $("#payerPhone").val().trim()) {
+        var payerPhoneLenCheck = checkPhoneNumberLength(document.querySelector("#payerPhone"), itiPayerContcat, false);
+        if (!payerPhoneLenCheck.valid && payerPhoneLenCheck.reason === "length") {
+            return showMessageTheme2(0, "Payer phone for " + payerPhoneLenCheck.countryName + " must be " + payerPhoneLenCheck.expectedDigits + " digits.");
+        }
+        if (!payerPhoneLenCheck.valid && payerPhoneLenCheck.reason === "invalid") {
+            return showMessageTheme2(0, "Please enter a valid payer phone number for " + payerPhoneLenCheck.countryName + ".");
+        }
+    }
     if (!$("#payerAddress").val().trim()) return showMessageTheme2(0, "Payer address is required!");
     if ($("#payerCountry").val() == "0" || $("#payerCountry").val() == "") return showMessageTheme2(0, "Please select Payer Country!");
     if ($("#payerState").val() == "0" || $("#payerState").val() == "") return showMessageTheme2(0, "Please select Payer State!");
@@ -277,6 +288,15 @@ function validateInvoice() {
     if (!$("#recipientName").val().trim()) return showMessageTheme2(0, "Recipient name is required!");
     // if (!$("#recipientEmail").val().trim()) return showMessageTheme2(0, "Recipient email is required!");
     // if (!$("#recipientPhone").val().trim()) return showMessageTheme2(0, "Recipient phone is required!");
+    if (typeof checkPhoneNumberLength === "function" && typeof itiRecipientContcat !== "undefined" && $("#recipientPhone").val().trim()) {
+        var recipientPhoneLenCheck = checkPhoneNumberLength(document.querySelector("#recipientPhone"), itiRecipientContcat, false);
+        if (!recipientPhoneLenCheck.valid && recipientPhoneLenCheck.reason === "length") {
+            return showMessageTheme2(0, "Recipient phone for " + recipientPhoneLenCheck.countryName + " must be " + recipientPhoneLenCheck.expectedDigits + " digits.");
+        }
+        if (!recipientPhoneLenCheck.valid && recipientPhoneLenCheck.reason === "invalid") {
+            return showMessageTheme2(0, "Please enter a valid recipient phone number for " + recipientPhoneLenCheck.countryName + ".");
+        }
+    }
     if (!$("#recipientAddress").val().trim()) return showMessageTheme2(0, "Recipient address is required!");
     if ($("#recipientCountry").val() == "0" || $("#recipientCountry").val() == "") return showMessageTheme2(0, "Please select Recipient Country!");
     if ($("#recipientState").val() == "0" || $("#recipientState").val() == "") return showMessageTheme2(0, "Please select Recipient State!");
@@ -342,34 +362,34 @@ function getInvoicePaymentDetails(payId){
                 $("#payerAddress").val(responseData.payer?.addressLine ?? "");
                 $("#payerPIN").val(responseData.payer?.pinCode ?? "");
                 inputPayerContact = document.querySelector("#payerPhone");
-                itiPayerContcat = window.intlTelInput(inputPayerContact);
                 var payerIsd = responseData?.payer?.phone?.split("-")[0].replace("+", "") || "1";
                 var payerIso = getIsoFromIsd(payerIsd);
-                itiPayerContcat.setCountry(payerIso);
-                $('#payerCountryData').val(itiPayerContcat.getSelectedCountryData().iso2);
-                $('#payerCountryIsd').val(itiPayerContcat.getSelectedCountryData().dialCode);
-                inputPayerContact.addEventListener('countrychange', function(e) {
-                    $('#payerCountryData').val(itiPayerContcat.getSelectedCountryData().iso2);
-                    $('#payerCountryIsd').val(itiPayerContcat.getSelectedCountryData().dialCode);
+                itiPayerContcat = initPhoneInputV29(inputPayerContact, {
+                    initialCountry: payerIso,
+                    onCountryChange: function (country) {
+                        $('#payerCountryData').val(country ? country.iso2 : '');
+                        $('#payerCountryIsd').val(country ? country.dialCode : '');
+                    }
                 });
                 $("#payerPhone").val(responseData.payer.phone.split("-")[1]);
+                clearContactNumberOnCountryChange(inputPayerContact);
             
                 $("#recipientName").val(responseData.payTo?.name ?? "");
                 $("#recipientEmail").val(responseData.payTo?.email ?? "");
                 $("#recipientAddress").val(responseData.payTo?.addressLine ?? "");
                 $("#recipientPIN").val(responseData.payTo?.pinCode ?? "");
                 inputRecipientContact = document.querySelector("#recipientPhone");
-                itiRecipientContcat = window.intlTelInput(inputRecipientContact);
                 var recipientIsd = responseData?.payTo?.phone?.split("-")[0].replace("+", "") || "1";
                 var recipientIso = getIsoFromIsd(recipientIsd);
-                itiRecipientContcat.setCountry(recipientIso);
-                $('#recipientCountryData').val(itiRecipientContcat.getSelectedCountryData().iso2);
-                $('#recipientCountryIsd').val(itiRecipientContcat.getSelectedCountryData().dialCode);
-                inputRecipientContact.addEventListener('countrychange', function(e) {
-                    $('#recipientCountryData').val(itiRecipientContcat.getSelectedCountryData().iso2);
-                    $('#recipientCountryIsd').val(itiRecipientContcat.getSelectedCountryData().dialCode);
+                itiRecipientContcat = initPhoneInputV29(inputRecipientContact, {
+                    initialCountry: recipientIso,
+                    onCountryChange: function (country) {
+                        $('#recipientCountryData').val(country ? country.iso2 : '');
+                        $('#recipientCountryIsd').val(country ? country.dialCode : '');
+                    }
                 });
                 $("#recipientPhone").val(responseData.payTo.phone.split("-")[1]);
+                clearContactNumberOnCountryChange(inputRecipientContact);
 
                 $("#payerCountry").select2({
                     theme:"bootstrap4",

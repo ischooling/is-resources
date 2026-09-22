@@ -1,4 +1,292 @@
 var defaultLocation='{"as":"AS10029 SHYAM SPECTRA PVT LTD","city":"New Delhi","country":"India","countryCode":"IN","isp":"Shyam Spectra Pvt Ltd","lat":28.6331,"lon":77.2207,"org":"Shyam Spectra Pvt Ltd","query":"125.63.99.243","region":"DL","regionName":"National Capital Territory of Delhi","status":"success","timezone":"Asia/Kolkata","zip":"110055"}';
+// ---------------------------------------------------------------------------
+// Standalone intl-tel-input helper fallbacks.
+//
+// locationFinder.js is loaded on MANY light pages (evaluation form, PPC,
+// request-demo, common signup, etc.) that do NOT load masterContent.js, where
+// the full versions of these helpers live. Without this block those pages throw
+// "initPhoneInputV29 is not defined". We define minimal, self-contained versions
+// here ONLY when they are not already defined, so masterContent's richer
+// versions always win when it is loaded.
+// ---------------------------------------------------------------------------
+if (typeof window.getIntlTelInputCtor !== "function") {
+	window.getIntlTelInputCtor = function () {
+		if (typeof window.intlTelInputV29 === "function") { return window.intlTelInputV29; }
+		if (typeof window.intlTelInput === "function") { return window.intlTelInput; }
+		return null;
+	};
+}
+if (typeof window.itiGetCountry !== "function") {
+	window.itiGetCountry = function (iti) {
+		if (!iti) { return null; }
+		try {
+			if (typeof iti.getSelectedCountryData === "function") { return iti.getSelectedCountryData(); }
+			if (typeof iti.getSelectedCountry === "function") { return iti.getSelectedCountry(); }
+		} catch (e) {}
+		return null;
+	};
+}
+if (typeof window.itiSetCountry !== "function") {
+	window.itiSetCountry = function (iti, iso2) {
+		if (!iti || !iso2) { return; }
+		try {
+			if (typeof iti.setCountry === "function") { iti.setCountry(iso2); }
+			else if (typeof iti.setSelectedCountry === "function") { iti.setSelectedCountry(iso2); }
+		} catch (e) {}
+	};
+}
+if (typeof window.itiIsValidNumber !== "function") {
+	window.itiIsValidNumber = function (iti) {
+		if (!iti) { return null; }
+		try {
+			if (typeof iti.isValidNumberPrecise === "function") { return iti.isValidNumberPrecise(); }
+			if (typeof iti.isValidNumber === "function") { return iti.isValidNumber(); }
+		} catch (e) {}
+		return null;
+	};
+}
+// URL of the libphonenumber utils bundle. Needed for precise per-country format
+// validation (e.g. Singapore numbers must start with 3/6/8/9). Light pages that
+// only load locationFinder.js otherwise have NO validation at all.
+if (typeof window.INTL_TEL_UTILS_SCRIPT_URL === "undefined") {
+	window.INTL_TEL_UTILS_SCRIPT_URL = "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.1.0/js/utils.js";
+}
+// Loads utils.js once (idempotent) and runs the callback when ready.
+if (typeof window.ensureIntlUtilsLoaded !== "function") {
+	window.__INTL_UTILS_LOADING = false;
+	window.__INTL_UTILS_CBS = [];
+	window.ensureIntlUtilsLoaded = function (cb) {
+		try {
+			var ctor = window.getIntlTelInputCtor();
+			// Already available?
+			if (ctor && ((ctor.utils) || (window.intlTelInputUtils))) {
+				if (typeof cb === "function") { cb(); }
+				return;
+			}
+			if (typeof cb === "function") { window.__INTL_UTILS_CBS.push(cb); }
+			if (window.__INTL_UTILS_LOADING) { return; }
+			window.__INTL_UTILS_LOADING = true;
+			var s = document.createElement("script");
+			s.src = window.INTL_TEL_UTILS_SCRIPT_URL;
+			s.async = true;
+			s.onload = function () {
+				window.__INTL_UTILS_LOADING = false;
+				var cbs = window.__INTL_UTILS_CBS.slice();
+				window.__INTL_UTILS_CBS = [];
+				for (var i = 0; i < cbs.length; i++) { try { cbs[i](); } catch (e) {} }
+			};
+			document.head.appendChild(s);
+		} catch (e) {}
+	};
+}
+// True when libphonenumber metadata is loaded (so precise validation works).
+if (typeof window.itiUtilsAvailable !== "function") {
+	window.itiUtilsAvailable = function () {
+		try {
+			var ctor = window.getIntlTelInputCtor();
+			if (ctor && ctor.utils) { return true; }
+			if (window.intlTelInputUtils) { return true; }
+		} catch (e) {}
+		return false;
+	};
+}
+// Light-page phone-validation toggle. If masterContent's richer version isn't
+// present, default to ENABLED (validate). Reads a global flag if the page sets one.
+if (typeof window.isPhoneValidationEnabled !== "function") {
+	window.isPhoneValidationEnabled = function () {
+		try {
+			if (typeof PHONE_VALIDATION_ENABLED !== "undefined") {
+				return PHONE_VALIDATION_ENABLED === true || PHONE_VALIDATION_ENABLED === "true";
+			}
+		} catch (e) {}
+		return true;
+	};
+}
+// Full country list { name, iso2, dialCode } (version-agnostic).
+if (typeof window.itiGetCountryList !== "function") {
+	window.itiGetCountryList = function () {
+		try {
+			var ctor = window.getIntlTelInputCtor();
+			if (ctor && typeof ctor.getCountryData === "function") { return ctor.getCountryData(); }
+			if (window.intlTelInputGlobals && typeof window.intlTelInputGlobals.getCountryData === "function") {
+				return window.intlTelInputGlobals.getCountryData();
+			}
+		} catch (e) {}
+		return [];
+	};
+}
+// Find the country whose dial code a digits-only number starts with (longest match).
+if (typeof window.matchCountryByDialCode !== "function") {
+	window.matchCountryByDialCode = function (digitsAll) {
+		try {
+			digitsAll = (digitsAll || "").replace(/\D/g, "");
+			if (!digitsAll) { return null; }
+			var list = window.itiGetCountryList() || [];
+			var best = null, bestLen = 0;
+			for (var i = 0; i < list.length; i++) {
+				var dc = (list[i].dialCode || "").replace(/\D/g, "");
+				if (dc && digitsAll.indexOf(dc) === 0 && dc.length > bestLen) {
+					best = list[i]; bestLen = dc.length;
+				}
+			}
+			return best;
+		} catch (e) {}
+		return null;
+	};
+}
+// Pure phone check (length + format via utils). Mirrors masterContent's version
+// with a minimal, self-contained implementation for light pages.
+// Returns { valid:true } | { valid:false, reason:'empty'|'length'|'invalid', expectedDigits, enteredDigits, countryName }.
+if (typeof window.checkPhoneNumberLength !== "function") {
+	window.checkPhoneNumberLength = function (inputEl, iti, isMandatory) {
+		if (!inputEl || !iti) { return { valid: true }; }
+		if (!window.isPhoneValidationEnabled()) { return { valid: true }; }
+		var rawValue = ($(inputEl).val() || "").trim();
+		if (rawValue === "") { return isMandatory ? { valid: false, reason: 'empty' } : { valid: true }; }
+		var countryData = window.itiGetCountry(iti);
+		var countryName = (countryData && countryData.name) ? countryData.name : "the selected country";
+		var enteredDigits = rawValue.replace(/\D/g, "");
+		// Format + length validation when utils are loaded (validates the number
+		// PATTERN, e.g. Singapore must start with 3/6/8/9 — not just the length).
+		if (window.itiUtilsAvailable()) {
+			var validRes = window.itiIsValidNumber(iti);
+			if (validRes === true) { return { valid: true }; }
+			if (validRes === false) {
+				return { valid: false, reason: 'invalid', enteredDigits: enteredDigits.length, countryName: countryName };
+			}
+		}
+		return { valid: true };
+	};
+}
+if (typeof window.initPhoneInputV29 !== "function") {
+	window.initPhoneInputV29 = function (inputElOrId, opts) {
+		opts = opts || {};
+		var inputEl = (typeof inputElOrId === "string") ? document.getElementById(inputElOrId) : inputElOrId;
+		if (!inputEl) { return null; }
+		var ctor = window.getIntlTelInputCtor();
+		if (!ctor) { return null; }
+		// Guard against double initialization. If this input was already inited
+		// (e.g. an inline JSP init followed by callLocationAndSelectCountryNew1),
+		// destroy the old instance and unwrap the stray .iti container so we don't
+		// stack wrappers / show duplicate flags.
+		try {
+			if (inputEl.intlTelInputInstance) {
+				try { inputEl.intlTelInputInstance.destroy(); } catch (e) {}
+				inputEl.intlTelInputInstance = null;
+			}
+			if (window.jQuery) {
+				var $existing = window.jQuery(inputEl).closest(".iti");
+				if ($existing.length > 0) {
+					$existing.find(".iti__flag-container, .iti__country-container").remove();
+					window.jQuery(inputEl).unwrap();
+				}
+			}
+		} catch (e) {}
+		// Remove any stale maxlength before the library reads the value, so a
+		// prefilled "+<dialCode> <national>" string isn't clipped by an old
+		// country-based maxlength before normalization. attachPhoneLengthLimit
+		// re-applies the correct maxlength afterward.
+		try {
+			inputEl.removeAttribute("maxlength");
+			inputEl.removeAttribute("data-max-digits");
+		} catch (e) {}
+		var options = {
+			classNames: { container: opts.containerClass || "iti-v29" },
+			separateDialCode: false,
+			// Keep v29 in NATIONAL mode so it never auto-switches the country from
+			// the typed number (e.g. Canada -> US). Country changes only via the
+			// dropdown.
+			numberDisplayFormat: "NATIONAL",
+			formatAsYouType: false,
+			// strictMode OFF: preserve a leading 0 the user types (v29 strictMode
+			// strips it as a trunk prefix). Length capping is handled elsewhere.
+			strictMode: false,
+			countrySearch: true,
+			// Load libphonenumber utils so precise per-country format validation
+			// works on light pages (e.g. Singapore must start with 3/6/8/9).
+			utilsScript: window.INTL_TEL_UTILS_SCRIPT_URL
+		};
+		if (opts.allowedNumberTypes) { options.allowedNumberTypes = opts.allowedNumberTypes; }
+		var iti = ctor(inputEl, options);
+		// Also load utils via our loader as a safety net (in case utilsScript is
+		// ignored by the loaded version).
+		if (typeof window.ensureIntlUtilsLoaded === "function") { window.ensureIntlUtilsLoaded(); }
+		// v16 back-compat shims so existing .setCountry()/.getSelectedCountryData()
+		// calls keep working on a v29 instance.
+		if (iti && typeof iti.setCountry !== "function" && typeof iti.setSelectedCountry === "function") {
+			iti.setCountry = function (iso2) { return iti.setSelectedCountry(iso2); };
+		}
+		if (iti && typeof iti.getSelectedCountryData !== "function" && typeof iti.getSelectedCountry === "function") {
+			iti.getSelectedCountryData = function () { return iti.getSelectedCountry(); };
+		}
+		var initial = (typeof opts.initialCountry === "undefined") ? "us" : opts.initialCountry;
+		// Country selection + value normalization. If the prefilled value carries
+		// an explicit "+<dialCode>" prefix, that number's own dial code wins
+		// (a saved "+91 8533990022" is India even if initialCountry says UZ).
+		// Otherwise the passed initialCountry is the source of truth.
+		try {
+			var raw = (inputEl.value || "").trim();
+			if (raw.charAt(0) === "+") {
+				var digitsAll = raw.replace(/\D/g, "");
+				var detected = window.itiGetCountry(iti) || {};
+				var detDial = (detected.dialCode || "").replace(/\D/g, "");
+				if (!detDial || digitsAll.indexOf(detDial) !== 0) {
+					var best = window.matchCountryByDialCode(digitsAll);
+					if (best) {
+						window.itiSetCountry(iti, best.iso2);
+						detected = window.itiGetCountry(iti) || best;
+						detDial = (detected.dialCode || "").replace(/\D/g, "");
+					}
+				}
+				var national = digitsAll;
+				if (detDial && digitsAll.indexOf(detDial) === 0 && digitsAll.length > detDial.length) {
+					national = digitsAll.substring(detDial.length);
+				}
+				if (inputEl.value !== national) { inputEl.value = national; }
+			} else {
+				if (initial) { window.itiSetCountry(iti, initial); }
+				var digitsOnly = raw.replace(/\D/g, "");
+				if (raw && inputEl.value !== digitsOnly) { inputEl.value = digitsOnly; }
+			}
+		} catch (e) {}
+		if (typeof window.attachPhoneLengthLimit === "function") {
+			window.attachPhoneLengthLimit(inputEl, iti);
+		}
+		// RE-ASSERT the caller's requested country for shared dial codes (+1:
+		// US/CA/...). v29 can default an ambiguous +1 number to US even when we
+		// asked for "ca"; force it back to what was requested if they share a
+		// dial code (trusts the saved country as-is, no area-code guessing).
+		try {
+			var _wantIsoLF = (initial || "").toString().toLowerCase();
+			if (_wantIsoLF) {
+				var _curCcLF = window.itiGetCountry(iti) || {};
+				var _curIsoLF = (_curCcLF.iso2 || "").toLowerCase();
+				if (_curIsoLF && _curIsoLF !== _wantIsoLF) {
+					var _wantDialLF = null, _curDialLF = (_curCcLF.dialCode || "").replace(/\D/g, "");
+					var _listLF = window.itiGetCountryList() || [];
+					for (var _k = 0; _k < _listLF.length; _k++) {
+						if ((_listLF[_k].iso2 || "").toLowerCase() === _wantIsoLF) {
+							_wantDialLF = (_listLF[_k].dialCode || "").replace(/\D/g, "");
+							break;
+						}
+					}
+					if (_wantDialLF && _wantDialLF === _curDialLF) {
+						window.itiSetCountry(iti, _wantIsoLF);
+					}
+				}
+			}
+		} catch (e) {}
+		if (typeof opts.onCountryChange === "function") {
+			var fireSync = function () { opts.onCountryChange(window.itiGetCountry(iti), iti); };
+			fireSync();
+			inputEl.addEventListener("countrychange", fireSync);
+		}
+		// Cache the instance on the DOM element so the double-init guard above can
+		// find & destroy it on a later re-init.
+		try { inputEl.intlTelInputInstance = iti; } catch (e) {}
+		return iti;
+	};
+}
 
 function callLocationDetailsFill(formId, data){
 	if(data!=undefined && data !=''){
@@ -98,142 +386,76 @@ function callLocationAndSelectCountryNew1Fill(formId, type, data,flag,countryCod
 	if(data!=undefined && data !=''){
 		if("admin"==type){
 			inputContact = document.querySelector("#userphone");
-			itiContcat = window.intlTelInput(inputContact,{
-				separateDialCode:true,
+			itiContcat = initPhoneInputV29(inputContact, {
+				initialCountry: ($("#isdCodeMobileNoIcon").val()==null || $("#isdCodeMobileNoIcon").val()=='') ? data.countryCode : $("#isdCodeMobileNoIcon").val(),
+				onCountryChange: function (country) {
+					$('#isdCodeMobileNoIcon').val(country ? country.iso2 : '');
+					$('#isdCodeMobileNo').val(country ? country.dialCode : '');
+				}
 			});
-			if($("#isdCodeMobileNoIcon").val()==null || $("#isdCodeMobileNoIcon").val()==''){
-				itiContcat.setCountry(data.countryCode);
-			}else{
-				itiContcat.setCountry($("#isdCodeMobileNoIcon").val());
-			}
-			if($('#isdCodeMobileNoIcon').val()==null || $('#isdCodeMobileNoIcon').val()==''){
-				$('#isdCodeMobileNoIcon').val(itiContcat.getSelectedCountryData().iso2);
-			}
-			if($('#isdCodeMobileNo').val()==null || $('#isdCodeMobileNo').val()==''){
-				$('#isdCodeMobileNo').val(itiContcat.getSelectedCountryData().dialCode);
-			}
-			inputContact.addEventListener('countrychange', function(e) {
-				console.log("itiContcat=>", itiContcat.getSelectedCountryData());
-				$('#isdCodeMobileNoIcon').val(itiContcat.getSelectedCountryData().iso2);
-				$('#isdCodeMobileNo').val(itiContcat.getSelectedCountryData().dialCode);
-			});
-			
+			clearContactNumberOnCountryChange(inputContact);
+
 			inputContact1 = document.querySelector("#wtspNumber");
-			itiContcat1 = window.intlTelInput(inputContact1,{
-				separateDialCode:true,
+			itiContcat1 = initPhoneInputV29(inputContact1, {
+				initialCountry: ($('#isdCodeWhatsupNoIcon').val()==null || $('#isdCodeWhatsupNoIcon').val()=='') ? data.countryCode : $("#isdCodeWhatsupNoIcon").val(),
+				onCountryChange: function (country) {
+					$('#isdCodeWhatsupNoIcon').val(country ? country.iso2 : '');
+					$('#isdCodeWhatsupNo').val(country ? country.dialCode : '');
+				}
 			});
-			if($('#isdCodeWhatsupNoIcon').val()==null || $('#isdCodeWhatsupNoIcon').val()==''){
-				itiContcat1.setCountry(data.countryCode);
-			}else{
-				itiContcat1.setCountry($("#isdCodeWhatsupNoIcon").val());
-			}
-			if($('#isdCodeWhatsupNoIcon').val()==null || $('#isdCodeWhatsupNoIcon').val()==''){
-				$('#isdCodeWhatsupNoIcon').val(itiContcat1.getSelectedCountryData().iso2);
-			}
-			if($('#isdCodeWhatsupNo').val()==null || $('#isdCodeWhatsupNo').val()==''){
-				$('#isdCodeWhatsupNo').val(itiContcat1.getSelectedCountryData().dialCode);
-			}
-			inputContact1.addEventListener('countrychange', function(e) {
-				console.log("itiContcat=>", itiContcat1.getSelectedCountryData());
-				$('#isdCodeWhatsupNoIcon').val(itiContcat1.getSelectedCountryData().iso2);
-				$('#isdCodeWhatsupNo').val(itiContcat1.getSelectedCountryData().dialCode);
-			});
+			clearContactNumberOnCountryChange(inputContact1);
 			$('#newDateslected').val($('#newDateslected option:first-child').val()).trigger('change');
 		}else if("evaluation"==type){
+			// Always initialize the phone widgets (regardless of `flag`). `flag`
+			// only controls whether we auto-select country/state from geo-IP for a
+			// NEW form; a returning user (flag=false, opened via UUID link) still
+			// needs the phone widget rendered and validated. The initialCountry
+			// expression already prefers a saved isdCode over the geo-IP fallback.
 			if(schoolId!=undefined && schoolId==1){
-				if(flag){
-					inputContact = document.querySelector("#studentContactNo");
-					itiContcat = window.intlTelInput(inputContact,{
-						separateDialCode:true,
+				inputContact = document.querySelector("#studentContactNo");
+				if(inputContact){
+					itiContcat = initPhoneInputV29(inputContact, {
+						initialCountry: ($("#isdCodeStudentIcon").val()==null || $("#isdCodeStudentIcon").val()=='') ? data.countryCode : $("#isdCodeStudentIcon").val(),
+						onCountryChange: function (country) {
+							$('#isdCodeStudentIcon').val(country ? country.iso2 : '');
+							$('#isdCodeStudent').val(country ? country.dialCode : '');
+						}
 					});
-					if($("#isdCodeStudentIcon").val()==null || $("#isdCodeStudentIcon").val()==''){
-						itiContcat.setCountry(data.countryCode);
-					}else{
-						itiContcat.setCountry($("#isdCodeStudentIcon").val());
-					}
-					if($('#isdCodeStudentIcon').val()==null || $('#isdCodeStudentIcon').val()==''){
-						$('#isdCodeStudentIcon').val(itiContcat.getSelectedCountryData().iso2);
-					}
-					if($('#isdCodeStudent').val()==null || $('#isdCodeStudent').val()==''){
-						$('#isdCodeStudent').val(itiContcat.getSelectedCountryData().dialCode);
-					}
-					inputContact.addEventListener('countrychange', function(e) {
-						console.log("itiContcat=>", itiContcat.getSelectedCountryData());
-						$('#isdCodeStudentIcon').val(itiContcat.getSelectedCountryData().iso2);
-						$('#isdCodeStudent').val(itiContcat.getSelectedCountryData().dialCode);
+					clearContactNumberOnCountryChange(inputContact);
+				}
+				inputContact2 = document.querySelector("#wtspNumber");
+				if(inputContact2){
+					itiContcat2 = initPhoneInputV29(inputContact2, {
+						initialCountry: ($('#isdCodeWtspIcon').val()==null || $('#isdCodeWtspIcon').val()=='') ? data.countryCode : $("#isdCodeWtspIcon").val(),
+						onCountryChange: function (country) {
+							$('#isdCodeWtspIcon').val(country ? country.iso2 : '');
+							$('#isdCodeWtsp').val(country ? country.dialCode : '');
+						}
 					});
-		
-					inputContact2 = document.querySelector("#wtspNumber");
-					itiContcat2 = window.intlTelInput(inputContact2,{
-						separateDialCode:true,
-					});
-					
-					if($('#isdCodeWtspIcon').val()==null || $('#isdCodeWtspIcon').val()==''){
-						itiContcat2.setCountry(data.countryCode);
-					}else{
-						itiContcat2.setCountry($("#isdCodeWtspIcon").val());
-					}
-					if($('#isdCodeWtspIcon').val()==null || $('#isdCodeWtspIcon').val()==''){
-						$('#isdCodeWtspIcon').val(itiContcat2.getSelectedCountryData().iso2);
-					}
-					if($('#isdCodeWtsp').val()==null || $('#isdCodeWtsp').val()==''){
-						$('#isdCodeWtsp').val(itiContcat2.getSelectedCountryData().dialCode);
-					}
-					inputContact2.addEventListener('countrychange', function(e) {
-						console.log("itiContcat=>", itiContcat2.getSelectedCountryData());
-						$('#isdCodeWtspIcon').val(itiContcat2.getSelectedCountryData().iso2);
-						$('#isdCodeWtsp').val(itiContcat2.getSelectedCountryData().dialCode);
-					});
+					clearContactNumberOnCountryChange(inputContact2);
 				}
 			}else{
-				if(flag){
-					inputContact = document.querySelector("#studentContactNo");
-					itiContcat = window.intlTelInput(inputContact,{
-						separateDialCode:true,
-						//disabled: true
+				inputContact = document.querySelector("#studentContactNo");
+				if(inputContact){
+					itiContcat = initPhoneInputV29(inputContact, {
+						initialCountry: ($("#autoDialCode").val()!=null && $("#autoDialCode").val()!='') ? $("#autoDialCode").val() : (($("#isdCodeStudentIcon").val()==null || $("#isdCodeStudentIcon").val()=='') ? data.countryCode : $("#isdCodeStudentIcon").val()),
+						onCountryChange: function (country) {
+							$('#isdCodeStudentIcon').val(country ? country.iso2 : '');
+							$('#isdCodeStudent').val(country ? country.dialCode : '');
+						}
 					});
-					if($("#autoDialCode").val()!=null && $("#autoDialCode").val()!=''){
-						itiContcat.setCountry($("#autoDialCode").val());
-					}else if($("#isdCodeStudentIcon").val()==null || $("#isdCodeStudentIcon").val()==''){
-						itiContcat.setCountry(data.countryCode);
-					}else{
-						itiContcat.setCountry($("#isdCodeStudentIcon").val());
-					}
-					if($('#isdCodeStudentIcon').val()==null || $('#isdCodeStudentIcon').val()==''){
-						$('#isdCodeStudentIcon').val(itiContcat.getSelectedCountryData().iso2);
-					}
-					if($('#isdCodeStudent').val()==null || $('#isdCodeStudent').val()==''){
-						$('#isdCodeStudent').val(itiContcat.getSelectedCountryData().dialCode);
-					}
-					inputContact.addEventListener('countrychange', function(e) {
-						console.log("itiContcat=>", itiContcat.getSelectedCountryData());
-						$('#isdCodeStudentIcon').val(itiContcat.getSelectedCountryData().iso2);
-						$('#isdCodeStudent').val(itiContcat.getSelectedCountryData().dialCode);
+					clearContactNumberOnCountryChange(inputContact);
+				}
+				inputContact2 = document.querySelector("#wtspNumber");
+				if(inputContact2){
+					itiContcat2 = initPhoneInputV29(inputContact2, {
+						initialCountry: ($("#autoDialCode").val()!=null && $("#autoDialCode").val()!='') ? $("#autoDialCode").val() : (($('#isdCodeWtspIcon').val()==null || $('#isdCodeWtspIcon').val()=='') ? data.countryCode : $("#isdCodeWtspIcon").val()),
+						onCountryChange: function (country) {
+							$('#isdCodeWtspIcon').val(country ? country.iso2 : '');
+							$('#isdCodeWtsp').val(country ? country.dialCode : '');
+						}
 					});
-		
-					inputContact2 = document.querySelector("#wtspNumber");
-					itiContcat2 = window.intlTelInput(inputContact2,{
-						separateDialCode:true,
-						//disabled: true
-					});
-					
-					if($("#autoDialCode").val()!=null && $("#autoDialCode").val()!=''){
-						itiContcat2.setCountry($("#autoDialCode").val());
-					}else if($('#isdCodeWtspIcon').val()==null || $('#isdCodeWtspIcon').val()==''){
-						itiContcat2.setCountry(data.countryCode);
-					}else{
-						itiContcat2.setCountry($("#isdCodeWtspIcon").val());
-					}
-					if($('#isdCodeWtspIcon').val()==null || $('#isdCodeWtspIcon').val()==''){
-						$('#isdCodeWtspIcon').val(itiContcat2.getSelectedCountryData().iso2);
-					}
-					if($('#isdCodeWtsp').val()==null || $('#isdCodeWtsp').val()==''){
-						$('#isdCodeWtsp').val(itiContcat2.getSelectedCountryData().dialCode);
-					}
-					inputContact2.addEventListener('countrychange', function(e) {
-						$('#isdCodeWtspIcon').val(itiContcat2.getSelectedCountryData().iso2);
-						$('#isdCodeWtsp').val(itiContcat2.getSelectedCountryData().dialCode);
-					});
+					clearContactNumberOnCountryChange(inputContact2);
 				}
 			}
 		}else{
@@ -282,20 +504,24 @@ function defaultIsdCodePopulation(formId, type, countryCode, countryCodeW){
 	if("admin"==type){
 	}else if("evaluation"==type){
 		inputContact = document.querySelector("#studentContactNo");
-		itiContcat = window.intlTelInput(inputContact);
-		itiContcat.setCountry(countryCode);
-		inputContact.addEventListener('countrychange', function(e) {
-			$('#isdCodeStudentIcon').val(itiContcat.getSelectedCountryData().iso2);
-			$('#isdCodeStudent').val(itiContcat.getSelectedCountryData().dialCode);
+		itiContcat = initPhoneInputV29(inputContact, {
+			initialCountry: countryCode,
+			onCountryChange: function (country) {
+				$('#isdCodeStudentIcon').val(country ? country.iso2 : '');
+				$('#isdCodeStudent').val(country ? country.dialCode : '');
+			}
 		});
-		
+		clearContactNumberOnCountryChange(inputContact);
+
 		inputContact2 = document.querySelector("#wtspNumber");
-		itiContcat2 = window.intlTelInput(inputContact2);
-		itiContcat2.setCountry(countryCodeW);
-		inputContact2.addEventListener('countrychange', function(e) {
-			$('#isdCodeWtspIcon').val(itiContcat2.getSelectedCountryData().iso2);
-			$('#isdCodeWtsp').val(itiContcat2.getSelectedCountryData().dialCode);
+		itiContcat2 = initPhoneInputV29(inputContact2, {
+			initialCountry: countryCodeW,
+			onCountryChange: function (country) {
+				$('#isdCodeWtspIcon').val(country ? country.iso2 : '');
+				$('#isdCodeWtsp').val(country ? country.dialCode : '');
+			}
 		});
+		clearContactNumberOnCountryChange(inputContact2);
 		if("evaluation"==type && schoolId!=undefined && schoolId!=1){
 			if($("#autoCountryTimeZoneId").val()!=null && $("#autoCountryTimeZoneId").val()!=''){
 				$('#countryTimezoneId').val($("#autoCountryTimeZoneId").val()).trigger('change')

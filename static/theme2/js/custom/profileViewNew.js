@@ -4794,33 +4794,25 @@ function getRequestForUpdateProfile(eleID, keyId, userId, studentStandardId, mod
     return requestProfile;
 }
 
+// Mandatory phone fields (must be filled + valid length for the country).
+var MANDATORY_PHONE_FIELDS = ['phoneNumber', 'motherPhoneNumber', 'fatherPhoneNumber', 'guardianPhoneNumber', 'payPalPhoneNumber'];
+// Optional phone fields (validate length only if a value is entered).
+var OPTIONAL_PHONE_FIELDS = ['altPhoneNumber'];
+
 function validateFields(eleID, keyId, fieldValue) {
     var flag = true;
-    if (keyId == 'phoneNumber' || keyId == 'altPhoneNumber' || keyId == 'motherPhoneNumber' || keyId == 'fatherPhoneNumber' || keyId == 'guardianPhoneNumber' || keyId == 'payPalPhoneNumber') {
-        // if(keyId=='phoneNumber'){
-        var valId = "";
-        var lent = $('#' + keyId).val().indexOf("-")
-        if (lent > 0) {
-            var valPhoneId = $('#' + keyId).val().split("-")[1];
-        } else {
-            var valPhoneId = $('#' + keyId).val();
-            if (valPhoneId == "") {
-                showMessageTheme2(0, ' Either field value is invalid or empty.', '', false);
-                flag = false;
-            } else {
-                var result = validatePhoneNumber(keyId);
-                // if (!result.valid) {
-                //     flag= false;
-                //     showMessageTheme2(0,result.message,'',false);
-                // }
-                flag = true
-            }
-        }
-        if (!flag) {
-            return flag;
-        }
+
+    // Phone validation handled outside the if/else chain so both mandatory and
+    // optional phone fields are covered. altPhoneNumber is optional, so an empty
+    // value is allowed but a filled value must match the country length.
+    if (MANDATORY_PHONE_FIELDS.indexOf(keyId) !== -1) {
+        return isPhoneNumberValid(eleID, true);
     }
-    else if (keyId == 'gender' || keyId == 'parentGender') {
+    if (OPTIONAL_PHONE_FIELDS.indexOf(keyId) !== -1) {
+        return isPhoneNumberValid(eleID, false);
+    }
+
+    if (keyId == 'gender' || keyId == 'parentGender') {
         if (fieldValue == '' || fieldValue == undefined || fieldValue == 0) {
             showMessageTheme2(0, "Please choose gender.", '', false);
             return false;
@@ -5780,6 +5772,48 @@ function controlEditField(src, eleID, eleValue, saveType, avalWhtsAppStatusID, c
         });
     }
 }
+// Normalize a phone value for restoring into a national/digits-only phone input.
+// Strips a leading "+<dialCode>" (matched against the field's currently selected
+// country, falling back to the longest matching dial code) plus all non-digits,
+// so a raw server value like "+91 8533990022" becomes "8533990022". This mirrors
+// initializeIntelInput's selectCountryAndNormalize so Cancel restores the same
+// national digits the field first showed (and doesn't get truncated by the
+// country-based maxlength).
+function normalizeProfilePhoneValueForField(eleID, rawValue) {
+    try {
+        var raw = (rawValue == null ? "" : String(rawValue)).trim();
+        if (raw === "") { return ""; }
+        var digitsAll = raw.replace(/\D/g, "");
+        if (raw.charAt(0) !== "+") {
+            // No explicit international prefix: just keep the digits.
+            return digitsAll;
+        }
+        // Prefer the dial code of the country currently selected on this field's
+        // intl-tel-input instance.
+        var dial = "";
+        try {
+            var el = document.getElementById(eleID);
+            var iti = el ? el.intlTelInputInstance : null;
+            var cc = (typeof itiGetCountry === "function") ? itiGetCountry(iti) : null;
+            dial = (cc && cc.dialCode) ? String(cc.dialCode).replace(/\D/g, "") : "";
+        } catch (e) {}
+        // Fall back to the longest dial code the number starts with.
+        if ((!dial || digitsAll.indexOf(dial) !== 0) && typeof matchCountryByDialCode === "function") {
+            var best = matchCountryByDialCode(digitsAll);
+            if (best && best.dialCode) {
+                var bd = String(best.dialCode).replace(/\D/g, "");
+                if (bd && digitsAll.indexOf(bd) === 0) { dial = bd; }
+            }
+        }
+        if (dial && digitsAll.indexOf(dial) === 0 && digitsAll.length > dial.length) {
+            return digitsAll.substring(dial.length);
+        }
+        return digitsAll;
+    } catch (e) {
+        return (rawValue == null ? "" : String(rawValue)).replace(/\D/g, "");
+    }
+}
+
 function cancelChanges(eleID, eleValue, saveType, keyId, whatsAppStatusEleId, emergencyNumberStatusEleId, index){
     if(saveType == 'input'){
         $("#"+eleID).val(eleValue);
@@ -5791,7 +5825,24 @@ function cancelChanges(eleID, eleValue, saveType, keyId, whatsAppStatusEleId, em
             // console.log("remove", SAVE_BLUK_PROFILE_DATA);
         }
     }else if(saveType == 'inputPhone'){
-        $("#"+eleID).val(eleValue);
+        // Restore the original value, but NORMALIZE it first. The phone input is
+        // in national/digits-only mode with a country-based maxlength (e.g. India
+        // = 10). The raw server value can be a "+<dialCode> <national>" string
+        // (e.g. "+91 8533990022"). Writing that raw string directly lets the
+        // browser's maxlength truncate it ("+91 8533990022" -> "+91 85339" ->
+        // "85339"). So we strip a leading "+<dialCode of the selected country>"
+        // and all non-digits, mirroring initializeIntelInput's normalization.
+        var _restorePhoneVal = normalizeProfilePhoneValueForField(eleID, eleValue);
+        $("#"+eleID).val(_restorePhoneVal);
+        // Re-apply the country length limit so maxlength/data-max-digits are in
+        // sync with the restored (national-digits) value.
+        try {
+            var _restoreEl = document.getElementById(eleID);
+            var _restoreIti = _restoreEl ? _restoreEl.intlTelInputInstance : null;
+            if (typeof attachPhoneLengthLimit === "function" && _restoreEl && _restoreIti) {
+                attachPhoneLengthLimit(_restoreEl, _restoreIti);
+            }
+        } catch (e) {}
         if(eleID == "motherPhoneNumber" || eleID == "fatherPhoneNumber"){
             $("#"+emergencyNumberStatusEleId).prop("checked", (PROFILE_RESPONSE_UPDATED_DATA[index][emergencyNumberStatusEleId] == "Y"? true:false));
         }
@@ -7668,7 +7719,7 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
                         personalPhoneData[fieldId] = fieldValue;
                     }
                     html += `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
-                            ${window[fieldId + 'Element'](personalPhoneData)}
+                            ${window[fieldId + 'Element'](personalPhoneData, 'PROFILE_MODAL')}
                         </div>`;
                     var fatherPhoneIndex = PROFILE_RESPONSE_UPDATED_DATA.findIndex(obj => obj.hasOwnProperty(fieldId));
                     inputPhoneNumberArray.push({ "fieldId": fieldId, "index": fatherPhoneIndex });
@@ -7690,7 +7741,7 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
                             var parentFieldValue = emailFields.includes(fieldId) ? PROFILE_RESPONSE_DATA.profileData.studentProfile[1][fieldId] : fieldValue;
                             html+=
                             `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
-                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PROFILE_RESPONSE_DATA.profileData.studentProfile[1]:parentFieldValue)}
+                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PROFILE_RESPONSE_DATA.profileData.studentProfile[1]:parentFieldValue, 'PROFILE_MODAL')}
                             </div>`;
                         }
                         
@@ -7706,7 +7757,7 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
                             var parentFieldValue = emailFields.includes(fieldId) ? PROFILE_RESPONSE_DATA.profileData.studentProfile[1][fieldId] : fieldValue;
                             html+=
                             `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
-                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PROFILE_RESPONSE_DATA.profileData.studentProfile[1]:parentFieldValue)}
+                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PROFILE_RESPONSE_DATA.profileData.studentProfile[1]:parentFieldValue, 'PROFILE_MODAL')}
                             </div>`;
                         }
                     }else if(guardianSectionFlag){
@@ -7721,7 +7772,7 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
                             var parentFieldValue = emailFields.includes(fieldId) ? PROFILE_RESPONSE_DATA.profileData.studentProfile[1][fieldId] : fieldValue;
                             html+=
                             `<div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
-                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PROFILE_RESPONSE_DATA.profileData.studentProfile[1]:parentFieldValue)}
+                                ${window[fieldId + 'Element'](parentPhone.includes(fieldId)?PROFILE_RESPONSE_DATA.profileData.studentProfile[1]:parentFieldValue, 'PROFILE_MODAL')}
                             </div>`;
                         }
                     }

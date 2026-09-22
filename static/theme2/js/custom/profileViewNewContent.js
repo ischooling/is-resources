@@ -629,7 +629,7 @@ function phoneNumberElement(data) {
     return html;
 }
 
-function altPhoneNumberElement(data) {
+function altPhoneNumberElement(data, callFrom) {
     var html =
         `<div class="custom-field-scope">
     <div class="d-flex flex-wrap">
@@ -645,7 +645,7 @@ function altPhoneNumberElement(data) {
     </div>
     <div class="input-group position-relative custom-field mb-2 mt-1 p-0 flex-nowrap">
         <input type="text" class="form-control form-control-sm group-append-hide-input" name="altPhoneNumber" id="altPhoneNumber" value="${data.altPhoneNumber != "" && data.altPhoneNumber != undefined ? data.altPhoneNumber : ""}" autocomplete="off" placeholder=" " data-idList="altPhoneNumber_altPhoneNumberWhatsAppStatus_altPhoneNumberCountryCode" onkeydown="return M.digit(event);" onkeyup="controlEditField(this,'altPhoneNumber',\'${data.altPhoneNumber != "" && data.altPhoneNumber != undefined ? data.altPhoneNumber : ""}\','inputPhone', 'altPhoneNumberWhatsAppStatus',\'${data.altPhoneNumberCountryCode != "" && data.altPhoneNumberCountryCode != undefined ? data.altPhoneNumberCountryCode : ""}\', 0,'altPhoneNumber')">
-        <label for="altPhoneNumber" style="left:12px;">Alternate Phone</label>
+        <label for="altPhoneNumber" style="left:${callFrom == "PROFILE_MODAL" ? "60px" : "12px"};">Alternate Phone</label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center" onclick="applyChanges('altPhoneNumber', 'altPhoneNumber', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',0)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
                 <i class="fa fa-check"></i>
@@ -1156,7 +1156,7 @@ function motherLastNameElement(data) {
     return html;
 }
 
-function motherPhoneNumberElement(data) {
+function motherPhoneNumberElement(data, callFrom) {
     var html =
         `<div class="d-flex flex-wrap">
         <div class="custom-checkbox custom-control float-left w-fit-content right-checkbox-align cursor ml-auto mr-2 d-inline-flex align-items-center">
@@ -1177,7 +1177,7 @@ function motherPhoneNumberElement(data) {
     <div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-1 p-0 flex-nowrap">
         <input type="text" class="form-control form-control-sm group-append-hide-input bar_count" name="motherPhoneNumber" id="motherPhoneNumber" value="${data.motherPhoneNumber != "" && data.motherPhoneNumber != undefined ? data.motherPhoneNumber : ""}" data-idList="motherPhoneNumber_motherPhoneNumberWhatsAppStatus_motherPhoneNumberCountryCode_motherPhoneEmergencyNumberStatus" autocomplete="off" placeholder=" " onkeydown="return M.digit(event);" onkeyup="controlEditField(this,'motherPhoneNumber',\'${data.motherPhoneNumber != "" && data.motherPhoneNumber != undefined ? data.motherPhoneNumber : ""}\','inputPhone', 'motherPhoneNumberWhatsAppStatus',\'${data.motherPhoneNumberCountryCode != "" && data.motherPhoneNumberCountryCode != undefined ? data.motherPhoneNumberCountryCode : ""}\', 1, 'motherPhoneNumber','motherPhoneEmergencyNumberStatus')">
-        <label for="motherPhoneNumber" style="left:12px;">Phone Number</label>
+        <label for="motherPhoneNumber" style="left:${callFrom == "PROFILE_MODAL" ? "60px" : "12px"};">Phone Number</label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center" onclick="applyChanges('motherPhoneNumber', 'motherPhoneNumber', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
                 <i class="fa fa-check"></i>
@@ -1340,7 +1340,7 @@ function fatherLastNameElement(data) {
     return html;
 }
 
-function fatherPhoneNumberElement(data) {
+function fatherPhoneNumberElement(data, callFrom) {
     var html =
         `<div class="d-flex flex-wrap">
         <div class="custom-checkbox custom-control float-left w-fit-content right-checkbox-align cursor ml-auto mr-2 d-inline-flex align-items-center">
@@ -1361,7 +1361,7 @@ function fatherPhoneNumberElement(data) {
     <div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-1 p-0 flex-nowrap">
         <input type="text" class="form-control form-control-sm group-append-hide-input bar_count" name="fatherPhoneNumber" id="fatherPhoneNumber" value="${data.fatherPhoneNumber != "" && data.fatherPhoneNumber != undefined ? data.fatherPhoneNumber : ""}" autocomplete="off" placeholder=" " data-idList="fatherPhoneNumber_fatherPhoneNumberWhatsAppStatus_fatherPhoneNumberCountryCode_fatherPhoneEmergencyNumberStatus" onkeydown="return M.digit(event);" onkeyup="controlEditField(this,'fatherPhoneNumber',\'${data.fatherPhoneNumber != "" && data.fatherPhoneNumber != undefined ? data.fatherPhoneNumber : ""}\','inputPhone', 'fatherPhoneNumberWhatsAppStatus',\'${data.fatherPhoneNumberCountryCode != "" && data.fatherPhoneNumberCountryCode != undefined ? data.fatherPhoneNumberCountryCode : ""}\', 1,'fatherPhoneNumber','fatherPhoneEmergencyNumberStatus')">
-        <label for="fatherPhoneNumber" style="left:12px;">Phone Number</label>
+        <label for="fatherPhoneNumber" style="left:${callFrom == "PROFILE_MODAL" ? "60px" : "12px"};">Phone Number</label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center" onclick="applyChanges('fatherPhoneNumber', 'fatherPhoneNumber', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
                 <i class="fa fa-check"></i>
@@ -1527,7 +1527,7 @@ function guardianLastNameElement(data) {
     return html;
 }
 
-function guardianPhoneNumberElement(data) {
+function guardianPhoneNumberElement(data, callFrom) {
     var html =
         `<div class="d-flex flex-wrap">
         <div class="custom-checkbox custom-control float-left w-fit-content right-checkbox-align cursor ml-auto mr-2 d-inline-flex align-items-center">
@@ -1548,7 +1548,7 @@ function guardianPhoneNumberElement(data) {
     <div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-1 p-0 flex-nowrap">
         <input type="text" class="form-control form-control-sm group-append-hide-input bar_count" name="guardianPhoneNumber" id="guardianPhoneNumber" value="${data.guardianPhoneNumber != "" && data.guardianPhoneNumber != undefined ? data.guardianPhoneNumber : ""}" autocomplete="off" placeholder=" " onkeydown="return M.digit(event);" data-idList="guardianPhoneNumber_guardianPhoneNumberWhatsAppStatus_guardianPhoneNumberCountryCode_guardianEmergencyNumberStatus" onkeyup="controlEditField(this,'guardianPhoneNumber',\'${data.guardianPhoneNumber != "" && data.guardianPhoneNumber != undefined ? data.guardianPhoneNumber : ""}\','inputPhone', 'guardianPhoneNumberWhatsAppStatus',\'${data.guardianPhoneNumberCountryCode != "" && data.guardianPhoneNumberCountryCode != undefined ? data.guardianPhoneNumberCountryCode : ""}\', 1, 'guardianPhoneNumber','guardianEmergencyNumberStatus')">
-        <label for="guardianPhoneNumber" style="left:12px;">Phone Number</label>
+        <label for="guardianPhoneNumber" style="left:${callFrom == "PROFILE_MODAL" ? "60px" : "12px"};">Phone Number</label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center" onclick="applyChanges('guardianPhoneNumber', 'guardianPhoneNumber', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
                 <i class="fa fa-check"></i>

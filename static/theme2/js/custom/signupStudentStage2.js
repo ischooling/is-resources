@@ -183,6 +183,14 @@ function validateRequestForSignupParent(){
 				showMessageTheme2(0, 'Invalid Phone Number');
 				return false
 			}
+			// intl-tel-input v29.2 country-aware validation - only when a (optional) parent
+			// phone number was actually entered; an empty field stays valid/optional as before.
+			var _phoneValEnabled2 = (typeof isPhoneValidationEnabled !== 'function') || isPhoneValidationEnabled();
+			var _parentPhoneValid = (typeof itiIsValidNumber === 'function') ? itiIsValidNumber(itiParent) : (itiParent && itiParent.isValidNumber());
+			if (_phoneValEnabled2 && $("#signupStage2 #parentPhoneNumber").val().length > 0 && typeof itiParent !== 'undefined' && itiParent && _parentPhoneValid === false) {
+				showMessageTheme2(0, typeof getIntlPhoneValidationMessage === 'function' ? getIntlPhoneValidationMessage(itiParent.getValidationError()) : 'Please enter a valid parent phone number for the selected country');
+				return false
+			}
 			if ($("#signupStage2 #pCountryId").val()==0 || $("#signupStage2 #pCountryId").val()=='') {
 				showMessageTheme2(0, 'Country is required');
 				return false
@@ -259,9 +267,18 @@ function getRequestForSignupParent(){
 		}else{
 			signupParentDTO['skipParent'] = "Y";
 		}
-		signupParentDTO['countryCode'] = $("#signupStage2 #parentCountryDailCode").val();
-		signupParentDTO['countryIsdCode2'] = $("#signupStage2 #parentCountryIsd").val();
-		signupParentDTO['contactNumber'] = $("#signupStage2 #parentPhoneNumber").val();
+		var parentContactNumber = $("#signupStage2 #parentPhoneNumber").val();
+		if (parentContactNumber && parentContactNumber.trim() != "") {
+			signupParentDTO['countryCode'] = $("#signupStage2 #parentCountryDailCode").val();
+			signupParentDTO['countryIsdCode2'] = $("#signupStage2 #parentCountryIsd").val();
+		} else {
+			// No number entered: never save a country code/flag with a blank number
+			// (e.g. the widget's default country), otherwise it shows up against an
+			// empty contact number in the Manage Users list.
+			signupParentDTO['countryCode'] = '';
+			signupParentDTO['countryIsdCode2'] = '';
+		}
+		signupParentDTO['contactNumber'] = parentContactNumber;
 		signupParentDTO['gender'] = 'DONOTWANTTOSPECIFY';
 		signupParentDTO['countryId'] = $("#signupStage2 #pCountryId").val();
 		signupParentDTO['stateId'] = $("#signupStage2 #pStateId").val();

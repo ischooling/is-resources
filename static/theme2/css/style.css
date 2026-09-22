@@ -1554,22 +1554,28 @@ input::placeholder {
 	display: inline-block;
 }
 
-.accordion li {
+/* Direct-child combinator (">") on purpose: without it this used to match a
+   <li> or <li>'s child <div> at ANY nesting depth inside .accordion,
+   including intl-tel-input's own internal <li class="iti__country"> /
+   <div class="iti__flag"> markup on pages where the phone widget sits inside
+   a review .accordion (e.g. student/teacher signup review screen), forcing
+   float:left onto them and breaking their flex layout into a distorted grid. */
+.accordion > li {
 	width: 100%;
 	float: left;
 	margin-bottom: 7px;
 }
 
-.accordion li:last-child {
+.accordion > li:last-child {
 	margin-bottom: 0;
 }
 
-.accordion li>div {
+.accordion > li > div {
 	width: 100%;
 	float: left;
 }
 
-.accordion li>div>.full {
+.accordion > li > div > .full {
 	float: left;
 }
 

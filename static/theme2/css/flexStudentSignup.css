@@ -235,22 +235,23 @@ input.error, .steps-form-wrapper select.error, .steps-form-wrapper textarea.erro
 	display: inline-block;
 }
 
-.accordion li {
+
+.accordion > li {
 	width: 100%;
 	float: left;
 	margin-bottom: 4px;
 }
 
-.accordion li:last-child {
+.accordion > li:last-child {
 	margin-bottom: 0;
 }
 
-.accordion li>div {
+.accordion > li > div {
 	width: 100%;
 	float: left;
 }
 
-.accordion li>div>.full {
+.accordion > li > div > .full {
 	float: left;
 }
 

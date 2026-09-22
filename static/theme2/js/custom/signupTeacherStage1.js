@@ -1,5 +1,30 @@
 
+// Human-readable message for an intl-tel-input v29.2 getValidationError() code.
+// See https://intl-tel-input.com/docs/types#validationerror for the full enum.
+if (typeof window.getIntlPhoneValidationMessage !== 'function') {
+	window.getIntlPhoneValidationMessage = function(validationError) {
+		switch (validationError) {
+			case "INVALID_COUNTRY_CODE":
+				return 'Please select a valid country code';
+			case "TOO_SHORT":
+				return 'Phone number is too short for the selected country';
+			case "TOO_LONG":
+				return 'Phone number is too long for the selected country';
+			case "IS_POSSIBLE_LOCAL_ONLY":
+			case "INVALID_LENGTH":
+			default:
+				return 'Please enter a valid phone number for the selected country';
+		}
+	};
+}
+
+// True while the teacher stage-1 form is being programmatically prefilled. While
+// set, the #countryId change handler must NOT push the address country onto the
+// phone widget (the phone country comes from the saved countryData instead).
+var TEACHER_STAGE1_INIT_IN_PROGRESS = false;
+
 function signupTeacherStage1OnLoadEvent(signupTeacher){
+	TEACHER_STAGE1_INIT_IN_PROGRESS = true;
 	signupTeacher = signupTeacher.details.teacher;
 	formValdate('teacherSignupStage1', mandatoryFields, []);
 	var scriptExecuted = false;
@@ -9,26 +34,26 @@ function signupTeacherStage1OnLoadEvent(signupTeacher){
 		if(inputContact == null || inputContact == undefined || inputContact == '') {
 			
 		}else{
-			itiContcat = window.intlTelInput(inputContact);
-			if(typeof refreshCustomFieldState === "function"){
-				refreshCustomFieldState($(inputContact).closest(".custom-field"));
-			}
-			if(IGNORECOUNTRYARRAY.includes(signupTeacher.countryData) || signupTeacher.countryData == '' || signupTeacher.countryData == undefined || signupTeacher.countryData == null) {
-			  itiContcat.setCountry('us');
-			   }else{
-				itiContcat.setCountry(signupTeacher.countryData);
-			}
-			inputContact.addEventListener('countrychange', function(e) {
-				$('#countryData').val(itiContcat.getSelectedCountryData().iso2);
-				$('#countryIsd').val(itiContcat.getSelectedCountryData().dialCode);
-				if(typeof refreshCustomFieldState === "function"){
-					refreshCustomFieldState($(inputContact).closest(".custom-field"));
+			// General required "Phone Number": init via the shared master helper
+			// (searchable dropdown, no separate dial code, no format-as-you-type,
+			// length validation). Default number types are kept.
+			var teacherInitialCountry = (IGNORECOUNTRYARRAY.includes(signupTeacher.countryData) || signupTeacher.countryData == '' || signupTeacher.countryData == undefined || signupTeacher.countryData == null)
+				? 'us' : signupTeacher.countryData;
+			itiContcat = initPhoneInputV29(inputContact, {
+				initialCountry: teacherInitialCountry,
+				onCountryChange: function (country) {
+					$('#countryData').val(country ? country.iso2 : '');
+					$('#countryIsd').val(country ? country.dialCode : '');
+					if(typeof refreshCustomFieldState === "function"){
+						refreshCustomFieldState($(inputContact).closest(".custom-field"));
+					}
 				}
 			});
+			clearContactNumberOnCountryChange(inputContact);
 			scriptExecuted = true;
 		}
 	}
-	
+
 	$("#teacherFirstName").blur(function() {
 		if ($("#teacherFirstName").val().trim()=="") {
 			$("#teacherFirstName").valid();
@@ -61,7 +86,14 @@ function signupTeacherStage1OnLoadEvent(signupTeacher){
 			validEndInvalidField(null, "phone_no");
 			return false
 		}else{
-			validEndInvalidField(true, "phone_no");
+			// Green only if valid for the selected country (correct format), else red cross.
+			var _valEnabledT = (typeof isPhoneValidationEnabled !== 'function') || isPhoneValidationEnabled();
+			var _validT = (typeof itiIsValidNumber === 'function') ? itiIsValidNumber(itiContcat) : null;
+			if (_valEnabledT && _validT === false) {
+				validEndInvalidField(false, "phone_no");
+			} else {
+				validEndInvalidField(true, "phone_no");
+			}
 		}
 	});
 	$("#teacherGender").change(function() {
@@ -84,7 +116,12 @@ function signupTeacherStage1OnLoadEvent(signupTeacher){
 				if(IGNORECOUNTRYARRAY.includes(selectedCountry)) {
 					selectedCountry	= "US";
 				}
-				itiContcat.setCountry(selectedCountry);
+				// NOTE: The ADDRESS country dropdown no longer overrides the PHONE
+				// widget's country. They are independent — the phone country is
+				// chosen in the phone widget's own dropdown and loaded from the saved
+				// countryData. Auto-syncing address -> phone repeatedly reset a
+				// correctly chosen phone country (e.g. India) to the address country
+				// (e.g. Sri Lanka / Singapore) on prefill and stored the wrong one.
 			}else{
 				$("#stateId").html("<option value=''>Select Province/State*</option>");
 			}
@@ -170,6 +207,19 @@ async function callForSignupTeacherBasicDetailsForm(formId) {
 	}
 	if($("#cityId").val() == ""){
 		showMessageTheme2(0, "Select City");
+		return false;
+	}
+	if($("#phone_no").val().trim() == ""){
+		showMessageTheme2(0, "Phone No is required");
+		return false;
+	}
+	// intl-tel-input v29.2 country-aware validation (utils are bundled synchronously via
+	// intlTelInputWithUtils, so isValidNumber()/getValidationError() are safe to call here
+	// with no extra async wait) - blocks an invalid number for the selected country from save.
+	var _phoneValEnabled = (typeof isPhoneValidationEnabled !== 'function') || isPhoneValidationEnabled();
+	var _phoneValid = (typeof itiIsValidNumber === 'function') ? itiIsValidNumber(itiContcat) : (itiContcat && itiContcat.isValidNumber());
+	if (_phoneValEnabled && typeof itiContcat !== 'undefined' && itiContcat && _phoneValid === false) {
+		showMessageTheme2(0, getIntlPhoneValidationMessage(itiContcat.getValidationError()));
 		return false;
 	}
 	hideMessage('');
@@ -349,5 +399,30 @@ async function getStage1Data(step){
 	$('.select_dropdown').select2();
 	await callCountriesOption("teacherSignupStage1", responseData.details.teacher.countryId, "countryId", responseData.details.teacher.countryId);
 	$("#teacherSignupStage1 #stateId").val(responseData.details.teacher.stateId).trigger('change');
-	autoSelectDropDownTeacherBasicInformation('teacherSignupStage1', responseData.details.teacher); 
+	autoSelectDropDownTeacherBasicInformation('teacherSignupStage1', responseData.details.teacher);
+	// Prefill done. Re-assert the PHONE country from the saved countryData (the
+	// address-country change triggers above may have nudged it) and restore the
+	// national number, then re-enable the address->phone sync for real user
+	// changes. Guarded so it only runs when a saved phone country exists.
+	try {
+		var _savedPhoneCountry = responseData.details.teacher.countryData;
+		if (typeof itiContcat !== "undefined" && itiContcat && _savedPhoneCountry &&
+			_savedPhoneCountry != "" && !IGNORECOUNTRYARRAY.includes(_savedPhoneCountry)) {
+			itiSetCountry(itiContcat, _savedPhoneCountry);
+			var _savedNumber = responseData.details.teacher.contactNumber || "";
+			var _savedDigits = String(_savedNumber).replace(/\D/g, "");
+			if (_savedDigits && $("#teacherSignupStage1 #phone_no").val().replace(/\D/g, "") !== _savedDigits) {
+				var _phoneEl = document.querySelector("#teacherSignupStage1 #phone_no") || document.querySelector("#phone_no");
+				if (_phoneEl) {
+					_phoneEl.removeAttribute("maxlength");
+					_phoneEl.removeAttribute("data-max-digits");
+				}
+				$("#teacherSignupStage1 #phone_no").val(_savedDigits);
+				if (typeof attachPhoneLengthLimit === "function" && _phoneEl && _phoneEl.intlTelInputInstance) {
+					attachPhoneLengthLimit(_phoneEl, _phoneEl.intlTelInputInstance);
+				}
+			}
+		}
+	} catch (e) {}
+	TEACHER_STAGE1_INIT_IN_PROGRESS = false;
 }

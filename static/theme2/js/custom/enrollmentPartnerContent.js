@@ -61,24 +61,26 @@ async function renderEnrollmentPartnerPage(UNIQUEUUID, MAINTENANCEDOWNTIME,paylo
 		});
 	
 		var inputContact = document.querySelector("#whatsappNumber");
-		itiContcat = window.intlTelInput(inputContact, {
-			separateDialCode: true,
+		itiContcat = initPhoneInputV29(inputContact, {
+			isValidationEnabledFn: isLeadPhoneValidationEnabled,
+			initialCountry: 'us',
+			onCountryChange: function (country) {
+				$('#whatsappIsoCode').val(country ? country.iso2 : '');
+				$('#whatsappIsdCode').val(country ? country.dialCode : '');
+			}
 		});
-		// inputContact.setCountry('US');
-		inputContact.addEventListener('countrychange', function (e) {
-			$('#whatsappIsoCode').val(itiContcat.getSelectedCountryData().iso2);
-			$('#whatsappIsdCode').val(itiContcat.getSelectedCountryData().dialCode);
-		});
-	
+		clearContactNumberOnCountryChange(inputContact);
+
 		var inputContact1 = document.querySelector("#phoneNumber");
-		itiContcat1 = window.intlTelInput(inputContact1, {
-			separateDialCode: true,
+		itiContcat1 = initPhoneInputV29(inputContact1, {
+			isValidationEnabledFn: isLeadPhoneValidationEnabled,
+			initialCountry: 'us',
+			onCountryChange: function (country) {
+				$('#phoneIsoCode').val(country ? country.iso2 : '');
+				$('#phoneIsdCode').val(country ? country.dialCode : '');
+			}
 		});
-		// inputContact1.setCountry('US');
-		inputContact1.addEventListener('countrychange', function (e) {
-			$('#phoneIsoCode').val(itiContcat1.getSelectedCountryData().iso2);
-			$('#phoneIsdCode').val(itiContcat1.getSelectedCountryData().dialCode);
-		});
+		clearContactNumberOnCountryChange(inputContact1);
 		if($("#asAnIndividual").prop("checked")){
 			$(".individual-field").show();
 			$(".organization-field").hide();

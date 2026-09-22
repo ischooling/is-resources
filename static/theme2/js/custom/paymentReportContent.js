@@ -710,6 +710,7 @@ function cardDetails(data){
 																<thead>
 																	<tr>
 																		<th>Course Name</th>
+																		<th>Score</th>
 																		<th>Teacher</th>
 																		<th>Start Date</th>
 																		<th>End Date</th>
@@ -724,11 +725,12 @@ function cardDetails(data){
 																		const element = item.creditDetails[index];
 																		html+=`<tr>
 																			<td>${element.subjectName}</td>
+																			<td class="text-center">${element.progress}%</td>
 																			<td>${(element.teacherName==null || element.teacherName=='')?'N/A':element.teacherName}</td>
 																			<td>${item.enrollmentStartDate}</td>
 																			<td>${item.enrollmentEndDate=='Dec 31,2999'?'On Going':item.enrollmentEndDate}</td>
 																			<td class="text-center">${element.progressGradable==null || element.progressGradable==''?'N/A':element.progressGradable+'%'}</td>
-																			<td class="text-center">${element.progress}%</td>
+																			<td class="text-center">${element.allActivity}%</td>
 																			<td class="text-center">${element.credits}</td>
 																		</tr>`;
 																	}

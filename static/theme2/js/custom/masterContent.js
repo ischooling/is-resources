@@ -2294,7 +2294,6 @@ function getLanguagesValueByCode(langCode) {
     return existingValues;
 }
 
-
 function getCourseProviderNameByIds(id){
 	var courseProviderObject = {
 		1:"Agilix Buzz",
@@ -2629,6 +2628,975 @@ function deleteWarning(warningMessage, callbackFunction) {
 	return html;
 }
 
+// URL for the intl-tel-input utils.js (v16-compatible). Once loaded, the library
+// can compute the exact valid length for EVERY country via getExampleNumber(),
+// so we no longer depend on the small built-in map below.
+var INTL_TEL_UTILS_SCRIPT_URL = "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/16.1.0/js/utils.js";
+var INTL_TEL_UTILS_LOADING = false;
+var INTL_TEL_UTILS_CALLBACKS = [];
+
+// Loads intl-tel-input utils.js once (if not already present) and invokes the
+// callback when ready. This makes country-specific length work for ALL countries
+// on every page, even those that don't include utils.js in their JSP.
+function ensureIntlUtilsLoaded(callback) {
+	// Already available.
+	if (window.intlTelInputUtils && typeof intlTelInputUtils.getExampleNumber === "function") {
+		if (typeof callback === "function") { callback(); }
+		return;
+	}
+	if (typeof callback === "function") {
+		INTL_TEL_UTILS_CALLBACKS.push(callback);
+	}
+	if (INTL_TEL_UTILS_LOADING) {
+		return;
+	}
+	INTL_TEL_UTILS_LOADING = true;
+
+	var runCallbacks = function () {
+		INTL_TEL_UTILS_LOADING = false;
+		var cbs = INTL_TEL_UTILS_CALLBACKS.slice();
+		INTL_TEL_UTILS_CALLBACKS = [];
+		for (var i = 0; i < cbs.length; i++) {
+			try { cbs[i](); } catch (e) {}
+		}
+	};
+
+	try {
+		var script = document.createElement("script");
+		script.src = INTL_TEL_UTILS_SCRIPT_URL;
+		script.async = true;
+		script.onload = runCallbacks;
+		script.onerror = function () {
+			// Loading failed (offline/CDN blocked); fall back to the built-in map.
+			runCallbacks();
+		};
+		document.head.appendChild(script);
+	} catch (e) {
+		runCallbacks();
+	}
+}
+
+// Built-in national-number length map (iso2 -> expected mobile digit count).
+// FALLBACK ONLY — used if utils.js fails to load (offline/blocked CDN). When
+// utils.js is available, getExpectedPhoneDigitCount uses it for ALL countries.
+var PHONE_NATIONAL_DIGIT_MAP = {
+	in: 10, // India
+	sg: 8,  // Singapore
+	us: 10, ca: 10, // North America
+	gb: 10, // UK (mobile)
+	ae: 9,  // UAE
+	sa: 9,  // Saudi Arabia
+	qa: 8,  // Qatar
+	kw: 8,  // Kuwait
+	bh: 8,  // Bahrain
+	om: 8,  // Oman
+	au: 9,  // Australia
+	nz: 9,  // New Zealand (mobile, 8-10; use 9 as common)
+	pk: 10, // Pakistan
+	bd: 10, // Bangladesh
+	lk: 9,  // Sri Lanka
+	np: 10, // Nepal
+	my: 9,  // Malaysia (mobile 9-10)
+	id: 11, // Indonesia (varies 9-12)
+	ph: 10, // Philippines
+	th: 9,  // Thailand
+	cn: 11, // China
+	hk: 8,  // Hong Kong
+	jp: 10, // Japan
+	kr: 10, // South Korea
+	za: 9,  // South Africa
+	ng: 10, // Nigeria
+	ke: 9,  // Kenya
+	eg: 10, // Egypt
+	de: 11, // Germany (varies)
+	fr: 9,  // France
+	it: 10, // Italy
+	es: 9,  // Spain
+	nl: 9,  // Netherlands
+	ru: 10, // Russia
+	br: 11, // Brazil
+	mx: 10  // Mexico
+};
+
+// Reads the expected national digit count for the currently selected country.
+// Order of preference:
+//   1) intl-tel-input utils.js example number (most accurate, when loaded)
+//   2) built-in PHONE_NATIONAL_DIGIT_MAP (works without utils.js)
+// Returns 0 only when the country is unknown to both sources.
+function getExpectedPhoneDigitCount(iti) {
+	try {
+		var countryData = itiGetCountry(iti);
+		if (!countryData || !countryData.iso2) {
+			return 0;
+		}
+		var iso2 = countryData.iso2.toLowerCase();
+
+		// 1) Try utils.js example number when available.
+		if (window.intlTelInputUtils && typeof intlTelInputUtils.getExampleNumber === "function") {
+			var numberType = (intlTelInputUtils.numberType && intlTelInputUtils.numberType.MOBILE != null)
+				? intlTelInputUtils.numberType.MOBILE
+				: 1;
+			var exampleNumber = intlTelInputUtils.getExampleNumber(iso2, false, numberType);
+			if (exampleNumber) {
+				var nationalDigits = exampleNumber.replace(/\D/g, "");
+				var dialCode = (countryData.dialCode || "").replace(/\D/g, "");
+				if (dialCode && nationalDigits.indexOf(dialCode) === 0) {
+					nationalDigits = nationalDigits.substring(dialCode.length);
+				}
+				if (nationalDigits.length > 0) {
+					return nationalDigits.length;
+				}
+			}
+		}
+
+		// 2) Fallback to the built-in map (works even without utils.js).
+		if (PHONE_NATIONAL_DIGIT_MAP[iso2]) {
+			return PHONE_NATIONAL_DIGIT_MAP[iso2];
+		}
+
+		return 0;
+	} catch (e) {
+		return 0;
+	}
+}
+
+// libphonenumber validationError codes (as exposed by intl-tel-input utils.js):
+//   IS_POSSIBLE = 0, INVALID_COUNTRY_CODE = 1, TOO_SHORT = 2, TOO_LONG = 3, NOT_A_NUMBER = 4
+// Returns the MAXIMUM number of national significant digits the selected country
+// accepts, derived purely from libphonenumber possible-length metadata.
+//
+// How it works: we ask libphonenumber (via intl-tel-input utils.js) for the
+// country's example MOBILE number, take its national significant number (NSN)
+// digits, and strip any leading national/trunk prefix "0". That NSN length is
+// the country's maximum input length. This is metadata-driven (no hardcoded
+// country list) and never counts the country dial code (+91, +65, ...).
+// Examples: India -> 10, Singapore -> 8, US -> 10, UK -> 10, UAE -> 9.
+// Default maxlength used for phone inputs when country-wise validation is
+// turned OFF via the PHONE_NUMBER_VALIDATION setting.
+var PHONE_VALIDATION_DISABLED_MAXLENGTH = 15;
+
+// Setting toggle: CONFIGURATION / PHONE_NUMBER_VALIDATION.
+//  - 'true'  (default) => keep all country-wise length checks & validations.
+//  - 'false'           => bypass ALL phone checks/validations; maxlength = 15.
+var __phoneValidationEnabled = null;
+function isPhoneValidationEnabled() {
+	if (__phoneValidationEnabled !== null) {
+		return __phoneValidationEnabled;
+	}
+	// Default to enabled if the setting is missing or can't be read.
+	var enabled = true;
+	try {
+		if (typeof getSettingsByTypeAndKey === "function") {
+			var setting = getSettingsByTypeAndKey('CONFIGURATION', 'PHONE_NUMBER_VALIDATION');
+			var metaValue = JSON.parse(setting).data.metaValue;
+			// Only an explicit 'false' disables validation; anything else keeps it on.
+			enabled = String(metaValue).trim().toLowerCase() !== "false";
+		}
+	} catch (e) {
+		enabled = true;
+	}
+	__phoneValidationEnabled = enabled;
+	return __phoneValidationEnabled;
+}
+
+function getMaxValidPhoneDigitCount(iti) {
+	try {
+		var countryData = itiGetCountry(iti);
+		if (!countryData || !countryData.iso2) {
+			return 0;
+		}
+		var iso2 = countryData.iso2;
+
+		if (window.intlTelInputUtils && typeof intlTelInputUtils.getExampleNumber === "function") {
+			// The example number is a real, valid national number. Its NSN length
+			// is the country's valid length. IMPORTANT: many countries' example
+			// numbers include a leading national/trunk prefix "0" (e.g. India
+			// "08123456789", Germany "015123456789") which is NOT part of the
+			// national significant number. We strip that leading 0 so the length
+			// is correct (India -> 10, not 11).
+			var mobileType = (intlTelInputUtils.numberType && intlTelInputUtils.numberType.MOBILE != null) ? intlTelInputUtils.numberType.MOBILE : 1;
+			var ex = intlTelInputUtils.getExampleNumber(iso2, true, mobileType); // nationalMode
+			var exDigits = (ex || "").replace(/\D/g, "");
+
+			// Strip a single leading trunk-prefix 0 (national significant numbers
+			// don't start with 0).
+			if (exDigits.length > 1 && exDigits.charAt(0) === "0") {
+				exDigits = exDigits.substring(1);
+			}
+
+			if (exDigits.length > 0) {
+				// The example number's NSN length is the reliable maximum. We do
+				// NOT probe with getValidationError for longer lengths because that
+				// API is length-only and too lenient (it reports many over-length
+				// values as "possible", e.g. India 11-13), which caused overshoot.
+				// getExampleNumber already returns the representative valid number
+				// for the country, so its NSN length is the correct cap.
+				return exDigits.length;
+			}
+		}
+
+		// Fallback: example-number length / built-in map (utils.js not loaded).
+		return getExpectedPhoneDigitCount(iti);
+	} catch (e) {
+		return getExpectedPhoneDigitCount(iti);
+	}
+}
+
+// True when the given national-digit count is within the country's max length.
+function isPhoneDigitCountWithinMax(iti, digitCount) {
+	if (digitCount < 1) { return true; }
+	var max = getMaxValidPhoneDigitCount(iti);
+	return max < 1 || digitCount <= max;
+}
+
+// Detects whether the given intl-tel-input instance renders the dial code
+// separately (separateDialCode:true). Uses the DOM structure so it works
+// regardless of the minified property name across library versions.
+function isSeparateDialCodeInput(inputEl, iti) {
+	try {
+		if (iti && iti.d && typeof iti.d.separateDialCode !== "undefined") {
+			return !!iti.d.separateDialCode;
+		}
+	} catch (e) {}
+	// DOM fallback: separateDialCode adds an element with this class.
+	if (inputEl) {
+		var container = inputEl.closest ? inputEl.closest(".iti") : null;
+		if (container && container.querySelector(".iti__selected-dial-code")) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// One global capture-phase listener that records which country the user picked
+// Makes the country dropdown the SINGLE source of truth for the selected country.
+//
+// intl-tel-input v16 automatically re-derives the flag from the typed number on
+// every keyup via its internal _v() ("update flag from number"). For shared
+// calling codes (e.g. +1: US/CA/JM/BS/...), this auto-detection would switch the
+// dropdown based on the NANP area code the user typed — overriding a country the
+// user deliberately selected (e.g. selecting Canada then typing a US area code
+// would flip it to USA).
+//
+// Per requirement, we DISABLE that automatic country-from-number detection: the
+// selected country only ever changes when the user picks it in the dropdown (or
+// via setCountry). We neutralise _v() so it never changes the country and never
+// broadcasts a spurious countrychange. Length validation still runs against the
+// currently selected country, showing the existing error when invalid.
+function disableAutoCountryDetection(iti) {
+	if (!iti || iti.__autoDetectDisabled || typeof iti._v !== "function") {
+		return;
+	}
+	iti.__autoDetectDisabled = true;
+	// Replace _v with a no-op that never re-selects a country from the number.
+	// Returning false tells the library's keyup handler NOT to fire countrychange.
+	iti._v = function () { return false; };
+}
+
+// ---------------------------------------------------------------------------
+// Version-agnostic intl-tel-input adapters + reusable initializer
+//
+// The app runs TWO intl-tel-input versions depending on the page:
+//   - v29 (new): window.intlTelInputV29 (signup) or window.intlTelInput (pages
+//     using the common header). API: setSelectedCountry(iso2) /
+//     getSelectedCountry() -> { iso2, dialCode, name }.
+//   - v16 (old): window.intlTelInput (dashboard pages). API: setCountry(iso2) /
+//     getSelectedCountryData() -> { iso2, dialCode, name }.
+// These adapters let all shared code work on EITHER version without caring
+// which one produced the instance.
+// ---------------------------------------------------------------------------
+
+// Return the selected country object { iso2, dialCode, name } for any instance,
+// using whichever getter the library version exposes. Returns null if unknown.
+function itiGetCountry(iti) {
+	if (!iti) { return null; }
+	try {
+		if (typeof iti.getSelectedCountryData === "function") { // v16
+			return iti.getSelectedCountryData();
+		}
+		if (typeof iti.getSelectedCountry === "function") { // v29
+			return iti.getSelectedCountry();
+		}
+	} catch (e) {}
+	return null;
+}
+
+// Set the selected country (iso2) for any instance, using whichever setter the
+// library version exposes.
+function itiSetCountry(iti, iso2) {
+	if (!iti || !iso2) { return; }
+	try {
+		if (typeof iti.setCountry === "function") { // v16
+			iti.setCountry(iso2);
+		} else if (typeof iti.setSelectedCountry === "function") { // v29
+			iti.setSelectedCountry(iso2);
+		}
+	} catch (e) {}
+}
+
+// The intl-tel-input constructor to use: prefer the isolated v29 global when a
+// page has loaded it (signup), otherwise fall back to the page's window global
+// (which is v29 on common-header pages, v16 on dashboard pages).
+function getIntlTelInputCtor() {
+	if (typeof window.intlTelInputV29 === "function") {
+		return window.intlTelInputV29;
+	}
+	if (typeof window.intlTelInput === "function") {
+		return window.intlTelInput;
+	}
+	return null;
+}
+
+// Version-agnostic replacement for window.intlTelInputGlobals.getInstance(el).
+// v16 exposes it on window.intlTelInputGlobals; v29 exposes it as a static
+// method on the constructor (intlTelInput.getInstance). Also falls back to the
+// instance we cache on the DOM element (phoneNumber.intlTelInputInstance).
+function itiGetInstance(inputEl) {
+	if (!inputEl) { return null; }
+	try {
+		var ctor = getIntlTelInputCtor();
+		if (ctor && typeof ctor.getInstance === "function") { // v29 static
+			return ctor.getInstance(inputEl);
+		}
+		if (window.intlTelInputGlobals && typeof window.intlTelInputGlobals.getInstance === "function") { // v16
+			return window.intlTelInputGlobals.getInstance(inputEl);
+		}
+	} catch (e) {}
+	return inputEl.intlTelInputInstance || null;
+}
+
+// Strict, version-agnostic "is this number valid for the selected country?"
+// check. Uses PRECISE validation when available (v29 isValidNumberPrecise),
+// which enforces the country's real number pattern (e.g. Singapore must start
+// with 3/6/8/9) — not just the length. Falls back to isValidNumber (v16 / when
+// precise is unavailable). Returns true/false, or null if no validator exists.
+// Canadian NANP (+1) area codes. libphonenumber treats the whole +1 plan as one
+// region, so it reports a Canadian number (e.g. area code 416 = Toronto) as
+// "valid" even when the selected country is USA. We use this set to reject a
+// number whose area code belongs to the OTHER +1 country than the one selected.
+// Source: standard Canadian numbering plan area codes.
+var NANP_CANADA_AREA_CODES = {
+	"204":1,"226":1,"236":1,"249":1,"250":1,"263":1,"289":1,"306":1,"343":1,"354":1,
+	"365":1,"367":1,"368":1,"382":1,"403":1,"416":1,"418":1,"431":1,"437":1,"438":1,
+	"450":1,"468":1,"474":1,"506":1,"514":1,"519":1,"548":1,"579":1,"581":1,"584":1,
+	"587":1,"600":1,"604":1,"613":1,"639":1,"647":1,"672":1,"683":1,"705":1,"709":1,
+	"742":1,"753":1,"778":1,"780":1,"782":1,"807":1,"819":1,"825":1,"867":1,"873":1,
+	"879":1,"902":1,"905":1
+};
+
+// For a +1 (NANP) selected country, returns false when the typed area code
+// clearly belongs to the OTHER country (US number under CA, or CA number under
+// US). Returns true otherwise (leave the decision to libphonenumber). Only
+// applies to us/ca; other +1 territories keep default behaviour.
+function nanpAreaCodeMatchesSelected(iti) {
+	try {
+		var cc = itiGetCountry(iti) || {};
+		var iso2 = (cc.iso2 || "").toLowerCase();
+		var dial = (cc.dialCode || "").replace(/\D/g, "");
+		if (dial !== "1" || (iso2 !== "us" && iso2 !== "ca")) {
+			return true; // not a US/CA case
+		}
+		var digits = "";
+		if (typeof iti.getNumber === "function") {
+			digits = (iti.getNumber() || "").replace(/\D/g, "");
+			// getNumber returns E.164 (+1XXXXXXXXXX) -> strip leading country code.
+			if (digits.charAt(0) === "1" && digits.length > 10) { digits = digits.substring(1); }
+		}
+		if (digits.length < 3) { return true; } // not enough to judge yet
+		var area = digits.substring(0, 3);
+		var isCanadaArea = !!NANP_CANADA_AREA_CODES[area];
+		if (iso2 === "us" && isCanadaArea) { return false; } // CA number under US
+		if (iso2 === "ca" && !isCanadaArea) { return false; } // US/other number under CA
+		return true;
+	} catch (e) {
+		return true;
+	}
+}
+
+function itiIsValidNumber(iti) {
+	if (!iti) { return null; }
+	try {
+		var base = null;
+		if (typeof iti.isValidNumberPrecise === "function") { // v29 strict
+			base = iti.isValidNumberPrecise();
+		} else if (typeof iti.isValidNumber === "function") { // v16 / fallback
+			base = iti.isValidNumber();
+		}
+		// Extra NANP guard: libphonenumber passes a Canadian number under a US
+		// selection (and vice-versa) because +1 is shared. Reject when the area
+		// code doesn't match the selected US/CA country.
+		if (base === true && !nanpAreaCodeMatchesSelected(iti)) {
+			return false;
+		}
+		return base;
+	} catch (e) {}
+	return null;
+}
+
+// True when libphonenumber utils (needed for isValidNumber pattern validation)
+// are available. v16 exposes them as window.intlTelInputUtils; v29 bundles them
+// on the constructor as intlTelInput.utils (the WithUtils build loads them
+// synchronously). Either being present means isValidNumber()/getValidationError()
+// will do real country-pattern validation, not just length.
+function itiUtilsAvailable() {
+	if (window.intlTelInputUtils) { return true; }
+	try {
+		var ctor = getIntlTelInputCtor();
+		if (ctor && ctor.utils) { return true; }
+	} catch (e) {}
+	return false;
+}
+
+// Version-agnostic replacement for window.intlTelInputGlobals.getCountryData().
+// Returns the array of { name, iso2, dialCode } for all countries.
+function itiGetCountryList() {
+	try {
+		var ctor = getIntlTelInputCtor();
+		// v29 (the "WithUtils" bundle actually in use here) exposes the list as
+		// the static getAllCountries() — getCountryData() does not exist on it
+		// (confirmed against the vendor bundle: Object.keys(intlTelInput) has no
+		// "getCountryData"). Without this, itiGetCountryList() always silently
+		// returned [], which broke matchCountryByDialCode() for every caller.
+		if (ctor && typeof ctor.getAllCountries === "function") { // v29 static
+			return ctor.getAllCountries();
+		}
+		if (ctor && typeof ctor.getCountryData === "function") { // older v29 builds
+			return ctor.getCountryData();
+		}
+		if (window.intlTelInputGlobals && typeof window.intlTelInputGlobals.getCountryData === "function") { // v16
+			return window.intlTelInputGlobals.getCountryData();
+		}
+	} catch (e) {}
+	return [];
+}
+
+// Given a digits-only international number (e.g. "918533990022"), find the
+// country whose dial code the number starts with. Prefers the LONGEST matching
+// dial code (so "+1..." US vs "+1868..." Trinidad resolve correctly, and
+// 3-digit codes like "998" win over shorter partial matches). Returns the
+// country object { name, iso2, dialCode } or null.
+function matchCountryByDialCode(digitsAll) {
+	try {
+		digitsAll = (digitsAll || "").replace(/\D/g, "");
+		if (!digitsAll) { return null; }
+		var list = itiGetCountryList() || [];
+		var best = null;
+		var bestLen = 0;
+		for (var i = 0; i < list.length; i++) {
+			var dc = (list[i].dialCode || "").replace(/\D/g, "");
+			if (dc && digitsAll.indexOf(dc) === 0 && dc.length > bestLen) {
+				best = list[i];
+				bestLen = dc.length;
+			}
+		}
+		return best;
+	} catch (e) {}
+	return null;
+}
+
+// Reusable phone-input initializer that applies the SAME configuration we use on
+// signup everywhere: searchable country dropdown, dial code hidden (national
+// mode), no format-as-you-type, and the country-wise length limiter/validation.
+//
+// This is the ONE function every page should call to init a phone field.
+//
+// Params:
+//   inputElOrId : the <input> DOM element, or its id string.
+//   opts (all optional):
+//     initialCountry   : iso2 to preselect (default "us"; ignored if empty).
+//     allowedNumberTypes: array for v29 validation (e.g. ["MOBILE"]). Omit to
+//                         keep the library default.
+//     onCountryChange  : function(country, iti) called on init AND whenever the
+//                         user changes the country. Use it to sync hidden
+//                         fields (country iso2 / dial code) per page.
+//     containerClass   : extra class for the injected wrapper (default
+//                         "iti-v29" so the v29 theme CSS applies).
+//
+// Returns the iti instance (or null if the input/constructor is missing).
+function initPhoneInputV29(inputElOrId, opts) {
+	opts = opts || {};
+	var inputEl = (typeof inputElOrId === "string")
+		? document.getElementById(inputElOrId)
+		: inputElOrId;
+	if (!inputEl) { return null; }
+
+	var ctor = getIntlTelInputCtor();
+	if (!ctor) { return null; }
+
+	// Guard against double initialization (e.g. re-init after a country/state
+	// change, or a page that inits then calls a location helper that inits
+	// again). Destroy the previous instance and unwrap the stray .iti container
+	// so we never stack wrappers / show duplicate flags.
+	try {
+		if (inputEl.intlTelInputInstance) {
+			try { inputEl.intlTelInputInstance.destroy(); } catch (e) {}
+			inputEl.intlTelInputInstance = null;
+		}
+		var $prevWrap = $(inputEl).closest(".iti");
+		if ($prevWrap.length > 0) {
+			$prevWrap.find(".iti__flag-container, .iti__country-container").remove();
+			$(inputEl).unwrap();
+		}
+	} catch (e) {}
+
+	// Remove any stale maxlength/data-max-digits from a previous init BEFORE the
+	// library reads the value. A prefilled "+<dialCode> <national>" string
+	// (e.g. "+91 8533990022") would otherwise be clipped by an old country-based
+	// maxlength (e.g. 10 -> "+91 85339") before we normalize it to national
+	// digits. attachPhoneLengthLimit re-applies the correct maxlength afterward.
+	try {
+		inputEl.removeAttribute("maxlength");
+		inputEl.removeAttribute("data-max-digits");
+	} catch (e) {}
+var validationEnabled = (typeof opts.isValidationEnabledFn === "function")
+		? !!opts.isValidationEnabledFn()
+		: isPhoneValidationEnabled();
+
+	var options = {
+		classNames: { container: opts.containerClass || "iti-v29" },
+		// National mode: hide the dial code next to the flag (v29 default true).
+		separateDialCode: false,
+		// Keep v29 in NATIONAL mode. With separateDialCode:false this stops v29
+		// from re-detecting/auto-switching the country from the typed number
+		// (e.g. Canada flipping to US when a US-style area code is typed). The
+		// selected country only changes when the user picks it in the dropdown.
+		numberDisplayFormat: "NATIONAL",
+		// Do not auto-format the number as the user types.
+		formatAsYouType: false,
+		// IMPORTANT: strictMode is OFF. v29's strictMode strips a leading "0"
+		// (national trunk prefix) as you type, which made valid numbers lose
+		// their leading zero and behaved inconsistently between fields. We do our
+		// OWN length capping in attachPhoneLengthLimit (digits-only + country max)
+		// and validate correctness with isValidNumberPrecise at save, so the
+		// user's leading 0 is preserved and phone/alt-phone behave identically.
+		strictMode: false,
+		// Load libphonenumber utils so per-country FORMAT validation works
+		// (e.g. Singapore must start with 3/6/8/9) and getExampleNumber() gives
+		// the exact maxlength per country.
+		utilsScript: INTL_TEL_UTILS_SCRIPT_URL
+	};
+	if (validationEnabled && opts.allowedNumberTypes) {
+		options.allowedNumberTypes = opts.allowedNumberTypes;
+	}
+	// countrySearch defaults to true in v29, so the dropdown is searchable
+	// automatically; passing it explicitly is harmless and documents intent.
+	options.countrySearch = true;
+
+	var iti = ctor(inputEl, options);
+
+	// v16 backward-compatibility shims: lots of existing page code calls
+	// iti.setCountry(...) and iti.getSelectedCountryData() directly on the
+	// instance (outside init, e.g. in country-dropdown change handlers). v29
+	// renamed these to setSelectedCountry()/getSelectedCountry(). To avoid
+	// touching every call site, we add the old method names onto the v29
+	// instance so both APIs work. (No-ops if the methods already exist.)
+	if (iti && typeof iti.setCountry !== "function" && typeof iti.setSelectedCountry === "function") {
+		iti.setCountry = function (iso2) { return iti.setSelectedCountry(iso2); };
+	}
+	if (iti && typeof iti.getSelectedCountryData !== "function" && typeof iti.getSelectedCountry === "function") {
+		iti.getSelectedCountryData = function () { return iti.getSelectedCountry(); };
+	}
+
+	// Preselect a country (default US) unless caller passes an empty string.
+	var initial = (typeof opts.initialCountry === "undefined") ? "us" : opts.initialCountry;
+
+	// Decide the country + normalize the prefilled value.
+	// If the prefilled value has an EXPLICIT "+<dialCode>" prefix, that number's
+	// own dial code is authoritative (a saved "+91 8533990022" IS an India number
+	// even if the caller passes UZ as initialCountry). Otherwise the passed
+	// initialCountry is the source of truth. Fixes the "country resets on re-edit"
+	// regression AND the "+91 shown under UZ" mismatch.
+	(function selectCountryAndNormalize() {
+		try {
+			var raw = (inputEl.value || "").trim();
+			if (raw.charAt(0) === "+") {
+				var digitsAll = raw.replace(/\D/g, "");
+				var detected = itiGetCountry(iti) || {};
+				var detDial = (detected.dialCode || "").replace(/\D/g, "");
+				if (!detDial || digitsAll.indexOf(detDial) !== 0) {
+					var best = matchCountryByDialCode(digitsAll);
+					if (best) {
+						itiSetCountry(iti, best.iso2);
+						detected = itiGetCountry(iti) || best;
+						detDial = (detected.dialCode || "").replace(/\D/g, "");
+					}
+				}
+				var national = digitsAll;
+				if (detDial && digitsAll.indexOf(detDial) === 0 && digitsAll.length > detDial.length) {
+					national = digitsAll.substring(detDial.length);
+				}
+				if (inputEl.value !== national) {
+					inputEl.value = national;
+				}
+			} else {
+				if (initial) {
+					itiSetCountry(iti, initial);
+				}
+				var digitsOnly = raw.replace(/\D/g, "");
+				if (raw && inputEl.value !== digitsOnly) {
+					inputEl.value = digitsOnly;
+				}
+			}
+		} catch (e) {}
+	})();
+
+	// Country-wise length limiting + digit-only enforcement (version-agnostic;
+	// no-ops the parts that don't apply to v29's own strictMode).
+	attachPhoneLengthLimit(inputEl, iti, opts.isValidationEnabledFn);
+
+	// Fire the caller's sync callback now (initial state) and on every change.
+	if (typeof opts.onCountryChange === "function") {
+		var fireSync = function () {
+			opts.onCountryChange(itiGetCountry(iti), iti);
+		};
+		fireSync();
+		inputEl.addEventListener("countrychange", fireSync);
+	}
+
+	// Cache the instance on the DOM element so the double-init guard (above) and
+	// page code (e.g. checkPhoneNumberLength lookups) can find it.
+	try { inputEl.intlTelInputInstance = iti; } catch (e) {}
+
+	return iti;
+}
+
+// Generic, reusable length limiter for ANY intl-tel-input instance, regardless
+// of how it was initialized (works on the DOM element directly, no id needed).
+// Handles: initial maxlength, re-apply after utils.js loads, live trimming of
+// extra digits, recomputation on country change, and disabling the library's
+// automatic country-from-number detection so the dropdown selection is the sole
+// source of truth (no auto-switching between +1 countries).
+// Usage (one line at any init site): attachPhoneLengthLimit(inputEl, iti);
+// Optional 3rd arg isEnabledOverrideFn: a caller-supplied function used in place
+// of the global isPhoneValidationEnabled() check (e.g. Lead List's own
+// isLeadPhoneValidationEnabled, independent of PHONE_NUMBER_VALIDATION). Omit it
+// to keep the existing global-flag behavior unchanged.
+function attachPhoneLengthLimit(inputEl, iti, isEnabledOverrideFn) {
+	if (!inputEl || !iti) {
+		return;
+	}
+	var $input = $(inputEl);
+	var validationEnabled = (typeof isEnabledOverrideFn === "function")
+		? !!isEnabledOverrideFn()
+		: isPhoneValidationEnabled();
+
+	// Validation disabled via setting: no country-wise length logic. Just set a
+	// fixed default maxlength (15) and skip all normalize/cap/auto-detect logic.
+	if (!validationEnabled) {
+		$input.removeAttr("data-max-digits");
+		$input.attr("maxlength", PHONE_VALIDATION_DISABLED_MAXLENGTH);
+		return;
+	}
+
+	// The dropdown selection is the single source of truth for the country.
+	// Disable intl-tel-input's automatic country-from-number detection so a
+	// manually selected +1 country (e.g. Canada) is never auto-switched to
+	// another +1 country (e.g. USA) based on the typed NANP area code.
+	disableAutoCountryDetection(iti);
+
+	// Snapshot the digit count that was ALREADY in the field when this limiter
+	// was first attached (i.e. the prefilled server value). This is the ONLY
+	// value we ever allow to exceed the country max — a legacy number that was
+	// saved with the country code inline (e.g. India "918533990022"). It is
+	// captured once so later re-applies (utils.js load, 800ms safety net,
+	// countrychange) never re-loosen the limit based on what the user has typed.
+	var initialDigitLen = (($input.val() || "").replace(/\D/g, "")).length;
+	// This "grace" length only stays in effect while the field still holds that
+	// original over-length value. Once the user edits it down to within the max,
+	// the grace is dropped and the country max becomes a hard cap.
+	var graceActive = true;
+
+	// Force the input to contain ONLY digits (no spaces, dashes, brackets, etc.).
+	// Any formatting the library or server value may have added (e.g.
+	// "416-555-0123") is stripped to digits. Length is capped to the country max
+	// UNLESS the legacy grace (see above) is still active for a prefilled value.
+	var normalizeToDigits = function () {
+		var maxDigits = parseInt($input.attr("data-max-digits"), 10);
+		var digitsOnly = ($input.val() || "").replace(/\D/g, "");
+		// Effective cap: country max, or the larger initial length while the
+		// legacy prefilled value is still present.
+		var cap = maxDigits;
+		if (graceActive && initialDigitLen > cap) {
+			cap = initialDigitLen;
+		}
+		if (!isNaN(cap) && cap > 0 && digitsOnly.length > cap) {
+			digitsOnly = digitsOnly.substring(0, cap);
+		}
+		if ($input.val() !== digitsOnly) {
+			$input.val(digitsOnly);
+		}
+	};
+
+	var applyLimit = function () {
+		// MAX VALID length for the country (supports multiple valid lengths, e.g.
+		// a country valid at 8 and 10 digits gets a cap of 10). Metadata-driven.
+		var maxDigitCount = getMaxValidPhoneDigitCount(iti);
+		var separateDialCode = isSeparateDialCodeInput(inputEl, iti);
+		if (maxDigitCount > 0) {
+			$input.attr("data-max-digits", maxDigitCount);
+			$input.attr("data-separate-dial", separateDialCode ? "1" : "0");
+			// maxlength = country max, but loosened to the ORIGINAL prefilled
+			// length while that legacy over-length value is still present. Using
+			// the snapshot (not the live value) prevents the browser from either
+			// truncating a prefilled value on load OR letting the user type past
+			// the max once they start editing.
+			var attrMax = maxDigitCount;
+			if (graceActive && initialDigitLen > attrMax) {
+				attrMax = initialDigitLen;
+			}
+			$input.attr("maxlength", attrMax);
+		} else {
+			$input.removeAttr("data-max-digits");
+			$input.attr("maxlength", Math.max(20, graceActive ? initialDigitLen : 0));
+		}
+		// Strip formatting characters and enforce the effective cap.
+		normalizeToDigits();
+	};
+
+	// Apply immediately (built-in map covers common countries right away).
+	applyLimit();
+	// Ensure utils.js is loaded so EVERY country gets its exact length, then
+	// re-apply. Also re-apply after a short delay as a safety net.
+	ensureIntlUtilsLoaded(applyLimit);
+	setTimeout(applyLimit, 800);
+
+	// Live: keep the input digits-only on every keystroke/paste and enforce the
+	// effective cap. As soon as the value drops to within the country max, the
+	// legacy grace is dropped so the user can never re-expand beyond the max.
+	$input.off("input.phoneLimit").on("input.phoneLimit", function () {
+		if (graceActive) {
+			var maxDigits = parseInt($input.attr("data-max-digits"), 10);
+			var len = (($input.val() || "").replace(/\D/g, "")).length;
+			if (!isNaN(maxDigits) && maxDigits > 0 && len <= maxDigits) {
+				// User has edited the legacy value down to a valid length: tighten.
+				graceActive = false;
+				$input.attr("maxlength", maxDigits);
+			}
+		}
+		normalizeToDigits();
+	});
+
+	// Remove any 'countrychange' listeners a PREVIOUS call of this function left on
+	// this same inputEl. Some callers (e.g. the "Complete Your Profile" modal)
+	// re-initialize the same persistent <input> twice (render + 'shown.bs.modal'),
+	// and native addEventListener has no dedup: without this, the stale listener
+	// from the first init stays bound alongside the new one. On a real country
+	// pick both fire; the stale one reads its closed-over (now destroyed) `iti`
+	// instance, clears inputEl.__userPickedCountry before the new listener sees
+	// it, and the new listener then "reverts" the flag back — so a selected
+	// country visually never sticks.
+	if (inputEl.__phoneLimitApplyLimit) {
+		inputEl.removeEventListener("countrychange", inputEl.__phoneLimitApplyLimit);
+	}
+	if (inputEl.__phoneLimitCountryChangeHandler) {
+		inputEl.removeEventListener("countrychange", inputEl.__phoneLimitCountryChangeHandler);
+	}
+
+	// Recompute the allowed length whenever the user changes the country.
+	inputEl.addEventListener("countrychange", applyLimit);
+	inputEl.__phoneLimitApplyLimit = applyLimit;
+
+	// --- Keep the user's selected country; block v29's auto-switch on typing ---
+	//
+	// v29 re-detects the country from the typed number and, for shared dial codes
+	// (e.g. +1: US / CA / JM ...), silently switches the flag as the user types an
+	// area code. We must keep whatever country the user picked. v29's detection
+	// lives in private (#) methods we can't override, so we correct it reactively
+	// on the 'countrychange' event:
+	//   - USER pick (dropdown click / Enter in search): accept as the new locked
+	//     country AND clear the number (number typed for one country must not carry
+	//     over to another).
+	//   - PROGRAMMATIC set (prefill / address->phone sync via setCountry): accept
+	//     as the new lock, do NOT clear.
+	//   - v29 AUTO-SWITCH while typing: revert to the locked country, do NOT clear.
+	// The revert fires only at the moment of a switch (not every keystroke), and
+	// restores the same national digits, so typing stays smooth.
+	var getIso = function () {
+		var cc = itiGetCountry(iti) || {};
+		return (cc.iso2 || "").toLowerCase();
+	};
+	inputEl.__lockedCountry = getIso();
+
+	// Detect a genuine user pick from the dropdown.
+	try {
+		var $limitWrap = $(inputEl).closest(".iti");
+		$limitWrap.off("mousedown.lockPick touchstart.lockPick keydown.lockPick")
+			.on("mousedown.lockPick touchstart.lockPick", ".iti__country, .iti__country-list li, .iti__dropdown-content .iti__country", function () {
+				inputEl.__userPickedCountry = true;
+			})
+			.on("keydown.lockPick", ".iti__search-input", function (e) {
+				if (e.which === 13) { inputEl.__userPickedCountry = true; }
+			});
+	} catch (e) {}
+
+	// Wrap setSelectedCountry/setCountry ONCE so every programmatic set updates the
+	// lock (and is flagged, so the revert logic below never fights it).
+	if (iti && typeof iti.setSelectedCountry === "function" && !iti.__lockSetterWrapped) {
+		iti.__lockSetterWrapped = true;
+		var _origSet = iti.setSelectedCountry.bind(iti);
+		iti.setSelectedCountry = function (iso2) {
+			iti.__programmaticSet = true;
+			var r = _origSet(iso2);
+			inputEl.__lockedCountry = (iso2 || "").toString().toLowerCase();
+			iti.__programmaticSet = false;
+			return r;
+		};
+		iti.setCountry = function (iso2) { return iti.setSelectedCountry(iso2); };
+	}
+
+	var onLockedCountryChange = function () {
+		if (iti.__revertingCountry) { return; } // ignore our own revert's event
+
+		if (inputEl.__userPickedCountry) {
+			// Genuine user pick: accept + clear the number.
+			inputEl.__lockedCountry = getIso();
+			inputEl.__userPickedCountry = false;
+			$(inputEl).val('');
+			return;
+		}
+		if (iti.__programmaticSet) {
+			// Prefill / sync: accept, keep the value.
+			inputEl.__lockedCountry = getIso();
+			return;
+		}
+		// v29 auto-switched from the typed number: revert to the locked country.
+		// IMPORTANT: setSelectedCountry() can re-parse/reformat the value and drop
+		// trailing digits (e.g. typing a Toronto area code "416..." on USA made
+		// v29 briefly switch to Canada; reverting then trimmed "4165550123" ->
+		// "416555"). So we SNAPSHOT the raw digits before the revert and RESTORE
+		// them (capped to the country max) right after, preserving the caret at the
+		// end. This keeps both the flag AND the full typed number intact.
+		var current = getIso();
+		var locked = (inputEl.__lockedCountry || "").toLowerCase();
+		if (locked && current && current !== locked) {
+			var _digitsBefore = ($(inputEl).val() || "").replace(/\D/g, "");
+			try {
+				iti.__revertingCountry = true;
+				if (typeof iti.setSelectedCountry === "function") {
+					iti.setSelectedCountry(locked);
+				}
+			} catch (e) {} finally {
+				iti.__revertingCountry = false;
+			}
+			// Restore the digits the user had typed (they belong to the locked
+			// country now). Re-apply the country length cap so nothing over-length
+			// sneaks in, then place the caret at the end.
+			try {
+				var _maxAfter = getMaxValidPhoneDigitCount(iti);
+				var _restore = _digitsBefore;
+				if (_maxAfter > 0 && _restore.length > _maxAfter) {
+					_restore = _restore.substring(0, _maxAfter);
+				}
+				if (($(inputEl).val() || "").replace(/\D/g, "") !== _restore) {
+					$(inputEl).val(_restore);
+				}
+				if (typeof inputEl.setSelectionRange === "function") {
+					var _end = (inputEl.value || "").length;
+					inputEl.setSelectionRange(_end, _end);
+				}
+			} catch (e) {}
+		}
+	};
+	inputEl.addEventListener("countrychange", onLockedCountryChange);
+	inputEl.__phoneLimitCountryChangeHandler = onLockedCountryChange;
+}
+
+// Opt-in helper: clears a phone input's value whenever the user picks a
+// different country from the intl-tel-input dropdown (iti__country-container),
+// so a number typed for one country is never silently kept under another.
+// Registered AFTER init (call this right after initPhoneInputV29/getInputIntel),
+// so the library's own initial/programmatic country selection during init never
+// triggers it — only a genuine subsequent user-driven country change does.
+// NOT used by attachPhoneLengthLimit's own countrychange handling above, which
+// intentionally preserves the number and re-validates length at save time
+// instead (e.g. the profile-edit popup, so an already-saved/verified number is
+// never wiped out by an accidental flag change).
+function clearContactNumberOnCountryChange(inputEl) {
+	// No-op retained for backward compatibility. Clearing the number on a genuine
+	// user-driven country pick (and NOT on programmatic set / v29 auto-switch) is
+	// now handled centrally inside attachPhoneLengthLimit, which runs for every
+	// phone field. Duplicating it here would double-clear / double-bind listeners.
+	return;
+}
+
+// Pure (no-UI) phone length check for ANY intl-tel-input instance.
+// Does NOT show any message — returns a result object so each page/form can
+// display errors using its own messaging system.
+// Returns:
+//   { valid: true }                                  -> ok (or optional & empty)
+//   { valid: false, reason: 'empty' }                -> mandatory & empty
+//   { valid: false, reason: 'length', expectedDigits, enteredDigits, countryName }
+//   { valid: false, reason: 'invalid' }              -> unknown-length & lib says invalid
+function checkPhoneNumberLength(inputEl, iti, isMandatory) {
+	if (!inputEl || !iti) {
+		return { valid: true };
+	}
+	// Validation disabled via setting: bypass all checks.
+	if (!isPhoneValidationEnabled()) {
+		return { valid: true };
+	}
+	var rawValue = ($(inputEl).val() || "").trim();
+	if (rawValue === "") {
+		return isMandatory ? { valid: false, reason: 'empty' } : { valid: true };
+	}
+	var countryData = itiGetCountry(iti);
+	var countryName = (countryData && countryData.name) ? countryData.name : "the selected country";
+	var maxDigits = getMaxValidPhoneDigitCount(iti);
+
+	// The field is in national mode (the dial code is shown separately via the
+	// flag), so the user should enter ONLY the national number. We therefore
+	// count ALL digits actually typed in the box as the national number and do
+	// NOT auto-strip a leading dial code. This is important: a value like India
+	// "918533990033" (12 digits) must be flagged as too long even though
+	// libphonenumber's isValidNumber() would "rescue" it by treating the leading
+	// "91" as the country code and validating the remaining 10 digits.
+	var enteredDigits = rawValue.replace(/\D/g, "");
+
+	// HARD LENGTH CAP FIRST: if more digits than the country's max were entered,
+	// it's invalid regardless of what isValidNumber() reports. This runs before
+	// isValidNumber() so the dial-code-prefix rescue can't hide an over-length
+	// number.
+	if (maxDigits > 0 && enteredDigits.length > maxDigits) {
+		return { valid: false, reason: 'length', expectedDigits: maxDigits, enteredDigits: enteredDigits.length, countryName: countryName };
+	}
+
+	// When libphonenumber metadata is available, use full validation so that
+	// countries with MULTIPLE valid lengths are handled correctly (any valid
+	// length passes; only invalid/too-short is rejected). This also validates the
+	// number PATTERN (e.g. Singapore must start with 3/6/8/9), not just length.
+	// Over-length was already rejected above.
+	if (itiUtilsAvailable()) {
+		var validRes = itiIsValidNumber(iti);
+		if (validRes === true) {
+			return { valid: true };
+		}
+		if (validRes === false) {
+			return { valid: false, reason: 'invalid', expectedDigits: maxDigits, enteredDigits: enteredDigits.length, countryName: countryName };
+		}
+	}
+
+	// Fallback (utils not loaded / no validator): length was already checked above.
+	return { valid: true };
+}
+
+// Reusable validation for ANY intl-tel-input instance using the DOM element.
+// Mirrors validatePhoneNumberField but does not depend on a unique id.
+// Returns true when valid (or optional & empty); shows the message otherwise.
+function validatePhoneNumberElement(inputEl, iti, isMandatory) {
+	var result = checkPhoneNumberLength(inputEl, iti, isMandatory);
+	if (result.valid) {
+		return true;
+	}
+	if (result.reason === 'empty') {
+		showMessageTheme2(0, ' Either field value is invalid or empty.', '', false);
+	} else if (result.reason === 'length') {
+		showMessageTheme2(0, "Phone number for " + result.countryName + " can be at most " + result.expectedDigits + " digits.", '', false);
+	} else {
+		showMessageTheme2(0, "Please enter a valid phone number for " + result.countryName + ".", '', false);
+	}
+	return false;
+}
+
 function initializeIntelInput(formId, eleId, itiInstances, flagCode, saveType,avalWhtsAppStatusID, index){
 	if(formId == ""){
 		var phoneNumber = document.querySelector("#"+eleId);
@@ -2636,10 +3604,12 @@ function initializeIntelInput(formId, eleId, itiInstances, flagCode, saveType,av
 		var phoneNumber = document.querySelector("#"+formId+" #"+eleId);
 	}
 	var placeholderValue = "xxx-xxx-xxxx";
-	var formatOnDisplay = true;
+	// Never let the library format the number (no dashes/spaces/brackets). The
+	// input must contain ONLY digits so it fits within the digit-based maxlength
+	// (e.g. Canada "4165550123", not "416-555-0123" which would get truncated).
+	var formatOnDisplay = false;
 	if(formId == "meetingBookSlotForm" && eleId == "phoneNo"){
 		placeholderValue = "";
-		formatOnDisplay = false;
 	}
     if (!phoneNumber) {
         return;
@@ -2666,44 +3636,136 @@ function initializeIntelInput(formId, eleId, itiInstances, flagCode, saveType,av
     }
     var $existingItiWrapper = $(phoneNumber).closest(".iti");
     if ($existingItiWrapper.length > 0) {
-        // Unwrap the input from a leftover .iti container so we don't stack wrappers.
-        $existingItiWrapper.find(".iti__flag-container").remove();
+        // Unwrap the input from a leftover .iti container so we don't stack
+        // wrappers. Remove the injected country UI (v16 .iti__flag-container OR
+        // v29 .iti__country-container) so no duplicate flag remains.
+        $existingItiWrapper.find(".iti__flag-container, .iti__country-container").remove();
         $(phoneNumber).unwrap();
     }
+    // Remove any stale maxlength/data-max-digits from a previous init BEFORE the
+    // library reads the value, so a prefilled "+<dialCode> <national>" string
+    // (e.g. "+91 8533990022") is not clipped by an old country-based maxlength
+    // (10 -> "+91 85339") before normalization. attachPhoneLengthLimit re-applies
+    // the correct maxlength afterward.
+    try {
+        phoneNumber.removeAttribute("maxlength");
+        phoneNumber.removeAttribute("data-max-digits");
+    } catch (e) {}
+    // Version-agnostic init options. On v29 (new) these apply natively; on v16
+    // (old) the unknown ones (countrySearch/classNames/formatAsYouType) are
+    // ignored. We hide the separate dial code (national mode), make the dropdown
+    // searchable (v29), and never auto-format the number.
+    var _validationEnabled = isPhoneValidationEnabled();
     var itiOptions = {
-        separateDialCode: true,
+        classNames: { container: "iti-v29" },
+        separateDialCode: false,
+        // Keep v29 in NATIONAL mode so it never auto-switches the country from the
+        // typed number (e.g. Canada -> US on a US-style area code). Country changes
+        // only when the user picks it from the dropdown.
+        numberDisplayFormat: "NATIONAL",
+        countrySearch: true,
         autoPlaceholder: "off",
-		formatOnDisplay: formatOnDisplay,
-		utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.17/js/utils.js"
+        formatOnDisplay: formatOnDisplay,
+        formatAsYouType: false,
+        // strictMode is OFF: v29's strictMode strips a leading "0" (trunk prefix)
+        // as you type, which broke valid numbers. We do our own digits-only +
+        // country-max length capping in attachPhoneLengthLimit and validate with
+        // isValidNumberPrecise at save, so the leading 0 is preserved.
+        strictMode: false,
+        utilsScript: INTL_TEL_UTILS_SCRIPT_URL
     };
     if (formId == "requestProfileForm") {
         itiOptions.dropdownContainer = document.body;
     }
-    var itiInstances = window.intlTelInput(phoneNumber, itiOptions);
+    var ctor = getIntlTelInputCtor();
+    var itiInstances = ctor ? ctor(phoneNumber, itiOptions) : null;
+    if (!itiInstances) { return; }
+    // v16 backward-compatibility shims: page code (e.g. TimeAvailabilityBook.jsp)
+    // calls .setCountry()/.getSelectedCountryData() directly on this instance.
+    // v29 renamed these to setSelectedCountry()/getSelectedCountry(); add the old
+    // names so both APIs work on a v29 instance.
+    if (typeof itiInstances.setCountry !== "function" && typeof itiInstances.setSelectedCountry === "function") {
+        itiInstances.setCountry = function (iso2) { return itiInstances.setSelectedCountry(iso2); };
+    }
+    if (typeof itiInstances.getSelectedCountryData !== "function" && typeof itiInstances.getSelectedCountry === "function") {
+        itiInstances.getSelectedCountryData = function () { return itiInstances.getSelectedCountry(); };
+    }
     if (formId == "requestProfileForm") {
         $(".iti--container, .iti__country-list").css({ "z-index": "2060" });
     }
-    if(flagCode == null || flagCode == undefined || flagCode == ""){
-        itiInstances.setCountry("US");
-    }else{
-        itiInstances.setCountry(flagCode);   
-    }
+    // Decide the country + normalize the prefilled value.
+    //
+    // Two possible sources of truth for the country:
+    //   (a) the dropdown/saved flagCode passed in (e.g. UZ), and
+    //   (b) the dial code embedded in the prefilled value (e.g. "+91 8533990022").
+    //
+    // When the prefilled value carries an EXPLICIT international "+<dialCode>"
+    // prefix, that number's own dial code is authoritative (the user typed/saved
+    // "+91", so it IS an India number even if some other field says UZ). We let
+    // the library keep the auto-detected country from the number and strip the
+    // "+<dialCode>" down to national digits. When there is no "+" prefix, we use
+    // the passed flagCode as the source of truth. This fixes both the
+    // "country resets on re-edit" regression and the "+91 shown under UZ" mismatch.
+    (function selectCountryAndNormalize() {
+        try {
+            var raw = ($(phoneNumber).val() || "").trim();
+            var fallbackCountry = (flagCode == null || flagCode == undefined || flagCode == "") ? "US" : flagCode;
+
+            if (raw.charAt(0) === "+") {
+                // Let the value's own "+<dialCode>" drive the country. The v29 ctor
+                // already auto-detected it from the value; if it didn't (e.g. v16),
+                // try matching the prefix against the known country list.
+                var detected = itiGetCountry(itiInstances) || {};
+                var digitsAll = raw.replace(/\D/g, "");
+                var detDial = (detected.dialCode || "").replace(/\D/g, "");
+                if (!detDial || digitsAll.indexOf(detDial) !== 0) {
+                    // Auto-detect failed/mismatched: find the longest dial code that
+                    // the number starts with and set that country explicitly.
+                    var best = matchCountryByDialCode(digitsAll);
+                    if (best) {
+                        itiSetCountry(itiInstances, best.iso2);
+                        detected = itiGetCountry(itiInstances) || best;
+                        detDial = (detected.dialCode || "").replace(/\D/g, "");
+                    }
+                }
+                // Strip the leading dial code, leaving national digits only.
+                var national = digitsAll;
+                if (detDial && digitsAll.indexOf(detDial) === 0 && digitsAll.length > detDial.length) {
+                    national = digitsAll.substring(detDial.length);
+                }
+                if ($(phoneNumber).val() !== national) {
+                    $(phoneNumber).val(national);
+                }
+            } else {
+                // No "+" prefix: the passed flagCode is the source of truth.
+                itiSetCountry(itiInstances, fallbackCountry);
+                var digitsOnly = raw.replace(/\D/g, "");
+                if (raw && $(phoneNumber).val() !== digitsOnly) {
+                    $(phoneNumber).val(digitsOnly);
+                }
+            }
+        } catch (e) {}
+    })();
+
     $(phoneNumber).attr("placeholder", placeholderValue);
-	$(phoneNumber).attr("data-countryCode", itiInstances.getSelectedCountryData().iso2);
-	$(phoneNumber).attr("data-ISD-Code",itiInstances.getSelectedCountryData().dialCode);
-    var onCountryChange = function(e) {
-		if (!itiInstances) {
-			return;
-		}
+	var _initCountry = itiGetCountry(itiInstances) || {};
+	$("#"+eleId).attr("data-countryCode", _initCountry.iso2 || "");
+	$("#"+eleId).attr("data-ISD-Code", _initCountry.dialCode || "");
+	// Apply the country-specific length limit (handles maxlength, live-trim, and
+	// recomputation on country change). Uses the built-in length map so it works
+	// even when the intl-tel-input utils.js is not loaded on the page.
+	attachPhoneLengthLimit(phoneNumber, itiInstances);
+    var onCountryChange = function (e) {
+		var cc = itiGetCountry(itiInstances) || {};
 		if(saveType == "selfSave"){
 			// Use the local itiInstances (closure) rather than
 			// phoneNumber.intlTelInputInstance: setCountry() fires 'countrychange'
 			// synchronously during init, before the DOM property is assigned, so
 			// reading phoneNumber.intlTelInputInstance would be null here.
-			phoneNumberDailCodeChange(itiInstances.a.id, flagCode, itiInstances.j, avalWhtsAppStatusID, index)
+			phoneNumberDailCodeChange(eleId, flagCode, cc.iso2 || "", avalWhtsAppStatusID, index)
 		}
-        $(phoneNumber).attr("data-countryCode", itiInstances.getSelectedCountryData().iso2);
-        $(phoneNumber).attr("data-ISD-Code",itiInstances.getSelectedCountryData().dialCode);
+        $(phoneNumber).attr("data-countryCode", cc.iso2 || "");
+        $(phoneNumber).attr("data-ISD-Code", cc.dialCode || "");
         $(phoneNumber).attr("placeholder", placeholderValue);
 		if(formId == "profileForm"){
 			$("label[for='"+eleId+"']").css({"left":$("#"+eleId).css("padding-left")})
@@ -2723,27 +3785,104 @@ function initializeIntelInput(formId, eleId, itiInstances, flagCode, saveType,av
 
 function validatePhoneNumber(eleId) {
     var phoneNumber = document.getElementById(eleId);
+    // Validation disabled via setting: bypass all checks, treat as valid.
+    if (!isPhoneValidationEnabled()) {
+        var itiBypass = phoneNumber ? phoneNumber.intlTelInputInstance : null;
+        var cd = itiGetCountry(itiBypass);
+        return {
+            valid: true,
+            number: (itiBypass && typeof itiBypass.getNumber === "function") ? itiBypass.getNumber() : $("#" + eleId).val(),
+            dialCode: cd ? cd.dialCode : "",
+            countryCode: cd ? cd.iso2 : ""
+        };
+    }
     if (phoneNumber && phoneNumber.intlTelInputInstance) {
         var iti = phoneNumber.intlTelInputInstance;
-        if (iti.isValidNumber()) {
-            return {
-                valid: true,
-                number: iti.getNumber(),
-                dialCode: iti.getSelectedCountryData().dialCode,
-                countryCode: iti.getSelectedCountryData().iso2
-            };
-        } else {
+        var countryData = itiGetCountry(iti);
+        var countryName = (countryData && countryData.name) ? countryData.name : "the selected country";
+        var maxDigits = getMaxValidPhoneDigitCount(iti);
+
+        // National-mode field: count ALL typed digits as the national number and
+        // do NOT auto-strip a leading dial code, so an over-length value like
+        // India "918533990033" (12 digits) is flagged even though isValidNumber()
+        // would rescue it by treating the leading "91" as the dial code.
+        var enteredDigitsStr = ($("#" + eleId).val() || "").replace(/\D/g, "");
+        var enteredDigits = enteredDigitsStr.length;
+
+        // HARD LENGTH CAP FIRST (before isValidNumber() rescue).
+        if (maxDigits > 0 && enteredDigits > maxDigits) {
             return {
                 valid: false,
-                message: "Invalid phone number"
+                message: "Phone number for " + countryName + " can be at most " + maxDigits + " digits.",
+                expectedDigits: maxDigits,
+                enteredDigits: enteredDigits
             };
         }
+
+        // When libphonenumber metadata is available, use full validation so that
+        // ALL valid lengths pass AND the number pattern is checked (e.g. Singapore
+        // must start with 3/6/8/9), not just the length.
+        if (itiUtilsAvailable() && itiIsValidNumber(iti) !== null) {
+            if (itiIsValidNumber(iti)) {
+                return {
+                    valid: true,
+                    number: (typeof iti.getNumber === "function") ? iti.getNumber() : $("#" + eleId).val(),
+                    dialCode: countryData.dialCode,
+                    countryCode: countryData.iso2
+                };
+            }
+            var msg = "Please enter a valid phone number for " + countryName + ".";
+            return { valid: false, message: msg, expectedDigits: maxDigits, enteredDigits: enteredDigits };
+        }
+
+        // Fallback (utils.js not loaded): cap by the max known length only.
+        if (maxDigits > 0 && enteredDigits > maxDigits) {
+            return {
+                valid: false,
+                message: "Phone number for " + countryName + " can be at most " + maxDigits + " digits.",
+                expectedDigits: maxDigits,
+                enteredDigits: enteredDigits
+            };
+        }
+        return {
+            valid: true,
+            number: (typeof iti.getNumber === "function") ? iti.getNumber() : $("#" + eleId).val(),
+            dialCode: countryData ? countryData.dialCode : "",
+            countryCode: countryData ? countryData.iso2 : ""
+        };
     } else {
         return {
             valid: false,
             message: "IntlTelInput instance not found"
         };
     }
+}
+
+// Reusable phone validation: checks the country-specific length using the
+// intl-tel-input instance and shows the message automatically.
+// - Returns true  => valid (or optional & empty, so nothing to validate).
+// - Returns false => invalid; the error message is shown via showMessageTheme2.
+// Params:
+//   eleId       -> input element id (e.g. "phoneNumber", "altPhoneNumber")
+//   isMandatory -> when false, an empty value is treated as valid (skipped).
+function isPhoneNumberValid(eleId, isMandatory) {
+	var rawValue = ($("#" + eleId).val() || "").trim();
+
+	// Optional field left empty => nothing to validate.
+	if (rawValue === "") {
+		if (isMandatory) {
+			showMessageTheme2(0, ' Either field value is invalid or empty.', '', false);
+			return false;
+		}
+		return true;
+	}
+
+	var result = validatePhoneNumber(eleId);
+	if (!result.valid) {
+		showMessageTheme2(0, result.message, '', false);
+		return false;
+	}
+	return true;
 }
 
 function parseTimeToMinutes(timeStr) {

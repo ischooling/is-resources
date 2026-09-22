@@ -9,10 +9,95 @@ var editor;
 $(function () {
 	// $('[data-toggle="tooltip"]').tooltip()
 });
+var __leadPhoneValidationEnabled = null;
+function isLeadPhoneValidationEnabled() {
+	if (__leadPhoneValidationEnabled !== null) {
+		return __leadPhoneValidationEnabled;
+	}
+	// Default to enabled if the setting is missing or can't be read.
+	var enabled = true;
+	try {
+		if (typeof getSettingsByTypeAndKey === "function") {
+			var setting = getSettingsByTypeAndKey('CONFIGURATION', 'MOBILE_NUMBER_VAIDATION_LEAD_FLAG');
+			var metaValue = JSON.parse(setting).data.metaValue;
+			// Only an explicit 'false' disables validation; anything else keeps it on.
+			enabled = String(metaValue).trim().toLowerCase() !== "false";
+		}
+	} catch (e) {
+		enabled = true;
+	}
+	__leadPhoneValidationEnabled = enabled;
+	return __leadPhoneValidationEnabled;
+}
+function checkLeadPhoneNumberLength(inputEl, iti, isMandatory) {
+	if (!isLeadPhoneValidationEnabled()) {
+		return { valid: true };
+	}
+	if (!inputEl || !iti) {
+		return { valid: true };
+	}
+	var rawValue = ($(inputEl).val() || "").trim();
+	if (rawValue === "") {
+		return isMandatory ? { valid: false, reason: 'empty' } : { valid: true };
+	}
+	var countryData = itiGetCountry(iti);
+	var countryName = (countryData && countryData.name) ? countryData.name : "the selected country";
+	var maxDigits = getMaxValidPhoneDigitCount(iti);
+	var enteredDigits = rawValue.replace(/\D/g, "");
+
+	// HARD LENGTH CAP FIRST, same as checkPhoneNumberLength.
+	if (maxDigits > 0 && enteredDigits.length > maxDigits) {
+		return { valid: false, reason: 'length', expectedDigits: maxDigits, enteredDigits: enteredDigits.length, countryName: countryName };
+	}
+	if (itiUtilsAvailable()) {
+		var validRes = itiIsValidNumber(iti);
+		if (validRes === true) {
+			return { valid: true };
+		}
+		if (validRes === false) {
+			return { valid: false, reason: 'invalid', expectedDigits: maxDigits, enteredDigits: enteredDigits.length, countryName: countryName };
+		}
+	}
+	return { valid: true };
+}
 
 function validateRequestForLeadSave(formId, newTheme, leadFrom, leadType){
  hideMessage('');
  var flag=true;
+ // UNIVERSAL phone validation chokepoint. Runs for EVERY lead form (add,
+ // update, dashboard, MERGE, B2B) so an invalid number can never be saved from
+ // any path. Only validates when a number is actually entered (phone is
+ // optional on some forms). Rejects both wrong length AND wrong format
+ // (reason 'invalid', e.g. Singapore not starting with 3/6/8/9, or an invalid
+ // leading-0 number). Uses checkLeadPhoneNumberLength, gated ONLY by
+ // MOBILE_NUMBER_VAIDATION_LEAD_FLAG (independent of PHONE_NUMBER_VALIDATION).
+ // The per-branch checks below are left intact as a fallback.
+ if (typeof checkLeadPhoneNumberLength === "function") {
+	var _leadPhoneEl = document.querySelector("#"+formId+" #phoneNo");
+	if (_leadPhoneEl && ($(_leadPhoneEl).val() || "").trim() !== "" && typeof itiPhoneNumber !== "undefined" && itiPhoneNumber) {
+		var _leadPhoneChk = checkLeadPhoneNumberLength(_leadPhoneEl, itiPhoneNumber, false);
+		if (!_leadPhoneChk.valid && _leadPhoneChk.reason === "length") {
+			showMessageTheme2(0, "Phone number for " + _leadPhoneChk.countryName + " must be " + _leadPhoneChk.expectedDigits + " digits.", '', true);
+			return false;
+		}
+		if (!_leadPhoneChk.valid && _leadPhoneChk.reason === "invalid") {
+			showMessageTheme2(0, "Please enter a valid phone number for " + _leadPhoneChk.countryName + ".", '', true);
+			return false;
+		}
+	}
+	var _leadAltEl = document.querySelector("#"+formId+" #phoneNoAlter");
+	if (_leadAltEl && ($(_leadAltEl).val() || "").trim() !== "" && typeof itiAltPhoneNumber !== "undefined" && itiAltPhoneNumber) {
+		var _leadAltChk = checkLeadPhoneNumberLength(_leadAltEl, itiAltPhoneNumber, false);
+		if (!_leadAltChk.valid && _leadAltChk.reason === "length") {
+			showMessageTheme2(0, "Alternate phone number for " + _leadAltChk.countryName + " must be " + _leadAltChk.expectedDigits + " digits.", '', true);
+			return false;
+		}
+		if (!_leadAltChk.valid && _leadAltChk.reason === "invalid") {
+			showMessageTheme2(0, "Please enter a valid alternate phone number for " + _leadAltChk.countryName + ".", '', true);
+			return false;
+		}
+	}
+ }
  if(leadFrom=='leadlist'){
 	 if ($("#"+formId+" #leadUpdateSource").val()==null || $("#"+formId+" #leadUpdateSource").val()=='0') {
 		showMessageTheme2(0, "Please select Lead Source",'',true);
@@ -70,7 +155,34 @@ function validateRequestForLeadSave(formId, newTheme, leadFrom, leadType){
 			showMessageTheme2(0, "Please choose ISD Code",'',true);
 			return false;
 		}
+		// Country-specific phone check (length AND format). Only when a number is
+		// entered. reason 'length' = wrong digit count; reason 'invalid' = correct
+		// length but wrong format for the country (e.g. Singapore not starting with
+		// 3/6/8/9, or an invalid leading-0 number). Both must block the save.
+		if (typeof checkLeadPhoneNumberLength === "function" && typeof itiPhoneNumber !== "undefined") {
+			var leadPhoneLenCheck = checkLeadPhoneNumberLength(document.querySelector("#"+formId+" #phoneNo"), itiPhoneNumber, false);
+			if (!leadPhoneLenCheck.valid && leadPhoneLenCheck.reason === "length") {
+				showMessageTheme2(0, "Phone number for " + leadPhoneLenCheck.countryName + " must be " + leadPhoneLenCheck.expectedDigits + " digits.", '', true);
+				return false;
+			}
+			if (!leadPhoneLenCheck.valid && leadPhoneLenCheck.reason === "invalid") {
+				showMessageTheme2(0, "Please enter a valid phone number for " + leadPhoneLenCheck.countryName + ".", '', true);
+				return false;
+			}
+		}
 	 }
+	// Alternate phone (optional): validate length + format only if filled.
+	if (typeof checkLeadPhoneNumberLength === "function" && typeof itiAltPhoneNumber !== "undefined" && $("#"+formId+" #phoneNoAlter").val()) {
+		var leadAltPhoneLenCheck = checkLeadPhoneNumberLength(document.querySelector("#"+formId+" #phoneNoAlter"), itiAltPhoneNumber, false);
+		if (!leadAltPhoneLenCheck.valid && leadAltPhoneLenCheck.reason === "length") {
+			showMessageTheme2(0, "Alternate phone number for " + leadAltPhoneLenCheck.countryName + " must be " + leadAltPhoneLenCheck.expectedDigits + " digits.", '', true);
+			return false;
+		}
+		if (!leadAltPhoneLenCheck.valid && leadAltPhoneLenCheck.reason === "invalid") {
+			showMessageTheme2(0, "Please enter a valid alternate phone number for " + leadAltPhoneLenCheck.countryName + ".", '', true);
+			return false;
+		}
+	}
 
 
 	if (leadType!='B2B' && ($("#"+formId+" #leadGuardfname").val()==null || $("#"+formId+" #leadGuardfname").val()=='')) {
@@ -143,6 +255,29 @@ function validateRequestForLeadSave(formId, newTheme, leadFrom, leadType){
 		if($("#"+formId+" #phoneNo").val()!='' && $("#"+formId+" #phoneNo").val()!=null){
 			if ($("#"+formId+" #isdCode").val()==null || $("#"+formId+" #isdCode").val()=='0') {
 				showMessageTheme2(0, "Please choose ISD Code",'',true);
+				return false;
+			}
+			if (typeof checkLeadPhoneNumberLength === "function" && typeof itiPhoneNumber !== "undefined") {
+				var leadDashPhoneLenCheck = checkLeadPhoneNumberLength(document.querySelector("#"+formId+" #phoneNo"), itiPhoneNumber, false);
+				if (!leadDashPhoneLenCheck.valid && leadDashPhoneLenCheck.reason === "length") {
+					showMessageTheme2(0, "Phone number for " + leadDashPhoneLenCheck.countryName + " must be " + leadDashPhoneLenCheck.expectedDigits + " digits.", '', true);
+					return false;
+				}
+				if (!leadDashPhoneLenCheck.valid && leadDashPhoneLenCheck.reason === "invalid") {
+					showMessageTheme2(0, "Please enter a valid phone number for " + leadDashPhoneLenCheck.countryName + ".", '', true);
+					return false;
+				}
+			}
+		}
+		// Alternate phone (optional): validate length + format only if filled.
+		if (typeof checkLeadPhoneNumberLength === "function" && typeof itiAltPhoneNumber !== "undefined" && $("#"+formId+" #phoneNoAlter").val()) {
+			var leadDashAltPhoneLenCheck = checkLeadPhoneNumberLength(document.querySelector("#"+formId+" #phoneNoAlter"), itiAltPhoneNumber, false);
+			if (!leadDashAltPhoneLenCheck.valid && leadDashAltPhoneLenCheck.reason === "length") {
+				showMessageTheme2(0, "Alternate phone number for " + leadDashAltPhoneLenCheck.countryName + " must be " + leadDashAltPhoneLenCheck.expectedDigits + " digits.", '', true);
+				return false;
+			}
+			if (!leadDashAltPhoneLenCheck.valid && leadDashAltPhoneLenCheck.reason === "invalid") {
+				showMessageTheme2(0, "Please enter a valid alternate phone number for " + leadDashAltPhoneLenCheck.countryName + ".", '', true);
 				return false;
 			}
 		}
@@ -2376,29 +2511,29 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 							   itiPhoneNumber.destroy();
 						   }
 						   var phoneNumber = document.querySelector("#"+formId+" #phoneNo");
-						   itiPhoneNumber = window.intlTelInput(phoneNumber, {
-							   //separateDialCode: true,
+						   itiPhoneNumber = initPhoneInputV29(phoneNumber, {
+							   isValidationEnabledFn: isLeadPhoneValidationEnabled,
+							   initialCountry: $('#'+formId+' #pCountryCode').val(),
+							   onCountryChange: function (country) {
+								   $('#'+formId+' #pCountryCode').val(country ? country.iso2 : '');
+								   $('#'+formId+' #isdCode').val(country ? country.dialCode : '');
+							   }
 						   });
-						   itiPhoneNumber.setCountry($('#'+formId+' #pCountryCode').val());
-						   phoneNumber.addEventListener('countrychange', function(e) {
-							   $('#'+formId+' #pCountryCode').val(itiPhoneNumber.getSelectedCountryData().iso2);
-							   $('#'+formId+' #isdCode').val(itiPhoneNumber.getSelectedCountryData().dialCode);
-						   });
-						   
+						   clearContactNumberOnCountryChange(phoneNumber);
+
 						   if (itiAltPhoneNumber && typeof itiAltPhoneNumber.destroy === 'function') {
 							   itiAltPhoneNumber.destroy();
 						   }
 						   var altPhoneNumber = document.querySelector("#"+formId+" #phoneNoAlter");
-						   itiAltPhoneNumber= window.intlTelInput(altPhoneNumber, {
-							   //separateDialCode: true,
+						   itiAltPhoneNumber= initPhoneInputV29(altPhoneNumber, {
+							   isValidationEnabledFn: isLeadPhoneValidationEnabled,
+							   initialCountry: $('#'+formId+' #pCountryCodeAlter').val(),
+							   onCountryChange: function (country) {
+								   $('#'+formId+' #pCountryCodeAlter').val(country ? country.iso2 : '');
+								   $('#'+formId+' #isdCodeAlter').val(country ? country.dialCode : '');
+							   }
 						   });
-						   altPhoneNumber.addEventListener('countrychange', function(e) {
-							   $('#'+formId+' #pCountryCodeAlter').val(itiAltPhoneNumber.getSelectedCountryData().iso2);
-							   $('#'+formId+' #isdCodeAlter').val(itiAltPhoneNumber.getSelectedCountryData().dialCode);
-						   });
-						   if(leadDemo.leadStudentDetailDTO.isdCountryCodeAlter!=null || leadDemo.leadStudentDetailDTO.isdCountryCodeAlter !=''){
-							   itiAltPhoneNumber.setCountry($('#'+formId+' #pCountryCodeAlter').val());
-						   }
+						   clearContactNumberOnCountryChange(altPhoneNumber);
 						   callPCountries(''+formId+'', 0, 'countryId',''+leadDemo.leadStudentDetailDTO.country+'');
 						  // $("#"+formId+" #countryId").val(leadDemo.leadStudentDetailDTO.country).trigger('change');
 						   
@@ -2450,13 +2585,14 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 						$("#"+formId+" #leadPriority").val(leadDemo.leadModifyDetailDTO.priority).trigger('change');
 					}, 1000);
 					setTimeout(function () {
+						$("#"+formId+" #countryId").val(leadDemo.leadStudentDetailDTO.country).trigger('change');
 						callStates(formId, leadDemo.leadStudentDetailDTO.country, 'countryId');
 						$("#"+formId+" #stateId").val(leadDemo.leadStudentDetailDTO.state).trigger('change');
 					  }, 1000);
 					setTimeout(function () {
 						callCities(formId, leadDemo.leadStudentDetailDTO.state, 'stateId');
 						$("#"+formId+" #cityId").val(leadDemo.leadStudentDetailDTO.city).trigger('change');
-					  }, 1000); 
+					  }, 1000);
 					$("#"+formId+" #leadSource").select2({
 						theme:"bootstrap4",
 						dropdownParent:"#"+formId+""
@@ -4335,31 +4471,29 @@ function callLeadMergeData(formId, leadId, userId, controlType, modalId,leadType
 								   itiPhoneNumber.destroy();
 							   }
 							   var phoneNumber = document.querySelector("#"+formId+" #phoneNo");
-							   itiPhoneNumber = window.intlTelInput(phoneNumber, {
-								   //separateDialCode: true,
+							   itiPhoneNumber = initPhoneInputV29(phoneNumber, {
+								   isValidationEnabledFn: isLeadPhoneValidationEnabled,
+								   initialCountry: $('#'+formId+' #pCountryCode').val(),
+								   onCountryChange: function (country) {
+									   $('#'+formId+' #pCountryCode').val(country ? country.iso2 : '');
+									   $('#'+formId+' #isdCode').val(country ? country.dialCode : '');
+								   }
 							   });
-							   itiPhoneNumber.setCountry($('#'+formId+' #pCountryCode').val());
-							   phoneNumber.addEventListener('countrychange', function(e) {
-								   //console.log("itiPhone=>", itiPhoneNumber.getSelectedCountryData());
-								   $('#'+formId+' #pCountryCode').val(itiPhoneNumber.getSelectedCountryData().iso2);
-								   $('#'+formId+' #isdCode').val(itiPhoneNumber.getSelectedCountryData().dialCode);
-							   });
-							   
+							   clearContactNumberOnCountryChange(phoneNumber);
+
 							   if (itiAltPhoneNumber && typeof itiAltPhoneNumber.destroy === 'function') {
 								   itiAltPhoneNumber.destroy();
 							   }
 							   var altPhoneNumber = document.querySelector("#"+formId+" #phoneNoAlter");
-							   itiAltPhoneNumber= window.intlTelInput(altPhoneNumber, {
-								   //separateDialCode: true,
+							   itiAltPhoneNumber= initPhoneInputV29(altPhoneNumber, {
+								   isValidationEnabledFn: isLeadPhoneValidationEnabled,
+								   initialCountry: $('#'+formId+' #pCountryCodeAlter').val(),
+								   onCountryChange: function (country) {
+									   $('#'+formId+' #pCountryCodeAlter').val(country ? country.iso2 : '');
+									   $('#'+formId+' #isdCodeAlter').val(country ? country.dialCode : '');
+								   }
 							   });
-							   altPhoneNumber.addEventListener('countrychange', function(e) {
-								   //console.log("itiPhone=>", itiAltPhoneNumber.getSelectedCountryData());
-								   $('#'+formId+' #pCountryCodeAlter').val(itiAltPhoneNumber.getSelectedCountryData().iso2);
-								   $('#'+formId+' #isdCodeAlter').val(itiAltPhoneNumber.getSelectedCountryData().dialCode);
-							   });
-							   if(leadDemo.leadStudentDetailDTO.isdCountryCodeAlter!=null || leadDemo.leadStudentDetailDTO.isdCountryCodeAlter !=''){
-								   itiAltPhoneNumber.setCountry($('#'+formId+' #pCountryCodeAlter').val());
-							   }
+							   clearContactNumberOnCountryChange(altPhoneNumber);
 							// }else{
 							//    $("#"+formId+" #isdCode").val(leadDemo.leadStudentDetailDTO.isdCode).trigger('change');
 							// 	$("#"+formId+" #isdCodeAlter").val(leadDemo.leadStudentDetailDTO.isdCodeAlter).trigger('change');
@@ -4699,15 +4833,15 @@ function getPartnerLeadById(formId, leadId, modalId, partnerDefaultSettings) {
 								}
 							}
 						}
-						itiPhoneNumber = window.intlTelInput(phoneNumber, {
-							//separateDialCode: true,
+						itiPhoneNumber = initPhoneInputV29(phoneNumber, {
+							isValidationEnabledFn: isLeadPhoneValidationEnabled,
+							initialCountry: $('#'+formId+' #pCountryCode').val(),
+							onCountryChange: function (country) {
+								$('#'+formId+' #pCountryCode').val(country ? country.iso2 : '');
+								$('#'+formId+' #isdCode').val(country ? country.dialCode : '');
+							}
 						});
-						itiPhoneNumber.setCountry($('#'+formId+' #pCountryCode').val());
-						phoneNumber.addEventListener('countrychange', function(e) {
-							//console.log("itiPhone=>", itiPhoneNumber.getSelectedCountryData());
-							$('#'+formId+' #pCountryCode').val(itiPhoneNumber.getSelectedCountryData().iso2);
-							$('#'+formId+' #isdCode').val(itiPhoneNumber.getSelectedCountryData().dialCode);
-						});
+						clearContactNumberOnCountryChange(phoneNumber);
 
 						$("#"+formId+" #countryId").val(leadDemo.leadStudentDetailDTO.country).trigger("change");
 						setTimeout(function () {
@@ -4946,10 +5080,10 @@ function getOfficeContentsDetails(formId){
 				$("#"+formId+" #supportEmail").val(data.details.supportEmail);
 				$("#"+formId+" #schoolName").val(data.details.schoolName);
 				if(data.details.schoolContactCountryCode !=  undefined){
-					itiSchoolContactNumber.setCountry(data.details.schoolContactCountryCode);
+					itiSetCountry(itiSchoolContactNumber, data.details.schoolContactCountryCode);
 				}
 				if(data.details.supportNumberCountryCode !=  undefined){
-					itiSchoolSupportNumber.setCountry(data.details.supportNumberCountryCode);
+					itiSetCountry(itiSchoolSupportNumber, data.details.supportNumberCountryCode);
 				}
 
 				if($("#"+formId+" #schoolName").val() == null || $("#"+formId+" #schoolName").val() == undefined || $("#"+formId+" #schoolName").val() == ''){
@@ -5120,7 +5254,10 @@ function callPCountries(formId, value, elementId, preSelected) {
 					$("#" + formId + " #" + elementId).append('<option dailCode="'+v.extra1+'" dail-country-code="'+v.extra+'" value="'+v.key+'" '+(preSelected==v.key?'selected':'')+'>'+v.value+'</option>');
 				});
 
-
+				var $countrySelect = $("#" + formId + " #" + elementId);
+				if ($countrySelect.hasClass("select2-hidden-accessible")) {
+					$countrySelect.trigger('change.select2');
+				}
 			}
 	}).catch(function () {});
 	return true;

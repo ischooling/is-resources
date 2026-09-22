@@ -177,17 +177,27 @@ function editProfilePage(){
         phoneNumber.intlTelInputInstance.destroy();
         phoneNumber.removeAttribute('data-intlTelInput-initialized');
     }
-    itiPhoneNumber = window.intlTelInput(phoneNumber, {
-        separateDialCode: true,
-    });
+    // CRITICAL: remove any stale maxlength left over from a previous edit before
+    // re-initializing. A prior init set maxlength to the country max (e.g. India
+    // = 10). destroy() can restore the full "+91 8533990022" string into the
+    // input; with maxlength=10 still present, the browser truncates it to
+    // "+91 85339" BEFORE our normalization runs, and the dial-code strip then
+    // leaves only "85339". Clearing maxlength here lets initPhoneInputV29 first
+    // normalize to national digits, then attachPhoneLengthLimit re-applies the
+    // correct maxlength for the resulting value.
+    phoneNumber.removeAttribute('maxlength');
+    phoneNumber.removeAttribute('data-max-digits');
     if($("#pCountryCode").val() == ""){
         $("#pCountryCode").val("IN") 
     }
-    itiPhoneNumber.setCountry($("#pCountryCode").val());
-    phoneNumber.addEventListener('countrychange', function(e) {
-        $('#pCountryCode').val(itiPhoneNumber.getSelectedCountryData().iso2);
-        $('#isdCode').val(itiPhoneNumber.getSelectedCountryData().dialCode);
+    itiPhoneNumber = initPhoneInputV29(phoneNumber, {
+        initialCountry: $("#pCountryCode").val(),
+        onCountryChange: function(country) {
+            $('#pCountryCode').val(country ? country.iso2 : '');
+            $('#isdCode').val(country ? country.dialCode : '');
+        }
     });
+    clearContactNumberOnCountryChange(phoneNumber);
     phoneNumber.intlTelInputInstance = itiPhoneNumber;
     phoneNumber.setAttribute('data-intlTelInput-initialized', 'true');
     $(".admin-profile-wrapper .field-input, .admin-profile-wrapper .iti--separate-dial-code, .save-proifle-btn-row, .cancelEditProfileBtn").show();
@@ -213,6 +223,12 @@ async function saveProfileDetails(formId, arg0) {
     //     showMessageTheme2(0, "Phone Number is required");
     //     return false;
     // }
+    // Phone is optional here: validate country-specific length only if filled.
+    if (typeof validatePhoneNumberElement === "function" && typeof itiPhoneNumber !== "undefined") {
+        if (!validatePhoneNumberElement(document.querySelector("#" + formId + " #phoneNumber") || document.querySelector("#phoneNumber"), itiPhoneNumber, false)) {
+            return false;
+        }
+    }
     if (!validateEmail($("#" + formId + " #emailId").val().trim())) {
         showMessageTheme2(0, "Email is either empty or invalid");
         return false;

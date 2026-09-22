@@ -14,6 +14,23 @@ $(document).ready(function(){
 				phone_number.match(/^(1-?)?(\([0-9]\d{2}\)|[0-9]\d{0})-?[0-9]\d{1}-?\d{0,12}$/);
 	}, "Please enter a valid phone number");
 
+	// Human-readable message for an intl-tel-input v29.2 getValidationError() code.
+	// See https://intl-tel-input.com/docs/types#validationerror for the full enum.
+	window.getIntlPhoneValidationMessage = function(validationError) {
+		switch (validationError) {
+			case "INVALID_COUNTRY_CODE":
+				return 'Please select a valid country code';
+			case "TOO_SHORT":
+				return 'Phone number is too short for the selected country';
+			case "TOO_LONG":
+				return 'Phone number is too long for the selected country';
+			case "IS_POSSIBLE_LOCAL_ONLY":
+			case "INVALID_LENGTH":
+			default:
+				return 'Please enter a valid phone number for the selected country';
+		}
+	};
+
 	$.validator.addMethod("dateFormat", function (value, element) {
 		var year = value.split('/');
 		if ( value.match(/^\d\d?\/\d\d?\/\d\d\d\d$/) && parseInt(year[2]) <= 2002 &&  parseInt(year[2]) >= 1970 && parseInt(year[1]) <= 12){
@@ -161,6 +178,15 @@ function validateRequestForSignupStudent(){
 		}
 		if ($("#signupStage1 #contactNumber").val()=="") {
 			showMessageTheme2(0, 'Phone No is required');
+			return false
+		}
+		// intl-tel-input v29.2 country-aware validation (utils are bundled synchronously via
+		// intlTelInputWithUtils, so isValidNumber()/getValidationError() are safe to call here
+		// with no extra async wait) - blocks a number like "8541254" for India from reaching save.
+		var _phoneValEnabled = (typeof isPhoneValidationEnabled !== 'function') || isPhoneValidationEnabled();
+		var _phoneValid = (typeof itiIsValidNumber === 'function') ? itiIsValidNumber(itiContcat) : (itiContcat && itiContcat.isValidNumber());
+		if (_phoneValEnabled && typeof itiContcat !== 'undefined' && itiContcat && _phoneValid === false) {
+			showMessageTheme2(0, getIntlPhoneValidationMessage(itiContcat.getValidationError()));
 			return false
 		}
 		if ($("#signupStage1 #nationality").val()==0 || $("#signupStage1 #nationality").val()=='') {

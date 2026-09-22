@@ -9,6 +9,7 @@ function validateRequestForEvaluationFormDetails(formId, otpType) {
   hideMessageErrorNew("ptLastNameError");
   hideMessageErrorNew("studentContactNoError");
   hideMessageErrorNew("studentContactNoError");
+  hideMessageErrorNew("wtspNumberError");
   hideMessageErrorNew("ptEmailIdError");
   hideMessageErrorNew("parentContactNoError");
   hideMessageErrorNew("countryIdError");
@@ -123,6 +124,25 @@ function validateRequestForEvaluationFormDetails(formId, otpType) {
       "studentContactNoError"
     );
     flag = false;
+  } else if (typeof checkPhoneNumberLength === "function" && typeof itiContcat !== "undefined") {
+    var evalPhoneLenCheck = checkPhoneNumberLength(document.querySelector("#" + formId + " #studentContactNo") || document.querySelector("#studentContactNo"), itiContcat, true);
+    if (!evalPhoneLenCheck.valid && evalPhoneLenCheck.reason === "length") {
+      showMessageErrorNew(
+        true,
+        "Phone number for " + evalPhoneLenCheck.countryName + " must be " + evalPhoneLenCheck.expectedDigits + " digits.",
+        "studentContactNoError"
+      );
+      flag = false;
+    } else if (!evalPhoneLenCheck.valid && evalPhoneLenCheck.reason === "invalid") {
+      // Correct length but wrong format for the country (e.g. Singapore number
+      // not starting with 3/6/8/9). Block the submission.
+      showMessageErrorNew(
+        true,
+        "Please enter a valid phone number for " + evalPhoneLenCheck.countryName + ".",
+        "studentContactNoError"
+      );
+      flag = false;
+    }
   }
   if (
     $("#" + formId + " #newDateslected").val() == "" ||
@@ -171,6 +191,32 @@ function validateRequestForEvaluationFormDetails(formId, otpType) {
   //		showMessageErrorNew(true, 'Whatsapp Number is required','wtspNumberError');
   //		flag= false
   //	}
+  // WhatsApp Number stays optional (no "required" asterisk in the form), but
+  // when a value IS entered it must be a valid number for the selected
+  // country, same check already used for studentContactNo.
+  if (
+    $("#" + formId + " #wtspNumber").val() != "" &&
+    $("#" + formId + " #wtspNumber").val() != null &&
+    typeof checkPhoneNumberLength === "function" &&
+    typeof itiContcat2 !== "undefined"
+  ) {
+    var evalWtspLenCheck = checkPhoneNumberLength(document.querySelector("#" + formId + " #wtspNumber") || document.querySelector("#wtspNumber"), itiContcat2, false);
+    if (!evalWtspLenCheck.valid && evalWtspLenCheck.reason === "length") {
+      showMessageErrorNew(
+        true,
+        "Phone number for " + evalWtspLenCheck.countryName + " must be " + evalWtspLenCheck.expectedDigits + " digits.",
+        "wtspNumberError"
+      );
+      flag = false;
+    } else if (!evalWtspLenCheck.valid && evalWtspLenCheck.reason === "invalid") {
+      showMessageErrorNew(
+        true,
+        "Please enter a valid phone number for " + evalWtspLenCheck.countryName + ".",
+        "wtspNumberError"
+      );
+      flag = false;
+    }
+  }
 
   //	if (!validateEmail($("#" + formId + " #ptEmailId").val().trim())) {
   //		showMessageErrorNew(true, 'Email is required','ptEmailIdError');

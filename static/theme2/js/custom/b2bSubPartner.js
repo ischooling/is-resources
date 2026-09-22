@@ -2,15 +2,15 @@ var B2BSubPartnerPhoneNo;
 var itiB2BSubPartnerPhoneNo;
 function B2BSubPartnerPageEvent(formId){
 	B2BSubPartnerPhoneNo= document.querySelector("#"+formId+" #B2BSubPartnerPhoneNo");
-	itiB2BSubPartnerPhoneNo = window.intlTelInput(B2BSubPartnerPhoneNo, {
-		//separateDialCode: true,
+	itiB2BSubPartnerPhoneNo = initPhoneInputV29(B2BSubPartnerPhoneNo, {
+		initialCountry: $('#'+formId+' #B2BSubPartnerPCountryCode').val(),
+		onCountryChange: function(country) {
+			$('#'+formId+' #B2BSubPartnerPCountryCode').val(country ? country.iso2 : '');
+			$('#'+formId+' #B2BSubPartnerIsdCode').val(country ? country.dialCode : '');
+		}
 	});
-	itiB2BSubPartnerPhoneNo.setCountry($('#'+formId+' #B2BSubPartnerPCountryCode').val());
-	B2BSubPartnerPhoneNo.addEventListener('countrychange', function(e) {
-		$('#'+formId+' #B2BSubPartnerPCountryCode').val(itiB2BSubPartnerPhoneNo.getSelectedCountryData().iso2);
-		$('#'+formId+' #B2BSubPartnerIsdCode').val(itiB2BSubPartnerPhoneNo.getSelectedCountryData().dialCode);
-	});
-	
+	clearContactNumberOnCountryChange(B2BSubPartnerPhoneNo);
+
 	initializeCountryStateCity(formId, "", "", "");
   	getAllTimeZoneForPartner("countryTimezoneId");
 	if($("#"+formId+" #B2BSubPartnerType").hasClass("select2-hidden-accessible")){
@@ -67,6 +67,17 @@ function validateRequestForAddSubPartnerSave(formId){
 	if ($("#"+formId+" #B2BSubPartnerPhoneNo").val()==null || $("#"+formId+" #B2BSubPartnerPhoneNo").val() == undefined || $("#"+formId+" #B2BSubPartnerPhoneNo").val()=='') {
 		showMessageTheme2(0, "Mobile Number is required",'',true);
 		return false;
+	}
+	if (typeof checkPhoneNumberLength === "function" && typeof itiB2BSubPartnerPhoneNo !== "undefined") {
+		var subPartnerPhoneLenCheck = checkPhoneNumberLength(document.querySelector("#"+formId+" #B2BSubPartnerPhoneNo"), itiB2BSubPartnerPhoneNo, true);
+		if (!subPartnerPhoneLenCheck.valid && subPartnerPhoneLenCheck.reason === "length") {
+			showMessageTheme2(0, "Mobile number for " + subPartnerPhoneLenCheck.countryName + " must be " + subPartnerPhoneLenCheck.expectedDigits + " digits.", '', true);
+			return false;
+		}
+		if (!subPartnerPhoneLenCheck.valid && subPartnerPhoneLenCheck.reason === "invalid") {
+			showMessageTheme2(0, "Please enter a valid mobile number for " + subPartnerPhoneLenCheck.countryName + ".", '', true);
+			return false;
+		}
 	}
 	if ($("#"+formId+" #countryId").val()==null || $("#"+formId+" #countryId").val() == undefined || $("#"+formId+" #countryId").val()=='') {
 		showMessageTheme2(0, "Country is required",'',true);
@@ -320,14 +331,14 @@ function getSubPartnerLeadById(formId, leadId, modalId) {
 								}
 							}
 						}
-						itiB2BSubPartnerPhoneNo = window.intlTelInput(B2BSubPartnerPhoneNo, {
-							//separateDialCode: true,
+						itiB2BSubPartnerPhoneNo = initPhoneInputV29(B2BSubPartnerPhoneNo, {
+							initialCountry: $('#'+formId+' #B2BSubPartnerPCountryCode').val(),
+							onCountryChange: function(country) {
+								$('#'+formId+' #B2BSubPartnerPCountryCode').val(country ? country.iso2 : '');
+								$('#'+formId+' #B2BSubPartnerIsdCode').val(country ? country.dialCode : '');
+							}
 						});
-						itiB2BSubPartnerPhoneNo.setCountry($('#'+formId+' #B2BSubPartnerPCountryCode').val());
-						B2BSubPartnerPhoneNo.addEventListener('countrychange', function(e) {
-							$('#'+formId+' #B2BSubPartnerPCountryCode').val(itiB2BSubPartnerPhoneNo.getSelectedCountryData().iso2);
-							$('#'+formId+' #B2BSubPartnerIsdCode').val(itiB2BSubPartnerPhoneNo.getSelectedCountryData().dialCode);
-						});
+						clearContactNumberOnCountryChange(B2BSubPartnerPhoneNo);
 						$("#"+formId+" #countryId").val(leadDemo.leadStudentDetailDTO.country).trigger("change");
 						setTimeout(function () {
 							callStates(formId, leadDemo.leadStudentDetailDTO.country, 'countryId');

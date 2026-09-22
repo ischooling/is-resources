@@ -1,3 +1,50 @@
+var __leadPhoneValidationEnabled = null;
+function isLeadPhoneValidationEnabled() {
+	if (__leadPhoneValidationEnabled !== null) {
+		return __leadPhoneValidationEnabled;
+	}
+	var enabled = true;
+	try {
+		if (typeof getSettingsByTypeAndKey === "function") {
+			var setting = getSettingsByTypeAndKey('CONFIGURATION', 'MOBILE_NUMBER_VAIDATION_LEAD_FLAG');
+			var metaValue = JSON.parse(setting).data.metaValue;
+			enabled = String(metaValue).trim().toLowerCase() !== "false";
+		}
+	} catch (e) {
+		enabled = true;
+	}
+	__leadPhoneValidationEnabled = enabled;
+	return __leadPhoneValidationEnabled;
+}
+function checkLeadPhoneNumberLength(inputEl, iti, isMandatory) {
+	if (!isLeadPhoneValidationEnabled()) {
+		return { valid: true };
+	}
+	if (!inputEl || !iti) {
+		return { valid: true };
+	}
+	var rawValue = ($(inputEl).val() || "").trim();
+	if (rawValue === "") {
+		return isMandatory ? { valid: false, reason: 'empty' } : { valid: true };
+	}
+	var countryData = itiGetCountry(iti);
+	var countryName = (countryData && countryData.name) ? countryData.name : "the selected country";
+	var maxDigits = getMaxValidPhoneDigitCount(iti);
+	var enteredDigits = rawValue.replace(/\D/g, "");
+	if (maxDigits > 0 && enteredDigits.length > maxDigits) {
+		return { valid: false, reason: 'length', expectedDigits: maxDigits, enteredDigits: enteredDigits.length, countryName: countryName };
+	}
+	if (itiUtilsAvailable()) {
+		var validRes = itiIsValidNumber(iti);
+		if (validRes === true) {
+			return { valid: true };
+		}
+		if (validRes === false) {
+			return { valid: false, reason: 'invalid', expectedDigits: maxDigits, enteredDigits: enteredDigits.length, countryName: countryName };
+		}
+	}
+	return { valid: true };
+}
 
 function getRequestForEnrollmentPartnerTrackerDetails(payload){
 	var request = {};
@@ -161,7 +208,6 @@ function sameAsWhatsApp(src, phoneNo){
 	var whatsAppNumberdialCode = $('#whatsappNumber').attr('data-ISO-code');
 	var phoneNumberdialCode = $('#phoneNumber').attr('data-ISO-code');
 	if ($(src).is(":checked")) {
-		$('#phoneNumber').val(whatsAppNumberValue);
 		if(!$("#whatsappNumber").prop("disabled")){
 			$('#whatsappNumber').attr('disabled', true).css({ "background": "#e3e3e3" });
 		}
@@ -169,15 +215,19 @@ function sameAsWhatsApp(src, phoneNo){
 			if(!$("#phoneNumber").prop("disabled")){
 				$('#phoneNumber').attr('disabled', true).css({ "background": "#e3e3e3" });
 			}
-			itiContcat1.setCountry('');
-			itiContcat1.setCountry(whatsAppNumberdialCode);
+			// itiSetCountry() dispatches a countrychange event, which clears the
+			// input (see attachPhoneLengthLimit in masterContent.js). Set the
+			// value AFTER setCountry(), not before, so it isn't wiped out.
+			itiSetCountry(itiContcat1, '');
+			itiSetCountry(itiContcat1, whatsAppNumberdialCode);
 		}
+		$('#phoneNumber').val(whatsAppNumberValue);
 	} else {
 		if ($("#phoneNumber").length > 0) {
-			$('#phoneNumber').val(phoneNo);
 			$('#phoneNumber').attr('disabled', false).css({ "background": "#fff" });
-			itiContcat1.setCountry('');
-			itiContcat1.setCountry(phoneNumberdialCode);
+			itiSetCountry(itiContcat1, '');
+			itiSetCountry(itiContcat1, phoneNumberdialCode);
+			$('#phoneNumber').val(phoneNo);
 		}
 		// $('#whatsappNumber').attr('disabled', true).css({ "background": "#fff" });
 
@@ -193,8 +243,17 @@ function setDefaultFormValues(data){
 	$.each(data.details.operatingCountries, function(k,v){
 		operatingCountries.push(v.key);
 	});
-	itiContcat.setCountry(data.details.whatsappIsoCode);
-	itiContcat1.setCountry(data.details.phoneIsoCode);
+	// The number was already embedded in the input's value attribute when the
+	// form HTML was built (see the whatsappNumber/phoneNumber template
+	// strings). itiSetCountry() below dispatches a countrychange event, which
+	// clears the input (see attachPhoneLengthLimit in masterContent.js), so
+	// capture the value here and restore it after setCountry() runs.
+	var whatsappNumberValue = $('#whatsappNumber').val();
+	var phoneNumberValue = $('#phoneNumber').val();
+	itiSetCountry(itiContcat, data.details.whatsappIsoCode);
+	itiSetCountry(itiContcat1, data.details.phoneIsoCode);
+	$('#whatsappNumber').val(whatsappNumberValue);
+	$('#phoneNumber').val(phoneNumberValue);
 	$("#countryId").val(data.details.countryId).trigger("change");
 	$("#stateId").val(data.details.stateId).trigger("change");
 	$("#cityId").val(data.details.cityId).trigger("change");
@@ -219,11 +278,29 @@ function enrollmentPartnerFormVaidation(formId){
 	if($("#"+formId+" #whatsappNumber").val() == undefined || $("#"+formId+" #whatsappNumber").val() == null || $("#"+formId+" #whatsappNumber").val() == ''){
 		formvalidationMsg(false, 'WhatsApp Number is required','whatsappNumberError');
 		formSubmissionflag= false;
+	} else if (typeof checkLeadPhoneNumberLength === "function" && typeof itiContcat !== "undefined") {
+		var epWhatsappLenCheck = checkLeadPhoneNumberLength(document.querySelector("#"+formId+" #whatsappNumber"), itiContcat, true);
+		if (!epWhatsappLenCheck.valid && epWhatsappLenCheck.reason === "length") {
+			formvalidationMsg(false, "WhatsApp number for " + epWhatsappLenCheck.countryName + " must be " + epWhatsappLenCheck.expectedDigits + " digits.", 'whatsappNumberError');
+			formSubmissionflag= false;
+		}
+		if (!epWhatsappLenCheck.valid && epWhatsappLenCheck.reason === "invalid") {
+			formvalidationMsg(false, "Please enter a valid WhatsApp number for " + epWhatsappLenCheck.countryName + ".", 'whatsappNumberError');
+			formSubmissionflag= false;
+		}
 	}
-	// if($("#"+formId+" #phoneNumber").val() == undefined || $("#"+formId+" #phoneNumber").val() == null || $("#"+formId+" #phoneNumber").val() == ''){
-	// 	formvalidationMsg(false, 'Phone Number is required','phoneNumberError');
-	// 	formSubmissionflag= false;
-	// }
+	// Alternate phone number is optional: validate country-specific length only if filled.
+	if (typeof checkLeadPhoneNumberLength === "function" && typeof itiContcat1 !== "undefined" && $("#"+formId+" #phoneNumber").val()) {
+		var epPhoneLenCheck = checkLeadPhoneNumberLength(document.querySelector("#"+formId+" #phoneNumber"), itiContcat1, false);
+		if (!epPhoneLenCheck.valid && epPhoneLenCheck.reason === "length") {
+			formvalidationMsg(false, "Alternate phone number for " + epPhoneLenCheck.countryName + " must be " + epPhoneLenCheck.expectedDigits + " digits.", 'phoneNumberError');
+			formSubmissionflag= false;
+		}
+		if (!epPhoneLenCheck.valid && epPhoneLenCheck.reason === "invalid") {
+			formvalidationMsg(false, "Please enter a valid alternate phone number for " + epPhoneLenCheck.countryName + ".", 'phoneNumberError');
+			formSubmissionflag= false;
+		}
+	}
 	if($("#"+formId+" #email").val() == undefined || $("#"+formId+" #email").val() == null || $("#"+formId+" #email").val() == ''){
 		formvalidationMsg(false, 'Email is required','emailError');
 		formSubmissionflag= false;

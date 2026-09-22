@@ -172,9 +172,7 @@ function initializeMeetingPhoneInput(defaultIsoCode, retryCount) {
 
 	var existingPhoneValue = sanitizeMeetingPhoneValue($("#sendToPhone").val() || $(phoneNumber).val());
 	var existingItiInstance = null;
-	if (window.intlTelInputGlobals && typeof window.intlTelInputGlobals.getInstance === 'function') {
-		existingItiInstance = window.intlTelInputGlobals.getInstance(phoneNumber);
-	}
+	existingItiInstance = itiGetInstance(phoneNumber);
 	if (!existingItiInstance && phoneNumber.intlTelInputInstance && typeof phoneNumber.intlTelInputInstance.destroy === 'function') {
 		existingItiInstance = phoneNumber.intlTelInputInstance;
 	}

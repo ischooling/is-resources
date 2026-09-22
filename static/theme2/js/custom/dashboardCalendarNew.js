@@ -176,6 +176,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
     }
 
     function normalizeCalendarEvent(rawEvent, courseDetails) {
+        
         // 
         var eventType = normalizeEventType(rawEvent);
         // assignments carry dueDate/paceDate instead of start — use it so they appear on the calendar
@@ -2481,7 +2482,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
         return html;
     }
     async function classDetailsOnModal(url, eventKind, courseId, classTitle, teacherName, classStatus, eventType, salutation) {
-        //  
+        // 
         try {
         const responseData = await getActualURL(url);
         if (responseData) {
@@ -3037,6 +3038,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                 timeout: 600000,
                 async: true,
                 success: function(data) {
+                    console.log(data)
                     handleNewSchoolCalendarResponse(data, formId, userId, uniqueId, viewName, startdate, enddate, flag, resolve, reject);
                 },
                 error: function(error) {

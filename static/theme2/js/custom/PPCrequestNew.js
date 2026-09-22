@@ -51,6 +51,7 @@ $(document).ready(function () {
     itiContcat = window.intlTelInput(inputContact, {
       separateDialCode: true,
     });
+    attachPhoneLengthLimit(inputContact, itiContcat);
     inputContact.addEventListener("countrychange", function (e) {
       $("#isdCodeStudentIcon").val(itiContcat.getSelectedCountryData().iso2);
       $("#isdCodeMobileNo").val(itiContcat.getSelectedCountryData().dialCode);
@@ -60,13 +61,10 @@ $(document).ready(function () {
       itiContcat2 = window.intlTelInput(inputContact2, {
         separateDialCode: true,
       });
+      attachPhoneLengthLimit(inputContact2, itiContcat2);
       inputContact2.addEventListener("countrychange", function (e) {
-        $("#isdCodeWtspStudentIcon").val(
-          itiContcat2.getSelectedCountryData().iso2
-        );
-        $("#isdCodeWtspStudent").val(
-          itiContcat2.getSelectedCountryData().dialCode
-        );
+        $("#isdCodeWtspStudentIcon").val(itiContcat2.getSelectedCountryData().iso2);
+        $("#isdCodeWtspStudent").val(itiContcat2.getSelectedCountryData().dialCode);
       });
     }
     scriptExecuted = true;
@@ -111,10 +109,12 @@ $(document).ready(function () {
     var phoneNoValue = $("#userphone").val();
     var dialCode = $("#isdCodeStudentIcon").val();
     if ($(this).is(":checked") == true) {
-      $("#wtspNumber").val(phoneNoValue);
       $("#userphone").attr("disabled", true).css({ background: "#e3e3e3" });
       if ($("#wtspNumber").length > 0) {
         $("#wtspNumber").attr("disabled", true).css({ background: "#e3e3e3" });
+        // setCountry() dispatches a countrychange event, which clears the
+        // input (see attachPhoneLengthLimit in masterContent.js). Set the
+        // value AFTER setCountry(), not before, so it isn't wiped out.
         itiContcat2.setCountry("");
         itiContcat2.setCountry(dialCode);
         $("#isdCodeWtspStudentIcon").val(
@@ -124,6 +124,7 @@ $(document).ready(function () {
           itiContcat2.getSelectedCountryData().dialCode
         );
       }
+      $("#wtspNumber").val(phoneNoValue);
     } else {
       if ($("#wtspNumber").length > 0) {
         $("#wtspNumber").val("");
@@ -527,6 +528,25 @@ function validateRequestForPPCRequest(formId) {
       "userphone"
     );
     flag = false;
+  } else if (typeof checkPhoneNumberLength === "function" && typeof itiContcat !== "undefined") {
+    var phoneLenCheck = checkPhoneNumberLength(document.querySelector("#userphone"), itiContcat, true);
+    if (!phoneLenCheck.valid && phoneLenCheck.reason === "length") {
+      showMessageRequestDemoPage(
+        true,
+        "Phone number for " + phoneLenCheck.countryName + " must be " + phoneLenCheck.expectedDigits + " digits.",
+        "isdCodeMobileNoError",
+        "userphone"
+      );
+      flag = false;
+    } else if (!phoneLenCheck.valid && phoneLenCheck.reason === "invalid") {
+      showMessageRequestDemoPage(
+        true,
+        "Please enter a valid phone number for " + phoneLenCheck.countryName + ".",
+        "isdCodeMobileNoError",
+        "userphone"
+      );
+      flag = false;
+    }
   }
   console.log("cv :" + cv);
   if (cv) {
@@ -838,6 +858,25 @@ function validateRequestForCommonForm(formId, moduleId) {
       "userphone"
     );
     flag = false;
+  } else if (typeof checkPhoneNumberLength === "function" && typeof itiContcat !== "undefined") {
+    var reqPhoneLenCheck = checkPhoneNumberLength(document.querySelector("#userphone"), itiContcat, true);
+    if (!reqPhoneLenCheck.valid && reqPhoneLenCheck.reason === "length") {
+      showMessageRequestDemoPage(
+        true,
+        "Phone number for " + reqPhoneLenCheck.countryName + " must be " + reqPhoneLenCheck.expectedDigits + " digits.",
+        "isdCodeMobileNoError",
+        "userphone"
+      );
+      flag = false;
+    } else if (!reqPhoneLenCheck.valid && reqPhoneLenCheck.reason === "invalid") {
+      showMessageRequestDemoPage(
+        true,
+        "Please enter a valid phone number for " + reqPhoneLenCheck.countryName + ".",
+        "isdCodeMobileNoError",
+        "userphone"
+      );
+      flag = false;
+    }
   }
 
   if (

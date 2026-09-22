@@ -48,6 +48,22 @@
   });
 })();
 var APPLICATION_JSON_VALUE = "application/json";
+// ── Phone length-limit helpers: safe fallbacks ────────────────────────────
+// The real implementations live in masterContent.js. On pages that do NOT load
+// masterContent.js, these no-op fallbacks prevent ReferenceError when phone
+// inits call attachPhoneLengthLimit / validatePhoneNumberElement. When
+// masterContent.js IS loaded (after this file), it overrides these with the
+// full implementations.
+if (typeof window.attachPhoneLengthLimit !== "function") {
+	window.attachPhoneLengthLimit = function () {};
+}
+if (typeof window.validatePhoneNumberElement !== "function") {
+	window.validatePhoneNumberElement = function () { return true; };
+}
+if (typeof window.checkPhoneNumberLength !== "function") {
+	window.checkPhoneNumberLength = function () { return { valid: true }; };
+}
+
 var BASE_TIMEZONE = "Asia/Singapore";
 var API_VERSION = CONTEXT_PATH + SCHOOL_UUID + "/" + "api/v1/";
 var API_VERSION_WITHOUT_UNIQUEID = CONTEXT_PATH + "api/v1/";
@@ -5285,30 +5301,16 @@ function renderIsdCode(formId, elementId, defaultCountryISOCode) {
   // console.log("element " + element);
   if (document.querySelector(element) != null) {
     var phoneNo = document.querySelector(element);
-    iti = intlTelInput(phoneNo, {
-      // allowDropdown: false,
-      // autoHideDialCode: false,
-      // autoPlaceholder: "off",
-      // dropdownContainer: document.body,
-      // excludeCountries: ["us"],
-      // formatOnDisplay: false,
-      // geoIpLookup: function(callback) {
-      //   $.get("http://ipinfo.io", function() {}, "jsonp").always(function(resp) {
-      //     var countryCode = (resp && resp.country) ? resp.country : "";
-      //     callback(countryCode);
-      //   });
-      // },
-      // hiddenInput: "full_number",
-      // initialCountry: "auto",
-      // localizedCountries: { 'de': 'Deutschland' },
-      // nationalMode: false,
-      // onlyCountries: ['us', 'gb', 'ch', 'ca', 'do'],
-      //placeholderNumberType: "MOBILE",
-      //preferredCountries: ['in'],
-      // separateDialCode: true,
-      // utilsScript: "js/utils.js",
-    });
-    iti.setCountry(defaultCountryISOCode);
+    if (typeof initPhoneInputV29 === "function") {
+      iti = initPhoneInputV29(phoneNo, { initialCountry: defaultCountryISOCode });
+    } else {
+      iti = intlTelInput(phoneNo, { separateDialCode: false });
+      if (iti.setSelectedCountry) iti.setSelectedCountry(defaultCountryISOCode);
+      else if (iti.setCountry) iti.setCountry(defaultCountryISOCode);
+      if (typeof attachPhoneLengthLimit === "function") {
+        attachPhoneLengthLimit(phoneNo, iti);
+      }
+    }
   }
   return iti;
 }
@@ -7818,7 +7820,7 @@ function getTinyUrlService() {
 }
 
 function getIsoFromIsd(isdCode) {
-  const country = window.intlTelInputGlobals.getCountryData().find(c => c.dialCode === isdCode);
+  const country = (typeof itiGetCountryList === "function" ? itiGetCountryList() : (window.intlTelInputGlobals ? window.intlTelInputGlobals.getCountryData() : [])).find(c => c.dialCode === isdCode);
   return country ? country.iso2 : "us";
 }
 

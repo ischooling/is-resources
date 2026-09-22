@@ -46,36 +46,28 @@ $(document).ready(function () {
   var scriptExecuted = false;
   if (!scriptExecuted) {
     var inputContact = document.querySelector("#userphone");
-    itiContcat = window.intlTelInput(inputContact, {
-      separateDialCode: true,
+    itiContcat = initPhoneInputV29(inputContact, {
+      initialCountry: 'us',
+      onCountryChange: function (country) {
+        $("#isdCodeStudentIcon").val(country ? country.iso2 : '');
+        $("#isdCodeMobileNo").val(country ? country.dialCode : '');
+        $("#isdCodeWtspStudentIcon").val(country ? country.iso2 : '');
+        $("#isdCodeWtspStudent").val(country ? country.dialCode : '');
+      }
     });
-    inputContact.addEventListener("countrychange", function (e) {
-      $("#isdCodeStudentIcon").val(itiContcat.getSelectedCountryData().iso2);
-      $("#isdCodeMobileNo").val(itiContcat.getSelectedCountryData().dialCode);
-      $("#isdCodeWtspStudentIcon").val(
-        itiContcat.getSelectedCountryData().iso2
-      );
-      $("#isdCodeWtspStudent").val(
-        itiContcat.getSelectedCountryData().dialCode
-      );
-    });
+    clearContactNumberOnCountryChange(inputContact);
     if ($("#wtspNumber").length > 0) {
       var inputContact2 = document.querySelector("#wtspNumber");
-      itiContcat2 = window.intlTelInput(inputContact2, {
-        separateDialCode: true,
+      itiContcat2 = initPhoneInputV29(inputContact2, {
+        initialCountry: 'us',
+        onCountryChange: function (country) {
+          $("#isdCodeWtspStudentIcon").val(country ? country.iso2 : '');
+          $("#isdCodeWtspStudent").val(country ? country.dialCode : '');
+          $("#isdCodeStudentIcon").val(country ? country.iso2 : '');
+          $("#isdCodeMobileNo").val(country ? country.dialCode : '');
+        }
       });
-      inputContact2.addEventListener("countrychange", function (e) {
-        $("#isdCodeWtspStudentIcon").val(
-          itiContcat2.getSelectedCountryData().iso2
-        );
-        $("#isdCodeWtspStudent").val(
-          itiContcat2.getSelectedCountryData().dialCode
-        );
-        $("#isdCodeStudentIcon").val(itiContcat2.getSelectedCountryData().iso2);
-        $("#isdCodeMobileNo").val(
-          itiContcat2.getSelectedCountryData().dialCode
-        );
-      });
+      clearContactNumberOnCountryChange(inputContact2);
     }
     scriptExecuted = true;
   }
@@ -136,10 +128,12 @@ $(document).ready(function () {
     var phoneNoValue = $("#userphone").val();
     var dialCode = $("#isdCodeStudentIcon").val();
     if ($(this).is(":checked") == true) {
-      $("#wtspNumber").val(phoneNoValue);
       $("#userphone").attr("disabled", true).css({ background: "#e3e3e3" });
       if ($("#wtspNumber").length > 0) {
         $("#wtspNumber").attr("disabled", true).css({ background: "#e3e3e3" });
+        // setCountry() dispatches a countrychange event, which clears the
+        // input (see attachPhoneLengthLimit in masterContent.js). Set the
+        // value AFTER setCountry(), not before, so it isn't wiped out.
         itiContcat2.setCountry("");
         itiContcat2.setCountry(dialCode);
         $("#isdCodeWtspStudentIcon").val(
@@ -149,6 +143,7 @@ $(document).ready(function () {
           itiContcat2.getSelectedCountryData().dialCode
         );
       }
+      $("#wtspNumber").val(phoneNoValue);
     } else {
       if ($("#wtspNumber").length > 0) {
         $("#wtspNumber").val("");
@@ -795,6 +790,25 @@ function validateRequestForB2BRequest(formId) {
         "userphone"
       );
       flag = false;
+    } else if (typeof checkPhoneNumberLength === "function" && typeof itiContcat !== "undefined") {
+      var b2bPhoneLenCheck = checkPhoneNumberLength(document.querySelector("#userphone"), itiContcat, true);
+      if (!b2bPhoneLenCheck.valid && b2bPhoneLenCheck.reason === "length") {
+        showMessageRequestDemoPage(
+          false,
+          "Phone number for " + b2bPhoneLenCheck.countryName + " must be " + b2bPhoneLenCheck.expectedDigits + " digits.",
+          "isdCodeMobileNoError",
+          "userphone"
+        );
+        flag = false;
+      } else if (!b2bPhoneLenCheck.valid && b2bPhoneLenCheck.reason === "invalid") {
+        showMessageRequestDemoPage(
+          false,
+          "Please enter a valid phone number for " + b2bPhoneLenCheck.countryName + ".",
+          "isdCodeMobileNoError",
+          "userphone"
+        );
+        flag = false;
+      }
     }
     // else{
     // 	hideMessageRequestDemoPage("isdCodeMobileNoError","isdCodeMobileNoError")

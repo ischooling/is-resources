@@ -1,6 +1,11 @@
 var PREVIOUS_LEARNING_PROGRAM_INDEX;
 var STUDENT_SINGUP_CURRENT_STEP;
 var IS_PARENT_COUNTRY_CHANGE = false;
+// True while a signup step is being programmatically prefilled. While set, the
+// address-country (#countryId / #pCountryId) change handlers must NOT push the
+// address country onto the phone widget (the phone country is set from the saved
+// data instead). Prevents the "phone country reset to address country" bug.
+var STUDENT_SIGNUP_PREFILLING = false;
 
 // get-commission-pay-by response, cached after the first call so every place that needs
 // SHOW_PAYMENT_OPTION (generateEnrollmentContent, callForParentSelection, showPaymentModal) reads
@@ -825,6 +830,7 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
 }
 
 function renderStudentDetails(data, signupType){
+	STUDENT_SIGNUP_PREFILLING = true;
 	var signupStudent = data.signupStudent;
 	var scriptExecuted = false;
 	$('#signupStage1Content').html(getStudentDetailsContent(data, signupType));
@@ -877,23 +883,42 @@ function renderStudentDetails(data, signupType){
 	if(!scriptExecuted){
 		inputContact = document.querySelector("#contactNumber");
 		if(inputContact != null){
-			itiContcat = window.intlTelInput(inputContact);
-			if(typeof refreshCustomFieldState === "function"){
-				refreshCustomFieldState($(inputContact).closest(".custom-field"));
-			}
-			if(IGNORECOUNTRYARRAY.includes(signupStudent.countryCode) || signupStudent.countryCode == '' || signupStudent.countryCode == undefined || signupStudent.countryCode == null) {
-			  itiContcat.setCountry('us');
-			   }else{
-				itiContcat.setCountry(signupStudent.countryCode);
-			}
-			// attachPhoneLengthLimit(inputContact, itiContcat);
-			inputContact.addEventListener('countrychange', function(e) {
-				$('#countryIsd').val(itiContcat.getSelectedCountryData().iso2);
-				$('#countryDailCode').val(itiContcat.getSelectedCountryData().dialCode);
-				if(typeof refreshCustomFieldState === "function"){
-					refreshCustomFieldState($(inputContact).closest(".custom-field"));
+			// "Mobile Number" field: init via the shared master helper (searchable
+			// dropdown, no separate dial code, no format-as-you-type, length
+			// validation). Only MOBILE / FIXED_LINE_OR_MOBILE are accepted here.
+			var studentInitialCountry = (IGNORECOUNTRYARRAY.includes(signupStudent.countryCode) || signupStudent.countryCode == '' || signupStudent.countryCode == undefined || signupStudent.countryCode == null)
+				? 'us' : signupStudent.countryCode;
+			// If the saved phone ISO (countryCode) disagrees with the saved phone
+			// DIAL code (countryIsdCode), prefer the dial code's country (the number
+			// is the source of truth for the phone widget). Mirrors the parent fix.
+			try {
+				var _stuDial = (signupStudent.countryIsdCode == null ? '' : String(signupStudent.countryIsdCode)).replace(/\D/g, '');
+				if(_stuDial && typeof matchCountryByDialCode === 'function'){
+					var _stuDialCountry = matchCountryByDialCode(_stuDial);
+					if(_stuDialCountry && _stuDialCountry.iso2){
+						var _stuIsoDial = String(_stuDialCountry.iso2).toLowerCase();
+						var _stuIsoSaved = String(studentInitialCountry || '').toLowerCase();
+						if(_stuIsoDial && _stuIsoDial !== _stuIsoSaved && !IGNORECOUNTRYARRAY.includes(_stuIsoDial)){
+							studentInitialCountry = _stuIsoDial;
+						}
+					}
+				}
+			} catch (e) {}
+			itiContcat = initPhoneInputV29(inputContact, {
+				initialCountry: studentInitialCountry,
+				allowedNumberTypes: ["MOBILE", "FIXED_LINE_OR_MOBILE"],
+				onCountryChange: function (country) {
+					$('#countryIsd').val(country ? country.iso2 : '');
+					$('#countryDailCode').val(country ? country.dialCode : '');
+					if(typeof refreshCustomFieldState === "function"){
+						refreshCustomFieldState($(inputContact).closest(".custom-field"));
+					}
 				}
 			});
+			// When the user changes the country from the iti__country-container
+			// dropdown, clear any already-entered/saved contactNumber so a number
+			// typed for one country is never kept under a different country.
+			clearContactNumberOnCountryChange(inputContact);
 			scriptExecuted = true;
 		}
 	}
@@ -1031,7 +1056,7 @@ function renderStudentDetails(data, signupType){
 			validEndInvalidField(true, "nationality");
 		}
 	});
-	$("#contactNumber").unbind().bind("change",function(){
+	$("#contactNumber").unbind().bind("change blur keyup",function(){
 		$('#contactNumber').valid();
 		if (signupFieldValue('contactNumber').length < 5 && signupFieldValue('contactNumber').length > 0 ) {
 			validEndInvalidField(false, "contactNumber");
@@ -1042,7 +1067,32 @@ function renderStudentDetails(data, signupType){
 			//showMessage(0, 'Gendar is required');
 			return false
 		}else{
-			validEndInvalidField(true, "contactNumber");
+			// Filled: mark green ONLY if the number is actually valid for the
+			// selected country (correct format, not just length). Otherwise show
+			// the red cross. Skipped when validation is turned off via setting.
+			// itiIsValidNumber returns:
+			//   true  -> valid   (green)
+			//   false -> invalid (red cross)
+			//   null  -> validator/utils not ready yet: ensure utils load then
+			//            re-run this same check so the cross appears once ready.
+			var _valEnabled = (typeof isPhoneValidationEnabled !== 'function') || isPhoneValidationEnabled();
+			var _valid = (typeof itiIsValidNumber === 'function') ? itiIsValidNumber(itiContcat) : null;
+			if (_valEnabled && _valid === null && typeof ensureIntlUtilsLoaded === 'function') {
+				ensureIntlUtilsLoaded(function(){
+					var _v2 = (typeof itiIsValidNumber === 'function') ? itiIsValidNumber(itiContcat) : null;
+					if (_valEnabled && _v2 === false) {
+						validEndInvalidField(false, "contactNumber");
+					} else {
+						validEndInvalidField(true, "contactNumber");
+					}
+				});
+				return;
+			}
+			if (_valEnabled && _valid === false) {
+				validEndInvalidField(false, "contactNumber");
+			} else {
+				validEndInvalidField(true, "contactNumber");
+			}
 		}
 	});
 	var mandatoryFields=[];
@@ -1112,7 +1162,9 @@ function renderStudentDetails(data, signupType){
 			$('#'+formId+' #cityId').val('').trigger('change');
 			callStates(formId, this.value, 'countryId', 'stateId', 'cityId');
 			if( selectedCountry !=undefined && selectedCountry != ''){
-				itiContcat.setCountry(selectedCountry);
+				// Address country no longer overrides the phone widget's country
+				// (they are independent; phone country comes from the phone dropdown
+				// / saved data). Prevents resetting a chosen phone country on prefill.
 			}else{
 				$("#stateId").html("<option value=''>Select Province/State*</option>");
 			}
@@ -1126,7 +1178,9 @@ function renderStudentDetails(data, signupType){
 			}
 			callStates(formId, this.value, 'countryId', 'stateId', 'cityId');
 			if( selectedCountry !=undefined && selectedCountry != ''){
-				itiContcat.setCountry(selectedCountry);
+				// Address country no longer overrides the phone widget's country
+				// (independent; phone country comes from the phone dropdown / saved
+				// data). Prevents resetting a chosen phone country on prefill.
 			}else{
 				$("#stateId").html("<option value=''>Select Province/State*</option>");
 			}
@@ -1180,7 +1234,9 @@ function renderStudentDetails(data, signupType){
 	$('#learningProgramPartnerStudent').on('focus', function () {
 		PREVIOUS_LEARNING_PROGRAM_INDEX = this.selectedIndex
 	});
-
+	// Prefill complete: re-enable address->phone country sync for genuine user
+	// changes (deferred to survive select2/programmatic change events).
+	setTimeout(function(){ STUDENT_SIGNUP_PREFILLING = false; }, 600);
 }
 
 function changeLearningProgramOfPartnerInitiate(studyingGradeId) {
@@ -1426,6 +1482,7 @@ function getStudentDetailsContent(data, signupType) {
 }
 
 function renderParentDetails(data){
+	STUDENT_SIGNUP_PREFILLING = true;
 	var signupParent = data.signupParent;
 	var scriptExecuted1 = false;
 	$('#signupStage2Content').html(getParentDetailsContent(data));
@@ -1448,29 +1505,54 @@ function renderParentDetails(data){
 		if(!scriptExecuted1){
             inputParentPhone = document.querySelector("#parentPhoneNumber");
             if(inputParentPhone!=null && inputParentPhone!=''){
-                itiParent = window.intlTelInput(inputParentPhone);
-                if(typeof refreshCustomFieldState === "function"){
-                    refreshCustomFieldState($(inputParentPhone).closest(".custom-field"));
-                }
+                // Migrated to intl-tel-input v29.2 (window.intlTelInputV29, isolated from the
+                // v16.1.0 global used elsewhere on the page). "Parent Phone Number" is optional
+                // and generic (not mobile-only), so the library default allowedNumberTypes
+                // (MOBILE, FIXED_LINE) is kept.
+                // "Parent Phone Number" is optional and generic (not mobile-only),
+                // so we keep the library default number types. Preselect the saved
+                // country; when none is saved, leave the country unset (empty),
+                // matching the previous behaviour.
+                var parentInitialCountry = '';
                 if(signupParent.countryIsdCode2!=null && signupParent.countryIsdCode2!=''){
-                    if(IGNORECOUNTRYARRAY.includes(signupParent.countryIsdCode2)) {
-                        itiParent.setCountry('us');
-                    }else{
-                        itiParent.setCountry(signupParent.countryIsdCode2);
-                    }
-
-                }else{
-                    //itiParent.setCountry($("#pCountryId option:selected").attr('dail-country-code'));
+                    parentInitialCountry = IGNORECOUNTRYARRAY.includes(signupParent.countryIsdCode2) ? 'us' : signupParent.countryIsdCode2;
                 }
-
-                // attachPhoneLengthLimit(inputParentPhone, itiParent);
-                inputParentPhone.addEventListener('countrychange', function(e) {
-                    $('#parentCountryIsd').val(itiParent.getSelectedCountryData().iso2);
-                    $('#parentCountryDailCode').val(itiParent.getSelectedCountryData().dialCode);
-                    if(typeof refreshCustomFieldState === "function"){
-                        refreshCustomFieldState($(inputParentPhone).closest(".custom-field"));
+                // The saved phone-country ISO (countryIsdCode2) can disagree with the
+                // saved phone DIAL code (countryCode). This happens when a previous
+                // session let the ADDRESS country overwrite the phone country
+                // (e.g. address Singapore -> countryIsdCode2 "SG") while the number
+                // itself is India (+91 -> countryCode "91"). The dial code is the
+                // truth for the phone, so if it maps to a different country, prefer
+                // that. Uses matchCountryByDialCode (loaded via masterContent).
+                try {
+                    var _savedDial = (signupParent.countryCode == null ? '' : String(signupParent.countryCode)).replace(/\D/g, '');
+                    if(_savedDial && typeof matchCountryByDialCode === 'function'){
+                        var _dialCountry = matchCountryByDialCode(_savedDial);
+                        if(_dialCountry && _dialCountry.iso2){
+                            var _isoDial = String(_dialCountry.iso2).toLowerCase();
+                            var _isoSaved = String(parentInitialCountry || '').toLowerCase();
+                            // Only override when the ISO actually differs and isn't an
+                            // ignored/placeholder country.
+                            if(_isoDial && _isoDial !== _isoSaved && !IGNORECOUNTRYARRAY.includes(_isoDial)){
+                                parentInitialCountry = _isoDial;
+                            }
+                        }
+                    }
+                } catch (e) {}
+                itiParent = initPhoneInputV29(inputParentPhone, {
+                    initialCountry: parentInitialCountry,
+                    onCountryChange: function (country) {
+                        $('#parentCountryIsd').val(country ? country.iso2 : '');
+                        $('#parentCountryDailCode').val(country ? country.dialCode : '');
+                        if(typeof refreshCustomFieldState === "function"){
+                            refreshCustomFieldState($(inputParentPhone).closest(".custom-field"));
+                        }
                     }
                 });
+                // When the user changes the country from the iti__country-container
+                // dropdown, clear any already-entered/saved parentPhoneNumber so a
+                // number typed for one country is never kept under a different country.
+                clearContactNumberOnCountryChange(inputParentPhone);
 
 				scriptExecuted1 = true
 			}
@@ -1530,9 +1612,22 @@ function renderParentDetails(data){
 			if (signupFieldValue('parentPhoneNumber').trim()=="" || signupFieldValue('parentPhoneNumber').length == 0 ) {
 				// validEndInvalidField(false, "parentPhoneNumber");
 				//showMessage(0, 'Gendar is required');
+				// No number entered: don't carry a leftover/default country selection
+				// (e.g. the widget's default "us") into the saved data or the review
+				// screen. getRequestForSignupParent() also guards this at save time,
+				// but clearing here keeps the UI state consistent too.
+				$('#parentCountryIsd').val('');
+				$('#parentCountryDailCode').val('');
 				return false
 			}else{
-				validEndInvalidField(true, "parentPhoneNumber");
+				// Filled: green only if valid for the selected country, else red cross.
+				var _valEnabledP = (typeof isPhoneValidationEnabled !== 'function') || isPhoneValidationEnabled();
+				var _validP = (typeof itiIsValidNumber === 'function') ? itiIsValidNumber(itiParent) : null;
+				if (_valEnabledP && _validP === false) {
+					validEndInvalidField(false, "parentPhoneNumber");
+				} else {
+					validEndInvalidField(true, "parentPhoneNumber");
+				}
 			}
 		});
 	}
@@ -1650,7 +1745,12 @@ function renderParentDetails(data){
 				if(IGNORECOUNTRYARRAY.includes(selectedCountry)) {
 					selectedCountry	= "US";
 				}
-				itiParent.setCountry(selectedCountry);
+				// NOTE: The ADDRESS country dropdown no longer overrides the PHONE
+				// widget's country. They are independent — the parent phone country
+				// is chosen in the phone widget's own dropdown and loaded from saved
+				// data. Auto-syncing address -> phone repeatedly reset a correctly
+				// chosen phone country (e.g. India) to the address country (e.g.
+				// Singapore) on prefill and stored the wrong country on save.
 				$("#pStateId").html("<option value=''>Select Province/State*</option>");
 				$("#pCityId").html("<option value=''>Select City*</option>");
 				callStates(formId, this.value, 'pCountryId', 'pStateId', 'pCityId');
@@ -1690,6 +1790,10 @@ function renderParentDetails(data){
 			pCheckCSCValidation($("#"+formId+" #pCityId").val(), "pCityId", "pCityId");
 		});
 	}
+	// Prefill complete: re-enable the address->phone country sync for genuine
+	// user changes. Deferred so any select2/programmatic change fired during
+	// this render tick doesn't clobber the phone country first.
+	setTimeout(function(){ STUDENT_SIGNUP_PREFILLING = false; }, 600);
 }
 
 function autoSelectDropDownParentDetails(signupParent){
@@ -3985,6 +4089,65 @@ function moveReviewFieldsToTable(type){
 		$wrapper.append($row);
 	});
 	$wrapper.show();
+	if(type === 'student'){
+		var $reinitContact = $wrapper.find('#contactNumber');
+		if($reinitContact.length){
+			var _contactCountry = (typeof itiGetCountry === 'function' && itiContcat) ? itiGetCountry(itiContcat) : null;
+			var _contactValue = $reinitContact.val();
+			itiContcat = initPhoneInputV29($reinitContact.get(0), {
+				initialCountry: _contactCountry ? _contactCountry.iso2 : 'us',
+				allowedNumberTypes: ["MOBILE", "FIXED_LINE_OR_MOBILE"],
+				// CRITICAL: re-attach the SAME onCountryChange as the original init.
+				// Without it, changing the country on the review-edit widget never
+				// updates the hidden #countryIsd / #countryDailCode fields, so the
+				// review save (which reads those) sent the OLD country (e.g. picked
+				// Singapore but saved India).
+				onCountryChange: function (country) {
+					$('#countryIsd').val(country ? country.iso2 : '');
+					$('#countryDailCode').val(country ? country.dialCode : '');
+					if(typeof refreshCustomFieldState === "function"){
+						refreshCustomFieldState($reinitContact.closest(".custom-field"));
+					}
+				}
+			});
+			$reinitContact.val(_contactValue);
+			// Sync the hidden fields to the CURRENT country right now, so even if the
+			// user saves without touching the dropdown, the correct country persists.
+			try {
+				var _cc = (typeof itiGetCountry === 'function') ? itiGetCountry(itiContcat) : null;
+				if(_cc){
+					$('#countryIsd').val(_cc.iso2 || '');
+					$('#countryDailCode').val(_cc.dialCode || '');
+				}
+			} catch (e) {}
+		}
+	}else if(type === 'parent'){
+		var $reinitParentPhone = $wrapper.find('#parentPhoneNumber');
+		if($reinitParentPhone.length){
+			var _parentPhoneCountry = (typeof itiGetCountry === 'function' && itiParent) ? itiGetCountry(itiParent) : null;
+			var _parentPhoneValue = $reinitParentPhone.val();
+			itiParent = initPhoneInputV29($reinitParentPhone.get(0), {
+				initialCountry: _parentPhoneCountry ? _parentPhoneCountry.iso2 : '',
+				// Re-attach the parent onCountryChange so the hidden parent country
+				// fields stay in sync on the review-edit widget too.
+				onCountryChange: function (country) {
+					$('#parentCountryIsd').val(country ? country.iso2 : '');
+					$('#parentCountryDailCode').val(country ? country.dialCode : '');
+					if(typeof refreshCustomFieldState === "function"){
+						refreshCustomFieldState($reinitParentPhone.closest(".custom-field"));
+					}
+				}
+			});
+			$reinitParentPhone.val(_parentPhoneValue);
+			try {
+				var _pcc = (typeof itiGetCountry === 'function') ? itiGetCountry(itiParent) : null;
+				if(_pcc){
+					$('#parentCountryIsd').val(_pcc.iso2 || '');
+					$('#parentCountryDailCode').val(_pcc.dialCode || '');
+				}
+			} catch (e) {}
+		}
+	}
 }
 
 // Put every moved field back exactly where it came from (replace its placeholder), restoring

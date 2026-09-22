@@ -1,17 +1,17 @@
 $('.edit-field-btn').on('click', function(e){
 	var fieldValue = $(this).parent().find('.field-value').text();
 	fieldValue = $.trim(fieldValue);
-	if($(this).prev().hasClass('iti--allow-dropdown')){
+	if($(this).prev().hasClass('iti--allow-dropdown') || $(this).prev().hasClass('iti')){
 	  var string1= fieldValue;
 	  string1 = string1.split('-')[1];
-	  $(this).parent().find('.field-input').addClass('visible').attr('value', string1);
+	  $(this).parent().find('.field-input').addClass('visible').attr('value', string1).val(string1);
 	}else{
-	  $(this).parent().find('.field-input').addClass('visible').attr('value', fieldValue);
+	  $(this).parent().find('.field-input').addClass('visible').attr('value', fieldValue).val(fieldValue);
 	}
 	$(this).hide().parent().find('.save-field-btn').addClass('visible');
 	$(this).hide().parent().find('.cancel-field-btn').addClass('visible');
 	$(this).parent().find('.field-value').addClass('hide-value');
-	$(this).parent().find('.iti--allow-dropdown, .select2').addClass('visible')
+	$(this).parent().find('.iti--allow-dropdown, .iti, .select2').addClass('visible')
 });
 
 $(document).on('dragstart dragover drop', function(event) { event.preventDefault(); });
@@ -152,6 +152,17 @@ function validateFields(keyId, fieldValue){
 		if(fieldValue==''|| fieldValue==undefined){
 			showMessageTheme2(0,"Contact number is mandatory.",'',false);
 			return false;
+		}
+		if(typeof validatePhoneNumberElement === "function" && typeof itiPhone !== "undefined" && itiPhone){
+			if(!validatePhoneNumberElement(document.getElementById('phoneNumber'), itiPhone, true)){
+				return false;
+			}
+		}
+	}else if(keyId=='alternatePhoneNumber'){
+		if(typeof validatePhoneNumberElement === "function" && typeof itiAltPhone !== "undefined" && itiAltPhone){
+			if(!validatePhoneNumberElement(document.getElementById('alternatePhoneNumber'), itiAltPhone, false)){
+				return false;
+			}
 		}
 	}else if(keyId=='gender' || keyId=='parentGender'){
 		if(fieldValue==''|| fieldValue==undefined ||fieldValue==0){
@@ -402,7 +413,7 @@ function applyChanges(src, keyId,userId,studentStandardId,roleModuleId,moduleId,
 						console.log("Isd Code",isdCode);
 						$(src).removeClass('visible').parent().find('.edit-field-btn').show();
 						$(src).parent().find('.field-value').removeClass('hide-value').text(isdCode+fieldValue);
-						$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible')
+						$(src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible')
 						$(src).parent().find('.cancel-field-btn').removeClass('visible');
 					}else if(keyId=='preferredcommunication'){
 						$(src).removeClass('visible').parent().find('.edit-field-btn').show();
@@ -415,7 +426,7 @@ function applyChanges(src, keyId,userId,studentStandardId,roleModuleId,moduleId,
 						}
 						$(src).removeClass('visible').parent().find('.edit-field-btn').show();
 						$(src).parent().find('.field-value').removeClass('hide-value').text(fieldValue);
-						$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible')
+						$(src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible')
 						$(src).parent().find('.cancel-field-btn').removeClass('visible');
 						if($('#isProfileUplaoded').val()==0 && keyId=='gender'){
 							var profilePic="Profile-picture.jpg"
@@ -436,25 +447,25 @@ function applyChanges(src, keyId,userId,studentStandardId,roleModuleId,moduleId,
 						$('.cityName').text($('#cityId option:selected').text()).removeClass('hide-value');
 						$('.stateName').text($('#stateId option:selected').text()).removeClass('hide-value');
 						$(src).parent().find('.cancel-field-btn').removeClass('visible');
-						$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+						$(src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible');
 						$(src).removeClass('visible').parent().find('.edit-field-btn').show();
 						$('.save-country').addClass('d-none');
 					}else if(keyId=='studyingGradeId'){
 						$('.studyingGradeName').text($('#studyingGradeId option:selected').text()).removeClass('hide-value');
 						$(src).parent().find('.cancel-field-btn').removeClass('visible');
-						$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+						$(src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible');
 						$(src).removeClass('visible').parent().find('.edit-field-btn').show();
 					}else if(keyId=='countryIdOfSchool'){
 						$('.countryNameOfSchool').text($('#countryIdOfSchool option:selected').text()).removeClass('hide-value');
 						$(src).parent().find('.cancel-field-btn').removeClass('visible');
-						$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+						$(src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible');
 						$(src).removeClass('visible').parent().find('.edit-field-btn').show();
 					}else if(keyId=='countrySectionParent'){
 						$('.countryNameParent').text($('#pCountryId option:selected').text()).removeClass('hide-value');
 						$('.cityNameParent').text($('#pCityId option:selected').text()).removeClass('hide-value');
 						$('.stateNameParent').text($('#pStateId option:selected').text()).removeClass('hide-value');
 						$(src).parent().find('.cancel-field-btn').removeClass('visible');
-						$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+						$(src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible');
 						$(src).removeClass('visible').parent().find('.edit-field-btn').show();
 						$('.save-country-Parent').addClass('d-none');
 					}else if(keyId=='admissonDate'){
@@ -478,13 +489,13 @@ function applyChanges(src, keyId,userId,studentStandardId,roleModuleId,moduleId,
 					}else if(keyId=='reserveASeat'){
 						$('.reserveASeatName').text($('#reserveASeat option:selected').text()).removeClass('hide-value');
 						$(src).parent().find('.cancel-field-btn').removeClass('visible');
-						$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+						$(src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible');
 						$(src).removeClass('visible').parent().find('.edit-field-btn').show();
 					}else if(keyId=='bookASeatNextGradeOpted'){
 						hidePermissionAndApprovalModal();
 						$('.reserveASeatNextGradeName').text($('#bookASeatNextGradeOpted option:selected').text()).removeClass('hide-value');
 						$("#"+src).parent().find('.cancel-field-btn').removeClass('visible');
-						$("#"+src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+						$("#"+src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible');
 						$("#"+src).removeClass('visible').parent().find('.edit-field-btn').show();
 						if($('#bookASeatNextGradeOpted option:selected').text()=='Yes'){
 							$('.advanceNextGradeName').html('No');
@@ -497,7 +508,7 @@ function applyChanges(src, keyId,userId,studentStandardId,roleModuleId,moduleId,
 						hidePermissionAndApprovalModal();
 						$('.advanceNextGradeName').text($('#advanceGradeOpted option:selected').text()).removeClass('hide-value');
 						$("#"+src).parent().find('.cancel-field-btn').removeClass('visible');
-						$("#"+src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+						$("#"+src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible');
 						$("#"+src).removeClass('visible').parent().find('.edit-field-btn').show();
 						if($('#bookASeatNextGradeOpted option:selected').text()=='Yes'){
 							$('.reserveASeatNextGradeName').html('No');
@@ -509,48 +520,48 @@ function applyChanges(src, keyId,userId,studentStandardId,roleModuleId,moduleId,
 					}else if(keyId=='specialization'){
 						$('.specilZViewSubject').text(data['extra']).removeClass('hide-value');
 						$(src).parent().find('.cancel-field-btn').removeClass('visible');
-						$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+						$(src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible');
 						$(src).removeClass('visible').parent().find('.edit-field-btn').show();
 					}else if(keyId=='totalTeacheingExperience'){
 						$('.totalTeacheingExpView').text(data['extra']).removeClass('hide-value');
 						$(src).parent().find('.cancel-field-btn').removeClass('visible');
-						$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+						$(src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible');
 						$(src).removeClass('visible').parent().find('.edit-field-btn').show();
 					}else if(keyId=='preferredSubjectName'){
 						$('.preferredSubjectNameView').text(data['extra']).removeClass('hide-value');
 						$(src).parent().find('.cancel-field-btn').removeClass('visible');
-						$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+						$(src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible');
 						$(src).removeClass('visible').parent().find('.edit-field-btn').show();
 					}else if(keyId=='lastsubTaught'){
 						$('.lastsubTaughtView').text(data['extra']).removeClass('hide-value');
 						$(src).parent().find('.cancel-field-btn').removeClass('visible');
-						$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+						$(src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible');
 						$(src).removeClass('visible').parent().find('.edit-field-btn').show();
 					}else if(keyId=='lastOrgGradeName'){
 						$('.lastOrgGradeNameView').text(data['extra']).removeClass('hide-value');
 						$(src).parent().find('.cancel-field-btn').removeClass('visible');
-						$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+						$(src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible');
 						$(src).removeClass('visible').parent().find('.edit-field-btn').show();
 					}else if(keyId=='preferredGradeName'){
 						$('.prefGradeNameView').text(data['extra']).removeClass('hide-value');
 						$(src).parent().find('.cancel-field-btn').removeClass('visible');
-						$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+						$(src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible');
 						$(src).removeClass('visible').parent().find('.edit-field-btn').show();
 					}else if(keyId=='departmentId'){
 						$('.departmentNameView').text($('#'+keyId).val()).removeClass('hide-value');
 						$(src).parent().find('.cancel-field-btn').removeClass('visible');
-						$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+						$(src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible');
 						$(src).removeClass('visible').parent().find('.edit-field-btn').show();
 					}else if(keyId=='countryTimezoneId'){
 						$('.countryTimezoneView').text(data['extra']).removeClass('hide-value');
 						$('.timeZoneSavedStatus').text("");
 						$('.cancel-field-btn').removeClass('visible');
-						$('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+						$('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible');
 						$('.save-field-btn').removeClass('visible').parent().find('.edit-field-btn').show();
 					}else if(keyId=='designation'){
 						$('.designationView').text($('#'+keyId).val()).removeClass('hide-value');
 						$(src).parent().find('.cancel-field-btn').removeClass('visible');
-						$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+						$(src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible');
 						$(src).removeClass('visible').parent().find('.edit-field-btn').show();
 					}else if(keyId=='otherRelation'|| keyId=='relationType'){
 						var viewValue='';
@@ -561,7 +572,7 @@ function applyChanges(src, keyId,userId,studentStandardId,roleModuleId,moduleId,
 						}
 						$('.relationTypeView').text(viewValue).removeClass('hide-value');
 						$(src).parent().find('.cancel-field-btn').removeClass('visible');
-						$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+						$(src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible');
 						$(src).removeClass('visible').parent().find('.edit-field-btn').show();
 						$(".otherRelationDiv").hide();
 					}else if(keyId=='joiningDate'){
@@ -582,7 +593,7 @@ function applyChanges(src, keyId,userId,studentStandardId,roleModuleId,moduleId,
 						$('.employee_type').text(employeeType).removeClass('hide-value');
 						$('.employee_type_start_date').text(selectedDate2[1]+", "+selectedDate2[2]+" "+selectedDate2[3]);
 						$(src).parent().find('.field-value').removeClass('hide-value');
-						$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible')
+						$(src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible')
 						$(src).parent().find('.cancel-field-btn').removeClass('visible');
 						$(src).removeClass('visible').parent().find('.edit-field-btn').show();
 					}else if(keyId=='parentEmailId'){
@@ -593,7 +604,7 @@ function applyChanges(src, keyId,userId,studentStandardId,roleModuleId,moduleId,
 							$('.parentLmsCreationCheck').css("display","none");
 							$('.parentOtpcheck').css("display","none");
 							$(src).parent().find('.field-value').removeClass('hide-value').text(fieldValue);
-							$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible')
+							$(src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible')
 							$(src).parent().find('.cancel-field-btn').removeClass('visible');
 							$(src).parent().find('.save-field-btn').removeClass('visible');
 							$(src).parent().find('.edit-field-btn').removeClass('visible');
@@ -604,7 +615,7 @@ function applyChanges(src, keyId,userId,studentStandardId,roleModuleId,moduleId,
 							$('.parentOtpcheck').css("display","none");
 							$('.parentOtpcheck').css("display","block");
 							$(src).parent().find('.field-value').removeClass('hide-value').text(fieldValue);
-							$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible')
+							$(src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible')
 							$(src).parent().find('.cancel-field-btn').removeClass('visible');
 							$(src).parent().find('.save-field-btn').removeClass('visible');
 							$(src).parent().find('.edit-field-btn').removeClass('visible');
@@ -620,7 +631,7 @@ function applyChanges(src, keyId,userId,studentStandardId,roleModuleId,moduleId,
 							}
 							$(src).removeClass('visible').parent().find('.edit-field-btn').show();
 							$(src).parent().find('.field-value').removeClass('hide-value').text(fieldValue);
-							$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible')
+							$(src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible')
 							$(src).parent().find('.cancel-field-btn').removeClass('visible');
 						}
 					}else if(keyId=='parentEmailSmsLmsCreation'){
@@ -681,7 +692,7 @@ function applyChanges(src, keyId,userId,studentStandardId,roleModuleId,moduleId,
 						}else{
 							$(src).parent().find('.field-value').removeClass('hide-value').text(fieldValue);
 						}
-						$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible')
+						$(src).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible')
 						$(src).parent().find('.cancel-field-btn').removeClass('visible');
 					}
 					if (data['statusCode'] == 'ST001') {
@@ -753,7 +764,7 @@ $('.cancel-field-btn').on('click', function(){
 		$('.employee_type').removeClass('hide-value').text(employeeType);
 		$(this).parent().find('.save-field-btn').removeClass('visible');
 		$(this).removeClass('visible').parent().find('.edit-field-btn').show();
-		$(this).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
+		$(this).parent().find('.field-input, .iti--allow-dropdown, .iti, .select2').removeClass('visible');
 	}else if($(this).parent().hasClass('verificationMail')){
 		fieldValueHTML = $(".emailIdView").html();
 		$(this).parent().find('.save-field-btn').removeClass('visible');
@@ -767,8 +778,12 @@ $('.cancel-field-btn').on('click', function(){
 		$(this).parent().find('.save-field-btn').removeClass('visible');
 		$(this).removeClass('visible').parent().find('.edit-field-btn').show();
 		$(this).parent().find('.field-value').removeClass('hide-value').text(fieldValue);
-		$(this).parent().find('.iti--allow-dropdown, .select2').val(cancelFieldValue).removeClass('visible');
-		$(this).parent().find('.field-input').attr('value', fieldValue).removeClass('visible');
+		$(this).parent().find('.iti--allow-dropdown, .iti, .select2').val(cancelFieldValue).removeClass('visible');
+		if($(this).parent().find('.iti--allow-dropdown, .iti').length){
+			$(this).parent().find('.field-input').attr('value', cancelFieldValue).val(cancelFieldValue).removeClass('visible');
+		}else{
+			$(this).parent().find('.field-input').attr('value', fieldValue).val(fieldValue).removeClass('visible');
+		}
 		$(".otherRelationDiv").hide()
 	}
  });
@@ -971,6 +986,18 @@ function getBankDetailsByUserId(userId, onlyEdit){
 			$('#profileViewOnlyContent').html(teacherBankDetailsView(bankDetails));
 			if(onlyEdit){
 				$("#teacherProfileContentDiv").after(teacherBankDetialsContent(bankDetails,userId));
+				// The page-load-time `$(".select_dropdown").select2(...)` call (in
+				// this same file) runs synchronously before this AJAX callback, so
+				// it never sees these selects — they're injected here, later. Without
+				// this, the country/state/city selects stay plain (un-select2'd) and
+				// visually show no selection even though the correct option already
+				// has the `selected` attribute set (from bankDetails.accountHolderCountryId
+				// / bankDetails.bankCountryId via getCountriesOption).
+				$("#bankDetailsForm .select_dropdown").select2({
+					theme: "bootstrap4",
+					placeholder: "Select an option",
+					minimumResultsForSearch: Infinity
+				});
 			}
 
 			$("#accountHolderCountryId").unbind().bind("change", function () {
@@ -1720,11 +1747,11 @@ function openTeacherReferencesModal(id){
 		const reference = employeeReferences[id];
 		const isoCode = reference?.isoCode || 'in';
 		const number = reference?.phoneNumber || '';
-		const iti = window.intlTelInput(phoneInput, {
-			initialCountry: isoCode,
-			separateDialCode: true,
-		});
-		if (number) iti.setNumber(`+${reference.isdCode}${number}`);
+		if (number) {
+			phoneInput.value = reference?.isdCode ? `+${reference.isdCode}${number}` : number;
+		}
+		const iti = initPhoneInputV29(phoneInput, { initialCountry: isoCode });
+		clearContactNumberOnCountryChange(phoneInput);
 	}, 500);
 }
 
@@ -1745,6 +1772,15 @@ function validateReference(refNum) {
 		showMessageTheme2(2, `Please fill all fields for Reference ${parseInt(refNum) + 1}.`, "", true);
 		return false;
 	}
+	if (allFilled) {
+		const phoneInput = document.querySelector(`#reference${refNum}Phone`);
+		const iti = itiGetInstance(phoneInput);
+		if (typeof validatePhoneNumberElement === "function" && iti) {
+			if (!validatePhoneNumberElement(phoneInput, iti, true)) {
+				return false;
+			}
+		}
+	}
 	return true;
 }
 
@@ -1755,8 +1791,8 @@ function extractReference(refNum) {
 	const designation = $(`#reference${refNum}Designation`).val().trim();
 	const primaryId = $(`#reference${refNum}PrimaryId`).val();
 	const userId = USER_ID;
-	const iti = window.intlTelInputGlobals.getInstance(phoneInput);
-	const countryData = iti.getSelectedCountryData();
+	const iti = itiGetInstance(phoneInput);
+	const countryData = itiGetCountry(iti);
 	const isdCode = countryData ? parseInt(countryData.dialCode) : null;
 	const isoCode = countryData ? countryData.iso2 : null;
 

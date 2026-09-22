@@ -230,10 +230,14 @@ textarea.form-control-field{height: inherit !important;}
 
 /* accordian css  */
 .accordion {width: 100%;display: inline-block;}
-.accordion li {width: 100%;float: left;margin-bottom: 4px;}
-.accordion li:last-child {margin-bottom: 0;}
-.accordion li>div {width: 100%;float: left;}
-.accordion li>div>.full {float: left;}
+/* ">" on purpose - unscoped ".accordion li" would also match intl-tel-input's
+   own nested <li class="iti__country"> markup when the phone widget sits
+   inside a review .accordion, forcing float:left onto it and breaking its
+   flex layout into a distorted grid. */
+.accordion > li {width: 100%;float: left;margin-bottom: 4px;}
+.accordion > li:last-child {margin-bottom: 0;}
+.accordion > li > div {width: 100%;float: left;}
+.accordion > li > div > .full {float: left;}
 .accordion .a-title {width: 100%;float: left;padding: 8px 12px;background: #f7f7f7;color: #333;margin: 0;cursor: pointer;font-weight: 600;padding-right: 35px;font-size: 15px;}
 .accordion .a-title i {float: right;line-height: 25px;font-size: 14px;}
 .accordion .a-content {width: 100%;float: left;padding: 12px;border: 1px solid rgba(255, 255, 255, 0.5);display: none;border: 1px solid #f7f7f7;}

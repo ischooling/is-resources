@@ -309,30 +309,31 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 			itiPhoneNumber.destroy();
 		}
 		var phoneNumber = document.querySelector("#"+formId+" #phoneNo");
-		itiPhoneNumber = window.intlTelInput(phoneNumber, {
-			//separateDialCode: true,
+		itiPhoneNumber = initPhoneInputV29(phoneNumber, {
+			initialCountry: 'us',
+			onCountryChange: function (country) {
+				$('#'+formId+' #pCountryCode').val(country ? country.iso2 : '');
+				$('#'+formId+' #isdCode').val(country ? country.dialCode : '');
+			}
 		});
-		phoneNumber.addEventListener('countrychange', function(e) {
-			$('#'+formId+' #pCountryCode').val(itiPhoneNumber.getSelectedCountryData().iso2);
-			$('#'+formId+' #isdCode').val(itiPhoneNumber.getSelectedCountryData().dialCode);
-		});
+		clearContactNumberOnCountryChange(phoneNumber);
 
 		if (itiAltPhoneNumber && typeof itiAltPhoneNumber.destroy === 'function') {
 			itiAltPhoneNumber.destroy();
 		}
 		var altPhoneNumber = document.querySelector("#"+formId+" #phoneNoAlter");
-		itiAltPhoneNumber= window.intlTelInput(altPhoneNumber, {
-			//separateDialCode: true,
+		itiAltPhoneNumber= initPhoneInputV29(altPhoneNumber, {
+			initialCountry: 'us',
+			onCountryChange: function (country) {
+				$('#'+formId+' #pCountryCodeAlter').val(country ? country.iso2 : '');
+				$('#'+formId+' #isdCodeAlter').val(country ? country.dialCode : '');
+			}
 		});
-		altPhoneNumber.addEventListener('countrychange', function(e) {
-			console.log("itiPhone=>", itiAltPhoneNumber.getSelectedCountryData());
-			$('#'+formId+' #pCountryCodeAlter').val(itiAltPhoneNumber.getSelectedCountryData().iso2);
-			$('#'+formId+' #isdCodeAlter').val(itiAltPhoneNumber.getSelectedCountryData().dialCode);
-		});
+		clearContactNumberOnCountryChange(altPhoneNumber);
 		getTggingMasterList(''+formId+'', 'leadTagging');
 		getPriorityMasterList(''+formId+'', 'leadPriority');
-		
-		
+
+
 
 	});
 
@@ -765,29 +766,30 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 				itiPhoneNumber.destroy();
 			}
 			var phoneNumber = document.querySelector("#"+formId+" #phoneNo");
-			itiPhoneNumber = window.intlTelInput(phoneNumber, {
-				//separateDialCode: true,
+			itiPhoneNumber = initPhoneInputV29(phoneNumber, {
+				initialCountry: 'us',
+				onCountryChange: function (country) {
+					$('#'+formId+' #pCountryCode').val(country ? country.iso2 : '');
+					$('#'+formId+' #isdCode').val(country ? country.dialCode : '');
+				}
 			});
-			phoneNumber.addEventListener('countrychange', function(e) {
-				$('#'+formId+' #pCountryCode').val(itiPhoneNumber.getSelectedCountryData().iso2);
-				$('#'+formId+' #isdCode').val(itiPhoneNumber.getSelectedCountryData().dialCode);
-			});
+			clearContactNumberOnCountryChange(phoneNumber);
 
 			if (itiAltPhoneNumber && typeof itiAltPhoneNumber.destroy === 'function') {
 				itiAltPhoneNumber.destroy();
 			}
 			var altPhoneNumber = document.querySelector("#"+formId+" #phoneNoAlter");
-			itiAltPhoneNumber= window.intlTelInput(altPhoneNumber, {
-				//separateDialCode: true,
+			itiAltPhoneNumber= initPhoneInputV29(altPhoneNumber, {
+				initialCountry: 'us',
+				onCountryChange: function (country) {
+					$('#'+formId+' #pCountryCodeAlter').val(country ? country.iso2 : '');
+					$('#'+formId+' #isdCodeAlter').val(country ? country.dialCode : '');
+				}
 			});
-			altPhoneNumber.addEventListener('countrychange', function(e) {
-				console.log("itiPhone=>", itiAltPhoneNumber.getSelectedCountryData());
-				$('#'+formId+' #pCountryCodeAlter').val(itiAltPhoneNumber.getSelectedCountryData().iso2);
-				$('#'+formId+' #isdCodeAlter').val(itiAltPhoneNumber.getSelectedCountryData().dialCode);
-			});
+			clearContactNumberOnCountryChange(altPhoneNumber);
 			getTggingMasterList(''+formId+'', 'leadTagging');
 			getPriorityMasterList(''+formId+'', 'leadPriority');
-			
+
 
 		});
 

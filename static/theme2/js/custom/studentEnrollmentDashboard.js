@@ -90,9 +90,13 @@ function sedRenderBatchKpis(b) {
     var total = Number(b.total || 0), students = Number(b.students || 0);
     sedSetVal('sedBatTotal', total);
     sedSetVal('sedBatActive', b.active);
-    sedSetVal('sedBatTeacher', b.withTeacher);
-    sedSetVal('sedBatStudents', students);
+    sedSetVal('sedBatRunning', b.running);
     sedSetVal('sedBatFull', b.full);
+    // empty comes from the same query as the rest; "with students" and "no teacher" are its counterparts
+    var empty = Number(b.empty || 0);
+    sedSetVal('sedBatEmpty', empty);
+    sedSetVal('sedBatFilled', Math.max(0, total - empty));
+    sedSetVal('sedBatNoTeacher', Math.max(0, total - Number(b.withTeacher || 0)));
     $('#sedBatAvg').text(total > 0 ? (students / total).toFixed(1) : '0');
 }
 
@@ -444,9 +448,9 @@ function sedRenderProgress(p) {
     if (typeof ApexCharts === 'undefined') { return; }
     var sel = '#sedProgressChart';
     if (SED_CHARTS[sel]) { try { SED_CHARTS[sel].destroy(); } catch (e) {} }
-    var cats = ['N/A', '0%', '1–25%', '26–50%', '51–75%', '76–99%', '100%'];
-    var vals = [Number(p.na || 0), Number(p.b0 || 0), Number(p.b1 || 0), Number(p.b2 || 0), Number(p.b3 || 0), Number(p.b4 || 0), Number(p.b5 || 0)];
-    var cols = [SED_COLORS.faint, SED_COLORS.crit, SED_COLORS.warn, SED_COLORS.warn, SED_COLORS.teal, SED_COLORS.good, SED_COLORS.brand];
+    var cats = ['N/A', '0%', '1–25%', '26–50%', '51–75%', '76–94%', '95–99%', '100%'];
+    var vals = [Number(p.na || 0), Number(p.b0 || 0), Number(p.b1 || 0), Number(p.b2 || 0), Number(p.b3 || 0), Number(p.b4 || 0), Number(p.b6 || 0), Number(p.b5 || 0)];
+    var cols = [SED_COLORS.faint, SED_COLORS.crit, SED_COLORS.warn, SED_COLORS.warn, SED_COLORS.teal, SED_COLORS.good, SED_COLORS.violet, SED_COLORS.brand];
     var opt = {
         chart: { type: 'bar', height: 280, fontFamily: 'inherit', toolbar: { show: false },
             events: { dataPointSelection: function (e, c, cfg) { sedOpenDrawer('progress' + cfg.dataPointIndex, 'Progress · ' + cats[cfg.dataPointIndex]); } } },

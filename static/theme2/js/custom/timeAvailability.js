@@ -3868,6 +3868,23 @@ function scheduleMeetingForEvent(formId){
 			showMessageTheme2(0,"Phone No. field is mandatory",'',true);
 			return false;
 		}
+		// Validate the phone number's length AND format for the selected country
+		// (e.g. Singapore must start with 3/6/8/9). Without this an invalid number
+		// was being saved. The instance was created by initializeIntelInput and
+		// cached on the DOM element.
+		var _meetingPhoneEl = document.querySelector('#'+formId+' #phoneNo') || document.querySelector('#phoneNo');
+		var _meetingPhoneIti = _meetingPhoneEl ? _meetingPhoneEl.intlTelInputInstance : null;
+		if(typeof checkPhoneNumberLength === "function" && _meetingPhoneEl && _meetingPhoneIti){
+			var _meetingPhoneCheck = checkPhoneNumberLength(_meetingPhoneEl, _meetingPhoneIti, true);
+			if(!_meetingPhoneCheck.valid && _meetingPhoneCheck.reason === "length"){
+				showMessageTheme2(0, "Phone number for " + _meetingPhoneCheck.countryName + " must be " + _meetingPhoneCheck.expectedDigits + " digits.", '', true);
+				return false;
+			}
+			if(!_meetingPhoneCheck.valid && _meetingPhoneCheck.reason === "invalid"){
+				showMessageTheme2(0, "Please enter a valid phone number for " + _meetingPhoneCheck.countryName + ".", '', true);
+				return false;
+			}
+		}
 	}
 	
 	// if($('#'+formId+' #communicationWhatsApp').length && !$('#'+formId+' #communicationWhatsApp').is(':checked') && !$('#'+formId+' #communicationCall').is(':checked')){

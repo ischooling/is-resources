@@ -4062,13 +4062,9 @@ function destroyHoldIntlInstance(inputEl, instanceRef) {
     } catch (e) {}
   }
 
-  if (
-    inputEl &&
-    window.intlTelInputGlobals &&
-    typeof window.intlTelInputGlobals.getInstance === "function"
-  ) {
+  if (inputEl) {
     try {
-      var liveInstance = window.intlTelInputGlobals.getInstance(inputEl);
+      var liveInstance = itiGetInstance(inputEl);
       if (liveInstance && typeof liveInstance.destroy === "function") {
         liveInstance.destroy();
       }
@@ -4139,10 +4135,9 @@ function initHoldPhoneField(selector, hiddenIsoSelector, hiddenDialSelector, cou
   }
 
   var safeCountryIso = (countryIso || "us").toLowerCase();
-  var itiInstance = window.intlTelInput(inputEl, {
-    separateDialCode: true
+  var itiInstance = initPhoneInputV29(inputEl, {
+    initialCountry: safeCountryIso
   });
-  itiInstance.setCountry(safeCountryIso);
 
   var selectedCountryData = itiInstance.getSelectedCountryData() || {};
   var localPhoneValue = getHoldPhoneLocalValue(phoneValue, selectedCountryData.dialCode || "");

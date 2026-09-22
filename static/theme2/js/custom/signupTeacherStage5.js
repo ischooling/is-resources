@@ -24,8 +24,12 @@ function signupTeacherStage5OnLoadEvent(data){
 	phoneIds.forEach((selector, index) => {
 		const input = document.querySelector(selector);
 		if (input) {
-			const iti = window.intlTelInput(input, {
+			const iti = initPhoneInputV29(input, {
 				initialCountry: 'us',
+				onCountryChange: function (country) {
+					$('#countryData' + (index + 1)).val(country ? country.iso2 : '');
+					$('#countryIsd' + (index + 1)).val(country ? country.dialCode : '');
+				}
 			});
 			const ref = data.employeeReference[index];
 			if (ref?.isdCode && ref?.isoCode) {
@@ -37,11 +41,7 @@ function signupTeacherStage5OnLoadEvent(data){
 				$('#countryData' + (index + 1)).val(ref.isoCode.toLowerCase());
 				$('#countryIsd' + (index + 1)).val(ref.isdCode);
 			}
-			input.addEventListener('countrychange', function () {
-				const countryData = iti.getSelectedCountryData();
-				$('#countryData' + (index + 1)).val(countryData.iso2);
-				$('#countryIsd' + (index + 1)).val(countryData.dialCode);
-			});
+			clearContactNumberOnCountryChange(input);
 		}
 	});
 }
@@ -156,8 +156,8 @@ function getRequestForVerification() {
 		const phoneInput = document.querySelector(`#reference${refNum}Phone`);
 		const designation = $(`#reference${refNum}Designation`).val().trim();
 
-		const iti = window.intlTelInputGlobals.getInstance(phoneInput);
-		const countryData = iti.getSelectedCountryData();
+		const iti = itiGetInstance(phoneInput);
+		const countryData = itiGetCountry(iti);
 		const isdCode = countryData ? parseInt(countryData.dialCode) : null;
 		const isoCode = countryData ? countryData.iso2 : null;
 
