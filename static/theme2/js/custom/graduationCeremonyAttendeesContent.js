@@ -179,7 +179,7 @@ function getGraduationCeremonyAttendeesContent(title, roleAndModule, schoolId, u
                         <select class="form-control" id="filterPaymentStatus">
                             <option value=""></option>
                             <option value="INITIATED">Initiated</option>
-                            <option value="SCHEDULED">Scheduled</option>
+                            <option value="SCHEDULED">Pending</option>
                             <option value="PARTIAL_PAID">Partial Paid</option>
                             <option value="SUCCESS">Success</option>
                         </select>

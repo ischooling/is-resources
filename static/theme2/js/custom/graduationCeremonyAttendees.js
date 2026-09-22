@@ -1,9 +1,11 @@
 var GRADUATION_CEREMONY_FILTER_STATE = {
     filterValues: {
-        ceremonyTitle: "GRADUATION_CEREMONY_2026"
+        ceremonyTitle: "GRADUATION_CEREMONY_2026",
+        country: "Colombia"
     }
 };
 var GRADUATION_CEREMONY_LAST_COMMUNICATIONS = {};
+var GRADUATION_CEREMONY_COUNTRY_DEFAULT_APPLIED = false;
 
 const ALLOW_DISCARD_GRADUATION_CEREMONY_ATTENDEE = getSettingsByTypeAndKey('CONFIGURATION', 'ALLOW_DISCARD_GRADUATION_CEREMONY_ATTENDEE');
 var isUserAllowedToDiscardGraduationCeremonyAttendee = false;
@@ -19,7 +21,8 @@ try{
 function resetGraduationCeremonyFilterStateToDefault(){
     GRADUATION_CEREMONY_FILTER_STATE = {
         filterValues: {
-            ceremonyTitle: "GRADUATION_CEREMONY_2026"
+            ceremonyTitle: "GRADUATION_CEREMONY_2026",
+            country: ""
         }
     };
 }
@@ -100,7 +103,7 @@ function loadGraduationCeremonyAttendees(){
                         const amountText = person.amount === null || person.amount === undefined || person.amount === "null"
                             ? "N/A"
                             : `$${person.amount}`;
-                        const statusText = person.amountStatus ? person.amountStatus : "SCHEDULED";
+                        const statusText = replaceGraduationCeremonyScheduledStatus(person.amountStatus ? person.amountStatus : "PENDING");
                         const paidBadgeClass = (person.isPaid || "").toUpperCase() === "Y" ? "success" : "warning";
                         return `<div class="mb-1" style="white-space:nowrap;">
                             <small>
@@ -117,8 +120,8 @@ function loadGraduationCeremonyAttendees(){
                        <small><strong>Total:</strong> $${totalAmount}</small>`
                     : `<small>$${(attendee.amountStatus || "").toUpperCase() === "SUCCESS" ? totalAmount : pendingAmount}</small>`;
                 const paymentStatusInfo = hasPaidGuests && pendingAmount > 0
-                    ? `<small><strong>${attendee.amountStatus}</strong></small><br><small>Pending Batch: ${pendingPaymentStatus}</small>`
-                    : `<small>${attendee.amountStatus}</small>`;
+                    ? `<small><strong>${replaceGraduationCeremonyScheduledStatus(attendee.amountStatus)}</strong></small><br><small>Pending Batch: ${replaceGraduationCeremonyScheduledStatus(pendingPaymentStatus)}</small>`
+                    : `<small>${replaceGraduationCeremonyScheduledStatus(attendee.amountStatus)}</small>`;
 
                 tbodyHtml += `<tr>
                     <td>${sno}</td>
@@ -177,7 +180,9 @@ function applyFilterGraduationCeremonyAttendees(){
 function resetGraduationCeremonyAttendeesFilter(){
     $('#graduationCeremonyFilterForm')[0].reset();
     resetGraduationCeremonyFilterStateToDefault();
+    GRADUATION_CEREMONY_COUNTRY_DEFAULT_APPLIED = true;
     $("#graduationCeremonyFilterForm #filterCeremonyName").val("GRADUATION_CEREMONY_2026");
+    $("#graduationCeremonyFilterForm #filterCountry").val("");
     if(typeof refreshCustomFieldState === "function"){
         setTimeout(function(){
             refreshCustomFieldState($("#graduationCeremonyFilterForm"));
@@ -207,9 +212,16 @@ function ensureDefaultGraduationCeremonyFilters(){
     if(!GRADUATION_CEREMONY_FILTER_STATE.filterValues.ceremonyTitle){
         GRADUATION_CEREMONY_FILTER_STATE.filterValues.ceremonyTitle = "GRADUATION_CEREMONY_2026";
     }
+    if(!GRADUATION_CEREMONY_COUNTRY_DEFAULT_APPLIED && !GRADUATION_CEREMONY_FILTER_STATE.filterValues.country){
+        GRADUATION_CEREMONY_FILTER_STATE.filterValues.country = "Colombia";
+    }
     if($("#graduationCeremonyFilterForm #filterCeremonyName").length && !$("#graduationCeremonyFilterForm #filterCeremonyName").val()){
         $("#graduationCeremonyFilterForm #filterCeremonyName").val("GRADUATION_CEREMONY_2026");
     }
+    if(!GRADUATION_CEREMONY_COUNTRY_DEFAULT_APPLIED && $("#graduationCeremonyFilterForm #filterCountry").length && !$("#graduationCeremonyFilterForm #filterCountry").val()){
+        $("#graduationCeremonyFilterForm #filterCountry").val(GRADUATION_CEREMONY_FILTER_STATE.filterValues.country);
+    }
+    GRADUATION_CEREMONY_COUNTRY_DEFAULT_APPLIED = true;
 }
 
 function getGraduationCeremonyTimeSlot(preferredDateTime){
@@ -227,6 +239,13 @@ function getGraduationCeremonyTimeSlot(preferredDateTime){
     };
 
     return slotMap[timePart] || timePart || "N/A";
+}
+
+function replaceGraduationCeremonyScheduledStatus(status){
+    if(status === null || status === undefined){
+        return status;
+    }
+    return (status + "").toUpperCase() === "SCHEDULED" ? "PENDING" : status;
 }
 
 function formatGraduationCeremonyPhone(phoneNo){
