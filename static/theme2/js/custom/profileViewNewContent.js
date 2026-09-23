@@ -1922,6 +1922,7 @@ function academicInformation(data) {
                             <span>3. Academic Information</span>
                             <div class="ml-auto">
                                 ${skipSystemTrainingHeaderControl(data)}
+                                ${restoreExpiredCountHeaderControl(data)}
                                 ${data.standardStatus == 0 ?
                                     `<a href="javascript:void(0)" onclick="callWithSession('${data.studentIdCardDownloadUrl}');" class="btn btn-sm btn-success mr-1">Download Student ID Card</a>` : ``
                                 }
@@ -2348,6 +2349,89 @@ function confirmSkipSystemTrainingFromProfile() {
                 $("#skipSystemTrainingBtn").replaceWith('<span id="skipSystemTrainingBtn" class="mr-1 font-weight-semi-bold text-dark" style="font-size:12px">System Training Skipped</span>');
             }
         }
+    });
+}
+
+function restoreExpiredCountHeaderControl(data) {
+    if (data.showRestoreExpiredCount) {
+        return `<a href="javascript:void(0)" id="restoreExpiredCountBtn" class="btn btn-sm btn-primary mr-1" onclick="openRestoreExpiredCountModal();">Restore Expired Count</a>`;
+    }
+    return `<span id="restoreExpiredCountBtn"></span>`;
+}
+
+function openRestoreExpiredCountModal() {
+    var payload = {};
+    payload['studentStandardId'] = $("#timeStuStandardId").val();
+    payload['schoolId'] = SCHOOL_ID;
+    getDashboardDataBasedUrlAndPayload(true, true, 'get-expired-count-restore-summary', payload).then(function (data) {
+        var details = (data && data.details) ? data.details : {};
+        var html = restoreExpiredCountModal(details);
+        $('body').append(html);
+        $('#restoreExpiredCountModal').modal({ backdrop: 'static', keyboard: false });
+    });
+}
+
+function restoreExpiredCountModal(details) {
+    var subjects = details.subjects || [];
+    var rowsHtml = '';
+    if (subjects.length > 0) {
+        subjects.forEach(function (subject) {
+            rowsHtml += `<tr>
+                <td class="text-left">${subject.subjectName}</td>
+                <td class="text-right">${subject.expiredCount}</td>
+            </tr>`;
+        });
+    } else {
+        rowsHtml = `<tr><td colspan="2" class="text-center text-muted">No expired classes to restore.</td></tr>`;
+    }
+    var html =
+        `<div class="modal fade fade-scale" id="restoreExpiredCountModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header py-2 bg-primary">
+                        <h5 class="modal-title text-white">Restore Expired Count</h5>
+                        <button type="button" class="close" aria-label="Close" onclick="closeRestoreExpiredCountModal();">
+                            <span aria-hidden="true" class="text-white">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-2"><span class="font-weight-semi-bold text-dark">Grade:</span> ${details.grade || ''}</p>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th class="text-left">Subject</th>
+                                    <th class="text-right">Expired Count</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rowsHtml}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="m-auto">
+                            <button type="button" class="btn btn-success mr-2" onclick="confirmRestoreExpiredCount();"${subjects.length === 0 ? ' disabled' : ''}>Restore</button>
+                            <button type="button" class="btn btn-secondary" onclick="closeRestoreExpiredCountModal();">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    return html;
+}
+
+function closeRestoreExpiredCountModal() {
+    $('#restoreExpiredCountModal').modal('hide');
+    window.setTimeout(function () { $('#restoreExpiredCountModal').remove(); }, 1000);
+}
+
+function confirmRestoreExpiredCount() {
+    var payload = {};
+    payload['studentStandardId'] = $("#timeStuStandardId").val();
+    payload['schoolId'] = SCHOOL_ID;
+    getDashboardDataBasedUrlAndPayload(true, true, 'restore-expired-count', payload).then(function (data) {
+        closeRestoreExpiredCountModal();
+        showMessageTheme2(1, data.message, '', false);
     });
 }
 
