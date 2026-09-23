@@ -6264,6 +6264,7 @@ function getRequestForLeadDemo(modeSearch,startDate, endDate) {
 	leadReportRequest['modeSearch'] = modeSearch;
 	leadReportRequest['startDate'] = startDate;
 	leadReportRequest['endDate'] = endDate;
+	leadReportRequest['callFrom'] = 'SCHOOL_DEMO_LIST';
 	
    
 	authentication['hash'] = getHash();

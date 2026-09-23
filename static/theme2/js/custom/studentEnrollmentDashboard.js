@@ -74,6 +74,10 @@ function renderStudentEnrollmentDashboardData(data) {
     sedSetVal('sedWithdrawn', s.withdrawn);
     sedSetVal('sedBooked', s.bookedSeat);
     sedSetVal('sedLearningActive', onb.learningActive);
+    sedSetVal('sedTzPlus', s.plusTz);
+    sedSetVal('sedTzMinus', s.minusTz);
+    sedRenderTzMix('sedTzPlusMix', 'tzPlus', 'Timezone (+) · East', s.plusTzGroup, s.plusTzOto, s.plusTzOther);
+    sedRenderTzMix('sedTzMinusMix', 'tzMinus', 'Timezone (−) · West', s.minusTzGroup, s.minusTzOto, s.minusTzOther);
     // show advance next-grade count inside the Re-Enrollments card (clickable)
     $('[data-sed-kpi="sedReEnroll"] .sed-foot').html('next grade · <b class="sed-adv-link" style="color:#7c3aed;cursor:pointer;text-decoration:underline;">' + Number(s.advance || 0).toLocaleString() + ' advance</b>');
 
@@ -98,6 +102,17 @@ function sedRenderBatchKpis(b) {
     sedSetVal('sedBatFilled', Math.max(0, total - empty));
     sedSetVal('sedBatNoTeacher', Math.max(0, total - Number(b.withTeacher || 0)));
     $('#sedBatAvg').text(total > 0 ? (students / total).toFixed(1) : '0');
+}
+
+// Group / 1:1 / Other split inside a tile — every value opens its own student list
+function sedRenderTzMix(elId, metric, titleBase, g, o, x) {
+    var part = function (lab, val, suffix) {
+        return '<a href="javascript:void(0)" class="sed-mixlink" data-metric="' + metric + suffix + '"'
+            + ' data-title="' + titleBase + ' · ' + lab + '" style="color:inherit;text-decoration:none;margin-right:14px;">'
+            + '<span style="opacity:.75;letter-spacing:.4px;">' + lab.toUpperCase() + '</span> '
+            + '<b style="font-size:13px;">' + Number(val || 0).toLocaleString() + '</b></a>';
+    };
+    $('#' + elId).html(part('Group', g, 'Group') + part('1:1', o, 'Oto') + part('Other', x, 'Other'));
 }
 
 function sedSetVal(id, v) {
@@ -276,6 +291,10 @@ function bindStudentEnrollmentDashboardEvents() {
         var metric = SED_KPI_METRIC[$(this).attr('data-sed-kpi')];
         if (!metric) { return; }
         sedOpenDrawer(metric, $(this).find('.sed-cap').text());
+    });
+    $(document).off('click', '.sed-mixlink').on('click', '.sed-mixlink', function (e) {
+        e.stopPropagation();
+        sedOpenDrawer($(this).attr('data-metric'), $(this).attr('data-title'));
     });
     $(document).off('click', '#sedDrawerClose, #sedDrawerOverlay').on('click', '#sedDrawerClose, #sedDrawerOverlay', function () {
         sedCloseDrawer();
@@ -681,7 +700,8 @@ $(document).off('click', '#sedActions .sed-arow').on('click', '#sedActions .sed-
    ============================================================ */
 var SED_KPI_METRIC = {
     sedTotal: 'total', sedActive: 'enrolledActive', sedFresh: 'fresh', sedReEnroll: 'reEnroll',
-    sedWithdrawn: 'withdrawn', sedBooked: 'bookedSeat', sedLearningActive: 'learningActive'
+    sedWithdrawn: 'withdrawn', sedBooked: 'bookedSeat', sedLearningActive: 'learningActive',
+    sedTzPlus: 'tzPlus', sedTzMinus: 'tzMinus'
 };
 var SED_ACTION_METRIC = {
     'LMS account not created': 'lmsNone',
@@ -1079,8 +1099,13 @@ function sedOpenStudentDetail(ssid, uid, roll) {
     $('#sedStuDrawer').addClass('show');
 
     sedEnsurePaymentReportDeps().then(function () {
+        // Carry the dashboard's SELECTED session into the report request (outer card + reused tabs both need it,
+        // otherwise sessionId=null -> "Unable to generate reports"). getPaymentReportDetailRequest reads the same
+        // #sedFilterSession dropdown for the tab calls.
+        var sedSess = $('#sedFilterSession').val() || SED_DEFAULT_SESSION;
         var req = getRequestForPaymentReport('studentPaymentForm', 2, 'N');
         if (req && req.paymentReportRequestDTO) {
+            if (sedSess && String(sedSess) !== '0') { req.paymentReportRequestDTO['sessionId'] = sedSess; }
             req.paymentReportRequestDTO['studentStandardId'] = parseInt(ssid, 10);
             req.paymentReportRequestDTO['pageNumber'] = 0;
             req.paymentReportRequestDTO['pageSize'] = 1;

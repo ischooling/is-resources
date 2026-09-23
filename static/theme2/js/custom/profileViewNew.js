@@ -7813,7 +7813,7 @@ async function getMissingProfileFields(missingFields, PROFILE_RESPONSE_DATA){
         html +=
             `<div class="form-row mb-3">
                 <div class="col-12">
-                    <div class="card border-0 shadow-sm rounded-10 overflow-hidden">
+                    <div class="card border-0 shadow-sm rounded-10">
                         <div class="card-header bg-light-primary border-0 py-2 px-3 text-transform-none">${profileFormSectionTile(index)}</div>
                         <div class="card-body p-3">
         `;

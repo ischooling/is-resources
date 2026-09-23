@@ -912,6 +912,12 @@ function getSettingAllDataDiv() {
 							<textarea name="metaValue" id="metaValue" maxlength="600" class="form-control" required></textarea>
 						</div>
 					</div>
+					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+						<div class="position-relative form-group mb-2">
+							<label class="m-0">Comments</label>
+							<textarea name="comments" id="comments" maxlength="500" class="form-control"></textarea>
+						</div>
+					</div>
 					<div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col-6">
 						<div class="position-relative form-group mb-2">
 							<label class="m-0">Parent Id<span class="text-danger">*</span></label>

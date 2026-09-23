@@ -52,6 +52,12 @@ function getPaymentReportDetailRequest(tabKey, studentStandardId){
 		request.paymentReportRequestDTO['pageNumber'] = 0;
 		request.paymentReportRequestDTO['pageSize'] = 1;
 		request.paymentReportRequestDTO['type'] = 2;
+		var _dtoSess = request.paymentReportRequestDTO['sessionId'];
+		if(_dtoSess === null || _dtoSess === undefined || _dtoSess === ''){
+			var _selSess = ($('#sedFilterSession').length ? $('#sedFilterSession').val() : '')
+						|| ($('#reelSession').length ? $('#reelSession').val() : '');
+			if(_selSess && String(_selSess) !== '0'){ request.paymentReportRequestDTO['sessionId'] = _selSess; }
+		}
 	}
 	return request;
 }
@@ -175,8 +181,9 @@ function loadPaymentReportTab(tabKey, studentStandardId, userId){
 			$("#payment-report-tab-" + tabKey + "-" + studentStandardId).tab('show');
 			return false;
 		},
-		error : function() {
+		error : function(xhr) {
 			$row.attr('data-loading', 'N');
+			if(xhr && (xhr.status === 401 || xhr.status === 403)){ redirectLoginPage(); return; }
 			if(paneSelector){
 				$(paneSelector).html('<div class="text-center text-muted py-4">Unable to load data.</div>');
 			}
@@ -195,6 +202,7 @@ function paymentReportEventLoad(){
 	}
 	callReEnrollStatusList('studentPaymentForm','RE-EN','reLeadStatus', false);
 	getAllGrade(SCHOOL_ID, false);
+	try { getAllCountryList('studentPaymentForm', 'countryId'); } catch (e) {}
 	getSessionMasterList('studentPaymentForm', 'sessionId', false);
 	$("#learningPlatform option:first-child").remove()
 	// $("#sessionId option:first-child").remove()
@@ -422,6 +430,9 @@ function getRequestForPaymentReport(formId, type, forDownload){
 	}
 	if($('#gradeId').val()!=''){
 		PaymentReportRequestDTO['gradeId'] = $('#gradeId').select2('val');
+	}
+	if($('#countryId').val()!=''){
+		PaymentReportRequestDTO['country'] = $('#countryId').select2('val');
 	}
 	if($('#learningProgram').val()!=''){
 		PaymentReportRequestDTO['learningProgram'] = $('#learningProgram').select2('val');

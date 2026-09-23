@@ -24,6 +24,8 @@ function renderReEnrollmentList(title, roleAndModule, schoolId, userId, userRole
     bindReEnrollmentEvents();
     reEnrollInitDatePickers();
     reEnrollInitParentSelect();
+    reEnrollLoadStatusOptions();
+    try { if (typeof refreshCustomFieldState === 'function') { refreshCustomFieldState($('#reelFilterBox')); } } catch (e) {}
     reEnrollFetch(0);
 }
 
@@ -106,6 +108,7 @@ function getRequestForReEnrollment(pageNumber) {
         regType: $('#reelRegType').val() || '',
         advPayment: $('#reelAdv').val() || '',
         progress: $('#reelProgress').val() || '',
+        reStatus: ($('#reelReStatus').val() || []),
         grade: ($('#reelGrade').val() || []),
         gradeMode: $('#reelGradeMode').val() || 'in',
         exWithdrawn: $('#reelExWd').is(':checked') ? 1 : 0,
@@ -146,6 +149,7 @@ function bindReEnrollmentEvents() {
     $(document).off('click', '#reelFilterToggle').on('click', '#reelFilterToggle', function () {
         $('#reelFilterBox').stop(true, true).slideToggle(150);
         $(this).toggleClass('active');
+        try { if (typeof refreshCustomFieldState === 'function') { refreshCustomFieldState($('#reelFilterBox')); } } catch (e) {}
     });
     $(document).off('change', '#reelExWd').on('change', '#reelExWd', function () { reEnrollClearCard(); reEnrollFetch(0); });
     $(document).off('click', '#reelApply').on('click', '#reelApply', function () { reEnrollClearCard(); reEnrollFetch(0); });
@@ -159,6 +163,14 @@ function bindReEnrollmentEvents() {
     // a split-line value opens its card's list, narrowed to that learning program
     $(document).off('click', '.reel-mixlink').on('click', '.reel-mixlink', function (e) {
         e.stopPropagation();
+        if ($(this).attr('data-neg')) {
+            reelCardListOpen('total', '', 'Negative for Re-enrolment', { reStatus: 'Negative for Re-enrolment' });
+            return;
+        }
+        if ($(this).attr('data-g12')) {
+            reelCardListOpen('total', '', $(this).attr('data-title') || 'Active · Grade 12', { grade: String($(this).attr('data-id') || '').split(',') });
+            return;
+        }
         reelCardListOpen($(this).attr('data-cm') || '', $(this).attr('data-sess') || '',
             $(this).attr('data-title') || 'Students', { regType: $(this).attr('data-rt') || '' });
     });
@@ -169,6 +181,7 @@ function bindReEnrollmentEvents() {
         $('#reelStart').val(''); $('#reelEnd').val('');
         try { if ($.fn && $.fn.datepicker) { $('#reelStart').datepicker('update', ''); $('#reelEnd').datepicker('update', ''); } } catch (e) {}
         $('#reelEnrolType').val(''); $('#reelRegType').val(''); $('#reelAdv').val(''); $('#reelProgress').val('');
+        try { $('#reelReStatus').val(null).trigger('change.select2'); } catch (e) { $('#reelReStatus').val([]); }
         $('#reelGradeMode').val('in'); $('#reelExWd').prop('checked', false);
         try { $('#reelGrade').val(null).trigger('change.select2'); } catch (e) { $('#reelGrade').val([]); }
         $('#reelSearch').val('');
@@ -197,6 +210,7 @@ function bindReEnrollmentEvents() {
     $(document).off('click', '#reelListClose, #reelListOverlay').on('click', '#reelListClose, #reelListOverlay', function () {
         $('#reelListOverlay').removeClass('show');
         $('#reelListDrawer').removeClass('show');
+        reelClearCountryClock();
     });
     $(document).off('click', '#reelCardPager a.page-link').on('click', '#reelCardPager a.page-link', function (e) {
         e.preventDefault();
@@ -204,8 +218,8 @@ function bindReEnrollmentEvents() {
         if (!isNaN(p)) { reelCardListFetch(p); }
     });
     // popup filters -> refetch from page 0
-    $(document).off('change', '#reelCardCountry, #reelCardGrade, #reelCardProgress, #reelCardAdv, #reelCardPageSize, #reelCardExWd')
-        .on('change', '#reelCardCountry, #reelCardGrade, #reelCardProgress, #reelCardAdv, #reelCardPageSize, #reelCardExWd', function () {
+    $(document).off('change', '#reelCardCountry, #reelCardGrade, #reelCardProgress, #reelCardAdv, #reelCardPageSize, #reelCardExWd, #reelCardReStatus')
+        .on('change', '#reelCardCountry, #reelCardGrade, #reelCardProgress, #reelCardAdv, #reelCardPageSize, #reelCardExWd, #reelCardReStatus', function () {
             if (REEL_CARD_FILTERS_READY) { reelCardListFetch(0); }
         });
     $(document).off('keydown', '#reelCardSearch').on('keydown', '#reelCardSearch', function (e) {
@@ -221,11 +235,12 @@ function bindReEnrollmentEvents() {
         var label = (metric === 'total' ? 'Active' : (metric === 'reEnrolledNext' ? 'Re-enrolled' : 'Pending')) + ' · ' + name;
         // id can be a CSV of ids (a grade/country name may map to several ids) -> filter by ALL of them
         var ids = String(id).split(',');
-        var preset = (kind === 'grade') ? { grade: ids } : (kind === 'country') ? { country: ids } : { progress: id };
+        var preset = (kind === 'grade') ? { grade: ids } : (kind === 'country') ? { country: ids, countryName: name } : { progress: id };
         reelCardListOpen(metric, '', label, preset);
     });
     $(document).off('click', '#reelCardFilterReset').on('click', '#reelCardFilterReset', function () {
         $('#reelCardProgress').val(''); $('#reelCardAdv').val(''); $('#reelCardSearch').val(''); $('#reelCardPageSize').val('25'); $('#reelCardExWd').prop('checked', false);
+        try { $('#reelCardReStatus').val(null).trigger('change.select2'); } catch (e) { $('#reelCardReStatus').val([]); }
         try { $('#reelCardCountry').val(null).trigger('change.select2'); $('#reelCardGrade').val(null).trigger('change.select2'); }
         catch (e) { $('#reelCardCountry').val([]); $('#reelCardGrade').val([]); }
         reelCardListFetch(0);
@@ -273,8 +288,11 @@ function reEnrollOpenStudentDetail(ssid, uid, roll, name, grade, reg, enrol) {
     $('#reelStuDrawer').addClass('show');
 
     reEnrollEnsurePaymentReportDeps().then(function () {
+        var reelSel = $('#reelSession').val();
+        var reelSess = (reelSel && String(reelSel) !== '0') ? reelSel : REEL_DEFAULT_SESSION;
         var req = getRequestForPaymentReport('studentPaymentForm', 2, 'N');
         if (req && req.paymentReportRequestDTO) {
+            if (reelSess && String(reelSess) !== '0') { req.paymentReportRequestDTO['sessionId'] = reelSess; }
             req.paymentReportRequestDTO['studentStandardId'] = parseInt(ssid, 10);
             req.paymentReportRequestDTO['pageNumber'] = 0;
             req.paymentReportRequestDTO['pageSize'] = 1;
@@ -413,10 +431,12 @@ function reEnrollRenderCards(s) {
         + card(s.totalReEnroll, 'Re-Enrollment', '#eaf1ff', '#2b62d6', 'reEnrollment', '', 'Re-Enrollment', '', reEnrollMixLine(s.reGroup, s.reOneToOne, s.reOther, 'reEnrollment', '', 'Re-Enrollment'))
         + '</div></div>';
     // ---- Progression row : selected session base -> next session re-enrolled / pending (display-only) ----
-    function pcard(num, label, bg, color) {
+    function pcard(num, label, bg, color, sub) {
         return '<div class="reel-card" style="background:' + bg + '">'
             + '<div class="reel-cnum" style="color:' + color + '">' + num + '</div>'
-            + '<div class="reel-clab" style="color:' + color + '">' + label + '</div></div>';
+            + '<div class="reel-clab" style="color:' + color + '">' + label + '</div>'
+            + (sub ? '<div class="reel-cmix" style="color:' + color + '">' + sub + '</div>' : '')
+            + '</div>';
     }
     var g2 = '';
     if (s.progBase !== undefined && s.progBase !== null) {
@@ -426,17 +446,13 @@ function reEnrollRenderCards(s) {
         var faCard = (s.freshAdvance !== undefined && s.freshAdvance !== null)
             ? card(s.freshAdvance, 'Fresh → Re-Enrolled (same year)', '#fff4e5', '#b26a00', 'freshAdvance', '', 'Fresh → Re-Enrolled (same year)' + (selName ? (' · ' + selName) : ''))
             : pcard('—', 'Fresh → Re-Enrolled (same year)', '#fff4e5', '#c8a26a');
-        var activeCard = card(pbase, 'Active Students', '#eef2ff', '#3730a3', 'total', '', 'Active Students' + (selName ? (' · ' + selName) : ''));
-        // Grade 12 count (subset of Active) — clickable, filters the list to Grade 12
-        // s.grade12 is counted independently of the page-level Grade filter, so the card survives "Exclude Grade 12";
-        // the breakup row is only a fallback for an older response.
         var g12 = s.grade12 || null;
         if (!g12 && s.gradeBreakup) { for (var gi = 0; gi < s.gradeBreakup.length; gi++) { if ((s.gradeBreakup[gi].name || '') === 'Grade 12') { g12 = s.gradeBreakup[gi]; break; } } }
-        var g12Card = (g12 && g12.id)
-            ? '<div class="reel-card reel-bclick" data-bk="grade" data-id="' + reEnrollEsc(g12.id) + '" data-metric="total" data-name="Grade 12" style="background:#eef7ee">'
-                + '<div class="reel-cnum" style="color:#1f7a4d">' + Number(g12.active || 0).toLocaleString() + '</div>'
-                + '<div class="reel-clab" style="color:#1f7a4d">Grade 12</div></div>'
-            : pcard('—', 'Grade 12', '#eef7ee', '#93b9a4');
+        var g12Sub = (g12 && g12.id)
+            ? '<a href="javascript:void(0)" class="reel-mixlink" data-g12="1" data-id="' + reEnrollEsc(g12.id) + '" data-title="Active · Grade 12"><span class="reel-mixlab">Grade 12</span> <b class="reel-mixval">' + Number(g12.active || 0).toLocaleString() + '</b></a>'
+            : '';
+        var activeCard = card(pbase, 'Active Students', '#eef2ff', '#3730a3', 'total', '', 'Active Students' + (selName ? (' · ' + selName) : ''), '', g12Sub);
+        var negSub = '<a href="javascript:void(0)" class="reel-mixlink" data-neg="1" data-title="Negative for Re-enrolment"><span class="reel-mixlab">Negative for Re-enrolment</span> <b class="reel-mixval">' + Number(s.negativeReEnroll || 0).toLocaleString() + '</b></a>';
         if (s.progHasNext == 1) {
             var pre = Number(s.progReEnroll || 0);
             var ppend = Number(s.progPending || 0);
@@ -446,19 +462,21 @@ function reEnrollRenderCards(s) {
             var head = 'Re-Enrollment Progression' + (selName ? (' · ' + selName) : '') + ' → ' + nextName;
             g2 = '<div class="reel-cgrp"><div class="reel-clabel">' + reEnrollEsc(head) + '</div><div class="reel-cards">'
                 + activeCard
-                + g12Card
                 + card(pre, 'Re-Enrolled · ' + rePct.toFixed(1) + '%', '#e7f6ec', '#16a34a', 'reEnrolledNext', '', 'Re-Enrolled · ' + (selName || 'selected session'), '', reEnrollMixLine(s.nxGroup, s.nxOneToOne, s.nxOther, 'reEnrolledNext', '', 'Re-Enrolled'))
-                + card(ppend, 'Pending · ' + pendPct.toFixed(1) + '%', '#fdeaea', '#c0392b', 'pendingNext', '', 'Pending · ' + (selName || 'selected session'))
+                + card(ppend, 'Pending · ' + pendPct.toFixed(1) + '%', '#fdeaea', '#c0392b', 'pendingNext', '', 'Pending · ' + (selName || 'selected session'), '', negSub)
                 + faCard
+                + card(s.plusTz || 0, 'Timezone (+) · East', '#eef7ee', '#1f7a4d', 'tzPlus', '', 'Timezone (+) · East', '', reEnrollMixLine(s.plusTzGroup, s.plusTzOto, s.plusTzOther, 'tzPlus', '', 'Timezone (+)'))
+                + card(s.minusTz || 0, 'Timezone (−) · West', '#eef2ff', '#3730a3', 'tzMinus', '', 'Timezone (−) · West', '', reEnrollMixLine(s.minusTzGroup, s.minusTzOto, s.minusTzOther, 'tzMinus', '', 'Timezone (−)'))
                 + '</div></div>';
         } else {
             var head2 = 'Re-Enrollment Progression' + (s.progPrevName ? (' · ' + s.progPrevName + ' → ') : ' · ') + (selName || '') + ' · no next session';
             g2 = '<div class="reel-cgrp"><div class="reel-clabel">' + reEnrollEsc(head2) + '</div><div class="reel-cards">'
                 + activeCard
-                + g12Card
                 + pcard('—', 'Re-Enrolled', '#eef1f4', '#98a2b3')
-                + pcard('—', 'Pending', '#eef1f4', '#98a2b3')
+                + pcard('—', 'Pending', '#fdeaea', '#c0392b', negSub)
                 + faCard
+                + card(s.plusTz || 0, 'Timezone (+) · East', '#eef7ee', '#1f7a4d', 'tzPlus', '', 'Timezone (+) · East', '', reEnrollMixLine(s.plusTzGroup, s.plusTzOto, s.plusTzOther, 'tzPlus', '', 'Timezone (+)'))
+                + card(s.minusTz || 0, 'Timezone (−) · West', '#eef2ff', '#3730a3', 'tzMinus', '', 'Timezone (−) · West', '', reEnrollMixLine(s.minusTzGroup, s.minusTzOto, s.minusTzOther, 'tzMinus', '', 'Timezone (−)'))
                 + '</div></div>';
         }
     }
@@ -756,7 +774,9 @@ function reelCardListOpen(cm, sess, title, preset, prevSess) {
     REEL_CARD_LIST_REG = (preset && preset.regType) || '';
     REEL_CARD_LIST_TITLE = title || 'Students';
     REEL_CARD_LIST_TOTAL = 0;
-    $('#reelListTitle').text(REEL_CARD_LIST_TITLE);
+    $('#reelListTitle').html(reEnrollEsc(REEL_CARD_LIST_TITLE) + '<span id="reelListClock"></span>');
+    reelClearCountryClock();
+    if (preset && preset.countryName) { reelStartCountryClock(preset.countryName); }
     $('#reelListSub').html('&nbsp;');
     $('#reelCardBody').html('<tr><td colspan="20" class="reel-empty">Loading…</td></tr>');
     $('#reelCardPager').html('');
@@ -784,19 +804,26 @@ function reelCardInitFilters(preset) {
     $('#reelCardAdv').val($('#reelAdv').val() || '');
     $('#reelCardExWd').prop('checked', $('#reelExWd').is(':checked'));
     $('#reelCardSearch').val($('#reelSearch').val() || '');
+    var stPreset = (preset && preset.reStatus != null)
+        ? (Array.isArray(preset.reStatus) ? preset.reStatus : [preset.reStatus])
+        : ($('#reelReStatus').val() || []);
     var gradeVal = (preset && preset.grade) ? preset.grade : null;
     var countryVal = (preset && preset.country) ? preset.country : null;
     try {
         if ($.fn && $.fn.select2) {
             $('#reelCardCountry').select2({ theme: 'bootstrap4', width: '100%', placeholder: 'All countries', allowClear: true, dropdownParent: $('#reelListDrawer') });
             $('#reelCardGrade').select2({ theme: 'bootstrap4', width: '100%', placeholder: 'All grades', allowClear: true, dropdownParent: $('#reelListDrawer') });
+            $('#reelCardReStatus').select2({ theme: 'bootstrap4', width: '100%', placeholder: 'All Status', allowClear: true, dropdownParent: $('#reelListDrawer') });
             $('#reelCardCountry').val(countryVal).trigger('change.select2');
             $('#reelCardGrade').val(gradeVal).trigger('change.select2');
+            $('#reelCardReStatus').val(stPreset).trigger('change.select2');
         } else {
             $('#reelCardCountry').val(countryVal || []);
             $('#reelCardGrade').val(gradeVal || []);
+            $('#reelCardReStatus').val(stPreset || []);
         }
     } catch (e) { /* select2 optional */ }
+    try { if (typeof refreshCustomFieldState === 'function') { refreshCustomFieldState($('#reelListDrawer')); } } catch (e) {}
     REEL_CARD_FILTERS_READY = true;
 }
 
@@ -816,6 +843,7 @@ function reelCardListFetch(pageNumber) {
     req.progress = ($('#reelCardProgress').val() || '');
     req.advPayment = ($('#reelCardAdv').val() || '');
     req.search = (($('#reelCardSearch').val() || '').trim());
+    req.reStatus = ($('#reelCardReStatus').val() || []);
     if (page > 0) { req.knownTotal = REEL_CARD_LIST_TOTAL; } else { delete req.knownTotal; }
     $('#reelCardBody').html('<tr><td colspan="20" class="reel-empty">Loading…</td></tr>');
     $.ajax({
@@ -873,4 +901,60 @@ function reelCardListRenderPager(total, pageNumber, pageSize) {
     if (end < pages - 1) { if (end < pages - 2) { h += li('…', 0, { disabled: true }); } h += li(String(pages), pages - 1, {}); }
     h += li('Next', pageNumber + 1, { disabled: pageNumber >= pages - 1 });
     $('#reelCardPager').html(h);
+}
+
+function reEnrollLoadStatusOptions() {
+    try {
+        $.ajax({
+            type: 'POST',
+            contentType: (typeof APPLICATION_JSON_VALUE !== 'undefined' ? APPLICATION_JSON_VALUE : 'application/json'),
+            url: getURLForCommon('masters'),
+            data: JSON.stringify(getRequestForMaster('reelFilterBox', 'LEAD-STATUS-LIST', 'RE-EN')),
+            dataType: 'json',
+            cache: false,
+            timeout: 600000,
+            success: function (data) {
+                if (!data || data.status == '0' || data.status == '2' || !data.mastersData || !data.mastersData.data) { return; }
+                var opts = '';
+                $.each(data.mastersData.data, function (k, v) {
+                    var val = (v && v.value != null) ? v.value : '';
+                    if (!val) { return; }
+                    opts += '<option value="' + reEnrollEsc(val) + '">' + reEnrollEsc(val) + '</option>';
+                });
+                $('#reelReStatus').html(opts);
+                $('#reelCardReStatus').html(opts);
+                try { if ($.fn && $.fn.select2) { $('#reelReStatus').select2({ theme: 'bootstrap4', width: '100%', placeholder: 'All Status', allowClear: true }); } } catch (e) {}
+            }
+        });
+    } catch (e) { /* status filter is optional */ }
+}
+
+var REEL_COUNTRY_TZ = {
+    'United Arab Emirates':'Asia/Dubai','Saudi Arabia':'Asia/Riyadh','Qatar':'Asia/Qatar','Kuwait':'Asia/Kuwait','Bahrain':'Asia/Bahrain','Oman':'Asia/Muscat','Yemen':'Asia/Aden',
+    'India':'Asia/Kolkata','Pakistan':'Asia/Karachi','Bangladesh':'Asia/Dhaka','Sri Lanka':'Asia/Colombo','Nepal':'Asia/Kathmandu','Afghanistan':'Asia/Kabul',
+    'United States':'America/New_York','Canada':'America/Toronto','Mexico':'America/Mexico_City','Brazil':'America/Sao_Paulo','Colombia':'America/Bogota','Argentina':'America/Argentina/Buenos_Aires','Chile':'America/Santiago','Peru':'America/Lima','Ecuador':'America/Guayaquil','Venezuela':'America/Caracas','Bolivia':'America/La_Paz','Paraguay':'America/Asuncion','Uruguay':'America/Montevideo','Costa Rica':'America/Costa_Rica','Panama':'America/Panama','Guatemala':'America/Guatemala','Honduras':'America/Tegucigalpa','El Salvador':'America/El_Salvador','Nicaragua':'America/Managua','Dominican Republic':'America/Santo_Domingo','Cuba':'America/Havana','Haiti':'America/Port-au-Prince','Puerto Rico':'America/Puerto_Rico','Jamaica':'America/Jamaica',
+    'United Kingdom':'Europe/London','Ireland':'Europe/Dublin','France':'Europe/Paris','Germany':'Europe/Berlin','Spain':'Europe/Madrid','Portugal':'Europe/Lisbon','Italy':'Europe/Rome','Netherlands':'Europe/Amsterdam','Belgium':'Europe/Brussels','Switzerland':'Europe/Zurich','Austria':'Europe/Vienna','Sweden':'Europe/Stockholm','Norway':'Europe/Oslo','Denmark':'Europe/Copenhagen','Finland':'Europe/Helsinki','Poland':'Europe/Warsaw','Turkey':'Europe/Istanbul','Greece':'Europe/Athens','Russia':'Europe/Moscow','Ukraine':'Europe/Kyiv','Romania':'Europe/Bucharest','Hungary':'Europe/Budapest','Czech Republic':'Europe/Prague','Bulgaria':'Europe/Sofia','Serbia':'Europe/Belgrade','Croatia':'Europe/Zagreb',
+    'Egypt':'Africa/Cairo','Morocco':'Africa/Casablanca','Algeria':'Africa/Algiers','Tunisia':'Africa/Tunis','Libya':'Africa/Tripoli','Nigeria':'Africa/Lagos','Kenya':'Africa/Nairobi','South Africa':'Africa/Johannesburg','Ghana':'Africa/Accra','Ethiopia':'Africa/Addis_Ababa','Tanzania':'Africa/Dar_es_Salaam','Uganda':'Africa/Kampala','Sudan':'Africa/Khartoum','Zimbabwe':'Africa/Harare','Zambia':'Africa/Lusaka','Senegal':'Africa/Dakar','Ivory Coast':'Africa/Abidjan',
+    'China':'Asia/Shanghai','Japan':'Asia/Tokyo','South Korea':'Asia/Seoul','Singapore':'Asia/Singapore','Malaysia':'Asia/Kuala_Lumpur','Indonesia':'Asia/Jakarta','Thailand':'Asia/Bangkok','Vietnam':'Asia/Ho_Chi_Minh','Philippines':'Asia/Manila','Hong Kong':'Asia/Hong_Kong','Taiwan':'Asia/Taipei','Myanmar':'Asia/Yangon',
+    'Jordan':'Asia/Amman','Lebanon':'Asia/Beirut','Iraq':'Asia/Baghdad','Iran':'Asia/Tehran','Israel':'Asia/Jerusalem','Kazakhstan':'Asia/Almaty','Uzbekistan':'Asia/Tashkent','Azerbaijan':'Asia/Baku','Georgia':'Asia/Tbilisi','Armenia':'Asia/Yerevan',
+    'Australia':'Australia/Sydney','New Zealand':'Pacific/Auckland'
+};
+var REEL_COUNTRY_CLOCK = null;
+function reelClearCountryClock() {
+    if (REEL_COUNTRY_CLOCK) { clearInterval(REEL_COUNTRY_CLOCK); REEL_COUNTRY_CLOCK = null; }
+    $('#reelListClock').html('');
+}
+function reelStartCountryClock(countryName) {
+    var tz = REEL_COUNTRY_TZ[(countryName || '').trim()];
+    if (!tz) { return; }
+    function tick() {
+        try {
+            var now = new Date();
+            var t = now.toLocaleTimeString('en-US', { timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+            $('#reelListClock').html('<span style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap;font-size:22px;font-weight:800;color:#1f9d55;">🕒 ' + t
+                + ' <span style="font-size:12px;font-weight:600;color:#98a2b3;">(' + reEnrollEsc(tz) + ')</span></span>');
+        } catch (e) { reelClearCountryClock(); }
+    }
+    tick();
+    REEL_COUNTRY_CLOCK = setInterval(tick, 1000);
 }

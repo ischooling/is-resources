@@ -192,6 +192,19 @@ function sedKpiCard(id, label, sub, color) {
         + '</div>';
 }
 
+function sedTzCard(id, label, bg, color) {
+    return ''
+        + '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-3">'
+            + '<div class="sed-card sed-kpi" data-sed-kpi="' + id + '" style="background:' + bg + ';">'
+                + '<div class="d-flex align-items-center" style="gap:10px;">'
+                    + '<div class="sed-val" id="' + id + '" style="margin:0;color:' + color + ';">0</div>'
+                    + '<div class="sed-cap" style="color:' + color + ';font-weight:600;">' + label + '</div>'
+                + '</div>'
+                + '<div class="sed-foot" id="' + id + 'Mix" style="margin-top:8px;color:' + color + ';"></div>'
+            + '</div>'
+        + '</div>';
+}
+
 function getStudentEnrollmentDashboardContent(title) {
     var html = ''
         + getStudentEnrollmentDashboardStyles()
@@ -238,6 +251,11 @@ function getStudentEnrollmentDashboardContent(title) {
             + sedKpiCard('sedWithdrawn', 'Withdrawn', 'left after enrolling', '#dc2626')
             + sedKpiCard('sedBooked', 'Booked-a-Seat', 'seat booked, not full enrol', '#8b93a4')
             + sedKpiCard('sedLearningActive', 'Fully Onboarded', 'of active · setup complete', '#16a34a')
+        + '</div>'
+        // ---- timezone split of Total Enrolled (clickable) ----
+        + '<div class="row">'
+            + sedTzCard('sedTzPlus', 'Timezone (+) · East', '#eef7ee', '#1f7a4d')
+            + sedTzCard('sedTzMinus', 'Timezone (−) · West', '#eef2ff', '#3730a3')
         + '</div>'
 
         // ---- splits ----
