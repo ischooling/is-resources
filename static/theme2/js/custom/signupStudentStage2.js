@@ -215,7 +215,7 @@ function validateRequestForSignupParent(){
 	if(pcModeWhatsapp == "Y" || pcModeCall == "Y" || pcModeEmail == "Y"){
 		
 	}else{
-		showMessageTheme2(0, 'Please select how you would like to be contacted.');
+		showMessageTheme2(0, 'How would you like us to contact you? Please tick below ✓');
 		return false
 	}
 //	if ($("#signupStage2 #countryCodeParent").val()==null) {

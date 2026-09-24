@@ -177,9 +177,68 @@ function addSignupFieldBackgroundOverride() {
 					padding-left: 12px;
 					padding-right: 10px;
 				}
+								.custom-field.has-value label[for="dob"] .text-black,
+				.custom-field:has(#parentEmailId:not(:placeholder-shown)) label[for="parentEmailId"] .text-black,
+				.custom-field:has(#contactNumber:not(:placeholder-shown)) label[for="contactNumber"] .text-black,
+				.custom-field:has(#parentPhoneNumber:not(:placeholder-shown)) label[for="parentPhoneNumber"] .text-black,
+				.custom-field:has(#nationality option:checked:not([value=""])) label[for="nationality"] .text-black,
+				.custom-field:has(#countryId option:checked:not([value=""])) label[for="countryId"] .text-black,
+				.custom-field:has(#pCountryId option:checked:not([value=""])) label[for="pCountryId"] .text-black {
+					color: #000 !important;
+				}
 				@media (max-width: 767px) {
 					#signupStage1 .nationality-id-hint:not(.mobile-nationality-id-hint) {
 						top: 95% !important;
+					}
+					.custom-field label:not(.error-msg) {
+						font-size: 13px !important;
+					}
+					.custom-field .form-control-field,
+					.custom-field .select-option-field,
+					.custom-field .select2-selection__rendered {
+						font-size: 13px !important;
+					}
+					.custom-field .form-control-field::placeholder {
+						font-size: 13px !important;
+					}
+					.custom-field:has(> label[for="nationality"]) .form-control-field,
+					.custom-field:has(> label[for="countryId"]) .form-control-field,
+					.custom-field:has(> label[for="pCountryId"]) .form-control-field,
+					.custom-field:has(> label[for="dob"]) .form-control-field,
+					.custom-field:has(> label[for="parentEmailId"]) .form-control-field {
+						height: 62px !important;
+						padding-top: 24px !important;
+					}
+					.custom-field:has(> label[for="nationality"]) .select2-container,
+					.custom-field:has(> label[for="countryId"]) .select2-container,
+					.custom-field:has(> label[for="pCountryId"]) .select2-container,
+					.custom-field:has(> label[for="nationality"]) .select2-selection--single,
+					.custom-field:has(> label[for="countryId"]) .select2-selection--single,
+					.custom-field:has(> label[for="pCountryId"]) .select2-selection--single {
+						height: 62px !important;
+					}
+					.custom-field:has(> label[for="nationality"]) .select2-selection__rendered,
+					.custom-field:has(> label[for="countryId"]) .select2-selection__rendered,
+					.custom-field:has(> label[for="pCountryId"]) .select2-selection__rendered {
+						height: 62px !important;
+						line-height: 62px !important;
+						padding-top: 24px !important;
+						box-sizing: border-box !important;
+					}
+					.custom-field:has(> label[for="nationality"]) .select2-selection__arrow,
+					.custom-field:has(> label[for="countryId"]) .select2-selection__arrow,
+					.custom-field:has(> label[for="pCountryId"]) .select2-selection__arrow {
+						height: 62px !important;
+					}
+					.custom-field:has(#contactNumber) .iti,
+					.custom-field:has(#parentPhoneNumber) .iti,
+					.custom-field #contactNumber.form-control-field,
+					.custom-field #parentPhoneNumber.form-control-field {
+						height: 62px !important;
+					}
+					.custom-field #contactNumber.form-control-field,
+					.custom-field #parentPhoneNumber.form-control-field {
+						padding-top: 24px !important;
 					}
 				}
 			#signupStage2 .custom-field .iti {
@@ -1075,24 +1134,24 @@ function renderStudentDetails(data, signupType){
 			//   false -> invalid (red cross)
 			//   null  -> validator/utils not ready yet: ensure utils load then
 			//            re-run this same check so the cross appears once ready.
-			var _valEnabled = (typeof isPhoneValidationEnabled !== 'function') || isPhoneValidationEnabled();
-			var _valid = (typeof itiIsValidNumber === 'function') ? itiIsValidNumber(itiContcat) : null;
-			if (_valEnabled && _valid === null && typeof ensureIntlUtilsLoaded === 'function') {
-				ensureIntlUtilsLoaded(function(){
-					var _v2 = (typeof itiIsValidNumber === 'function') ? itiIsValidNumber(itiContcat) : null;
-					if (_valEnabled && _v2 === false) {
-						validEndInvalidField(false, "contactNumber");
-					} else {
-						validEndInvalidField(true, "contactNumber");
-					}
-				});
-				return;
-			}
-			if (_valEnabled && _valid === false) {
-				validEndInvalidField(false, "contactNumber");
-			} else {
-				validEndInvalidField(true, "contactNumber");
-			}
+			// var _valEnabled = (typeof isPhoneValidationEnabled !== 'function') || isPhoneValidationEnabled();
+			// var _valid = (typeof itiIsValidNumber === 'function') ? itiIsValidNumber(itiContcat) : null;
+			// if (_valEnabled && _valid === null && typeof ensureIntlUtilsLoaded === 'function') {
+			// 	ensureIntlUtilsLoaded(function(){
+			// 		var _v2 = (typeof itiIsValidNumber === 'function') ? itiIsValidNumber(itiContcat) : null;
+			// 		if (_valEnabled && _v2 === false) {
+			// 			validEndInvalidField(false, "contactNumber");
+			// 		} else {
+			// 			validEndInvalidField(true, "contactNumber");
+			// 		}
+			// 	});
+			// 	return;
+			// }
+			// if (_valEnabled && _valid === false) {
+			// 	validEndInvalidField(false, "contactNumber");
+			// } else {
+			// 	validEndInvalidField(true, "contactNumber");
+			// }
 		}
 	});
 	var mandatoryFields=[];
@@ -1359,7 +1418,7 @@ function getStudentDetailsContent(data, signupType) {
 					value="${signupStudent.dob}"
 					placeholder=" "
 					onkeydown="return false" tabindex="${++tabindex}" readonly>
-					<label for="dob">Date of Birth<sup class="sup">*</sup> (MMM DD, YYYY)</label>
+					<label for="dob">Date of Birth (Month Day, Year)<sup class="sup">*</sup></label>
 				</div>
 			</div>
 			<div class="form-holder valid-field">
@@ -1389,19 +1448,17 @@ function getStudentDetailsContent(data, signupType) {
                     <input type="tel" name="contactNumber" id="contactNumber" class="form-control-field"
                         maxlength="15" value="${signupStudent.contactNumber}"
                         onkeydown="return M.digit(event);" placeholder=" " tabindex="${++tabindex}">
-                    <label for="contactNumber">Mobile Number<sup class="sup">*</sup></label>
+                    <label for="contactNumber">Mobile Number (Student or Parent)<sup class="sup">*</sup></label>
                 </div>
             </div>
             <div class="form-holder valid-field">
-				<span class="nationality-id-hint mobile-nationality-id-hint" style="color:#181818;font-weight:700;position:absolute;bottom:92%;right:25px">You must have a valid National ID</span>
-				<span class="nationality-id-hint desktop-nationality-id-hint" style="color:#181818;font-weight:700;position:absolute;bottom:96%;right:25px">You must have a valid National ID</span>
                 <i class="zmdi zmdi-globe"></i>
                 <div class="custom-field">
                     <select name="nationality" id="nationality" class="form-control-field" required tabindex="${++tabindex}">
                         <option value="">Select Nationality*</option>
                         ${getNationalityOption(signupStudent.countries, signupStudent.nationality)}
                     </select>
-                    <label for="nationality">Nationality<sup class="sup">*</sup></label>
+                    <label for="nationality">Nationality (You must have a valid National ID)<sup class="sup">*</sup></label>
                 </div>
                 
             </div>
@@ -1411,8 +1468,6 @@ function getStudentDetailsContent(data, signupType) {
         </div>*/''}
         <div class="form-row">
             <div class="form-holder valid-field">
-				<strong class="student-current-location-desktop" style="color:#181818;font-weight:700;position:absolute;bottom:96%;right:25px">Student's Current Location</strong>
-				<span class="student-current-location-mobile" style="color:#181818;font-weight:700;position:absolute;bottom:92%;right:25px">Student's Current Location</span>
                 <i class="zmdi zmdi-pin"></i>
                 <div class="custom-field">
                     <select name="countryId" id="countryId" class="form-control-field" required tabindex="${++tabindex}"
@@ -1420,17 +1475,17 @@ function getStudentDetailsContent(data, signupType) {
                         <option value="">Select Country*</option>
                         ${getCountriesOption(signupStudent.countries, signupStudent.countryId)}
                     </select>
-                    <label for="countryId">Country<sup class="sup">*</sup></label>
+                    <label for="countryId">Country (Student's Current Location)<sup class="sup">*</sup></label>
                 </div>
             </div>
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-map"></i>
                 <div class="custom-field">
                     <select name="stateId" id="stateId" class="form-control-field" required tabindex="${++tabindex}">
-                        <option value="">Select Province/State*</option>
+                        <option value="">Select State/Province*</option>
                         ${getStatesOption(signupStudent.states, signupStudent.stateId)}
                     </select>
-                    <label for="stateId">Province/State<sup class="sup">*</sup></label>
+                    <label for="stateId">State/Province<sup class="sup">*</sup></label>
                 </div>
             </div>
             <div class="form-holder valid-field">
@@ -1927,7 +1982,7 @@ function getParentDetailsContent(data) {
                     <input type="email" class="form-control-field parent-email" id="parentEmailId" name="parentEmailId"
                         placeholder=" " value="${signupParent.email}"
                         autocomplete="off" tabindex="${++tabindex}">
-                    <label for="parentEmailId">Parent Email (Optional)</label>
+                    <label for="parentEmailId">Parent Email <span class="text-black">(Optional)</span></label>
                 </div>
                 <a href="javascript:void(0)" class="input-over-btn send-mail-btn primary-bg white-txt-color" onclick="resendOtp();">Verify Mail</a>
             </div>
@@ -1937,12 +1992,11 @@ function getParentDetailsContent(data) {
                     <input type="tel" class="form-control-field parent-phone" name="parentPhoneNumber" id="parentPhoneNumber"
                         maxlength="15" placeholder=" " value="${signupParent.contactNumber}"
                         autocomplete="off" onkeydown="return M.digit(event);" tabindex="${++tabindex}">
-                    <label for="parentPhoneNumber">Parent Phone Number (Optional)</label>
+                    <label for="parentPhoneNumber">Parent Mobile Number (Optional)</label>
                 </div>
             </div>
         </div>
         <div class="form-row m-0 parent-current-location" style="${hideClass}">
-            <strong>Parent's Current Location</strong>
         </div>
         <div class="form-row mb-2 same-student-location" style="${hideClass}">
             <label for="sameAsStudentLocation">
@@ -1958,7 +2012,7 @@ function getParentDetailsContent(data) {
                         <option value="">Select Country*</option>
 						${getCountriesOption(signupParent.countries, signupParent.countryId)}
                     </select>
-                    <label for="pCountryId">Country<sup class="sup">*</sup></label>
+                    <label for="pCountryId">Country (Parent's Current Location)<sup class="sup">*</sup></label>
                 </div>
             </div>
             <div class="form-holder valid-field">

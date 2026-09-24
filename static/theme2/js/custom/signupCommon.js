@@ -52,7 +52,7 @@ function signupStudentOnLoad() {
 					callEmailCheck('userSignupForm', moduleId);
 					if ($("#confirmEmail").val().trim() != '' && $("#email").val().trim() != $("#confirmEmail").val().trim() && $("#email").val().trim().length > 0) {
 						validEndInvalidField(false, "email");
-						showElementErrorMessage(false, 'email', 'Email and confirm email are not same');
+						showElementErrorMessage(false, 'email', 'Please re-enter the same email');
 
 					} else if ($("#email").val().trim() == $("#confirmEmail").val().trim() && $("#email").val().trim() != "") {
 						validEndInvalidField(true, "email");
@@ -72,40 +72,31 @@ function signupStudentOnLoad() {
 			} else {
 				validEndInvalidField(false, "email");
 				if ("STUDENT" == moduleId) {
-					showElementErrorMessage(false, 'email', 'Email is either empty or invalid.');
+					showElementErrorMessage(false, 'email', 'Please enter a valid email');
 				} else {
-					showElementErrorMessage(false, 'email', 'Email is either empty or invalid');
+					showElementErrorMessage(false, 'email', 'Please enter a valid email');
 				}
 			}
 		}
 	});
 	$("#confirmEmail").blur(function () {
+		// Border/checkmark state still updates on blur, but the error MESSAGE text
+		// is left untouched here - it's only ever set/cleared by the keyup handler
+		// below, so nothing shows up on this field until the user actually types.
 		if (validateEmail($("#userSignupForm #confirmEmail").val().trim())) {
 			if ($("#email").val().trim() != '' && $("#email").val().trim() != $("#confirmEmail").val().trim() && $("#confirmEmail").val().trim().length > 0) {
 				validEndInvalidField(false, "confirmEmail");
-				showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email are not same');
-
 			} else if ($("#email").val().trim() == $("#confirmEmail").val().trim() && $("#confirmEmail").val().trim() != "") {
 				validEndInvalidField(true, "email");
 				validEndInvalidField(true, "confirmEmail");
-				showElementErrorMessage(false, 'confirmEmail', '');
-				showElementErrorMessage(false, 'email', '');
 			} else {
 				validEndInvalidField(null, "confirmEmail");
-				showElementErrorMessage(false, 'confirmEmail', '');
 			}
 		} else {
 			if ($("#confirmEmail").val().trim().length > 0) {
 				validEndInvalidField(false, "confirmEmail");
-				if ("STUDENT" == moduleId) {
-					showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email should be same.');
-				} else {
-					showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email should be same.');
-				}
-
 			} else {
 				validEndInvalidField(null, "confirmEmail");
-				showElementErrorMessage(false, 'confirmEmail', '');
 			}
 		}
 	});
@@ -146,29 +137,31 @@ function signupStudentOnLoad() {
 	// 		showElementErrorMessage(false, 'confirmEmail', '');
 	// 	}
 	// });
-	$("#email").on("keyup", function () {
-		var emailVal = $(this).val().trim();
-		var confirmEmailVal = $("#confirmEmail").val().trim();
-		if (emailVal.length > 0) {
-			if (emailVal != confirmEmailVal) {
-				validEndInvalidField(false, "confirmEmail");
-				showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email are not same');
-			} else {
-				validEndInvalidField(true, "confirmEmail");
-				showElementErrorMessage(false, 'confirmEmail', '');
-			}
-		} else if (confirmEmailVal.length == 0) {
-			validEndInvalidField(null, "confirmEmail");
-			showElementErrorMessage(false, 'confirmEmail', '');
-		}
-	});
+	// Disabled for now: typing in #email should not validate/flag #confirmEmail.
+	// confirmEmail's own keyup handler below still validates it as the user types there.
+	// $("#email").on("keyup", function () {
+	// 	var emailVal = $(this).val().trim();
+	// 	var confirmEmailVal = $("#confirmEmail").val().trim();
+	// 	if (emailVal.length > 0) {
+	// 		if (emailVal != confirmEmailVal) {
+	// 			validEndInvalidField(false, "confirmEmail");
+	// 			showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email are not same');
+	// 		} else {
+	// 			validEndInvalidField(true, "confirmEmail");
+	// 			showElementErrorMessage(false, 'confirmEmail', '');
+	// 		}
+	// 	} else if (confirmEmailVal.length == 0) {
+	// 		validEndInvalidField(null, "confirmEmail");
+	// 		showElementErrorMessage(false, 'confirmEmail', '');
+	// 	}
+	// });
 	$("#confirmEmail").on("keyup", function () {
 		var emailVal = $("#email").val().trim();
 		var confirmEmailVal = $(this).val().trim();
 		if (confirmEmailVal.length > 0) {
 			if (emailVal != confirmEmailVal) {
 				validEndInvalidField(false, "confirmEmail");
-				showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email are not same');
+				showElementErrorMessage(false, 'confirmEmail', 'Please re-enter the same email');
 			} else {
 				validEndInvalidField(true, "confirmEmail");
 				showElementErrorMessage(false, 'confirmEmail', '');
@@ -213,10 +206,11 @@ function signupStudentOnLoad() {
 				"password",
 				"P"
 			);
+			// confirmPassword's error MESSAGE is only ever set/cleared by its own keyup
+			// handler - blurring #password only updates confirmPassword's border/checkmark.
 			if (!isPasswordStrong) {
 				showElementErrorMessage(false, 'password', '');
 				if ($(this).val().trim() != $("#userSignupForm #confirmPassword").val().trim() && $("#userSignupForm #confirmPassword").val().trim().length > 0) {
-					showElementErrorMessage(false, 'confirmPassword', 'Create your own password and Confirm y our own Password do not match');
 					validEndInvalidField(false, "confirmPassword");
 				} else {
 					showElementErrorMessage(false, 'password', '')
@@ -226,7 +220,7 @@ function signupStudentOnLoad() {
 				flag = false
 			} else if (!validPassword($("#userSignupForm #password").val().trim())) {
 				$("#userSignupForm #password").css('color', '#a9a9a9');
-				showElementErrorMessage(false, 'password', 'Password is either empty or invalid');
+				showElementErrorMessage(false, 'password', 'Please enter a valid password');
 				validEndInvalidField(false, "password");
 				flag = false
 			} else {
@@ -234,12 +228,10 @@ function signupStudentOnLoad() {
 				showElementErrorMessage(true, 'password', '');
 				if ($(this).val().trim() != $("#confirmPassword").val().trim() && $("#confirmPassword").val().trim().length > 0) {
 					validEndInvalidField(false, "confirmPassword");
-					showElementErrorMessage(false, 'confirmPassword', 'Create your password and Confirm your Password do not match');
 				} else if ($("#confirmPassword").val().trim().length == 0) {
 					validEndInvalidField(null, "confirmPassword");
 				} else {
 					validEndInvalidField(true, "confirmPassword");
-					showElementErrorMessage(false, 'confirmPassword', '');
 				}
 			}
 		}
@@ -247,45 +239,41 @@ function signupStudentOnLoad() {
 			validEndInvalidField(null, "password");
 		}
 	});
-	$("#password").on("keyup", function () {
-		var passwordVal = $(this).val().trim();
-		var confirmPasswordVal = $("#confirmPassword").val().trim();
-		if (passwordVal.length > 0) {
-			if (passwordVal != confirmPasswordVal) {
-				validEndInvalidField(false, "confirmPassword");
-				showElementErrorMessage(false, 'confirmPassword', 'Create your password and Confirm your password do not match');
-			} else {
-				validEndInvalidField(true, "confirmPassword");
-				showElementErrorMessage(false, 'confirmPassword', '');
-			}
-		} else if (confirmPasswordVal.length == 0) {
-			validEndInvalidField(null, "confirmPassword");
-			showElementErrorMessage(false, 'confirmPassword', '');
-		}
-	});
+	// Disabled for now: typing in #password should not validate/flag #confirmPassword.
+	// confirmPassword's own keyup (via checkPasswordStrength, inline onkeyup) still
+	// validates it as the user types there.
+	// $("#password").on("keyup", function () {
+	// 	var passwordVal = $(this).val().trim();
+	// 	var confirmPasswordVal = $("#confirmPassword").val().trim();
+	// 	if (passwordVal.length > 0) {
+	// 		if (passwordVal != confirmPasswordVal) {
+	// 			validEndInvalidField(false, "confirmPassword");
+	// 			showElementErrorMessage(false, 'confirmPassword', 'Create your password and Confirm your password do not match');
+	// 		} else {
+	// 			validEndInvalidField(true, "confirmPassword");
+	// 			showElementErrorMessage(false, 'confirmPassword', '');
+	// 		}
+	// 	} else if (confirmPasswordVal.length == 0) {
+	// 		validEndInvalidField(null, "confirmPassword");
+	// 		showElementErrorMessage(false, 'confirmPassword', '');
+	// 	}
+	// });
 	$("#confirmPassword").blur(function () {
+		// Border/checkmark state still updates on blur, but the error MESSAGE text
+		// is left untouched here - it's only ever set/cleared by the keyup handler
+		// (checkPasswordStrength's onkeyup). checkPasswordStrength() itself shows the
+		// message as a side effect, so it's deliberately NOT called from this blur
+		// handler - the match is checked directly instead.
 		if ($(this).val().length > 0) {
-
-			if (!validPassword($("#userSignupForm #confirmPassword").val().trim()) || !checkPasswordStrength(
-				$("#userSignupForm #confirmPassword").get(0),
-				"userSignupForm",
-				"confirmPassword",
-				"CP",
-				"password"
-			)) {
-				$("#userSignupForm #confirmPassword").css('color', '#a9a9a9');
-				showElementErrorMessage(false, 'confirmPassword', 'Create your password and Confirm your password do not match');
-				validEndInvalidField(false, "confirmPassword");
-				flag = false;
-			} else if ($("#userSignupForm #password").val().trim() != $("#userSignupForm #confirmPassword").val().trim()) {
+			var passwordVal = $("#userSignupForm #password").val().trim();
+			var confirmPasswordVal = $("#userSignupForm #confirmPassword").val().trim();
+			if (!validPassword(confirmPasswordVal) || passwordVal != confirmPasswordVal) {
 				$("#userSignupForm #password").css('color', '#a9a9a9');
 				$("#userSignupForm #confirmPassword").css('color', '#a9a9a9');
-				showElementErrorMessage(false, 'confirmPassword', 'Create your password and Confirm your password do not match');
 				validEndInvalidField(false, "confirmPassword");
-				flag = false
+				flag = false;
 			} else {
 				validEndInvalidField(true, "confirmPassword");
-				showElementErrorMessage(true, 'confirmPassword', '');
 			}
 		} else {
 			validEndInvalidField(null, "confirmPassword");
@@ -407,9 +395,9 @@ function validateRequestForSignup(formId, moduleId) {
 	if (!validateEmail($("#" + formId + " #email").val().trim())) {
 		$("#" + formId + " #email").css('color', '#a9a9a9');
 		if ("STUDENT" == moduleId) {
-			showElementErrorMessage(false, 'email', 'Email is either empty or invalid');
+			showElementErrorMessage(false, 'email', 'Please enter a valid email');
 		} else {
-			showElementErrorMessage(false, 'email', 'Email is either empty or invalid');
+			showElementErrorMessage(false, 'email', 'Please enter a valid email');
 		}
 		flag = false
 	}
@@ -417,9 +405,9 @@ function validateRequestForSignup(formId, moduleId) {
 		$("#" + formId + " #confirmEmail").css('color', '#a9a9a9');
 		if ($("#" + formId + " #confirmEmail").val().trim() != "") {
 			if ("STUDENT" == moduleId) {
-				showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email should be same');
+				showElementErrorMessage(false, 'confirmEmail', 'Please re-enter the same email');
 			} else {
-				showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email should be same');
+				showElementErrorMessage(false, 'confirmEmail', 'Please re-enter the same email');
 			}
 		}
 		flag = false
@@ -427,9 +415,9 @@ function validateRequestForSignup(formId, moduleId) {
 		$("#" + formId + " #email").css('color', '#a9a9a9');
 		$("#" + formId + " #confirmEmail").css('color', '#a9a9a9');
 		if ("STUDENT" == moduleId) {
-			showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email are not same');
+			showElementErrorMessage(false, 'confirmEmail', 'Please re-enter the same email');
 		} else {
-		showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email are not same');
+		showElementErrorMessage(false, 'confirmEmail', 'Please re-enter the same email');
 		}
 		flag = false
 	}
@@ -442,14 +430,14 @@ function validateRequestForSignup(formId, moduleId) {
 	if (!isPasswordStrong) {
 		if ($("#password").val().trim() == "") {
 			validEndInvalidField(false, "password");
-			showElementErrorMessage(false, 'password', 'Password is either empty or invalid');
+			showElementErrorMessage(false, 'password', 'Please enter a valid password');
 		} else {
-			showElementErrorMessage(false, 'password', 'Password is either empty or invalid');
+			showElementErrorMessage(false, 'password', 'Please enter a valid password');
 		}
 		flag = false
 	} else if (!validPassword($("#" + formId + " #password").val().trim())) {
 		$("#" + formId + " #password").css('color', '#a9a9a9');
-		showElementErrorMessage(false, 'password', 'Password is either empty or invalid');
+		showElementErrorMessage(false, 'password', 'Please enter a valid password');
 		flag = false
 	}
 
@@ -462,13 +450,13 @@ function validateRequestForSignup(formId, moduleId) {
 	)) {
 		$("#" + formId + " #confirmPassword").css('color', '#a9a9a9');
 		if ($("#" + formId + " #confirmPassword").val().trim() != "") {
-			showElementErrorMessage(false, 'confirmPassword', 'Password and confirm password should be same');
+			showElementErrorMessage(false, 'confirmPassword', 'Please re-enter the same password');
 		}
 		flag = false;
 	} else if ($("#" + formId + " #password").val().trim() != $("#" + formId + " #confirmPassword").val().trim()) {
 		$("#" + formId + " #password").css('color', '#a9a9a9');
 		$("#" + formId + " #confirmPassword").css('color', '#a9a9a9');
-		showElementErrorMessage(false, 'confirmPassword', 'Create your password and Confirm your password do not match');
+		showElementErrorMessage(false, 'confirmPassword', 'Please re-enter the same password');
 		flag = false
 	}
 	if (!validateCaptcha($("#" + formId + " #captcha").val().trim())) {
@@ -612,7 +600,7 @@ function validMailPermission(flag, elementID) {
 			validEndInvalidField(true, "email");
 			validEndInvalidField(false, "confirmEmail");
 			showElementErrorMessage(false, 'email', '');
-			showElementErrorMessage(false, 'confirmEmail', 'Email and confirm email are not same');
+			showElementErrorMessage(false, 'confirmEmail', 'Please re-enter the same email');
 
 		}
 	} else {

@@ -1598,7 +1598,7 @@ function validateRequestForEmailCheck(formId) {
   ) {
     $("#" + formId + " #email").css("color", "#a9a9a9");
     validEndInvalidField(false, "email");
-    showMessageTheme2(false, "email", "Email is either empty or invalid.");
+    showMessageTheme2(false, "email", "Please enter a valid email");
     return false;
   }
   validEndInvalidField(true, "email");
@@ -2244,7 +2244,7 @@ function validateForEmailForgot(formId) {
     )
   ) {
     $("#" + formId + " #emailid").css("color", "#a9a9a9");
-    showMessageTheme2(0, "Please enter a valid email.");
+    showMessageTheme2(0, "Please enter a valid email");
     return false;
   }
   return true;
@@ -6494,7 +6494,7 @@ showElementErrorMessage(true, elementId, "");
 return false;
 }
 
-showElementErrorMessage(isPasswordValid, elementId, isPasswordValid ? "" : "Password and confirm password should be same");
+showElementErrorMessage(isPasswordValid, elementId, isPasswordValid ? "" : "Please re-enter the same password");
 if (typeof validEndInvalidField === "function") validEndInvalidField(isPasswordValid, elementId);
 return isPasswordValid;
 }
