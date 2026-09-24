@@ -16,6 +16,8 @@ var REEL_GRADES = [];
 var REEL_CARD_LIST_PREV = '';   // session the page was on, for the "returning / new" drill
 var REEL_CARD_LIST_REG = '';    // learning program forced by a split-line click (GROUP / ONE_TO_ONE / OTHER)
 var REEL_CARD_FILTERS_READY = false;
+var REEL_COUNTRY_ROWS = [];     // last country-wise breakup rows (for the timezone toggle re-render)
+var REEL_COUNTRY_TZMODE = '';   // '' = all, 'east' = Timezone (+), 'west' = Timezone (-)
 
 function renderReEnrollmentList(title, roleAndModule, schoolId, userId, userRole) {
     $('#dashboardContentInHTML').html(getReEnrollmentListContent(title));
@@ -232,11 +234,19 @@ function bindReEnrollmentEvents() {
         var kind = $(this).attr('data-bk');
         var metric = $(this).attr('data-metric');
         var name = $(this).attr('data-name') || '';
-        var label = (metric === 'total' ? 'Active' : (metric === 'reEnrolledNext' ? 'Re-enrolled' : 'Pending')) + ' · ' + name;
+        var baseMetric = metric.replace(/(East|West)$/, '');
+        var tzTag = /East$/.test(metric) ? ' · Timezone (+)' : /West$/.test(metric) ? ' · Timezone (−)' : '';
+        var label = (baseMetric === 'total' ? 'Active' : (baseMetric === 'reEnrolledNext' ? 'Re-enrolled' : 'Pending')) + ' · ' + name + tzTag;
         // id can be a CSV of ids (a grade/country name may map to several ids) -> filter by ALL of them
         var ids = String(id).split(',');
         var preset = (kind === 'grade') ? { grade: ids } : (kind === 'country') ? { country: ids, countryName: name } : { progress: id };
         reelCardListOpen(metric, '', label, preset);
+    });
+    // Country-wise timezone toggle (All / +East / -West) -> re-render just that table
+    $(document).off('click', '.reel-tzpill').on('click', '.reel-tzpill', function () {
+        REEL_COUNTRY_TZMODE = $(this).attr('data-tzmode') || '';
+        var html = reEnrollBreakupSection('Country wise', 'Country', 'country', REEL_COUNTRY_ROWS);
+        $('#reelCountryCol').replaceWith(html);
     });
     $(document).off('click', '#reelCardFilterReset').on('click', '#reelCardFilterReset', function () {
         $('#reelCardProgress').val(''); $('#reelCardAdv').val(''); $('#reelCardSearch').val(''); $('#reelCardPageSize').val('25'); $('#reelCardExWd').prop('checked', false);
@@ -339,7 +349,7 @@ function reEnrollOpenStudentDetail(ssid, uid, roll, name, grade, reg, enrol) {
 
 function reEnrollFetch(pageNumber) {
     REEL_PAGE = pageNumber || 0;
-    $('#reelBody').html('<tr><td colspan="20" class="reel-empty">Loading…</td></tr>');
+    $('#reelBody').html('<tr><td colspan="21" class="reel-empty">Loading…</td></tr>');
     var req = getRequestForReEnrollment(REEL_PAGE);
     $.ajax({
         type: 'POST',
@@ -352,7 +362,7 @@ function reEnrollFetch(pageNumber) {
         success: function (data) {
             if (data['status'] == '3') { redirectLoginPage(); return; }
             if (data['status'] == '0' || data['status'] == '2') {
-                $('#reelBody').html('<tr><td colspan="20" class="reel-empty">Unable to load data.</td></tr>');
+                $('#reelBody').html('<tr><td colspan="21" class="reel-empty">Unable to load data.</td></tr>');
                 return;
             }
             if (!REEL_SESSIONS_LOADED) {
@@ -378,7 +388,7 @@ function reEnrollFetch(pageNumber) {
         },
         error: function () {
             if (typeof checkonlineOfflineStatus === 'function' && checkonlineOfflineStatus()) { return; }
-            $('#reelBody').html('<tr><td colspan="20" class="reel-empty">Unable to load data. Please retry.</td></tr>');
+            $('#reelBody').html('<tr><td colspan="21" class="reel-empty">Unable to load data. Please retry.</td></tr>');
         }
     });
 }
@@ -464,9 +474,9 @@ function reEnrollRenderCards(s) {
                 + activeCard
                 + card(pre, 'Re-Enrolled · ' + rePct.toFixed(1) + '%', '#e7f6ec', '#16a34a', 'reEnrolledNext', '', 'Re-Enrolled · ' + (selName || 'selected session'), '', reEnrollMixLine(s.nxGroup, s.nxOneToOne, s.nxOther, 'reEnrolledNext', '', 'Re-Enrolled'))
                 + card(ppend, 'Pending · ' + pendPct.toFixed(1) + '%', '#fdeaea', '#c0392b', 'pendingNext', '', 'Pending · ' + (selName || 'selected session'), '', negSub)
+                + card(s.plusTz || 0, 'Timezone (+) · East', '#fdeaea', '#c0392b', 'tzPlus', '', 'Timezone (+) · East', '', reEnrollMixLine(s.plusTzGroup, s.plusTzOto, s.plusTzOther, 'tzPlus', '', 'Timezone (+)'))
+                + card(s.minusTz || 0, 'Timezone (−) · West', '#fdeaea', '#c0392b', 'tzMinus', '', 'Timezone (−) · West', '', reEnrollMixLine(s.minusTzGroup, s.minusTzOto, s.minusTzOther, 'tzMinus', '', 'Timezone (−)'))
                 + faCard
-                + card(s.plusTz || 0, 'Timezone (+) · East', '#eef7ee', '#1f7a4d', 'tzPlus', '', 'Timezone (+) · East', '', reEnrollMixLine(s.plusTzGroup, s.plusTzOto, s.plusTzOther, 'tzPlus', '', 'Timezone (+)'))
-                + card(s.minusTz || 0, 'Timezone (−) · West', '#eef2ff', '#3730a3', 'tzMinus', '', 'Timezone (−) · West', '', reEnrollMixLine(s.minusTzGroup, s.minusTzOto, s.minusTzOther, 'tzMinus', '', 'Timezone (−)'))
                 + '</div></div>';
         } else {
             var head2 = 'Re-Enrollment Progression' + (s.progPrevName ? (' · ' + s.progPrevName + ' → ') : ' · ') + (selName || '') + ' · no next session';
@@ -474,9 +484,9 @@ function reEnrollRenderCards(s) {
                 + activeCard
                 + pcard('—', 'Re-Enrolled', '#eef1f4', '#98a2b3')
                 + pcard('—', 'Pending', '#fdeaea', '#c0392b', negSub)
+                + card(s.plusTz || 0, 'Timezone (+) · East', '#fdeaea', '#c0392b', 'tzPlus', '', 'Timezone (+) · East', '', reEnrollMixLine(s.plusTzGroup, s.plusTzOto, s.plusTzOther, 'tzPlus', '', 'Timezone (+)'))
+                + card(s.minusTz || 0, 'Timezone (−) · West', '#fdeaea', '#c0392b', 'tzMinus', '', 'Timezone (−) · West', '', reEnrollMixLine(s.minusTzGroup, s.minusTzOto, s.minusTzOther, 'tzMinus', '', 'Timezone (−)'))
                 + faCard
-                + card(s.plusTz || 0, 'Timezone (+) · East', '#eef7ee', '#1f7a4d', 'tzPlus', '', 'Timezone (+) · East', '', reEnrollMixLine(s.plusTzGroup, s.plusTzOto, s.plusTzOther, 'tzPlus', '', 'Timezone (+)'))
-                + card(s.minusTz || 0, 'Timezone (−) · West', '#eef2ff', '#3730a3', 'tzMinus', '', 'Timezone (−) · West', '', reEnrollMixLine(s.minusTzGroup, s.minusTzOto, s.minusTzOther, 'tzMinus', '', 'Timezone (−)'))
                 + '</div></div>';
         }
     }
@@ -498,12 +508,21 @@ function reEnrollRenderCards(s) {
 // numeric cells are clickable -> open the popup list filtered to that grade/country + metric
 function reEnrollBreakupSection(title, nameCol, kind, rows) {
     if (!rows) { return ''; }
+    var isCountry = (kind === 'country');
+    if (isCountry) { REEL_COUNTRY_ROWS = rows; }
+    // Country-wise table has a student-level timezone toggle (All / +East / -West);
+    // the picked mode swaps which numbers each country row shows and drills to that side only.
+    var tzMode = isCountry ? (REEL_COUNTRY_TZMODE || '') : '';
+    var suffix = tzMode === 'east' ? 'East' : tzMode === 'west' ? 'West' : '';
     var body = '', tActive = 0, tRe = 0, tPend = 0;
     for (var i = 0; i < rows.length; i++) {
         var r = rows[i];
-        var active = Number(r.active || 0);
-        var re = Number(r.reEnroll || 0);
-        var pend = Number(r.pending || 0);
+        var active, re, pend;
+        if (tzMode === 'east') { active = Number(r.activeE || 0); re = Number(r.reEnrollE || 0); pend = Number(r.pendingE || 0); }
+        else if (tzMode === 'west') { active = Number(r.activeW || 0); re = Number(r.reEnrollW || 0); pend = Number(r.pendingW || 0); }
+        else { active = Number(r.active || 0); re = Number(r.reEnroll || 0); pend = Number(r.pending || 0); }
+        // in a timezone view, hide countries that have nobody on that side
+        if (tzMode && active === 0) { continue; }
         tActive += active; tRe += re; tPend += pend;
         var pct = active > 0 ? (re / active * 100) : 0;
         var tier = pct >= 50 ? 'reel-b5' : pct >= 40 ? 'reel-b4' : pct >= 30 ? 'reel-b3' : pct >= 20 ? 'reel-b2' : pct > 0 ? 'reel-b1' : '';
@@ -514,10 +533,10 @@ function reEnrollBreakupSection(title, nameCol, kind, rows) {
         }
         body += '<tr class="' + tier + '">'
             + '<td class="reel-bname">' + reEnrollEsc(r.name || '-') + '</td>'
-            + bcell(active.toLocaleString(), 'total')
-            + bcell(re.toLocaleString(), 'reEnrolledNext')
+            + bcell(active.toLocaleString(), 'total' + suffix)
+            + bcell(re.toLocaleString(), 'reEnrolledNext' + suffix)
             + '<td class="reel-bpct">' + pct.toFixed(1) + '%</td>'
-            + bcell(pend.toLocaleString(), 'pendingNext')
+            + bcell(pend.toLocaleString(), 'pendingNext' + suffix)
             + '</tr>';
     }
     if (!body) { body = '<tr><td colspan="5" class="reel-bempty">No data</td></tr>'; }
@@ -530,14 +549,24 @@ function reEnrollBreakupSection(title, nameCol, kind, rows) {
         + '<th>' + tPct.toFixed(1) + '%</th>'
         + '<th>' + tPend.toLocaleString() + '</th>'
         + '</tr>';
-    return '<div class="reel-breakcol">'
-        + '<div class="reel-bhead">' + reEnrollEsc(title) + '</div>'
+    var toggle = isCountry ? reEnrollCountryTzToggle(tzMode) : '';
+    return '<div class="reel-breakcol"' + (isCountry ? ' id="reelCountryCol"' : '') + '>'
+        + '<div class="reel-bhead">' + reEnrollEsc(title) + toggle + '</div>'
         + '<div class="reel-bwrap"><table class="reel-btbl"><thead>'
         + totalRow
         + '<tr class="reel-blblr">'
         + '<th>' + reEnrollEsc(nameCol) + '</th><th>Active</th><th>Re-enrolled</th><th>%</th><th>Pending</th>'
         + '</tr></thead><tbody>' + body + '</tbody></table></div>'
         + '</div>';
+}
+
+// the All / +East / -West pill toggle shown in the Country-wise header
+function reEnrollCountryTzToggle(tzMode) {
+    function pill(mode, label) {
+        var on = ((tzMode || '') === mode);
+        return '<a href="javascript:void(0)" class="reel-tzpill' + (on ? ' reel-tzpill-on' : '') + '" data-tzmode="' + mode + '">' + label + '</a>';
+    }
+    return '<span class="reel-tztoggle">' + pill('', 'All') + pill('east', 'Timezone (+) · East') + pill('west', 'Timezone (−) · West') + '</span>';
 }
 
 // Advance column has three states: ADV = advance / seat booked, SUCCESS = paid re-enrollment
@@ -584,14 +613,23 @@ function reEnrollRowsHtml(rows, srBase) {
             + '<td>' + reEnrollEsc(r.profileStatus || '-') + '</td>'
             + '<td>' + reEnrollEsc(r.lastLogout || '-') + '</td>'
             + '<td>' + adv + '</td>'
+            + '<td>' + reEnrollLastStatusCell(r.lastStatus) + '</td>'
             + '</tr>';
     }
     return h;
 }
 
+// latest COMMON_COMMENTS status shown as a soft badge; "Negative for Re-enrolment" stands out in red
+function reEnrollLastStatusCell(v) {
+    var s = (v === null || v === undefined) ? '' : String(v).trim();
+    if (!s) { return '<span class="reel-lsbadge reel-ls-none">—</span>'; }
+    var cls = /negative/i.test(s) ? 'reel-ls-neg' : 'reel-ls-set';
+    return '<span class="reel-lsbadge ' + cls + '">' + reEnrollEsc(s) + '</span>';
+}
+
 function reEnrollRenderRows(rows, pageNumber, pageSize) {
     if (!rows.length) {
-        $('#reelBody').html('<tr><td colspan="20" class="reel-empty">No students found for the selected filters.</td></tr>');
+        $('#reelBody').html('<tr><td colspan="21" class="reel-empty">No students found for the selected filters.</td></tr>');
         return;
     }
     $('#reelBody').html(reEnrollRowsHtml(rows, (pageNumber || 0) * (pageSize || 25)));
@@ -778,7 +816,7 @@ function reelCardListOpen(cm, sess, title, preset, prevSess) {
     reelClearCountryClock();
     if (preset && preset.countryName) { reelStartCountryClock(preset.countryName); }
     $('#reelListSub').html('&nbsp;');
-    $('#reelCardBody').html('<tr><td colspan="20" class="reel-empty">Loading…</td></tr>');
+    $('#reelCardBody').html('<tr><td colspan="21" class="reel-empty">Loading…</td></tr>');
     $('#reelCardPager').html('');
     reelCardInitFilters(preset);
     $('#reelListOverlay').addClass('show');
@@ -845,7 +883,7 @@ function reelCardListFetch(pageNumber) {
     req.search = (($('#reelCardSearch').val() || '').trim());
     req.reStatus = ($('#reelCardReStatus').val() || []);
     if (page > 0) { req.knownTotal = REEL_CARD_LIST_TOTAL; } else { delete req.knownTotal; }
-    $('#reelCardBody').html('<tr><td colspan="20" class="reel-empty">Loading…</td></tr>');
+    $('#reelCardBody').html('<tr><td colspan="21" class="reel-empty">Loading…</td></tr>');
     $.ajax({
         type: 'POST',
         contentType: APPLICATION_JSON_VALUE,
@@ -857,14 +895,14 @@ function reelCardListFetch(pageNumber) {
         success: function (data) {
             if (data['status'] == '3') { redirectLoginPage(); return; }
             if (data['status'] == '0' || data['status'] == '2') {
-                $('#reelCardBody').html('<tr><td colspan="20" class="reel-empty">Unable to load data.</td></tr>');
+                $('#reelCardBody').html('<tr><td colspan="21" class="reel-empty">Unable to load data.</td></tr>');
                 return;
             }
             if (page === 0) { REEL_CARD_LIST_TOTAL = Number(data.count || 0); }
             var rows = data.data || [];
             var pageSize = req.pageSize || 25;
             if (!rows.length) {
-                $('#reelCardBody').html('<tr><td colspan="20" class="reel-empty">No students found.</td></tr>');
+                $('#reelCardBody').html('<tr><td colspan="21" class="reel-empty">No students found.</td></tr>');
             } else {
                 $('#reelCardBody').html(reEnrollRowsHtml(rows, page * pageSize));
             }
@@ -876,7 +914,7 @@ function reelCardListFetch(pageNumber) {
         },
         error: function () {
             if (typeof checkonlineOfflineStatus === 'function' && checkonlineOfflineStatus()) { return; }
-            $('#reelCardBody').html('<tr><td colspan="20" class="reel-empty">Unable to load data. Please retry.</td></tr>');
+            $('#reelCardBody').html('<tr><td colspan="21" class="reel-empty">Unable to load data. Please retry.</td></tr>');
         }
     });
 }
