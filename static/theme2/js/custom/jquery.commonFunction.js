@@ -607,7 +607,7 @@ position:relative;
 .custom-field-scope .custom-field:has(textarea:not(:placeholder-shown)) label:not(.error-msg) {
     top: 0;
     transform: translateY(-46%);
-    font-size: 12px;
+    font-size: 12px !important;
     font-weight: 500;
     z-index: 5;
 }

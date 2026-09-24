@@ -186,6 +186,15 @@ function addSignupFieldBackgroundOverride() {
 				.custom-field:has(#pCountryId option:checked:not([value=""])) label[for="pCountryId"] .text-black {
 					color: #000 !important;
 				}
+				label[for="nationality"] .text-black {
+					display: none;
+				}
+				.custom-field:focus-within label[for="nationality"] .text-black,
+				.custom-field:has(.select2-container--open) label[for="nationality"] .text-black,
+				.custom-field:has(.select2-container--focus) label[for="nationality"] .text-black,
+				.custom-field:has(#nationality option:checked:not([value=""])) label[for="nationality"] .text-black {
+					display: inline;
+				}
 				@media (max-width: 767px) {
 					#signupStage1 .nationality-id-hint:not(.mobile-nationality-id-hint) {
 						top: 95% !important;
@@ -201,44 +210,18 @@ function addSignupFieldBackgroundOverride() {
 					.custom-field .form-control-field::placeholder {
 						font-size: 13px !important;
 					}
-					.custom-field:has(> label[for="nationality"]) .form-control-field,
-					.custom-field:has(> label[for="countryId"]) .form-control-field,
-					.custom-field:has(> label[for="pCountryId"]) .form-control-field,
-					.custom-field:has(> label[for="dob"]) .form-control-field,
-					.custom-field:has(> label[for="parentEmailId"]) .form-control-field {
-						height: 62px !important;
-						padding-top: 24px !important;
+					.custom-field:has(#nationality option:checked:not([value=""])) .select2-container,
+					.custom-field:has(#nationality option:checked:not([value=""])) .select2-selection--single {
+						height: 56px !important;
 					}
-					.custom-field:has(> label[for="nationality"]) .select2-container,
-					.custom-field:has(> label[for="countryId"]) .select2-container,
-					.custom-field:has(> label[for="pCountryId"]) .select2-container,
-					.custom-field:has(> label[for="nationality"]) .select2-selection--single,
-					.custom-field:has(> label[for="countryId"]) .select2-selection--single,
-					.custom-field:has(> label[for="pCountryId"]) .select2-selection--single {
+					.custom-field:has(#nationality option:checked:not([value=""])) .select2-selection__rendered {
 						height: 62px !important;
-					}
-					.custom-field:has(> label[for="nationality"]) .select2-selection__rendered,
-					.custom-field:has(> label[for="countryId"]) .select2-selection__rendered,
-					.custom-field:has(> label[for="pCountryId"]) .select2-selection__rendered {
-						height: 62px !important;
-						line-height: 62px !important;
+						line-height: 12px !important;
 						padding-top: 24px !important;
 						box-sizing: border-box !important;
 					}
-					.custom-field:has(> label[for="nationality"]) .select2-selection__arrow,
-					.custom-field:has(> label[for="countryId"]) .select2-selection__arrow,
-					.custom-field:has(> label[for="pCountryId"]) .select2-selection__arrow {
+					.custom-field:has(#nationality option:checked:not([value=""])) .select2-selection__arrow {
 						height: 62px !important;
-					}
-					.custom-field:has(#contactNumber) .iti,
-					.custom-field:has(#parentPhoneNumber) .iti,
-					.custom-field #contactNumber.form-control-field,
-					.custom-field #parentPhoneNumber.form-control-field {
-						height: 62px !important;
-					}
-					.custom-field #contactNumber.form-control-field,
-					.custom-field #parentPhoneNumber.form-control-field {
-						padding-top: 24px !important;
 					}
 				}
 			#signupStage2 .custom-field .iti {
