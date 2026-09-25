@@ -1116,6 +1116,25 @@ function renderLeadDemoDashboardCounselors(counselors, sectionData) {
             totalMissed += counselor.missedConvertibleCount || 0;
             var missedLeads = counselor.missedConvertibleLeads || [];
             var rowId = 'lddMissedDetail' + (counselor.counselorId || index);
+            if (counselor.isUnattributed) {
+                // Aggregate row for converted students whose counselor is inactive / not on file.
+                // Only the two Converted columns carry a value; the rest are not applicable.
+                html += '<tr style="background:#f6f7f9;font-style:italic;color:#6b7280;">'
+                    + '<td>' + (index + 1) + '</td>'
+                    + '<td>' + (counselor.counselorName || 'No counselor on file / Inactive')
+                        + ' <i class="fa fa-info-circle" title="Converted students whose referral counselor has left / been deactivated, or who have no referral code on file. Not attributable to a named expert."></i></td>'
+                    + '<td class="text-center">&mdash;</td>'
+                    + '<td class="text-center">&mdash;</td>'
+                    + '<td class="text-center">&mdash;</td>'
+                    + '<td class="text-center">&mdash;</td>'
+                    + '<td class="text-center">&mdash;</td>'
+                    + '<td class="text-center" style="color:#2e7d32;font-weight:600;font-style:normal;">' + (counselor.convertedCount || 0) + '</td>'
+                    + '<td class="text-center" style="color:#2e7d32;font-weight:600;font-style:normal;">' + (counselor.convertedCountFY || 0) + '</td>'
+                    + '<td class="text-center">&mdash;</td>'
+                    + '<td class="text-center">&mdash;</td>'
+                + '</tr>';
+                return; // no missed-detail row for the aggregate
+            }
             html += '<tr' + (counselor.missedConvertibleFlag ? ' style="background:#fdecea;"' : '') + '>'
                 + '<td>' + (index + 1) + '</td>'
                 + '<td>' + (counselor.counselorName || 'N/A') + '</td>'
