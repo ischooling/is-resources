@@ -1280,17 +1280,21 @@ input::placeholder {
 	opacity: 1;
 	position: relative;
 	z-index: 1;
+	padding: 2px 7px 5px;
+	margin-right: 2px;
 }
-.modal .close:not(.close-with-red-color):after{content: '';width: 35px;height: 35px;background-color: red;position: absolute;right: 0;z-index: -1;}
+.modal .close:not(.close-with-red-color):after{content: '';position: absolute;inset: 0;background-color: red;z-index: -1;}
 .modal .close-with-red-color {
 	opacity: 1;
-    width: 27px;
+    width: 12px;
     height: 27px;
 	margin: 0 !important;
     padding: 0 !important;
     line-height: 27px;
 	display: inline-flex;
 	justify-content: center;
+	margin-right: 2px;
+	padding: 2px 4px 6px;
 }
 .modal .close-with-red-color:hover, .close-with-red-color{
 	background-color: red !important;

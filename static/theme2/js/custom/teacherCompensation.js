@@ -1637,6 +1637,16 @@ function editAttendance(attendanceid, attendminuts, remark, calltype, startdate,
 				}else{
 					showMessageTheme2(1, data['message'],'',true);
 				}
+				if(calltype=='publish'){
+					$(".publish"+attendanceid).text('Published');
+					$(".publish"+attendanceid).removeClass('text-danger');
+					$(".publish"+attendanceid).addClass('text-success');
+					if(typeof getPublishedAuditHtml == 'function'){
+						$(".publishAudit"+attendanceid).replaceWith(getPublishedAuditHtml(attendanceid, 1, USER_FULL_NAME, moment().format('MMM DD, YYYY hh:mm A')));
+					}
+				}else if(calltype=='edit'){
+					$(".publishAudit"+attendanceid).html('');
+				}
 				if(callFrom!='classreview'){
 					$("#addattenanceform")[0].reset();
 					$("#addmoreAttendance").modal('hide');

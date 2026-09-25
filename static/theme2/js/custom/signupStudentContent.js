@@ -177,22 +177,21 @@ function addSignupFieldBackgroundOverride() {
 					padding-left: 12px;
 					padding-right: 10px;
 				}
-								.custom-field.has-value label[for="dob"] .text-black,
-				.custom-field:has(#parentEmailId:not(:placeholder-shown)) label[for="parentEmailId"] .text-black,
-				.custom-field:has(#contactNumber:not(:placeholder-shown)) label[for="contactNumber"] .text-black,
-				.custom-field:has(#parentPhoneNumber:not(:placeholder-shown)) label[for="parentPhoneNumber"] .text-black,
-				.custom-field:has(#nationality option:checked:not([value=""])) label[for="nationality"] .text-black,
-				.custom-field:has(#countryId option:checked:not([value=""])) label[for="countryId"] .text-black,
-				.custom-field:has(#pCountryId option:checked:not([value=""])) label[for="pCountryId"] .text-black {
+				.text-black {
+					color: var(--custom-field-default-text);
+				}
+				.custom-field.has-value .text-black,
+				.custom-field:focus-within .text-black,
+				.custom-field:has(input:not(:placeholder-shown)) .text-black {
 					color: #000 !important;
 				}
 				label[for="nationality"] .text-black {
 					display: none;
 				}
-				.custom-field:focus-within label[for="nationality"] .text-black,
-				.custom-field:has(.select2-container--open) label[for="nationality"] .text-black,
-				.custom-field:has(.select2-container--focus) label[for="nationality"] .text-black,
-				.custom-field:has(#nationality option:checked:not([value=""])) label[for="nationality"] .text-black {
+				.custom-field:has(#nationality):focus-within label[for="nationality"] .text-black,
+				.custom-field:has(#nationality option:checked:not([value=""])) label[for="nationality"] .text-black,
+				.custom-field:has(#nationality):has(.select2-container--open) label[for="nationality"] .text-black,
+				.custom-field:has(#nationality):has(.select2-container--focus) label[for="nationality"] .text-black {
 					display: inline;
 				}
 				@media (max-width: 767px) {
@@ -1401,7 +1400,7 @@ function getStudentDetailsContent(data, signupType) {
 					value="${signupStudent.dob}"
 					placeholder=" "
 					onkeydown="return false" tabindex="${++tabindex}" readonly>
-					<label for="dob">Date of Birth (Month Day, Year)<sup class="sup">*</sup></label>
+					<label for="dob">Date of Birth <span class="text-black">(Month Day, Year)</span><sup class="sup">*</sup></label>
 				</div>
 			</div>
 			<div class="form-holder valid-field">
@@ -1431,7 +1430,7 @@ function getStudentDetailsContent(data, signupType) {
                     <input type="tel" name="contactNumber" id="contactNumber" class="form-control-field"
                         maxlength="15" value="${signupStudent.contactNumber}"
                         onkeydown="return M.digit(event);" placeholder=" " tabindex="${++tabindex}">
-                    <label for="contactNumber">Mobile Number (Student or Parent)<sup class="sup">*</sup></label>
+                    <label for="contactNumber">Mobile Number <span class="text-black">(Student or Parent)</span><sup class="sup">*</sup></label>
                 </div>
             </div>
             <div class="form-holder valid-field">
@@ -1441,7 +1440,7 @@ function getStudentDetailsContent(data, signupType) {
                         <option value="">Select Nationality*</option>
                         ${getNationalityOption(signupStudent.countries, signupStudent.nationality)}
                     </select>
-                    <label for="nationality">Nationality (You must have a valid National ID)<sup class="sup">*</sup></label>
+                    <label for="nationality">Nationality <span class="text-black">(You must have a valid National ID)</span><sup class="sup">*</sup></label>
                 </div>
                 
             </div>
@@ -1458,7 +1457,7 @@ function getStudentDetailsContent(data, signupType) {
                         <option value="">Select Country*</option>
                         ${getCountriesOption(signupStudent.countries, signupStudent.countryId)}
                     </select>
-                    <label for="countryId">Country (Student's Current Location)<sup class="sup">*</sup></label>
+                    <label for="countryId">Country <span class="text-black">(Student's Current Location)</span><sup class="sup">*</sup></label>
                 </div>
             </div>
             <div class="form-holder valid-field">
@@ -1975,7 +1974,7 @@ function getParentDetailsContent(data) {
                     <input type="tel" class="form-control-field parent-phone" name="parentPhoneNumber" id="parentPhoneNumber"
                         maxlength="15" placeholder=" " value="${signupParent.contactNumber}"
                         autocomplete="off" onkeydown="return M.digit(event);" tabindex="${++tabindex}">
-                    <label for="parentPhoneNumber">Parent Mobile Number (Optional)</label>
+                    <label for="parentPhoneNumber">Parent Mobile Number <span class="text-black">(Optional)</span></label>
                 </div>
             </div>
         </div>
@@ -1995,7 +1994,7 @@ function getParentDetailsContent(data) {
                         <option value="">Select Country*</option>
 						${getCountriesOption(signupParent.countries, signupParent.countryId)}
                     </select>
-                    <label for="pCountryId">Country (Parent's Current Location)<sup class="sup">*</sup></label>
+                    <label for="pCountryId">Country <span class="text-black">(Parent's Current Location)</span><sup class="sup">*</sup></label>
                 </div>
             </div>
             <div class="form-holder valid-field">
