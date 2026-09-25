@@ -241,14 +241,47 @@ function validateFields(keyId, fieldValue){
 			showMessageTheme2(0,"Email is either empty or invalid.",'',false);
 			return false;
 		}
-	}else if(keyId=='otherRelation'|| keyId=='relationType'){
-		var viewValue='';
-		if('Other'== $('#relationType').val()){
-			if($('#otherRelation').val()=='' || $('#otherRelation').val()==undefined){
-				showMessageTheme2(0,"Please Enter relation type.",'',false);
+		}else if(keyId=='otherRelation'|| keyId=='relationType'){
+			var viewValue='';
+			var selectedRelation = $('#relationType').val();
+			var primaryEmailVal = '';
+			var primaryFirstNameVal = '';
+			var primaryMiddleNameVal = '';
+			var primaryLastNameVal = '';
+			if(selectedRelation === 'Mother'){
+				primaryEmailVal = $('#motherEmail').val();
+				primaryFirstNameVal = $('#motherName').val();
+				primaryMiddleNameVal = $('#motherMiddleName').val();
+				primaryLastNameVal = $('#motherLastName').val();
+			}else if(selectedRelation === 'Father'){
+				primaryEmailVal = $('#fatherEmail').val();
+				primaryFirstNameVal = $('#fatherFirstName').val();
+				primaryMiddleNameVal = $('#fatherMiddleName').val();
+				primaryLastNameVal = $('#fatherLastName').val();
+			}else if(selectedRelation === 'Guardian'){
+				primaryEmailVal = $('#guardianEmail').val();
+				primaryFirstNameVal = $('#guardianFirstName').val();
+				primaryMiddleNameVal = $('#guardianMiddleName').val();
+				primaryLastNameVal = $('#guardianLastName').val();
+			}
+			if(selectedRelation !== 'Other' && (!primaryEmailVal || primaryEmailVal.trim() === '')){
+				showMessageTheme2(0,"Primary parent email is required.",'',false);
 				return false;
 			}
-		}
+			if(selectedRelation !== 'Other' && (!primaryFirstNameVal || primaryFirstNameVal.trim() === '')){
+				showMessageTheme2(0,"Primary parent first name is required.",'',false);
+				return false;
+			}
+			if(selectedRelation !== 'Other' && (!primaryLastNameVal || primaryLastNameVal.trim() === '')){
+				showMessageTheme2(0,"Primary parent last name is required.",'',false);
+				return false;
+			}
+			if('Other'== $('#relationType').val()){
+				if($('#otherRelation').val()=='' || $('#otherRelation').val()==undefined){
+					showMessageTheme2(0,"Please Enter relation type.",'',false);
+					return false;
+				}
+			}
 	}else if(keyId=='sendUserVerificationEmail' || keyId=='verifyUserEmail' || keyId=='pMiddleName' || keyId=='middleName'|| keyId=='pLastName'|| keyId=='lastName' || keyId=='switchParentStudEmailId' || keyId=='reserveASeat' || keyId=='bookASeatNextGradeOpted' || keyId=='advanceGradeOpted'){
 
 	}else if(keyId=="parentEmailSmsLmsCreation"){

@@ -1,3 +1,6 @@
+var PORFILE_RESPONSE_DATA;
+var PORFILE_RESPONSE_UPDATED_DATA;
+var PROFILE_VIEW_PAYLOAD;
 var PROFILE_RESPONSE_DATA;
 var PROFILE_RESPONSE_UPDATED_DATA;
 var PROFILE_PROGRESS_REPORT_CURRENT_DAYS = null;
@@ -9,13 +12,21 @@ async function renderStudentProfilePage(extraParam) {
     if ($("#profileFielddModal").length > 0) {
         $("#profileFielddModal").remove();
     }
-    PROFILE_RESPONSE_DATA = await getDashboardDataBasedUrlAndPayload(true, true, 'profile-view-content-new?payload=' + extraParam, '');
-    console.log(PROFILE_RESPONSE_DATA)
+    PROFILE_VIEW_PAYLOAD = extraParam;
+    PORFILE_RESPONSE_DATA = await getDashboardDataBasedUrlAndPayload(true, true, 'profile-view-content-new?payload='+extraParam, '');
+    console.log(PORFILE_RESPONSE_DATA)
+    if(Object.keys(PORFILE_RESPONSE_DATA.profileData).length<1){
+        PROFILE_RESPONSE_DATA = await getDashboardDataBasedUrlAndPayload(true, true, 'profile-view-content-new?payload=' + extraParam, '');
+        console.log(PROFILE_RESPONSE_DATA)
+    } else {
+        PROFILE_RESPONSE_DATA = PORFILE_RESPONSE_DATA;
+    }
     if (Object.keys(PROFILE_RESPONSE_DATA.profileData).length < 1) {
         showMessageTheme2(0, "No Data found")
     } else {
         var data = PROFILE_RESPONSE_DATA.profileData.studentProfile;
         PROFILE_RESPONSE_UPDATED_DATA = data;
+        PORFILE_RESPONSE_UPDATED_DATA = data;
         try {
             var gradeId = data && data[2] ? parseInt(data[2].gradeId) : 0;
             var marksPublishedStatus = data && data[2] ? data[2].marksPublishedStatus : "N";
@@ -1000,6 +1011,12 @@ function guardianInformation(data) {
                         ${motherCountryElement(data.motherCountry)}
                     </div>
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${motherStateElement(data.motherState)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${motherCityElement(data.motherCity)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
                         ${motherOccupationElement(data.motherOccupation)}
                     </div>
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
@@ -1033,6 +1050,12 @@ function guardianInformation(data) {
                         ${fatherCountryElement(data.fatherCountry)}
                     </div>
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${fatherStateElement(data.fatherState)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${fatherCityElement(data.fatherCity)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
                         ${fatherOccupationElement(data.fatherOccupation)}
                     </div>
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
@@ -1064,6 +1087,12 @@ function guardianInformation(data) {
                     </div>
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
                         ${guardianCountryElement(data)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${guardianStateElement(data)}
+                    </div>
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
+                        ${guardianCityElement(data)}
                     </div>
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
                         ${guardianOccupationElement(data.guardianOccupation)}
@@ -1105,7 +1134,7 @@ function motherNameElement(data) {
     var html =
         `<div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-3 p-0">
-        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="motherName" id="motherName" value="${data != "" && data != undefined ? data : ""}" onkeydown="return M.isChars(event);" placeholder=" " autocomplete="off" onkeyup="controlEditField(this,'motherName',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'motherName')">
+        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="motherName" id="motherName" value="${data != "" && data != undefined ? data : ""}" onkeydown="return M.isChars(event);" placeholder=" " autocomplete="off" ${USER_ROLE != "STUDENT" && USER_ROLE != "PARENT" && USER_ROLE !='TEACHER' && PROFILE_RESPONSE_DATA.rightToEdit ? '' : 'disabled'} onkeyup="controlEditField(this,'motherName',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'motherName')">
         <label for="motherName">First Name</label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="applyChanges('motherName', 'motherName', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
@@ -1123,7 +1152,7 @@ function motherMiddleNameElement(data) {
     var html =
         `<div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-3 p-0">
-        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input" name="motherMiddleName" id="motherMiddleName" value="${data != "" && data != undefined ? data : ""}" onkeydown="return M.isChars(event);" placeholder=" " autocomplete="off" onkeyup="controlEditField(this,'motherMiddleName',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'motherMiddleName')">
+        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input" name="motherMiddleName" id="motherMiddleName" value="${data != "" && data != undefined ? data : ""}" onkeydown="return M.isChars(event);" placeholder=" " autocomplete="off" ${USER_ROLE != "STUDENT" && USER_ROLE != "PARENT" && USER_ROLE !='TEACHER' && PROFILE_RESPONSE_DATA.rightToEdit ? '' : 'disabled'} onkeyup="controlEditField(this,'motherMiddleName',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'motherMiddleName')">
         <label for="motherMiddleName">Middle Name</label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="applyChanges('motherMiddleName', 'motherMiddleName', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
@@ -1141,7 +1170,7 @@ function motherLastNameElement(data) {
     var html =
         `<div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-3 p-0">
-        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="motherLastName" id="motherLastName" value="${data != "" && data != undefined ? data : ""}" onkeydown="return M.isChars(event);" placeholder=" " autocomplete="off" onkeyup="controlEditField(this,'motherLastName',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'motherLastName')">
+        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="motherLastName" id="motherLastName" value="${data != "" && data != undefined ? data : ""}" onkeydown="return M.isChars(event);" placeholder=" " autocomplete="off" ${USER_ROLE != "STUDENT" && USER_ROLE != "PARENT" && USER_ROLE !='TEACHER' && PROFILE_RESPONSE_DATA.rightToEdit ? '' : 'disabled'} onkeyup="controlEditField(this,'motherLastName',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'motherLastName')">
         <label for="motherLastName">Last Name</label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="applyChanges('motherLastName', 'motherLastName', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
@@ -1158,7 +1187,7 @@ function motherLastNameElement(data) {
 
 function motherPhoneNumberElement(data, callFrom) {
     var html =
-        `<div class="d-flex flex-wrap">
+        `<div class="d-flex flex-wrap mb-1" style="margin-top:-6px;">
         <div class="custom-checkbox custom-control float-left w-fit-content right-checkbox-align cursor ml-auto mr-2 d-inline-flex align-items-center">
             <input type="checkbox" id="motherPhoneNumberWhatsAppStatus" class="custom-control-input" ${data.motherPhoneNumberWhatsAppStatus != "N" && data.motherPhoneNumberWhatsAppStatus != undefined ? 'checked' : ''} data-status="${data.motherPhoneNumberWhatsAppStatus != "N" && data.motherPhoneNumberWhatsAppStatus != undefined ? true : false}"  onchange="availableOnWhatsApp(this, 'motherPhoneNumber',\'${data.motherPhoneNumber}\','input',\'${data.motherPhoneNumberCountryCode != "" && data.motherPhoneNumberCountryCode != undefined ? data.motherPhoneNumberCountryCode : "us"}\',1)">
             <label class="custom-control-label cursor font-10 after-top-0 before-top-0" for="motherPhoneNumberWhatsAppStatus">
@@ -1195,7 +1224,7 @@ function motherEmailElement(data) {
     var html =
         `<div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-4 p-0">
-        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="motherEmail" id="motherEmail" value="${data != "" && data != undefined ? data : ""}" placeholder=" " autocomplete="off" style="padding-left:6px !important; padding-right:2px !important;" onkeyup="controlEditField(this,'motherEmail',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'motherEmail')">
+        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="motherEmail" id="motherEmail" value="${data != "" && data != undefined ? data : ""}" placeholder=" " autocomplete="off" ${USER_ROLE != "STUDENT" && USER_ROLE != "PARENT" && USER_ROLE !='TEACHER' && PROFILE_RESPONSE_DATA.rightToEdit ? '' : 'disabled'} style="padding-left:6px !important; padding-right:2px !important;" onkeyup="controlEditField(this,'motherEmail',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'motherEmail')">
         <label for="motherEmail">Email</label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="applyChanges('motherEmail', 'motherEmail', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
@@ -1247,6 +1276,44 @@ function motherCountryElement(data) {
     return html;
 }
 
+function motherStateElement(data) {
+    var html =
+        `<div class="custom-field-scope">
+    <div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+        <select id="motherState" name="motherState" class="form-control form-control-sm group-append-hide-input bar_count" data-country="motherState" onchange="controlEditField(this,'motherState',\'${data != "" && data != undefined ? data : ""}\','select', '','', 1,'motherState')"></select>
+        <label for="motherState">State</label>
+        <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
+            <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center" onclick="applyChanges('motherState', 'motherState',\'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
+                <i class="fa fa-check"></i>
+            </a>
+            <a href="javascript:void(0)" class="btn btn-sm btn-danger rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="cancelChanges('motherState',\'${data != "" && data != undefined ? data : ""}\','countrySectionParent','motherState')" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
+                <i class="fa fa-times"></i>
+            </a>
+        </div>
+    </div>
+</div>`;
+    return html;
+}
+
+function motherCityElement(data) {
+    var html =
+        `<div class="custom-field-scope">
+    <div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+        <select id="motherCity" name="motherCity" class="form-control form-control-sm group-append-hide-input bar_count" data-country="motherCity" onchange="controlEditField(this,'motherCity',\'${data != "" && data != undefined ? data : ""}\','select', '','', 1,'motherCity')"></select>
+        <label for="motherCity">City</label>
+        <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
+            <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center" onclick="applyChanges('motherCity', 'motherCity',\'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
+                <i class="fa fa-check"></i>
+            </a>
+            <a href="javascript:void(0)" class="btn btn-sm btn-danger rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="cancelChanges('motherCity',\'${data != "" && data != undefined ? data : ""}\','countrySectionParent','motherCity')" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
+                <i class="fa fa-times"></i>
+            </a>
+        </div>
+    </div>
+</div>`;
+    return html;
+}
+
 function motherOccupationElement(data) {
     var html =
         `<div class="custom-field-scope">
@@ -1288,7 +1355,7 @@ function fatherFirstNameElement(data) {
     var html =
         `<div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-3 p-0">
-        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="fatherFirstName" id="fatherFirstName" value="${data != "" && data != undefined ? data : ""}" onkeydown="return M.isChars(event);" placeholder=" " autocomplete="off" onkeyup="controlEditField(this,'fatherFirstName',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'fatherFirstName')">
+        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="fatherFirstName" id="fatherFirstName" value="${data != "" && data != undefined ? data : ""}" onkeydown="return M.isChars(event);" placeholder=" " autocomplete="off" ${USER_ROLE != "STUDENT" && USER_ROLE != "PARENT" && USER_ROLE !='TEACHER' && PROFILE_RESPONSE_DATA.rightToEdit ? '' : 'disabled'} onkeyup="controlEditField(this,'fatherFirstName',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'fatherFirstName')">
         <label for="fatherFirstName">First Name</label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="applyChanges('fatherFirstName', 'fatherFirstName', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
@@ -1306,7 +1373,7 @@ function fatherMiddleNameElement(data) {
     var html =
         `<div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-3 p-0">
-        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input" name="fatherMiddleName" id="fatherMiddleName" value="${data != "" && data != undefined ? data : ""}" onkeydown="return M.isChars(event);" placeholder=" " autocomplete="off" onkeyup="controlEditField(this,'fatherMiddleName',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'fatherMiddleName')">
+        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input" name="fatherMiddleName" id="fatherMiddleName" value="${data != "" && data != undefined ? data : ""}" onkeydown="return M.isChars(event);" placeholder=" " autocomplete="off" ${USER_ROLE != "STUDENT" && USER_ROLE != "PARENT" && USER_ROLE !='TEACHER' && PROFILE_RESPONSE_DATA.rightToEdit ? '' : 'disabled'} onkeyup="controlEditField(this,'fatherMiddleName',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'fatherMiddleName')">
         <label for="fatherMiddleName">Middle Name</label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="applyChanges('fatherMiddleName', 'fatherMiddleName', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
@@ -1325,7 +1392,7 @@ function fatherLastNameElement(data) {
     var html =
         `<div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-3 p-0">
-        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="fatherLastName" id="fatherLastName" value="${data != "" && data != undefined ? data : ""}" onkeydown="return M.isChars(event);" placeholder=" " autocomplete="off" onkeyup="controlEditField(this,'fatherLastName',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'fatherLastName')">
+        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="fatherLastName" id="fatherLastName" value="${data != "" && data != undefined ? data : ""}" onkeydown="return M.isChars(event);" placeholder=" " autocomplete="off" ${USER_ROLE != "STUDENT" && USER_ROLE != "PARENT" && USER_ROLE !='TEACHER' && PROFILE_RESPONSE_DATA.rightToEdit ? '' : 'disabled'} onkeyup="controlEditField(this,'fatherLastName',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'fatherLastName')">
         <label for="fatherLastName">Last Name</label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="applyChanges('fatherLastName', 'fatherLastName', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
@@ -1380,7 +1447,7 @@ function fatherEmailElement(data) {
     var html =
         `<div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-4 p-0">
-        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="fatherEmail" id="fatherEmail" value="${data != "" && data != undefined ? data : ""}" placeholder=" " autocomplete="off" style="padding-left:6px !important; padding-right:2px !important;" onkeyup="controlEditField(this,'fatherEmail',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'fatherEmail')">
+        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="fatherEmail" id="fatherEmail" value="${data != "" && data != undefined ? data : ""}" placeholder=" " autocomplete="off" ${USER_ROLE != "STUDENT" && USER_ROLE != "PARENT" && USER_ROLE !='TEACHER' && PROFILE_RESPONSE_DATA.rightToEdit ? '' : 'disabled'} style="padding-left:6px !important; padding-right:2px !important;" onkeyup="controlEditField(this,'fatherEmail',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'fatherEmail')">
         <label for="fatherEmail">Email</label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="applyChanges('fatherEmail', 'fatherEmail', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
@@ -1433,6 +1500,44 @@ function fatherCountryElement(data) {
     return html;
 }
 
+function fatherStateElement(data) {
+    var html =
+        `<div class="custom-field-scope">
+    <div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+        <select id="fatherState" name="fatherState" class="form-control form-control-sm group-append-hide-input bar_count" data-country="fatherState" onchange="controlEditField(this,'fatherState',\'${data != "" && data != undefined ? data : ""}\','select', '','', 1,'fatherState')"></select>
+        <label for="fatherState">State</label>
+        <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
+            <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center" onclick="applyChanges('fatherState', 'fatherState',\'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
+                <i class="fa fa-check"></i>
+            </a>
+            <a href="javascript:void(0)" class="btn btn-sm btn-danger rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="cancelChanges('fatherState',\'${data != "" && data != undefined ? data : ""}\','countrySectionParent','fatherState')" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
+                <i class="fa fa-times"></i>
+            </a>
+        </div>
+    </div>
+</div>`;
+    return html;
+}
+
+function fatherCityElement(data) {
+    var html =
+        `<div class="custom-field-scope">
+    <div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+        <select id="fatherCity" name="fatherCity" class="form-control form-control-sm group-append-hide-input bar_count" data-country="fatherCity" onchange="controlEditField(this,'fatherCity',\'${data != "" && data != undefined ? data : ""}\','select', '','', 1,'fatherCity')"></select>
+        <label for="fatherCity">City</label>
+        <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
+            <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center" onclick="applyChanges('fatherCity', 'fatherCity',\'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
+                <i class="fa fa-check"></i>
+            </a>
+            <a href="javascript:void(0)" class="btn btn-sm btn-danger rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="cancelChanges('fatherCity',\'${data != "" && data != undefined ? data : ""}\','countrySectionParent','fatherCity')" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
+                <i class="fa fa-times"></i>
+            </a>
+        </div>
+    </div>
+</div>`;
+    return html;
+}
+
 function fatherOccupationElement(data) {
     var html =
         `<div class="custom-field-scope">
@@ -1475,7 +1580,7 @@ function guardianFirstNameElement(data) {
     var html =
     `<div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-3 p-0">
-        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="guardianFirstName" id="guardianFirstName" value="${data != "" && data != undefined ? data : ""}" onkeydown="return M.isChars(event);" placeholder=" " autocomplete="off" onkeyup="controlEditField(this,'guardianFirstName',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'guardianFirstName')">
+        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="guardianFirstName" id="guardianFirstName" value="${data != "" && data != undefined ? data : ""}" onkeydown="return M.isChars(event);" placeholder=" " autocomplete="off" ${USER_ROLE != "STUDENT" && USER_ROLE != "PARENT" && USER_ROLE !='TEACHER' && PROFILE_RESPONSE_DATA.rightToEdit ? '' : 'disabled'} onkeyup="controlEditField(this,'guardianFirstName',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'guardianFirstName')">
         <label for="guardianFirstName">First Name</label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="applyChanges('guardianFirstName', 'guardianFirstName', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
@@ -1493,7 +1598,7 @@ function guardianMiddleNameElement(data) {
     var html =
         `<div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-3 p-0">
-        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input" name="guardianMiddleName" id="guardianMiddleName" value="${data != "" && data != undefined ? data : ""}" onkeydown="return M.isChars(event);" placeholder=" " autocomplete="off" onkeyup="controlEditField(this,'guardianMiddleName',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'guardianMiddleName')">
+        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input" name="guardianMiddleName" id="guardianMiddleName" value="${data != "" && data != undefined ? data : ""}" onkeydown="return M.isChars(event);" placeholder=" " autocomplete="off" ${USER_ROLE != "STUDENT" && USER_ROLE != "PARENT" && USER_ROLE !='TEACHER' && PROFILE_RESPONSE_DATA.rightToEdit ? '' : 'disabled'} onkeyup="controlEditField(this,'guardianMiddleName',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'guardianMiddleName')">
         <label for="guardianMiddleName">Middle Name</label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="applyChanges('guardianMiddleName', 'guardianMiddleName', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
@@ -1512,7 +1617,7 @@ function guardianLastNameElement(data) {
     var html =
         `<div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-3 p-0">
-        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="guardianLastName" id="guardianLastName" value="${data != "" && data != undefined ? data : ""}" onkeydown="return M.isChars(event);" placeholder=" " autocomplete="off" onkeyup="controlEditField(this,'guardianLastName',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'guardianLastName')">
+        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="guardianLastName" id="guardianLastName" value="${data != "" && data != undefined ? data : ""}" onkeydown="return M.isChars(event);" placeholder=" " autocomplete="off" ${USER_ROLE != "STUDENT" && USER_ROLE != "PARENT" && USER_ROLE !='TEACHER' && PROFILE_RESPONSE_DATA.rightToEdit ? '' : 'disabled'} onkeyup="controlEditField(this,'guardianLastName',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'guardianLastName')">
         <label for="guardianLastName">Last Name</label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="applyChanges('guardianLastName', 'guardianLastName', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
@@ -1567,7 +1672,7 @@ function guardianEmailElement(data) {
     var html =
         `<div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-4 p-0">
-        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="guardianEmail" id="guardianEmail" value="${data != "" && data != undefined ? data : ""}" placeholder=" " autocomplete="off" style="padding-left:6px !important; padding-right:2px !important;" onkeyup="controlEditField(this,'guardianEmail',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'guardianEmail')">
+        <input type="text" class="form-control form-control-sm form-control form-control-sm-sm group-append-hide-input bar_count" name="guardianEmail" id="guardianEmail" value="${data != "" && data != undefined ? data : ""}" placeholder=" " autocomplete="off" ${USER_ROLE != "STUDENT" && USER_ROLE != "PARENT" && USER_ROLE !='TEACHER' && PROFILE_RESPONSE_DATA.rightToEdit ? '' : 'disabled'} style="padding-left:6px !important; padding-right:2px !important;" onkeyup="controlEditField(this,'guardianEmail',\'${data != "" && data != undefined ? data : ""}\','input', '','', 1,'guardianEmail')">
         <label for="guardianEmail">Email</label>
         <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
             <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="applyChanges('guardianEmail', 'guardianEmail', \'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
@@ -1620,6 +1725,44 @@ function guardianCountryElement(data) {
     return html;
 }
 
+function guardianStateElement(data) {
+    var html =
+        `<div class="custom-field-scope">
+    <div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+        <select id="guardianState" name="guardianState" class="form-control form-control-sm group-append-hide-input bar_count" data-country="guardianState" onchange="controlEditField(this,'guardianState',\'${data != "" && data != undefined ? data : ""}\','select', '','', 1,'guardianState')"></select>
+        <label for="guardianState">State</label>
+        <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
+            <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="applyChanges('guardianState', 'guardianState',\'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
+                <i class="fa fa-check"></i>
+            </a>
+            <a href="javascript:void(0)" class="btn btn-sm btn-danger rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="cancelChanges('guardianState',\'${data != "" && data != undefined ? data : ""}\','countrySectionParent','guardianState')" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
+                <i class="fa fa-times"></i>
+            </a>
+        </div>
+    </div>
+</div>`;
+    return html;
+}
+
+function guardianCityElement(data) {
+    var html =
+        `<div class="custom-field-scope">
+    <div class="input-group position-relative custom-field mb-2 mt-3 p-0">
+        <select id="guardianCity" name="guardianCity" class="form-control form-control-sm group-append-hide-input bar_count" data-country="guardianCity" onchange="controlEditField(this,'guardianCity',\'${data != "" && data != undefined ? data : ""}\','select', '','', 1,'guardianCity')"></select>
+        <label for="guardianCity">City</label>
+        <div class="input-group-append input-group-append-hide position-absolute" style="display:none;right:8px;top:50%;transform:translateY(-50%);z-index:6;gap:4px;margin:0;">
+            <a href="javascript:void(0)" class="btn btn-sm btn-success rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="applyChanges('guardianCity', 'guardianCity',\'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
+                <i class="fa fa-check"></i>
+            </a>
+            <a href="javascript:void(0)" class="btn btn-sm btn-danger rounded-circle d-inline-flex align-items-center justify-content-center profile-input-action-btn" onclick="cancelChanges('guardianCity',\'${data != "" && data != undefined ? data : ""}\','countrySectionParent','guardianCity')" style="width:24px;height:24px;min-width:24px;padding:0;font-size:11px;line-height:1;">
+                <i class="fa fa-times"></i>
+            </a>
+        </div>
+    </div>
+</div>`;
+    return html;
+}
+
 function guardianOccupationElement(data) {
     var html =
         `<div class="custom-field-scope">
@@ -1662,7 +1805,7 @@ function relationTypeElement(data) {
     var html =
         `<div class="custom-field-scope">
     <div class="input-group position-relative custom-field mb-2 mt-3 p-0">
-        <select id="relationType" name="relationType" class="form-control form-control-sm group-append-hide-input bar_count" onchange="controlEditField(this,'relationType',\'${data != "" && data != undefined ? data : ""}\','select', '','', 1,'relationType')">
+        <select id="relationType" name="relationType" class="form-control form-control-sm group-append-hide-input bar_count" ${USER_ROLE != "STUDENT" && USER_ROLE != "PARENT" && USER_ROLE !='TEACHER' && PROFILE_RESPONSE_DATA.rightToEdit ? '' : 'disabled'} onchange="controlEditField(this,'relationType',\'${data != "" && data != undefined ? data : ""}\','select', '','', 1,'relationType')">
             ${getRelationshipContent()}
         </select>
         <label for="relationType">Type of Relation (Primary Parent)</label>
@@ -1773,6 +1916,77 @@ function preferredCommunicationContent(data) {
                 <a href="javascript:void(0)" class="btn btn-sm btn-success mx-1" onclick="applyChanges('preferredcommunication', 'preferredcommunication',\'${PROFILE_RESPONSE_DATA.userId}\',\'${PROFILE_RESPONSE_DATA.studentStandardId}\',\'${PROFILE_RESPONSE_DATA.moduleId}\','student','false',1)">Save</a>
                 <a href="javascript:void(0)" class="btn btn-sm btn-danger mx-1" onclick="cancelCommunication()">Cancel</a>
             </div>
+        ${USER_ROLE != "STUDENT"  && USER_ROLE != "PARENT" && USER_ROLE !='TEACHER' && PROFILE_RESPONSE_DATA.rightToEdit ?
+        `<div class="col-12 mb-2 d-flex align-items-center flex-wrap">
+            <span class="font-weight-semi-bold">Do you want to create a separate user for Parent/Guardian? (Please note that parent account will only be created for the primary parent) </span>
+            <div class="ml-auto" id="parentUserCreateButtonWrapper">
+                ${!data.isParentUserExist ?
+                    `<a href="javascript:void(0)" id="parentEmailSmsLmsCreation" class="btn btn-sm btn-primary" onclick="applyChanges('parentEmailSmsLmsCreation','parentEmailSmsLmsCreation',\'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false',1)"><i class="fa fa-edit"></i>&nbsp;Create</a>`
+                    :
+                    `<a href="javascript:void(0)" class="btn btn-sm btn-success disabled" aria-disabled="true"><i class="fa fa-check"></i></a>`
+                }
+            </div>
+        </div>` : ``}
+        <!-- Swipe student email to Parent/Guardian - feature not tested yet, disabled for now
+        <div class="col-12 mb-2 d-flex align-items-center flex-wrap">
+            <span class="font-weight-semi-bold">Do you want to swipe a student email to Parent/Guardian?</span>
+            <div class="ml-auto">
+                <div class="full">
+                    <label class="switch">
+                        <input class="switch-input switchParentStudEmailId" id="switchParentStudEmailId" name="switchParentStudEmailId" type="checkbox" value="N" onchange="toggleParentStudentEmailFields(this)" data-size="mini">
+                        <span class="switch-label" data-on="Yes" data-off="No"></span> 
+                        <span class="switch-handle"></span>
+                    </label>    
+                </div> 
+            </div>
+        </div>
+        -->
+        <div class="col-12 mb-2 studParntswipedata" id="parentStudentEmailFieldsWrapper" style="display:none;">
+            <div class="form-row align-items-end">
+                <div class="col-xl-5 col-lg-5 col-md-5 col-sm-12 col-12 mb-2">
+                    <label for="swipeParentId" class="font-weight-semi-bold text-dark">Parent Email</label>
+                    <input type="text" class="form-control form-control-sm" id="swipeParentId" name="swipeParentId" attrparentid="${data.parentId != undefined ? data.parentId : ''}" value="${data.guardianEmail != undefined ? data.guardianEmail : ''}" disabled>
+                </div>
+                <div class="col-xl-1 col-lg-1 col-md-2 col-sm-12 col-12 mb-2 text-center">
+                    <button class="btn btn-primary btn-sm" id="swapID" title="Swap Email">
+                        <i class="fa fa-exchange"></i>
+                    </button>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-5 col-sm-12 col-12 mb-2">
+                    <label for="studID" class="font-weight-semi-bold text-dark">Student Email</label>
+                    <select class="form-control form-control-sm" id="studID">`;
+                        if(data.mappedStudentList != undefined && data.mappedStudentList.length > 0){
+                            $.each(data.mappedStudentList, function(index, mappedStudent){
+                                var studentEmail = mappedStudent.studentEmail ? mappedStudent.studentEmail : '';
+                                var userId = mappedStudent.userId ? mappedStudent.userId : '';
+                                html += '<option value="' + userId + '" attrStudentEmail="' + studentEmail + '">' + studentEmail + '</option>';
+                            });
+                        }else if(PORFILE_RESPONSE_DATA && PORFILE_RESPONSE_DATA.profileData && PORFILE_RESPONSE_DATA.profileData.studentProfile && PORFILE_RESPONSE_DATA.profileData.studentProfile[0]){
+                            var currentStudent = PORFILE_RESPONSE_DATA.profileData.studentProfile[0];
+                            var currentStudentEmail = currentStudent.studentEmailId ? currentStudent.studentEmailId : '';
+                            var currentStudentUserId = PORFILE_RESPONSE_DATA.userId ? PORFILE_RESPONSE_DATA.userId : '';
+                            if(currentStudentEmail != ''){
+                                html += '<option value="' + currentStudentUserId + '" attrStudentEmail="' + currentStudentEmail + '">' + currentStudentEmail + '</option>';
+                            }
+                        }
+                    html += `</select>
+                </div>
+            </div>
+            <div class="form-row mt-2 d-none swap-Id-Wrapper">
+                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12 mb-2">
+                    <label class="font-weight-semi-bold text-dark">Updated Parent Email</label>
+                    <p id="updatedParentEmail" class="mb-0"></p>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12 mb-2">
+                    <label class="font-weight-semi-bold text-dark">Updated Student Email</label>
+                    <p id="updatedStudEmail" class="mb-0"></p>
+                </div>
+                <div class="col-12 text-right">
+                    <button class="btn btn-danger btn-sm mr-2" id="cancelSwapID">Cancel</button>
+                    <button id="switchParentStudEmailId" class="btn btn-primary btn-sm" onclick="applyChanges('switchParentStudEmailId','switchParentStudEmailId',\'${PORFILE_RESPONSE_DATA.userId}\',\'${PORFILE_RESPONSE_DATA.studentStandardId}\',\'${PORFILE_RESPONSE_DATA.moduleId}\','student','false',1)">Save</button>
+                </div>
+            </div>
+        </div>
         </div>    
     </div>`;
     return html;
@@ -1783,6 +1997,7 @@ function communicationPreferredTimingInformation(data) {
         `<div class="col-12 mb-2">
             <span class="font-weight-semi-bold w-100">Communication Preferred Timing:</span>
         </div>
+
         <div class="col-12" id="communication-preferred-time-wrapper">
             <ul class="p-0 communication-preferred-time-wrapper-ul bar_count">
                 ${getCommunicationPreferredSlotContent(data.callingTimePrefArray)}
@@ -1840,10 +2055,7 @@ function communicationPreferredTimingInformation(data) {
         </div>`;
     return html;
 }
-
-
-
-function getCommunicationPreferredSlotContent(data) {
+function getCommunicationPreferredSlotContent(data){
     // data=[
     //     {
     //         "key":"Student",

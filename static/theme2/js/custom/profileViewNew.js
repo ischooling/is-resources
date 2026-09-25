@@ -1905,14 +1905,16 @@ async function profileViewPageLoadEvent(data) {
     if (data[5] && data[5].reenrollmentDiscount) {
         $('#reenrollmentDiscount').datepicker('update', new Date(data[5].reenrollmentDiscount));
     }
-    await callCountriesOption("profileForm", '', "country", '', "Select Country*");
-    await callCountriesOption("profileForm", '', "motherCountry", '');
-    await callCountriesOption("profileForm", '', "country", '', "Select Country*");
-    await callCountriesOption("profileForm", '', "fatherCountry", '');
-    await callCountriesOption("profileForm", '', "country", '', "Select Country*");
-    await callCountriesOption("profileForm", '', "guardianCountry", '');
-    await callCountriesOption("profileForm", '', "country", '', "Select Country*");
-    await callCountriesOption("profileForm", '', "pCountryId", '');
+    toggleParentStudentEmailFields($("#switchParentStudEmailId"));
+    bindParentStudentEmailSwapEvents();
+    callCountriesOption("profileForm", '', "country", '', "Select Country*");
+    callCountriesOption("profileForm", '', "motherCountry", '');
+    callCountriesOption("profileForm", '', "country", '', "Select Country*");
+    callCountriesOption("profileForm", '', "fatherCountry", '');
+    callCountriesOption("profileForm", '', "country", '', "Select Country*");
+    callCountriesOption("profileForm", '', "guardianCountry", '');
+    callCountriesOption("profileForm", '', "country", '', "Select Country*");
+    callCountriesOption("profileForm", '', "pCountryId", '');
     await getTimeZones("profileForm", "timezone", "timezoneInput", "");
     await callCountriesOption("profileForm", '', "nationality", '', "Select Nationality*")
     $("#country").unbind().bind("change", function () {
@@ -1931,6 +1933,27 @@ async function profileViewPageLoadEvent(data) {
     });
     $("#pStateId").unbind().bind("change", function () {
         callCities('profileForm', this.value, 'pStateId', 'pCityId');
+    });
+    $("#motherCountry").unbind().bind("change", function () {
+        callStates('profileForm', this.value, 'motherCountry', 'motherState', 'motherCity');
+        $("#motherCity").html("<option value=''>Select City*</option>");
+    });
+    $("#motherState").unbind().bind("change", function () {
+        callCities('profileForm', this.value, 'motherState', 'motherCity');
+    });
+    $("#fatherCountry").unbind().bind("change", function () {
+        callStates('profileForm', this.value, 'fatherCountry', 'fatherState', 'fatherCity');
+        $("#fatherCity").html("<option value=''>Select City*</option>");
+    });
+    $("#fatherState").unbind().bind("change", function () {
+        callCities('profileForm', this.value, 'fatherState', 'fatherCity');
+    });
+    $("#guardianCountry").unbind().bind("change", function () {
+        callStates('profileForm', this.value, 'guardianCountry', 'guardianState', 'guardianCity');
+        $("#guardianCity").html("<option value=''>Select City*</option>");
+    });
+    $("#guardianState").unbind().bind("change", function () {
+        callCities('profileForm', this.value, 'guardianState', 'guardianCity');
     });
 
     if(USER_ROLE != "STUDENT"){
@@ -1958,10 +1981,28 @@ async function profileViewPageLoadEvent(data) {
     $("#motherCountry").select2({
         theme: "bootstrap4",
     });
+    $("#motherState").select2({
+        theme: "bootstrap4",
+    });
+    $("#motherCity").select2({
+        theme: "bootstrap4",
+    });
     $("#fatherCountry").select2({
         theme: "bootstrap4",
     });
+    $("#fatherState").select2({
+        theme: "bootstrap4",
+    });
+    $("#fatherCity").select2({
+        theme: "bootstrap4",
+    });
     $("#guardianCountry").select2({
+        theme: "bootstrap4",
+    });
+    $("#guardianState").select2({
+        theme: "bootstrap4",
+    });
+    $("#guardianCity").select2({
         theme: "bootstrap4",
     });
 
@@ -1990,7 +2031,15 @@ async function profileViewPageLoadEvent(data) {
     $("#relationType").select2({
         theme: "bootstrap4",
     });
-    $("#relationType").val(data[1].relationType).trigger("change");
+    var initialRelationType = data[1].relationType || "";
+    $("#relationType").val(initialRelationType).trigger("change");
+    $("#relationType").attr("data-prev-value", initialRelationType);
+    $("#relationType").off("change.parentSwipeEmail").on("change.parentSwipeEmail", function(){
+        syncParentSwipeEmailWithRelation();
+    });
+    $("#motherEmail, #fatherEmail, #guardianEmail").off("keyup.parentSwipeEmail change.parentSwipeEmail").on("keyup.parentSwipeEmail change.parentSwipeEmail", function(){
+        syncParentSwipeEmailWithRelation();
+    });
     $("#pCountryId").select2({
         theme: "bootstrap4",
     });
@@ -2001,8 +2050,14 @@ async function profileViewPageLoadEvent(data) {
         theme: "bootstrap4",
     });
     $("#motherCountry").val(data[1].motherCountry == 0 ? '' : data[1].motherCountry).trigger("change");
+    $("#motherState").val(data[1].motherState == 0 ? '' : data[1].motherState).trigger("change");
+    $("#motherCity").val(data[1].motherCity == 0 ? '' : data[1].motherCity).trigger("change");
     $("#fatherCountry").val(data[1].fatherCountry == 0 ? '' : data[1].fatherCountry).trigger("change");
+    $("#fatherState").val(data[1].fatherState == 0 ? '' : data[1].fatherState).trigger("change");
+    $("#fatherCity").val(data[1].fatherCity == 0 ? '' : data[1].fatherCity).trigger("change");
     $("#guardianCountry").val(data[1].guardianCountry == 0 ? '' : data[1].guardianCountry).trigger("change");
+    $("#guardianState").val(data[1].guardianState == 0 ? '' : data[1].guardianState).trigger("change");
+    $("#guardianCity").val(data[1].guardianCity == 0 ? '' : data[1].guardianCity).trigger("change");
 
     // $("#pCountryId").val(data[1].pCountryId == 0? '' : data[1].pCountryId).trigger("change");
     // $("#pStateId").val(data[1].pStateId == 0? '' : data[1].pStateId).trigger("change");
@@ -2146,6 +2201,289 @@ async function profileViewPageLoadEvent(data) {
         loadProfileStudentDocumentVerification();
     }
 
+}
+
+function toggleParentStudentEmailFields(toggleElement){
+    var $toggle = $(toggleElement);
+    if($toggle.length < 1){
+        return;
+    }
+    var $wrapper = $("#parentStudentEmailFieldsWrapper");
+    if($wrapper.length < 1){
+        return;
+    }
+    if($toggle.is(":checked")){
+        syncParentSwipeEmailWithRelation();
+        $wrapper.stop(true, true).slideDown(150);
+    }else{
+        $("#studID").prop("disabled", false);
+        $("#updatedStudEmail").text("");
+        $("#updatedParentEmail").text("");
+        $(".swap-Id-Wrapper").addClass("d-none");
+        $wrapper.stop(true, true).slideUp(150);
+    }
+}
+
+function getPrimaryParentEmailByRelation(){
+    var relationType = ($("#relationType").val() || "").toLowerCase();
+    if(relationType == "father"){
+        return $("#fatherEmail").val() || "";
+    }
+    if(relationType == "guardian"){
+        return $("#guardianEmail").val() || "";
+    }
+    return $("#motherEmail").val() || "";
+}
+
+function getSavedRelationTypeValue(){
+    if(typeof PORFILE_RESPONSE_UPDATED_DATA !== "undefined" && Array.isArray(PORFILE_RESPONSE_UPDATED_DATA)){
+        for(var i=0; i<PORFILE_RESPONSE_UPDATED_DATA.length; i++){
+            if(PORFILE_RESPONSE_UPDATED_DATA[i] && PORFILE_RESPONSE_UPDATED_DATA[i].hasOwnProperty("relationType")){
+                return PORFILE_RESPONSE_UPDATED_DATA[i].relationType || "";
+            }
+        }
+    }
+    if(typeof PORFILE_RESPONSE_DATA !== "undefined" && PORFILE_RESPONSE_DATA.profileData && PORFILE_RESPONSE_DATA.profileData.studentProfile && PORFILE_RESPONSE_DATA.profileData.studentProfile[1]){
+        return PORFILE_RESPONSE_DATA.profileData.studentProfile[1].relationType || "";
+    }
+    return ($("#relationType").attr("data-prev-value") || "");
+}
+
+function resetRelationTypeSelectionToSaved(){
+    if($("#relationType").length < 1){
+        return;
+    }
+    var savedRelation = getSavedRelationTypeValue();
+    if(savedRelation == undefined || savedRelation == null){
+        savedRelation = "";
+    }
+    $("#relationType").data("skip-edit", true);
+    $("#relationType").val(savedRelation).trigger("change");
+    if($("#relationType").data("select2")){
+        $("#relationType").trigger("change.select2");
+    }
+    $("#relationType").closest(".input-group").find(".input-group-append-hide").hide();
+    addAndRemoveRequestToSaveBulkData(false, "relationType", "relationType");
+    if($("#otherRelation").length > 0 && savedRelation !== "Other"){
+        $("#otherRelation").val("");
+        $(".otherRelationDiv").hide();
+    }
+}
+
+function isPrimaryParentEmailValidForUserCreation(){
+    var primaryParentEmail = (getPrimaryParentEmailByRelation() || "").trim();
+    if (!validateEmail(primaryParentEmail)) {
+        showMessageTheme2(0, "Primary parent email is required.",'',false);
+        return false;
+    }
+    if($("#parentEmailId").length > 0){
+        $("#parentEmailId").val(primaryParentEmail);
+    }
+    return true;
+}
+
+function syncParentSwipeEmailWithRelation(){
+    if(!$("#switchParentStudEmailId").is(":checked")){
+        return;
+    }
+    if($("#swipeParentId").length < 1){
+        return;
+    }
+    $("#swipeParentId").val(getPrimaryParentEmailByRelation());
+}
+
+async function refreshGuardianSectionData(){
+    if(typeof PROFILE_VIEW_PAYLOAD === "undefined" || !PROFILE_VIEW_PAYLOAD){
+        return;
+    }
+    var latest = await getDashboardDataBasedUrlAndPayload(false, false, `profile-view-content-new?payload=${PROFILE_VIEW_PAYLOAD}`, '');
+    if(!latest || !latest.profileData || !latest.profileData.studentProfile){
+        return;
+    }
+    PORFILE_RESPONSE_DATA = latest;
+    PORFILE_RESPONSE_UPDATED_DATA = latest.profileData.studentProfile;
+    var data = latest.profileData.studentProfile;
+    if(!data[1]){
+        return;
+    }
+    var g = data[1];
+    var setVal = function(selector, value){
+        if($(selector).length > 0){
+            $(selector).val(value != undefined && value != null ? value : "");
+        }
+    };
+    var setChecked = function(selector, flag){
+        if($(selector).length > 0){
+            $(selector).prop("checked", !!flag).attr("data-status", !!flag);
+        }
+    };
+    // Names & emails
+    setVal("#motherName", g.motherName);
+    setVal("#motherMiddleName", g.motherMiddleName);
+    setVal("#motherLastName", g.motherLastName);
+    setVal("#motherEmail", g.motherEmail);
+    setVal("#fatherFirstName", g.fatherFirstName);
+    setVal("#fatherMiddleName", g.fatherMiddleName);
+    setVal("#fatherLastName", g.fatherLastName);
+    setVal("#fatherEmail", g.fatherEmail);
+    setVal("#guardianFirstName", g.guardianFirstName);
+    setVal("#guardianMiddleName", g.guardianMiddleName);
+    setVal("#guardianLastName", g.guardianLastName);
+    setVal("#guardianEmail", g.guardianEmail);
+    // Phones
+    setVal("#motherPhoneNumber", g.motherPhoneNumber);
+    if($("#motherPhoneNumber").length > 0){
+        $("#motherPhoneNumber").attr("data-countrycode", g.motherPhoneNumberCountryCode || "");
+    }
+    setChecked("#motherPhoneNumberWhatsAppStatus", g.motherPhoneNumberWhatsAppStatus && g.motherPhoneNumberWhatsAppStatus != "N");
+    setChecked("#motherPhoneEmergencyNumberStatus", g.motherPhoneEmergencyNumberStatus && g.motherPhoneEmergencyNumberStatus != "N");
+
+    setVal("#fatherPhoneNumber", g.fatherPhoneNumber);
+    if($("#fatherPhoneNumber").length > 0){
+        $("#fatherPhoneNumber").attr("data-countrycode", g.fatherPhoneNumberCountryCode || "");
+    }
+    setChecked("#fatherPhoneNumberWhatsAppStatus", g.fatherPhoneNumberWhatsAppStatus && g.fatherPhoneNumberWhatsAppStatus != "N");
+    setChecked("#fatherPhoneEmergencyNumberStatus", g.fatherPhoneEmergencyNumberStatus && g.fatherPhoneEmergencyNumberStatus != "N");
+
+    setVal("#guardianPhoneNumber", g.guardianPhoneNumber);
+    if($("#guardianPhoneNumber").length > 0){
+        $("#guardianPhoneNumber").attr("data-countrycode", g.guardianPhoneNumberCountryCode || "");
+    }
+    setChecked("#guardianPhoneNumberWhatsAppStatus", g.guardianPhoneNumberWhatsAppStatus && g.guardianPhoneNumberWhatsAppStatus != "N");
+    setChecked("#guardianEmergencyNumberStatus", g.guardianEmergencyNumberStatus && g.guardianEmergencyNumberStatus != "N");
+
+    // Countries
+    if($("#motherCountry").length > 0){
+        $("#motherCountry").val(g.motherCountry == 0 ? "" : g.motherCountry).trigger("change");
+    }
+    if($("#motherState").length > 0){
+        $("#motherState").val(g.motherState == 0 ? "" : g.motherState).trigger("change");
+    }
+    if($("#motherCity").length > 0){
+        $("#motherCity").val(g.motherCity == 0 ? "" : g.motherCity).trigger("change");
+    }
+    if($("#fatherCountry").length > 0){
+        $("#fatherCountry").val(g.fatherCountry == 0 ? "" : g.fatherCountry).trigger("change");
+    }
+    if($("#fatherState").length > 0){
+        $("#fatherState").val(g.fatherState == 0 ? "" : g.fatherState).trigger("change");
+    }
+    if($("#fatherCity").length > 0){
+        $("#fatherCity").val(g.fatherCity == 0 ? "" : g.fatherCity).trigger("change");
+    }
+    if($("#guardianCountry").length > 0){
+        $("#guardianCountry").val(g.guardianCountry == 0 ? "" : g.guardianCountry).trigger("change");
+    }
+    if($("#guardianState").length > 0){
+        $("#guardianState").val(g.guardianState == 0 ? "" : g.guardianState).trigger("change");
+    }
+    if($("#guardianCity").length > 0){
+        $("#guardianCity").val(g.guardianCity == 0 ? "" : g.guardianCity).trigger("change");
+    }
+    // Occupation
+    setVal("#motherOccupation", g.motherOccupation);
+    setVal("#fatherOccupation", g.fatherOccupation);
+    setVal("#guardianOccupation", g.guardianOccupation);
+    // DOBs
+    if($("#motherDob").length > 0){
+        if(g.motherDob){
+            $("#motherDob").datepicker("update", new Date(g.motherDob));
+        }else{
+            $("#motherDob").val("");
+        }
+    }
+    if($("#fatherDob").length > 0){
+        if(g.fatherDob){
+            $("#fatherDob").datepicker("update", new Date(g.fatherDob));
+        }else{
+            $("#fatherDob").val("");
+        }
+    }
+    if($("#guardianDob").length > 0){
+        if(g.guardianDob){
+            $("#guardianDob").datepicker("update", new Date(g.guardianDob));
+        }else{
+            $("#guardianDob").val("");
+        }
+    }
+    if($("#weddingAnniversaryDate").length > 0){
+        if(g.weddingAnniversaryDate){
+            $("#weddingAnniversaryDate").datepicker("update", new Date(g.weddingAnniversaryDate));
+        }else{
+            $("#weddingAnniversaryDate").val("");
+        }
+    }
+    // Relation type
+    if($("#relationType").length > 0){
+        var refreshedRelationType = g.relationType || "";
+        $("#relationType").val(refreshedRelationType).trigger("change");
+        $("#relationType").attr("data-prev-value", refreshedRelationType);
+    }
+    // Communication preferences
+    setChecked("#pcWhatsappView", g.pcWhatsappView && g.pcWhatsappView != "N");
+    setChecked("#pcCallView", g.pcCallView && g.pcCallView != "N");
+    setChecked("#pcEmailView", g.pcEmailView && g.pcEmailView != "N");
+    $(".communication-wrapper input[type='checkbox']").each(function(){
+        $(this).attr("check-status", $(this).prop("checked") ? "true" : "false");
+    });
+    // Parent user create button state
+    if($("#parentUserCreateButtonWrapper").length > 0){
+        if(g.isParentUserExist){
+            $("#parentUserCreateButtonWrapper").html('<a href="javascript:void(0)" class="btn btn-sm btn-success disabled" aria-disabled="true"><i class="fa fa-check"></i></a>');
+        }else{
+            $("#parentUserCreateButtonWrapper").html('<a href="javascript:void(0)" id="parentEmailSmsLmsCreation" class="btn btn-sm btn-primary" onclick="applyChanges(\'parentEmailSmsLmsCreation\',\'parentEmailSmsLmsCreation\',\''+PORFILE_RESPONSE_DATA.userId+'\',\''+PORFILE_RESPONSE_DATA.studentStandardId+'\',\''+PORFILE_RESPONSE_DATA.moduleId+'\',\'student\',\'false\',1)"><i class="fa fa-edit"></i>&nbsp;Create</a>');
+        }
+    }
+    // Update parent swipe email fields
+    if($("#swipeParentId").length > 0){
+        $("#swipeParentId").attr("attrparentid", g.parentId != undefined ? g.parentId : "");
+        $("#swipeParentId").val(getPrimaryParentEmailByRelation());
+    }
+    if($("#parentEmailId").length > 0){
+        $("#parentEmailId").val(getPrimaryParentEmailByRelation());
+    }
+    calculateSectionPercentage();
+}
+
+function bindParentStudentEmailSwapEvents(){
+    if($("#studID").length > 0){
+        $("#studID").select2({
+            theme: "bootstrap4",
+            width: "100%"
+        });
+        $("#studID").next(".select2-container").find(".select2-selection__arrow").hide();
+        $("#studID").next(".select2-container").find(".select2-selection--single").css("padding-right","0.75rem");
+    }
+    $("#swapID").off("click").on("click", function(e){
+        e.preventDefault();
+        if($("#studID").val() == undefined || $("#studID").val() == 0 || $("#studID").val() == ''){
+            showMessageTheme2(0, "Please choose student to proceed.",'',false);
+            return false;
+        }
+        var parentEmail = ($("#swipeParentId").val() || "").trim();
+        if (parentEmail == "" || !validateEmail(parentEmail)) {
+            showMessageTheme2(0, "Please enter valid parent email to proceed.",'',false);
+            return false;
+        }
+        var studentEmail = ($("#studID option:selected").attr("attrStudentEmail") || "").trim();
+        if (studentEmail == "" || !validateEmail(studentEmail)) {
+            showMessageTheme2(0, "Please choose student with valid email to proceed.",'',false);
+            return false;
+        }
+        $("#studID").prop("disabled", true);
+        $("#updatedStudEmail").text(parentEmail);
+        $("#updatedParentEmail").text(studentEmail);
+        $(".swap-Id-Wrapper").removeClass("d-none");
+        return false;
+    });
+    $("#cancelSwapID").off("click").on("click", function(e){
+        e.preventDefault();
+        $("#studID").prop("disabled", false);
+        $("#updatedStudEmail").text("");
+        $("#updatedParentEmail").text("");
+        $(".swap-Id-Wrapper").addClass("d-none");
+        return false;
+    });
 }
 
 function getCallingPreference() {
@@ -4565,110 +4903,252 @@ function applyChnagesBulk(saveList, userId, studentStandardId, roleModuleId, mod
     }
 
     hideMessageTheme2('');
-    MISSING_PARENT_NAME_SECTION_FLAG = getProfileParentNameSaveFlag();
-    if(!MISSING_PARENT_NAME_SECTION_FLAG){
-        if (!saveList || saveList.length < 1) {
-            showMessageTheme2(0, "No unsaved changes available to save.", '', false);
-            return false;
-        }
 
-        if (!validateBulkFields(saveList)) {
-            return false;
-        }
-    }else{
-        saveList = [
-            {
-                "eleID": "motherName",
-                "keyId": "motherName"
-            },
-            {
-                "eleID": "motherMiddleName",
-                "keyId": "motherMiddleName"
-            },
-            {
-                "eleID": "motherLastName",
-                "keyId": "motherLastName"
-            },
-            {
-                "eleID": "fatherFirstName",
-                "keyId": "fatherFirstName"
-            },
-            {
-                "eleID": "fatherMiddleName",
-                "keyId": "fatherMiddleName"
-            },
-            {
-                "eleID": "fatherLastName",
-                "keyId": "fatherLastName"
-            },
-            {
-                "eleID": "guardianFirstName",
-                "keyId": "guardianFirstName"
-            },
-            {
-                "eleID": "guardianMiddleName",
-                "keyId": "guardianMiddleName"
-            },
-            {
-                "eleID": "guardianLastName",
-                "keyId": "guardianLastName"
-            }
-        ];
+    // ✅ Step-1: Validate all fields
+    if (!validateBulkFields(saveList)) {
+        return false;
     }
+    // ✅ Step-2: Build bulk request
+    let bulkRequest = getBulkRequestForUpdateProfile(
+        saveList,
+        userId,
+        studentStandardId,
+        moduleId
+    );
 
-    // if($("#communicationPreferredSlotSave").css("display") != "none"){
-    //     $("#communicationPreferredSlotSave").trigger("click");   
-    // }
+    // console.log("Bulk Save Payload", bulkRequest);
 
-    BULK_PROFILE_SAVE_CONTEXT = {
-        saveList: saveList.slice(),
-        approvedList: [],
-        currentIndex: 0,
-        currentWarningItem: null,
-        userId: userId,
-        studentStandardId: studentStandardId,
-        roleModuleId: roleModuleId,
-        moduleId: moduleId
-    };
+    // ✅ Step-3: AJAX call (Single API hit)
+    // $.ajax({
+    //     type: "POST",
+    //     contentType: APPLICATION_JSON_VALUE,
+    //     url: getURLForHTML('dashboard', 'update-user-profile-bulk'),
+    //     data: JSON.stringify(bulkRequest),
+    //     dataType: 'json',
+    //     success: function (data) {
 
-    return processApplyChnagesBulkWarnings();
+    //         if (data.status !== '1') {
+    //             showMessageTheme2(0, data.message, '', false);
+    //             return;
+    //         }
+
+    //         // ✅ Step-4: UI Update + Local overwrite
+    //         saveList.forEach(item => {
+
+    //             let { eleID, keyId } = item;
+
+    //             overWriteProfileData(eleID, keyId);
+
+    //             $("#" + eleID)
+    //                 .closest(".input-group")
+    //                 .find(".input-group-append-hide")
+    //                 .hide();
+    //         });
+
+    //         calculateSectionPercentage();
+    //         showMessageTheme2(1, data.message, '', false);
+    //     }
+    // });
+}
+
+function saveBulkProfileData(userId,studentStandardId,roleModuleId,moduleId){
+    
+    // console.log(SAVE_BLUK_PROFILE_DATA);
+    applyBulkChanges(SAVE_BLUK_PROFILE_DATA,userId,studentStandardId,roleModuleId,moduleId);
+
 }
 
 
 
 
 
-function getRequestForUpdateProfile(eleID, keyId, userId, studentStandardId, moduleId) {
+function getRequestForUpdateProfile(eleID,keyId,userId,studentStandardId,moduleId,parentMappingConsent, confirmParentSwitch){
     var requestProfile = {};
-    var authentication = {};
-    var requestProfileData = {};
-    requestProfileData['studentStandardId'] = studentStandardId;
-    requestProfileData['keyId'] = keyId;
-    var getParentNamePayloadValue = function (fieldId) {
-        var domValue = $("#" + fieldId).length > 0 ? $("#" + fieldId).val() : undefined;
-        if (fieldId === eleID) {
-            return domValue != null ? domValue : "";
-        }
-        if (domValue !== "" && domValue !== null && domValue !== undefined) {
-            return domValue;
-        }
-        var savedValue = getValue(fieldId, 1);
-        if (savedValue !== "" && savedValue !== null && savedValue !== undefined) {
-            return savedValue;
-        }
-        if (PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA.profileData) {
-            savedValue = getFieldValue(PROFILE_RESPONSE_DATA.profileData, fieldId, 1);
-            if (savedValue !== "" && savedValue !== null && savedValue !== undefined) {
-                return savedValue;
-            }
-        }
-        return domValue != null ? domValue : "";
-    };
-
-    if(keyId == "customProfileFieldId"){
-        requestProfileData['fieldValue1'] =  $('#' + eleID).attr("data-element-id");
-        requestProfileData['fieldValue'] = escapeCharacters($('#' + eleID).val());
+	var authentication = {};
+	var requestProfileData = {};
+	requestProfileData['studentStandardId']=studentStandardId;
+	requestProfileData['keyId']=keyId;
+    if(confirmParentSwitch === "Y"){
+        requestProfileData['confirmParentSwitch']="Y";
     }
+	if(keyId=='employeeType'){
+		if($('#employeeTypeStartDate').val()==''){
+			showMessageTheme2(0,"Please enter employee Type Start Date.",'',false);
+			return false;
+		}
+        requestProfileData['employeeStartDate'] = $('#employeeTypeStartDate').val();
+		
+	}
+	// else if(keyId=='phoneNumber' || keyId=='altPhoneNumber' || keyId=='motherPhoneNumber' || keyId=='fatherPhoneNumber' || keyId=='guardianPhoneNumber' || keyId=='payPalPhoneNumber' ){
+	// 	var valId ="";
+	// 	var lent=$('#'+keyId).val().indexOf("-")
+	// 	if(lent>0){
+	// 		var valPhoneId = $('#'+keyId).val().split("-")[1];
+	// 	}else{
+	// 		var valPhoneId = $('#'+keyId).val();
+	// 		if(valPhoneId==""){
+	// 			showMessageTheme2(2,' Either field value is invalid or empty.','',false);
+	// 			return false;
+	// 		}
+	// 	}
+    //     valPhoneId = valPhoneId.replace(/\s+/g, '')
+    //     requestProfileData['fieldValue']=escapeCharacters(valPhoneId);
+	// }
+	else if(keyId=='alternateEmail'){
+		var valEmailId = $('#'+keyId).val();
+		if(valEmailId=="" || !validateEmail(valEmailId)){
+			showMessageTheme2(2,' Either field value is invalid or empty.','',false);
+			return false;
+		}
+		requestProfileData['fieldValue']=valEmailId;
+	}
+    else if(keyId=='hobbies'){
+        var hobbiesArr=[];
+		$(".hobbie-wrapper input[type='checkbox']:checked").each(function(){
+            hobbiesArr.push($(this).attr("data-hobbie-keyId")+"~"+$(this).attr("data-hobbie-label"))
+        });
+        requestProfileData['hobbiesList'] = hobbiesArr;
+        $("#saveHobbiesWrapper").hide();
+        HOBBIES_CHANGES_COUNT=[];
+    }
+    else if(keyId=='socialMedia'){
+       requestProfileData['fieldValue']=$('#'+eleID).attr("data-social-media-id")+"~"+$('#'+eleID).val()+"~"+$(`[for=${eleID}]`).attr("data-title");
+        //requestProfileData['fieldValue']=
+    }
+    else if(keyId=='specialization' || keyId=='preferredSubjectName' || keyId=='lastsubTaught'){
+		requestProfileData['fieldValue']=$('#'+keyId).val().toString();
+	}else if(keyId=='educationSpecialization'){
+		requestProfileData['fieldValue']=$('#educationSpecialization').val();//$(".stuPhoneNumber .iti__active").last().attr("data-dial-code");
+	}
+    else if(keyId=='countrySection'){
+		requestProfileData['countryId']=$('#country').val();
+		requestProfileData['stateId']=$('#state').val();
+		requestProfileData['cityId']=$('#city').val();
+	}else if(keyId=='nationality'){
+        requestProfileData['fieldValue']=$("#"+eleID+" option:selected").text().trim();;
+    }else if(keyId=='motherName' || keyId == "motherMiddleName" || keyId == "motherLastName"){
+		requestProfileData['firstName']=$('#motherName').val();
+		requestProfileData['middleName']=$('#motherMiddleName').val();
+		requestProfileData['lastName']=$('#motherLastName').val();
+        requestProfileData['primaryParent']=escapeCharacters($('#relationType').val());
+        requestProfileData['parentType']="Mother";
+	}else if (keyId == 'fatherFacebook') {
+        requestProfileData['faceBook'] = $('#fatherFacebook').val();
+        requestProfileData['parentType'] = "Father";
+    } else if (keyId == 'motherFacebook') {
+        requestProfileData['faceBook'] = $('#motherFacebook').val();
+        requestProfileData['parentType'] = "Mother";
+    } else if (keyId == 'guardianFacebook') {
+        requestProfileData['faceBook'] = $('#guardianFacebook').val();
+        requestProfileData['parentType'] = "Guardian";
+    } else if (keyId == 'motherCountry' || keyId == 'motherState' || keyId == 'motherCity') {
+        requestProfileData['parentType'] = "Mother";
+        requestProfileData['countryId'] = $("#motherCountry").val() || null;
+        requestProfileData['stateId'] = $("#motherState").val() || null;
+        requestProfileData['cityId'] = $("#motherCity").val() || null;
+    }
+    else if (keyId == 'fatherCountry' || keyId == 'fatherState' || keyId == 'fatherCity') {
+        requestProfileData['parentType'] = "Father";
+        requestProfileData['countryId'] = $("#fatherCountry").val() || null;
+        requestProfileData['stateId'] = $("#fatherState").val() || null;
+        requestProfileData['cityId'] = $("#fatherCity").val() || null;
+    }
+    else if (keyId == 'guardianCountry' || keyId == 'guardianState' || keyId == 'guardianCity') {
+        requestProfileData['parentType'] = "Guardian";
+        requestProfileData['countryId'] = $("#guardianCountry").val() || null;
+        requestProfileData['stateId'] = $("#guardianState").val() || null;
+        requestProfileData['cityId'] = $("#guardianCity").val() || null;
+    }
+    else if(keyId=='fatherFirstName' || keyId == "fatherMiddleName" || keyId == "fatherLastName"){
+		requestProfileData['firstName']=$('#fatherFirstName').val();
+		requestProfileData['middleName']=$('#fatherMiddleName').val();
+		requestProfileData['lastName']=$('#fatherLastName').val();
+        requestProfileData['primaryParent']=escapeCharacters($('#relationType').val());
+         requestProfileData['parentType']="Father";
+	}else if(keyId=='guardianFirstName' || keyId == "guardianMiddleName" || keyId == "guardianLastName"){
+		requestProfileData['firstName']=$('#guardianFirstName').val();
+		requestProfileData['middleName']=$('#guardianMiddleName').val();
+		requestProfileData['lastName']=$('#guardianLastName').val();
+        requestProfileData['primaryParent']=escapeCharacters($('#relationType').val());
+         requestProfileData['parentType']="Guardian";
+	}else if(keyId=='countrySectionParent'){
+		requestProfileData['countryId']=$('#pCountryId').val();
+		requestProfileData['stateId']=$('#pStateId').val();
+		requestProfileData['cityId']=$('#pCityId').val();
+	}else if(keyId=='totalTeacheingExperience'){
+		requestProfileData['yearValue']=$("#yearExp").val();
+		requestProfileData['monthValue']=$("#monthExp").val();
+	}else if(keyId=='lastOrgGradeName'){
+		if($('#lastGradeK').val().length>0){
+			requestProfileData['fieldValue']=$('#lastGradeK').val().toString();
+		}else if($('#lastGradeM').val().length>0){
+			requestProfileData['fieldValue']=$('#lastGradeM').val().toString();
+		}else if($('#lastGradeH').val().length>0){
+			requestProfileData['fieldValue']=$('#lastGradeH').val().toString();
+		}
+	}else if(keyId=='preferredGradeName'){
+		if($('#prefGradeK').val().length>0){
+			requestProfileData['fieldValue']=$('#prefGradeK').val().toString();
+		}else if($('#prefGradeM').val().length>0){
+			requestProfileData['fieldValue']=$('#prefGradeM').val().toString();
+		}else if($('#prefGradeH').val().length>0){
+			requestProfileData['fieldValue']=$('#prefGradeH').val().toString();
+		}
+	}else if(keyId=='otherRelation'|| keyId=='relationType'){
+		requestProfileData['fieldValue']=$("#relationType").val();
+        if($("#otherRelation").length>0){
+            requestProfileData['fieldValue1']=toTitleCase($("#otherRelation").val());
+        }
+	}else if(keyId=='parentEmailSmsLmsCreation'){
+		requestProfileData['fieldValue']=encode($("#parentPassword").val());
+	}else if(keyId=='pEmailOtp'){
+		requestProfileData['fieldValue']=$("#parentEmailId").val().trim();
+	}else if(keyId=='pEmailOtpVerify'){
+		requestProfileData['fieldValue']=$("#parentEmailId").val().trim();
+		requestProfileData['fieldValue1']=$("#otp").val();
+	}else if(keyId=='pStudEmailMappedVerify'){
+		requestProfileData['fieldValue']=$("#parentEmailId").val().trim();
+		requestProfileData['fieldValue1']=$("#verifyMailId").val().trim();
+	}else if(keyId=="parentEmailLmsCreation"){
+		requestProfileData['fieldValue']=$("#parentEmailId").val().trim();
+	}else if(keyId=='switchParentStudEmailId'){
+		requestProfileData['fieldValue']=$('#swipeParentId').val().trim();
+		requestProfileData['fieldValue1']= $('#studID option:selected ').attr('attrStudentEmail').trim();
+		requestProfileData['studUserId']=$('#studID').val();
+		requestProfileData['parentId']=$('#swipeParentId').attr("attrparentid");
+	}else if(keyId=="forcefulRepeatOrImprove"){
+		requestProfileData['forcefulRepeatOrImprove']=$("#forcefulRepeatOrImprove").val().trim();
+	}else if(keyId == "occupation"){
+        requestProfileData['fieldValue']=$('#'+eleID).val()
+		requestProfileData['parentType']=$('#'+eleID).attr("data-Occupationparent");
+    }
+    else if(keyId == "parentDob"){
+        requestProfileData['fieldValue']=$('#'+eleID).val();
+        requestProfileData['parentType']=$('#'+eleID).attr("data-dobparent");
+    }
+    else if(keyId == "weddingAnniversaryDate"){
+        requestProfileData['fieldValue']=$('#'+eleID).val();
+    }
+    else if(keyId == "progressReportType"){
+        requestProfileData['fieldValue']=$('#progressReportAnchorDate').val();
+        requestProfileData['reportType']=parseInt($('#progressReportDaysType').val() || "14", 10);
+    }
+    else if(keyId == 'communicationPreferredSlots'){
+        requestProfileData["callingPreferences"] = getCallingPreference();
+    }else if(keyId=='extracurricular'){
+        var sportsAndEcList=[];
+		$(".sports-extra-curriculars-wrapper input[type='checkbox']:checked").each(function(){
+            sportsAndEcList.push($(this).attr("data-Id"));
+        });
+        requestProfileData['sportsAndEcList'] = sportsAndEcList;
+        $("#saveSportsAndEcClubWrapper").hide();
+        SPORTS_AND_CLUB_COUNT=[];
+    }else if(keyId == 'preferredcommunication'){
+		var pcWhatsapp=$('#pcWhatsappView').is(':checked')?'Y':'N';
+		var pcCall=$('#pcCallView').is(':checked')?'Y':'N';
+		var pcEmail=$('#pcEmailView').is(':checked')?'Y':'N';
+		requestProfileData['fieldValue']='W='+pcWhatsapp+'|'+'C='+pcCall+'|'+'E='+pcEmail;
+	}
     else{
         if (keyId == 'employeeType') {
             if ($('#employeeTypeStartDate').val() == '') {
@@ -4741,17 +5221,23 @@ function getRequestForUpdateProfile(eleID, keyId, userId, studentStandardId, mod
         } else if (keyId == 'guardianFacebook') {
             requestProfileData['faceBook'] = $('#guardianFacebook').val();
             requestProfileData['parentType'] = "Guardian";
-        } else if (keyId == 'motherCountry') {
+        } else if (keyId == 'motherCountry' || keyId == 'motherState' || keyId == 'motherCity') {
             requestProfileData['parentType'] = "Mother";
-            requestProfileData['fieldValue'] = $("#motherCountry").val();
+            requestProfileData['countryId'] = $("#motherCountry").val() || null;
+            requestProfileData['stateId'] = $("#motherState").val() || null;
+            requestProfileData['cityId'] = $("#motherCity").val() || null;
         }
-        else if (keyId == 'fatherCountry') {
+        else if (keyId == 'fatherCountry' || keyId == 'fatherState' || keyId == 'fatherCity') {
             requestProfileData['parentType'] = "Father";
-            requestProfileData['fieldValue'] = $("#fatherCountry").val();
+            requestProfileData['countryId'] = $("#fatherCountry").val() || null;
+            requestProfileData['stateId'] = $("#fatherState").val() || null;
+            requestProfileData['cityId'] = $("#fatherCity").val() || null;
         }
-        else if (keyId == 'guardianCountry') {
+        else if (keyId == 'guardianCountry' || keyId == 'guardianState' || keyId == 'guardianCity') {
             requestProfileData['parentType'] = "Guardian";
-            requestProfileData['fieldValue'] = $("#guardianCountry").val();
+            requestProfileData['countryId'] = $("#guardianCountry").val() || null;
+            requestProfileData['stateId'] = $("#guardianState").val() || null;
+            requestProfileData['cityId'] = $("#guardianCity").val() || null;
         }
         else if (keyId == 'fatherFirstName' || keyId == "fatherMiddleName" || keyId == "fatherLastName") {
             requestProfileData['firstName'] = getParentNamePayloadValue('fatherFirstName');
@@ -5049,8 +5535,117 @@ function validateFields(eleID, keyId, fieldValue) {
                 return false;
             }
         }
-    } else if (keyId == 'communicationPreferredSlots') {
-        $(".communication-preferred-time-wrapper-ul > li").each(function () {
+        }
+    else if(keyId=='admissonDate' || keyId=='joiningDate'){
+		if(fieldValue==''|| fieldValue==undefined ||fieldValue==0){
+			showMessageTheme2(0,"Either field value is invalid or empty.",'',false);
+			return false;
+		}
+	}else if(keyId=='dob'){
+		if(fieldValue==''|| fieldValue==undefined ||fieldValue==0){
+			showMessageTheme2(0,"Either field value is invalid or empty.",'',false);
+			return false;
+		}
+	}else if(keyId=='parentDob'){
+		if(fieldValue==''|| fieldValue==undefined ||fieldValue==0){
+			showMessageTheme2(0,"Either field value is invalid or empty.",'',false);
+			return false;
+		}
+	}else if(keyId=='weddingAnniversaryDate'){
+		if(fieldValue==''|| fieldValue==undefined ||fieldValue==0){
+			showMessageTheme2(0,"Either field value is invalid or empty.",'',false);
+			return false;
+		}
+	}else if(keyId=='countrySection'){
+		if( $("#country").val()==undefined ||$("#country").val()==0 || $("#country").val()==''){
+			showMessageTheme2(0," Please choose country to proceed.",'',false);
+			return false;
+		}else if( $("#state").val()==undefined ||$("#state").val()==0 || $("#state").val()==''){
+			showMessageTheme2(0,"Please choose state to proceed.",'',false);
+			return false;
+		}else if( $("#city").val()==undefined ||$("#city").val()==0 || $("#city").val()==''){
+			showMessageTheme2(0,"Please choose city to proceed.",'',false);
+			return false;
+		}
+	}else if(keyId=='motherName' || keyId=='motherLastName'){
+		// if( $("#motherName").val()==undefined ||$("#motherName").val()==0 || $("#motherName").val()==''){
+		// 	showMessageTheme2(0," Please enter mother name to proceed.",'',false);
+		// 	return false;
+		// }
+        // else if( $("#motherLastName").val()==undefined ||$("#motherLastName").val()==0 || $("#motherLastName").val()==''){
+		// 	showMessageTheme2(0,"Please enter mother last name to proceed.",'',false);
+		// 	return false;
+		// }
+	}
+    else if(keyId=='fatherFirstName' || keyId=='fatherLastName'){
+		// if( $("#fatherFirstName").val()==undefined ||$("#fatherFirstName").val()==0 || $("#fatherFirstName").val()==''){
+		// 	showMessageTheme2(0," Please enter father name to proceed.",'',false);
+		// 	return false;
+		// }else if( $("#fatherLastName").val()==undefined ||$("#fatherLastName").val()==0 || $("#fatherLastName").val()==''){
+		// 	showMessageTheme2(0,"Please enter father last name to proceed.",'',false);
+		// 	return false;
+		// }
+	}
+    else if(keyId=='guardianFirstName' || keyId=='guardianLastName'){
+		// if( $("#guardianFirstName").val()==undefined ||$("#guardianFirstName").val()==0 || $("#guardianFirstName").val()==''){
+		// 	showMessageTheme2(0," Please enter guardian name to proceed.",'',false);
+		// 	return false;
+		// }else if( $("#guardianLastName").val()==undefined ||$("#guardianLastName").val()==0 || $("#guardianLastName").val()==''){
+		// 	showMessageTheme2(0,"Please enter guardian last name to proceed.",'',false);
+		// 	return false;
+		// }
+	}
+    else if(keyId=='timezone'){
+		if(fieldValue==''|| fieldValue==undefined ||fieldValue==0){
+			showMessageTheme2(0,"Either field value is invalid or empty.",'',false);
+			return false;
+		}
+		}else if(keyId=='otherRelation'|| keyId=='relationType'){
+			var viewValue='';
+			var selectedRelation = $('#relationType').val();
+			var primaryEmailVal = '';
+			var primaryFirstNameVal = '';
+			var primaryMiddleNameVal = '';
+			var primaryLastNameVal = '';
+			if(selectedRelation === 'Mother'){
+				primaryEmailVal = $('#motherEmail').val();
+				primaryFirstNameVal = $('#motherName').val();
+				primaryMiddleNameVal = $('#motherMiddleName').val();
+				primaryLastNameVal = $('#motherLastName').val();
+			}else if(selectedRelation === 'Father'){
+				primaryEmailVal = $('#fatherEmail').val();
+				primaryFirstNameVal = $('#fatherFirstName').val();
+				primaryMiddleNameVal = $('#fatherMiddleName').val();
+				primaryLastNameVal = $('#fatherLastName').val();
+			}else if(selectedRelation === 'Guardian'){
+				primaryEmailVal = $('#guardianEmail').val();
+				primaryFirstNameVal = $('#guardianFirstName').val();
+				primaryMiddleNameVal = $('#guardianMiddleName').val();
+				primaryLastNameVal = $('#guardianLastName').val();
+			}
+			if(selectedRelation !== 'Other' && (!primaryEmailVal || primaryEmailVal.trim() === '')){
+				showMessageTheme2(0,"Primary parent email is required.",'',false);
+                resetRelationTypeSelectionToSaved();
+				return false;
+			}
+			if(selectedRelation !== 'Other' && (!primaryFirstNameVal || primaryFirstNameVal.trim() === '')){
+				showMessageTheme2(0,"Primary parent first name is required.",'',false);
+                resetRelationTypeSelectionToSaved();
+				return false;
+			}
+			if(selectedRelation !== 'Other' && (!primaryLastNameVal || primaryLastNameVal.trim() === '')){
+				showMessageTheme2(0,"Primary parent last name is required.",'',false);
+                resetRelationTypeSelectionToSaved();
+				return false;
+			}
+			if('Other'== $('#relationType').val()){
+				if($('#otherRelation').val()=='' || $('#otherRelation').val()==undefined){
+					showMessageTheme2(0,"Please Enter relation type.",'',false);
+					return false;
+				}
+			}
+	}else if(keyId=='communicationPreferredSlots'){
+		$(".communication-preferred-time-wrapper-ul > li").each(function () {
             var slotUI = $(this).find(".communication_slot_ul");
             var roleType = slotUI.attr("data-communicationroletype-ul");
             if (!roleType) {
@@ -5118,26 +5713,10 @@ function validateFields(eleID, keyId, fieldValue) {
 
     } else if (keyId == 'sendUserVerificationEmail' || keyId == 'verifyUserEmail' || keyId == 'middleName' || keyId == 'lastName' || keyId == 'switchParentStudEmailId' || keyId == 'reserveASeat' || keyId == 'bookASeatNextGradeOpted' || keyId == 'advanceGradeOpted' || keyId == 'motherMiddleName' || keyId == 'fatherMiddleName' || keyId == 'guardianMiddleName') {
 
-    } else if (keyId == "parentEmailSmsLmsCreation") {
-        if (!validPassword($("#parentPassword").val())) {
-            showMessageTheme2(0, "Please Enter parent password.", '', false);
-            return false;
-        }
-        if (!validPassword($("#confirmPassword").val())) {
-            showMessageTheme2(0, "Please Enter parent confirm password.", '', false);
-            return false;
-        }
-        if ($('#parentPassword').val().trim() != $('#confirmPassword').val().trim()) {
-            showMessageTheme2(0, "Password and Confirm Password do not match.", '', false);
-            return false;
-        }
 
-        var pass = $("#parentPassword").val();
-        if (pass != undefined) {
-            if (!(pattern.test(pass))) {
-                showMessageTheme2(0, "Passwords must match all requirements.", '', false);
-                return false
-            }
+	}else if(keyId=="parentEmailSmsLmsCreation"){
+        if(!isPrimaryParentEmailValidForUserCreation()){
+            return false;
         }
     } else if (keyId == "parentEmailLmsCreation") {
         if (!validateEmail($('#parentEmailId').val())) {
@@ -5167,6 +5746,8 @@ function validateFields(eleID, keyId, fieldValue) {
             showMessageTheme2(0, "Email is either empty or invalid.", '', false);
             return false;
         }
+    } else if (keyId == 'preferredcommunication') {
+        // checkbox-level validation (at least one of WhatsApp/Call/Email) already done in applyChanges()
     } else {
         if (fieldValue == '' || fieldValue == undefined || fieldValue == 0) {
             showMessageTheme2(0, "Either field value is invalid or empty.", '', false);
@@ -5207,7 +5788,7 @@ function checkParentType(eleID, keyId){
     }
 }
 
-function applyChanges(eleID, keyId, userId, studentStandardId, roleModuleId, moduleId, showWarning, index) {
+function applyChanges(eleID, keyId, userId, studentStandardId, roleModuleId, moduleId, showWarning, index, parentMappingConsent, confirmParentSwitch) {
     if (!getSession()) {
         showMessageTheme2(0, "Your session has been timed out, please login again", '', false);
         redirectLoginPage();
@@ -5269,32 +5850,41 @@ function applyChanges(eleID, keyId, userId, studentStandardId, roleModuleId, mod
         }
     }
     $.ajax({
-        type: "POST",
-        contentType: APPLICATION_JSON_VALUE,
-        url: getURLForHTML('dashboard', 'update-user-profile-content'),
-        data: JSON.stringify(getRequestForUpdateProfile(eleID, keyId, userId, studentStandardId, moduleId)),
-        dataType: 'json',
-        success: function (data) {
+        type : "POST",
+        contentType : APPLICATION_JSON_VALUE,
+        url : getURLForHTML('dashboard','update-user-profile-content'),
+        data : JSON.stringify(getRequestForUpdateProfile(eleID, keyId, userId, studentStandardId,moduleId,parentMappingConsent, confirmParentSwitch)),
+        dataType : 'json',
+        success : function(data) {
             if (data['status'] == '0' || data['status'] == '2') {
-                showMessageTheme2(0, data['message'], '', false);
-            }
+                if ((keyId == 'motherEmail' || keyId == 'fatherEmail' || keyId == 'guardianEmail') && data['statusCode'] == 'W001' && parentMappingConsent !== 'Y') {
+                    var warningCallback = "applyChanges('"+eleID+"','"+keyId+"','"+userId+"','"+studentStandardId+"','"+roleModuleId+"','"+moduleId+"',false,'','Y')";
+                    showWarningMessageShow(data['message'], warningCallback, false);
+                    return false;
+                }
+                showMessageTheme2(0, data['message'],'',false);
+            } 
             else {
-                CUSTOM_DATEPICKER_FIELD_FLAG=false;
-                if (keyId == "firstName" || keyId == "lastName") {
-                    $(".userNameLabel").text($("#firstName").val() + " " + $("#lastName").val());
-                    $("#" + eleID).closest(".input-group").find(".input-group-append-hide").hide();
-                } else if (keyId == 'phoneNumber' || keyId == 'alternatePhoneNumber' || keyId == 'motherPhoneNumber' || keyId == 'alternateParentPhoneNumber' || keyId == 'payPalPhoneNumber') {
-                    var isdCode = "";
-                    if (keyId == 'phoneNumber') {
-                        isdCode = $('#phoneDailCode').val() + '-';//$(".stuPhoneNumber .iti__active").last().attr("data-dial-code")+'-';
-                    } else if (keyId == 'alternatePhoneNumber') {
-                        isdCode = $('#alternateDailCode').val() + '-';//$(".stuAlternatePhoneNumber .iti__active").last().attr("data-dial-code")+'-';
-                    } else if (keyId == 'motherPhoneNumber') {
-                        isdCode = $('#parentPhoneDailCode').val() + '-';//$(".stuParentPhoneNumber .iti__active").last().attr("data-dial-code")+'-';
-                    } else if (keyId == 'alternateParentPhoneNumber') {
-                        isdCode = $('#alternateParentPhoneDailCode').val() + '-';//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-dial-code")+'-';
-                    } else if (keyId == 'payPalPhoneNumber') {
-                        isdCode = $('#payPalDailCode').val() + '-';//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-dial-code")+'-';
+                if ((keyId == 'relationType' || keyId == 'otherRelation') && data['statusCode'] == 'WPR01') {
+                    var warningCallback = "applyChanges('"+eleID+"','"+keyId+"','"+userId+"','"+studentStandardId+"','"+roleModuleId+"','"+moduleId+"',false,'','', 'Y')";
+                    showWarningMessageShow(data['message'], warningCallback, false);
+                    return false;
+                }
+                if(keyId == "firstName" || keyId == "lastName"){
+                    $(".userNameLabel").text($("#firstName").val()+" "+$("#lastName").val());
+                    $("#"+eleID).closest(".input-group").find(".input-group-append-hide").hide();
+                }else if(keyId=='phoneNumber' || keyId=='alternatePhoneNumber' ||  keyId=='motherPhoneNumber' ||keyId=='alternateParentPhoneNumber' ||keyId=='payPalPhoneNumber'){
+                    var isdCode="";
+                    if(keyId=='phoneNumber'){
+                        isdCode=$('#phoneDailCode').val()+'-';//$(".stuPhoneNumber .iti__active").last().attr("data-dial-code")+'-';
+                    }else if( keyId=='alternatePhoneNumber'){
+                        isdCode=$('#alternateDailCode').val()+'-';//$(".stuAlternatePhoneNumber .iti__active").last().attr("data-dial-code")+'-';
+                    }else if( keyId=='motherPhoneNumber'){
+                        isdCode=$('#parentPhoneDailCode').val()+'-';//$(".stuParentPhoneNumber .iti__active").last().attr("data-dial-code")+'-';
+                    }else if( keyId=='alternateParentPhoneNumber'){
+                        isdCode=$('#alternateParentPhoneDailCode').val()+'-';//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-dial-code")+'-';
+                    }else if( keyId=='payPalPhoneNumber'){
+                        isdCode=$('#payPalDailCode').val()+'-';//$(".stuAlternateParentPhoneNumber .iti__active").last().attr("data-dial-code")+'-';
                     }
                     // console.log("Isd Code",isdCode);
                     $("#" + eleID).closest(".input-group").find(".input-group-append-hide").hide();
@@ -5333,6 +5923,12 @@ function applyChanges(eleID, keyId, userId, studentStandardId, roleModuleId, mod
                     $.each(elementIDs, function (i, v) {
                         $("#" + v).closest(".input-group").find(".input-group-append-hide").hide();
                     });
+                } else if (keyId == 'motherCountry' || keyId == 'motherState' || keyId == 'motherCity') {
+                    $("#motherCountry, #motherState, #motherCity").closest(".input-group").find(".input-group-append-hide").hide();
+                } else if (keyId == 'fatherCountry' || keyId == 'fatherState' || keyId == 'fatherCity') {
+                    $("#fatherCountry, #fatherState, #fatherCity").closest(".input-group").find(".input-group-append-hide").hide();
+                } else if (keyId == 'guardianCountry' || keyId == 'guardianState' || keyId == 'guardianCity') {
+                    $("#guardianCountry, #guardianState, #guardianCity").closest(".input-group").find(".input-group-append-hide").hide();
                 } else if (keyId == 'socialMedia') {
                     $("[id='" + eleID + "']").parent().find(".input-group-append-hide").hide();
                 } else if (keyId == 'motherName' || keyId == 'motherLastName') {
@@ -5469,10 +6065,11 @@ function applyChanges(eleID, keyId, userId, studentStandardId, roleModuleId, mod
                     //$(src).parent().find('.field-input, .iti--allow-dropdown, .select2').removeClass('visible');
                     $("#" + eleID).parent().find(".input-group-append-hide").hide();
                     $(".otherRelationDiv").hide();
-                } else if (keyId == 'joiningDate') {
-                    var adDate = $('#joiningDate').val();
-                    adDate = adDate.split('-');
-                    var selectedDate = new Date(adDate[0] + '/' + adDate[1] + '/' + adDate[2]);
+                    $("#relationType").attr("data-prev-value", $("#relationType").val() || "");
+                }else if(keyId=='joiningDate'){
+                    var adDate=$('#joiningDate').val();
+                    adDate=adDate.split('-');
+                    var selectedDate=new Date(adDate[0]+'/'+adDate[1]+'/'+adDate[2]);
                     var selectedDate2 = selectedDate.toString().split(" ");
                     $('.joiningDateView').text(selectedDate2[1] + ", " + selectedDate2[2] + " " + selectedDate2[3]).removeClass('hide-value');
                     // //$(src).parent().find('.cancel-field-btn').removeClass('visible');
@@ -5536,9 +6133,12 @@ function applyChanges(eleID, keyId, userId, studentStandardId, roleModuleId, mod
                     } else {
                         $('.parentLmsStatusView').text('Inactive').removeClass('hide-value');
                     }
-                    $('.parentCreationCheck').css("display", "none");
-                    $('.separate-user-for-parent').slideUp()
-                } else if (keyId == 'parentEmailLmsCreation') {
+                    $('.parentCreationCheck').css("display","none");
+                    $('.separate-user-for-parent').slideUp();
+                    if($("#parentEmailSmsLmsCreation").length > 0){
+                        $("#parentEmailSmsLmsCreation").parent().html('<a href="javascript:void(0)" class="btn btn-sm btn-success disabled" aria-disabled="true"><i class="fa fa-check"></i></a>');
+                    }
+                }else if(keyId=='parentEmailLmsCreation'){
                     $('.parentSmsCreatedView').text('Yes').removeClass('hide-value');
                     $('.parentLmsCreatedView ').text('Yes').removeClass('hide-value');
                     if (data['extra'] == 'Y') {
@@ -5569,8 +6169,8 @@ function applyChanges(eleID, keyId, userId, studentStandardId, roleModuleId, mod
                     $('#updatedStudEmail').text('');
                     $('#updatedParentEmail').text('');
                     $('.swap-Id-Wrapper').addClass('d-none');
-                    $('.studParntswipedata').css("display", "none");
-                    $('#switchParentEmail').prop('checked', false);
+                    $('.studParntswipedata').css("display","none");
+                    $('#switchParentStudEmailId').prop('checked', false);
                     $('#parentEmailId').removeClass('visible').parent().find('.edit-field-btn').show();
                     if (data['statusCode'] == '1') {
                         $('.emailIdView').text(data['extra']).removeClass('hide-value');
@@ -5578,7 +6178,8 @@ function applyChanges(eleID, keyId, userId, studentStandardId, roleModuleId, mod
                     $('#swipeParentId').val(data['extra1']);
                     $('.parentEmailswipe').css("display", "none");
                     $('.parentEmailIdView').text(data['extra1']).removeClass('hide-value');
-                } else if (keyId == "communicationPreferredSlots") {
+                    refreshGuardianSectionData();
+                }else if(keyId == "communicationPreferredSlots"){
                     $("#communication-preferred-time-dropdown-wrapper").hide();
                     $("#communicationPreferredSlotSave").hide();
                     $(".addcommunicationPreferredTimeBtn").show();
@@ -5639,30 +6240,30 @@ function applyChanges(eleID, keyId, userId, studentStandardId, roleModuleId, mod
             }
             if(USER_ROLE == "STUDENT"){ 
                 SAVE_BLUK_PROFILE_DATA = SAVE_BLUK_PROFILE_DATA.filter(item => item.eleID !== item.eleID);
-                var eleIdsToRemove=[];
-                if(eleID == "extracurricular"){
-                    eleID = "extracurricularActivities";
                 }
-                var eleIdsToRemove = []; eleIdsToRemove.push(eleID);
-                updateProfileLocalStorageData(eleIdsToRemove);
-                refreshProfileMissingModalStateAfterBulkSave(missingFields); 
+                // console.log("not updated",PORFILE_RESPONSE_UPDATED_DATA);
+                
+                overWriteProfileData(eleID, keyId)
+                // console.log("updated",PORFILE_RESPONSE_UPDATED_DATA);
+                if(keyId=='motherEmail' || keyId=='fatherEmail' || keyId=='guardianEmail' || keyId=='relationType' || keyId=='otherRelation'){
+                    refreshGuardianSectionData();
+                }
             }
-            return false;
-        }
     });
+    return false;
 }
 
-function controlEditField(src, eleID, eleValue, saveType, avalWhtsAppStatusID, countryCode, index, keyId, avalemergencyStatusID) {
-    if (saveType == 'input') {
-        var fieldValue = getValue(eleID, index); 
-        // if(keyId == "customProfileFieldId"){
-                // fieldValue = getValue(eleID);
-        // }else{
-        //     fieldValue = PROFILE_RESPONSE_UPDATED_DATA[index][eleID]
-        // }
-        if ($("#" + eleID).val() != fieldValue) {
-            $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
-
+function controlEditField(src, eleID, eleValue, saveType, avalWhtsAppStatusID, countryCode, index, keyId, avalemergencyStatusID){
+    if(keyId == 'relationType' && $("#relationType").data("skip-edit") === true){
+        $("#relationType").data("skip-edit", false);
+        $("#relationType").closest(".input-group").find(".input-group-append-hide").hide();
+        addAndRemoveRequestToSaveBulkData(false, "relationType", "relationType");
+        return;
+    }
+    if(saveType == 'input'){
+        if($("#"+eleID).val()!=PORFILE_RESPONSE_UPDATED_DATA[index][eleID]){
+            $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
+            
             // if(eleID == "motherName" || eleID == "motherLastName"){
             //     if(eleID == "motherName" && $("#motherLastName").val()==""){
             //         $("#motherLastName").closest(".input-group").find(".input-group-append-hide").css({"display":"flex"});
@@ -5729,7 +6330,8 @@ function controlEditField(src, eleID, eleValue, saveType, avalWhtsAppStatusID, c
             // }
         }
     } else if (saveType == "select") {
-        if ($("#" + eleID).val() != PROFILE_RESPONSE_UPDATED_DATA[index][eleID == "nationality" ? "nationalityId" : eleID == "previousCurrentGradeName" ? "previousCurrentGradeId" : eleID]) {
+        var domValForCompare = $("#" + eleID).val();
+        if ((domValForCompare == null ? 0 : domValForCompare) != PROFILE_RESPONSE_UPDATED_DATA[index][eleID == "nationality" ? "nationalityId" : eleID == "previousCurrentGradeName" ? "previousCurrentGradeId" : eleID]) {
             $("#" + eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
             if (eleID == "reserveASeat" && (PROFILE_RESPONSE_UPDATED_DATA[index][eleID] == "N" && $("#" + eleID).val() == "1")) {
                 $("#reserveASeat").closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
@@ -5773,7 +6375,7 @@ function controlEditField(src, eleID, eleValue, saveType, avalWhtsAppStatusID, c
             }
 
 
-            if (eleID == "country" ||  eleID == "state" || eleID == "city" || eleID == "motherCountry" || eleID == "fatherCountry" || eleID == "guardianCountry" || eleID == "timezone" || eleID == "nationality" || eleID == "previousCurrentSchoolCountry") {
+            if (eleID == "country" ||  eleID == "state" || eleID == "city" || eleID == "motherCountry" || eleID == "fatherCountry" || eleID == "guardianCountry" || eleID == "motherState" || eleID == "motherCity" || eleID == "fatherState" || eleID == "fatherCity" || eleID == "guardianState" || eleID == "guardianCity" || eleID == "timezone" || eleID == "nationality" || eleID == "previousCurrentSchoolCountry") {
                 $("#"+eleID).closest(".input-group").find(".input-group-append-hide").css({ "display": "flex" });
                 addAndRemoveRequestToSaveBulkData(true, eleID, keyId);
             }else{
@@ -6652,11 +7254,15 @@ function isParentFilled(data, fields) {
 function getParentNonContactGroupedFieldIdsToSkip(parentData) {
     var fieldsToSkip = new Set();
     var countryFieldIds = ["motherCountry", "fatherCountry", "guardianCountry"];
+    var stateFieldIds = ["motherState", "fatherState", "guardianState"];
+    var cityFieldIds = ["motherCity", "fatherCity", "guardianCity"];
     var groupedFieldSets = [
         ["motherName", "fatherFirstName", "guardianFirstName"],
         ["motherMiddleName", "fatherMiddleName", "guardianMiddleName"],
         ["motherLastName", "fatherLastName", "guardianLastName"],
         countryFieldIds,
+        stateFieldIds,
+        cityFieldIds,
         ["motherDob", "fatherDob", "guardianDob"],
         ["motherFacebook", "fatherFacebook", "guardianFacebook"],
         ["motherOccupation", "fatherOccupation", "guardianOccupation"]
@@ -6666,7 +7272,7 @@ function getParentNonContactGroupedFieldIdsToSkip(parentData) {
         if (fieldId === "guardianFacebook" && (val === "" || val === null || val === undefined)) {
             val = parentData?.gurdianFacebook;
         }
-        if (countryFieldIds.includes(fieldId)) {
+        if (countryFieldIds.includes(fieldId) || stateFieldIds.includes(fieldId) || cityFieldIds.includes(fieldId)) {
             return val !== "" && val !== null && val !== undefined && val != "0";
         }
         return val !== "" && val !== null && val !== undefined;

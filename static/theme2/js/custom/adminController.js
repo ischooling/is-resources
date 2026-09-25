@@ -135,7 +135,12 @@ const contentHandlers = {
     'task': () => renderTaskListDashboard("Task", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'add-sub-partner': () => renderB2BSubPartnerContent("Sub Partner List", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'partner-fee-structure': () => renderB2BPartnerFeeStructureContent("Fee Structure", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
-    'profile-view': ({ extraParam }) => renderStudentProfilePage(extraParam),
+    'profile-view': async ({ extraParam }) => {
+        if (typeof renderStudentProfilePage !== 'function') {
+            await new Promise((res, rej) => $.getScript(PATH_FOLDER_JS2 + RESOURCES_FROM_MIN_LOCATION + 'custom/profileViewNewContent.js').done(res).fail(rej));
+        }
+        renderStudentProfilePage(extraParam);
+    },
     'payment-reports': () => getPaymentReportContent(),
     're-enrollment-list': () => renderReEnrollmentList('Re-Enrollment List', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'attendance-report': () => renderAttendanceReport(),

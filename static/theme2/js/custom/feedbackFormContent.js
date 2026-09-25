@@ -13,8 +13,8 @@ function getFeedbackFormPageContent(){
                             <tr>
                                 <th>Label</th>
                                 <th>Code</th>
-                                <th>Form URL</th>
-                                <th>Description</th>
+                                <th style="width:12%; word-break:break-all;">Form URL</th>
+                                <th style="width:25%;">Description</th>
                                 <th>Roles</th>
                                 <th>Events</th>
                                 <th>View Type</th>

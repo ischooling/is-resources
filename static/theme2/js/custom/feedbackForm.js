@@ -129,8 +129,8 @@ function bindFeedbackFormTable(list){
         <tr>
             <td>${label}</td>
             <td>${code}</td>
-            <td><a href="${url}" target="_blank" class="text-primary">${url}</a></td>
-            <td>${description}</td>
+            <td style="word-break:break-all;"><a href="${url}" target="_blank" class="text-primary">${url}</a></td>
+            <td style="width:25%;">${description}</td>
             <td>${roleText}</td>
             <td>${eventsText}</td>
             <td>${viewTypeHtml}</td>
