@@ -69,7 +69,7 @@ var M={toString:function(){return 'Master Object';},W:window,promptExit:function
     decimal:function(value,decimals){return Math.round(value*Math.pow(10,decimals))/Math.pow(10,decimals);},
     getCookie:function(cn){var ar={};var t="";var C=document.cookie.split('; ');for(var nxt=0;nxt<C.length;nxt++){var s=M.trim(C[nxt].substring(0,C[nxt].indexOf('=')));var v=C[nxt].substr(C[nxt].indexOf('=')+1);if(cn&&s==cn)return unescape(v);}if(cn)return null;return unescape(ar);},
     setCookieOld:function(name, value){var expire=new Date();var nowPlusOneWeek=expire.getTime()+(7*24*60*60*1000);expire.setTime(nowPlusOneWeek);document.cookie=name+"="+value+";expires="+expire.toGMTString()+";";},
-    setCookie:function(name,value,expire){if(expire==undefined||isNaN(expire))expire=7;document.cookie=name+"="+escape(value)+"; expires="+new Date(new Date().getTime()+expire*24*60*60*1000).toGMTString()+(/^[0-9.]+$/.test(location.hostname)||location.hostname.indexOf(".")===-1?"":"; domain="+location.hostname.split(".").slice(-2).join("."))+"; path=/; secure;";},
+    setCookie:function(name,value,expire){if(expire==undefined||isNaN(expire))expire=7;document.cookie=name+"="+escape(value)+"; expires="+new Date(new Date().getTime()+expire*24*60*60*1000).toGMTString()+"; domain=internationalschooling.org; path=/; secure;";},
     isSpecialCharsWithN:function(str){return str.match(/\<|\>|\"|\'|\~|\@|\#|\$|\^|\*|\(|\)|\_|\+|\=|\:|\?|\"|\/|\!|\%|\;|\(|\)|\&|\+|\-|\[|\]|[0-9]/g);},
     isSpecialChars:function(str){return str.match(/\<|\>|\"|\'|\~|\@|\#|\$|\^|\*|\(|\)|\_|\+|\=|\:|\?|\"|\/|\!|\%|\;|\(|\)|\&|\+|\-|\[|\]/g);},
     isAlpha:function(str){

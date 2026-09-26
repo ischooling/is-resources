@@ -11,17 +11,6 @@ function urlParam(name) {
   return decodeURI(results[1]) || null;
 }
 
-// Registrable domain of the current host (e.g. sms-is.ischoolusa.com -> ischoolusa.com)
-// so cookies are shared across subdomains; empty for localhost/IPs (host-only cookie).
-function getCookieDomain() {
-  var host = window.location.hostname;
-  if (!host || host.indexOf(".") === -1 || /^[0-9.]+$/.test(host)) {
-    return "";
-  }
-  var parts = host.split(".");
-  return parts.slice(-2).join(".");
-}
-
 function setCookie(key, value) {
   if (value == undefined || value == "") {
     return false;
@@ -34,8 +23,7 @@ function setCookie(key, value) {
     value +
     ";expires=" +
     expires.toUTCString() +
-    (getCookieDomain() ? ";domain=" + getCookieDomain() : "") +
-    ";path=/";
+    ";domain=internationalschooling.org;path=/";
   console.log("setCookie cname:: " + cname);
   document.cookie = cname;
 }
@@ -49,34 +37,29 @@ function getCookie(key) {
   return keyValue ? keyValue[2] : "Test";
 }
 
-// getCookie returns "Test" when the cookie is absent, so treat that as missing too
-function isCookieEmpty(v) {
-  return !v || v === "0" || v === "N/A" || v === "undefined" || v === "Test";
-}
-
 const us = getCookie("us");
-if (isCookieEmpty(us)) {
+if (us === "0" || !us || us === "N/A" || us === "undefined") {
   const utm_source = urlParam("utm_source");
   if (utm_source) {
     setCookie("us", utm_source);
   }
 }
 const um = getCookie("um");
-if (isCookieEmpty(um)) {
+if (um === "0" || !um || um === "N/A" || um === "undefined") {
   const utm_medium = urlParam("utm_medium");
   if (utm_medium) {
     setCookie("um", utm_medium);
   }
 }
 const uc = getCookie("uc");
-if (isCookieEmpty(uc)) {
+if (uc === "0" || !uc || uc === "N/A" || uc === "undefined") {
   const utm_content = urlParam("utm_content");
   if (utm_content) {
     setCookie("uc", utm_content);
   }
 }
 const gc = getCookie("gclid");
-if (isCookieEmpty(gc)) {
+if (gc === "0" || !gc || gc === "N/A" || gc === "undefined") {
   const gclid = urlParam("gclid");
   if (gclid) {
     setCookie("gclid", gclid);
@@ -86,30 +69,24 @@ if (isCookieEmpty(gc)) {
     setCookie("gclid", fbclid);
   }
 }
-const ucamCheck = getCookie("ucam");
-if (isCookieEmpty(ucamCheck)) {
+const ucamCheck = getCookie("utm_campaign");
+if (
+  ucamCheck === "0" ||
+  !ucamCheck ||
+  ucamCheck === "N/A" ||
+  ucamCheck === "undefined"
+) {
   const utm_campaign = urlParam("utm_campaign");
   if (utm_campaign) {
     setCookie("ucam", utm_campaign);
   }
 }
-const ut = getCookie("ut");
-if (isCookieEmpty(ut)) {
+const ut = getCookie("utm_term");
+if (ut === "0" || !ut || ut === "N/A" || ut === "undefined") {
   const utm_term = urlParam("utm_term");
   if (utm_term) {
     setCookie("ut", utm_term);
   }
 }
 
-// lu: first page the visitor landed on; set once, never overwritten
-if (isCookieEmpty(getCookie("lu"))) {
-  setCookie("lu", window.location.href);
-}
-// cu: first URL that carried campaign params; set once, never overwritten
-if (
-  isCookieEmpty(getCookie("cu")) &&
-  (urlParam("utm_source") || urlParam("utm_medium") || urlParam("utm_campaign") ||
-    urlParam("utm_content") || urlParam("utm_term") || urlParam("gclid") || urlParam("fbclid"))
-) {
-  setCookie("cu", window.location.href);
-}
+setCookie("cu", window.location.href);

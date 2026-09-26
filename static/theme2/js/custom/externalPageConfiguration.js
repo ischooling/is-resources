@@ -252,10 +252,7 @@ function setCookie(key, value) {
     value +
     ";expires=" +
     expires.toUTCString() +
-    (/^[0-9.]+$/.test(location.hostname) || location.hostname.indexOf(".") === -1
-      ? ""
-      : ";domain=" + location.hostname.split(".").slice(-2).join(".")) +
-    ";path=/";
+    ";domain=internationalschooling.org;path=/";
   console.log("setCookie cname:: " + cname);
   document.cookie = cname;
 }
@@ -277,34 +274,29 @@ function getCookie(key) {
 // setCookie("ut", urlParam("utm_term"));
 // setCookie("cu", window.location.href);
 
-// getCookie returns "Test" when the cookie is absent, so treat that as missing too
-function isCookieEmpty(v) {
-  return !v || v === "0" || v === "N/A" || v === "undefined" || v === "Test";
-}
-
 const us = getCookie("us");
-if (isCookieEmpty(us)) {
+if (us === "0" || !us || us === "N/A" || us === "undefined") {
   const utm_source = urlParam("utm_source");
   if (utm_source) {
     setCookie("us", utm_source);
   }
 }
 const um = getCookie("um");
-if (isCookieEmpty(um)) {
+if (um === "0" || !um || um === "N/A" || um === "undefined") {
   const utm_medium = urlParam("utm_medium");
   if (utm_medium) {
     setCookie("um", utm_medium);
   }
 }
 const uc = getCookie("uc");
-if (isCookieEmpty(uc)) {
+if (uc === "0" || !uc || uc === "N/A" || uc === "undefined") {
   const utm_content = urlParam("utm_content");
   if (utm_content) {
     setCookie("uc", utm_content);
   }
 }
 const gc = getCookie("gclid");
-if (isCookieEmpty(gc)) {
+if (gc === "0" || !gc || gc === "N/A" || gc === "undefined") {
   const gclid = urlParam("gclid");
   if (gclid) {
     setCookie("gclid", gclid);
@@ -314,33 +306,27 @@ if (isCookieEmpty(gc)) {
     setCookie("gclid", fbclid);
   }
 }
-const ucamCheck = getCookie("ucam");
-if (isCookieEmpty(ucamCheck)) {
+const ucamCheck = getCookie("utm_campaign");
+if (
+  ucamCheck === "0" ||
+  !ucamCheck ||
+  ucamCheck === "N/A" ||
+  ucamCheck === "undefined"
+) {
   const utm_campaign = urlParam("utm_campaign");
   if (utm_campaign) {
     setCookie("ucam", utm_campaign);
   }
 }
-const ut = getCookie("ut");
-if (isCookieEmpty(ut)) {
+const ut = getCookie("utm_term");
+if (ut === "0" || !ut || ut === "N/A" || ut === "undefined") {
   const utm_term = urlParam("utm_term");
   if (utm_term) {
     setCookie("ut", utm_term);
   }
 }
 
-// lu: first page the visitor landed on; set once, never overwritten
-if (isCookieEmpty(getCookie("lu"))) {
-  setCookie("lu", window.location.href);
-}
-// cu: first URL that carried campaign params; set once, never overwritten
-if (
-  isCookieEmpty(getCookie("cu")) &&
-  (urlParam("utm_source") || urlParam("utm_medium") || urlParam("utm_campaign") ||
-    urlParam("utm_content") || urlParam("utm_term") || urlParam("gclid") || urlParam("fbclid"))
-) {
-  setCookie("cu", window.location.href);
-}
+setCookie("cu", window.location.href);
 
 function validateEmail(email) {
   var expr =
