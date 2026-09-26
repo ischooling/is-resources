@@ -3940,28 +3940,6 @@ function getRequestForMasterForHiring(key) {
 	return request;
 }
 
-function getAllHiringRoles(key){
-	var html = '';
-	$.ajax({
-		type : "POST",
-		contentType : APPLICATION_JSON_VALUE,
-		url : getURLForCommon('masters'),
-		data : JSON.stringify(getRequestForMasterForHiring(key)),
-		dataType : 'json',
-		async: false,
-		success : function(data) {
-		   if (data.status == '0' || data.status == '2') {
-			   showMessageTheme2(0, data.message);
-		   } else {
-				$.each(data.mastersData.data, function(k, v) {
-					html+='<option value="'+v.key+'" data-extra="'+v.extra+'">'+v.value+'</option>';
-				});
-			}
-	   }
-   });
-   return html;
-}
-
 function timeAgo(dateString) {
     var pastDate = new Date(dateString.replace(" ", "T"));
     var now = new Date();

@@ -61,7 +61,10 @@ async function userApplicationProfileOnloadFunction(){
         }
         $("#applicantsStatus").html(html).trigger("change");
     });
-    initUserApplicationSelect2Fields("#userScreeningFilterForm");
+    $("#userScreeningFilterForm #applicantsStatus").select2({
+        placeholder: "Select Status",
+        theme:"bootstrap4"
+    })
     $("#userScreeningFilterForm #filterGrades").val("").trigger("change");
     $("#userScreeningFilterForm #filterCourses").val("").trigger("change");
     USER_APPLICATION_SORT_STATE.sortBy = "";
@@ -152,6 +155,12 @@ function bindUserApplicationData(responseData) {
                         }
                     </td>
                     <td>
+                        ${user.hasProfessionalDetails > 0
+                            ? `<a href="javascript:void(0)" class="btn btn-sm btn-outline-primary" onclick="openUserScreeningProfessionalDetailsModal('${user.id}')">View</a>`
+                            : '<span class="text-muted">N/A</span>'
+                        }
+                    </td>
+                    <td>
                        ${user.isAnswersAvailable > 0 
                             ? `
                                 <p class="mb-2">Submitted Date & Time: <br/><strong class="text-primary">${changeDateFormat(new Date(user.answerSubmittedDate), "MMM dd, yyyy hh:mm:ss A")}</strong></p>
@@ -213,6 +222,20 @@ function bindUserApplicationData(responseData) {
                                             </a>
                                         </li>`
                                     }
+                                    if(user.status == "Accepted for Contract" || user.status == "Contract Drafted" || user.status == "Initiated Contract - Acceptance Pending" || user.status == "Contract Accepted & Police Verification Pending" || user.status == "Police Verification Submitted" || user.status == "Ready for Training & Onboarding"){
+                                        row+=`<li>
+                                            <a class="dropdown-item" href="javascript:void(0);" onclick="addUserContract('${user.id}', '${user.userName}', '${user.email}', '${user.contractId}', '${user.appliedUserRole}');">
+                                                <i class="fas fa-file-contract"></i>&nbsp; ${user.contractId > 0 ? "Edit/View Contract" : "Draft Contract"}
+                                            </a>
+                                        </li>`;
+                                        if(user.status == "Police Verification Submitted"){
+                                            row+=`<li>
+                                                <a class="dropdown-item" href="javascript:void(0);" onclick="openVerficationModalForOtherRoles('${user.id}');">
+                                                    <i class="fas fa-file-contract"></i>&nbsp; View Verification Documents
+                                                </a>
+                                            </li>`;
+                                        }
+                                    }
                                     row+=`<li>
                                         <a class="dropdown-item" href="javascript:void(0);" onclick="openCommunicationLogsModalForUserApplication(${user.id}, 'USER_SCREENING', 'USER_SCREENING')">
                                             <i class="fas fa-comment me-2"></i>&nbsp;Communication Log
@@ -235,6 +258,81 @@ function bindUserApplicationData(responseData) {
         $("#userApplicationPagination").html('');
         $('#userApplicationTable tbody').html('<tr><td colspan="13" class="text-center text-muted">No Data Found</td></tr>')
     }
+}
+
+async function openUserScreeningProfessionalDetailsModal(entityId){
+    var payload = { entityId: entityId, entityType: "USER_SCREENING" };
+    var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-user-screening-professional-details', payload, '/teacher/signup');
+    if($("#userScreeningProfessionalDetailsModal").length == 1){
+        $("#userScreeningProfessionalDetailsModal").remove();
+    }
+    $("body").append(
+        `<div class="modal fade" id="userScreeningProfessionalDetailsModal" tabindex="-1" role="dialog" aria-labelledby="userScreeningProfessionalDetailsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="userScreeningProfessionalDetailsModalLabel">Professional Details</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="userScreeningProfessionalDetailsModalBody" style="max-height: 600px; overflow: auto;"></div>
+                </div>
+            </div>
+        </div>`
+    );
+    $("#userScreeningProfessionalDetailsModalBody").html(getUserScreeningProfessionalDetailsModalContent(responseData.details));
+    $("#userScreeningProfessionalDetailsModal").modal("show");
+}
+
+function getUserScreeningProfessionalDetailsModalContent(details){
+    if(!details || typeof details === "string"){
+        return `<p class="text-center text-muted mb-0">Professional details not found.</p>`;
+    }
+    var professional = details.professionalDetails || {};
+    var attachments = details.attachments || {};
+    var totalExpText = `${professional.totalExperianceFromYYYY || 0} Years ${professional.totalExperianceFromMM || 0} Months`;
+    var html =
+        `<div class="row">
+            <div class="col-md-6">
+                <div class="border rounded p-3 mb-3">
+                    <h6 class="text-primary mb-3">Professional Information</h6>
+                    <p class="mb-2"><strong>Highest Qualification:</strong> ${professional.highestQualificationId || "N/A"}</p>
+                    <p class="mb-2"><strong>Degree Specialization:</strong> ${professional.educationSpecialization || "N/A"}</p>
+                    <p class="mb-2"><strong>Experience:</strong> ${totalExpText}</p>
+                    <p class="mb-2"><strong>Last Organization:</strong> ${professional.lastOrganizationName || "N/A"}</p>
+                    <p class="mb-2"><strong>Why Hire:</strong> ${professional.lastJobDesc || "N/A"}</p>
+                    <p class="mb-0"><strong>Declaration Accepted:</strong> ${professional.declConfirmation === "Y" ? "Yes" : "No"}</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="border rounded p-3 mb-3">
+                    <h6 class="text-primary mb-3">Attachments</h6>
+                    ${renderProfessionalAttachment("Highest Degree", attachments.highestDegreeName, attachments.highestDegreeURL)}
+                    ${renderProfessionalAttachment("Updated CV", attachments.updatedCvName, attachments.updatedCvURL)}
+                    ${renderProfessionalAttachment("Experience Proof", attachments.experienceProofName, attachments.experienceProofURL)}
+                    ${renderProfessionalAttachment("Passport/National ID", attachments.passportIdName, attachments.passportIdURL)}
+                    ${renderProfessionalAttachment("Internet Speed Test", attachments.internetSpeedTestName, attachments.internetSpeedTestURL)}
+                </div>
+            </div>
+        </div>`;
+    return html;
+}
+
+function renderProfessionalAttachment(label, fileName, fileUrl){
+    if(fileName && fileUrl){
+        return `<div class="d-flex justify-content-between align-items-center border rounded p-2 mb-2">
+                    <div>
+                        <div class="font-weight-bold">${label}</div>
+                        <div class="text-muted">${fileName}</div>
+                    </div>
+                    <a href="javascript:void(0)" class="btn btn-sm btn-outline-primary" onclick="viewResumeAndPhoto('${fileUrl}','viewApplicantsAttachementModal')">View</a>
+                </div>`;
+    }
+    return `<div class="d-flex justify-content-between align-items-center border rounded p-2 mb-2">
+                <div class="font-weight-bold">${label}</div>
+                <span class="text-muted">N/A</span>
+            </div>`;
 }
 
 async function loadUserApplicationData(isToday, callFrom, isTeaching) {
@@ -350,6 +448,7 @@ function resetUserApplication() {
     $('#userScreeningFilterForm')[0].reset();
     $('#userScreeningFilterForm #filterCountryId').val('0').trigger('change');
     $("#filterAppliedUserRole").val("").trigger("change");
+    $("#applicantsStatus").val("").trigger("change");
     CURRENT_PAGE_USER_APPLICATION = 1;
     $('#userScreeningFilterForm #pageSize').val('10');
     $("#filterDateDuration").val("Custom").trigger("change");
@@ -427,14 +526,24 @@ function openUpdateStatusModalUserApplication(id, status, role, interviewStatus,
 
 function eventStatuschangeEvent(src, applicationStatus){
     var status = $(src).val();
+    var roleVal = $("#uaRole").val();
+
     if (status === "COMPLETED" || status === "NOTATTENDED") {
+
         if($("#userApplicationProfileStatus option[value='Another Interview']").length){
             return;
         }
-        if($("#userApplicationProfileStatus option[value='Another Round of Interview']").length === 0) {
-            $("#userApplicationProfileStatus option[value='0']").after('<option value="Another Round of Interview">Another Round of Interview</option>');
+
+        if(applicationStatus != "Final Round of Interview"){
+            if($("#userApplicationProfileStatus option[value='Another Round of Interview']").length === 0) {
+                $("#userApplicationProfileStatus option[value='0']").after('<option value="Another Round of Interview">Another Round of Interview</option>');
+            }
+        }else{
+            $("#userApplicationProfileStatus option[value='Another Round of Interview']").remove();
         }
+
         $("#userApplicationProfileStatus").parent().show();
+
         if(applicationStatus == "Approved For Interview" || applicationStatus == "Another Round of Interview"){
             if($("#userApplicationProfileStatus option[value='Final Round of Interview']").length === 0) {
                 $("#userApplicationProfileStatus option[value='Another Round of Interview']").after('<option value="Final Round of Interview">Final Round of Interview</option>');
@@ -444,14 +553,37 @@ function eventStatuschangeEvent(src, applicationStatus){
                 $("#userApplicationProfileStatus option[value='Final Round of Interview']").remove(); 
             }
         }
+
+        if(!TEACHER_SUB_ROLES.includes(roleVal) &&
+           (applicationStatus == "Approved For Interview" ||
+            applicationStatus == "Another Round of Interview" ||
+            applicationStatus == "Final Round of Interview")){
+
+            if($("#userApplicationProfileStatus option[value='Professional Details Step']").length === 0){
+                $("#userApplicationProfileStatus").append('<option value="Professional Details Step">Professional Details Step</option>');
+            }else{
+                $("#userApplicationProfileStatus option[value='Professional Details Step']").show();
+            }
+
+        }else{
+            $("#userApplicationProfileStatus option[value='Professional Details Step']").hide();
+        }
+
     }else{
+
         if($("#userApplicationProfileStatus option[value='Another Interview']").length > 0) {
             $("#userApplicationProfileStatus option[value='Another Interview']").remove();
         }
+
         if($("#userApplicationProfileStatus option[value='Final Round of Interview']").length > 0) {
             $("#userApplicationProfileStatus option[value='Final Round of Interview']").remove(); 
-        } 
+        }
+
+        $("#userApplicationProfileStatus option[value='Accepted for Contract']").hide();
+        $("#userApplicationProfileStatus option[value='Professional Details Step']").hide();
+
         $("#userApplicationProfileStatus").val("0").trigger("change");
+
         if (status === "CANCELLED" || status === "RESCHEDULE") {
             $("#userApplicationProfileStatus").parent().hide();
         }
@@ -604,7 +736,9 @@ async function proceedUpdateUserApplicationProfile(id, status){
     var payload = {};
     payload["sessionUserId"] = USER_ID;
     payload["entityId"] = id;
-    payload["entityType"] = "INITIAL-INTERVIEW";
+    payload["entityType"] = (selectedStatus == "Verification Accepted & Redirect to Bank Details" || selectedStatus == "Professional Details Step" || selectedStatus == "Accepted for Contract")
+        ? "USER_SCREENING"
+        : "INITIAL-INTERVIEW";
     payload["assignTo"] = $("#userApplicationProfileStatusForm #assignedToInterview").val();
     payload["questions"] = finalQuestionsArr;
     payload["status"] = $("#userApplicationProfileStatus").val();
@@ -1586,4 +1720,451 @@ async function getHiringSubRoleByRoleName(roleName){
     }else{
         showMessageTheme2(0, responseData.message)
     }
+}
+
+
+async function addUserContract(userId, name, email, contractId, role) {
+    $("#addUserContractModal").remove();
+    var payload = {};
+    payload['entityId'] = parseInt(userId);
+    payload['entityType'] = "USER_SCREENING";
+    if(parseInt(contractId) > 0){
+        payload['contractId'] = parseInt(contractId);
+        payload['actionType'] = "V";
+    }
+	payload = "?payload="+encode(JSON.stringify(payload));
+    var ajaxReqDetails = {
+        method: "GET",
+        url: getURLForHTML("", "partner-contract-details" + payload),
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    };
+    var responseData = await callCommonAjax(ajaxReqDetails);
+    $("body").append(addUserContractModal(responseData.details, userId, name, email, contractId, role));
+    
+    if (contractId != 0) {
+        $("#publishUserContractBtn").show();
+        $("#previewUserContractBtn").show();
+    }
+    
+    setTimeout(() => {
+        $("#addUserContractModal").modal("show");
+    }, 300);
+        
+    initializeCountryStateCity("userContractForm", "userContractCountry", "userContractState", "userContractCity");
+
+	if (responseData.details.countryId) {
+		setTimeout(() => {
+			$("#userContractForm #userContractCountry")
+			.val(responseData.details.countryId)
+			.trigger("change");
+		}, 300);
+	}
+
+	if (responseData.details.stateId) {
+		setTimeout(() => {
+			$("#userContractForm #userContractState")
+			.val(responseData.details.stateId)
+			.trigger("change");
+		}, 600);
+	}
+
+	if (responseData.details.cityId) {
+		setTimeout(() => {
+			$("#userContractForm #userContractCity")
+			.val(responseData.details.cityId)
+			.trigger("change");
+		}, 900);
+	}
+    
+    editor = new Jodit('#userContractCommentData', {
+        width: 794,
+        height: 400,
+        toolbarSticky: true,
+        uploader: { insertImageAsBase64URI: true },
+        toolbarAdaptive: false,
+        events: {
+            change: function () {
+                toggleContractEditorUser("userContractForm");
+            }
+        }
+    });
+    
+    if (responseData.details.commentData && responseData.details.commentData.trim() !== "") {
+        editor.value = cleanBase64Images(responseData.details.commentData);
+        editor.setReadOnly(false);
+		$("#userContractForm label[for='recipientSignatureUpload']").text($("#leftSignatureBox img").data("name"));
+    } else {
+        editor.setReadOnly(true);
+        editor.value = '<p class="text-muted">Please fill contract details above to enable editor.</p>';
+    }
+
+    $("#userContractForm #contractDate").datepicker({
+        autoclose: true,
+        format: 'M dd, yyyy',
+        startDate: new Date()
+    });
+    
+    $("#userContractForm #contractStartDate").datepicker({
+        autoclose: true,
+        format: 'M dd, yyyy',
+        startDate: new Date()
+    });
+    
+    $("#userContractForm #contractEndDate").datepicker({
+        autoclose: true,
+        format: 'M dd, yyyy',
+        startDate: new Date()
+    });
+    
+    $("#userContractForm #contractValidityStartDate").datepicker({
+        autoclose: true,
+        format: 'M dd, yyyy',
+        startDate: new Date()
+    });
+    
+    $("#userContractForm #contractValidityEndDate").datepicker({
+        autoclose: true,
+        format: 'M dd, yyyy',
+        startDate: new Date()
+    });
+
+    if (responseData.details.validityStart && responseData.details.validityEnd) {
+        var start = new Date(responseData.details.validityStart);
+        var end = new Date(responseData.details.validityEnd);
+        var duration = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+        if (duration > 0) {
+            $('#userContractForm #contractValidityDuration').val(duration).trigger('change');
+        }
+    }
+    
+    if (responseData.details.durationYears > 0) {
+        setTimeout(() => {
+            calculateEndDate('userContractForm', 'contractStartDate', 'contractDuration', 'contractEndDate', 'YEAR');
+        }, 100);
+    }
+    
+    $("#userContractForm").on(
+        "keyup change",
+        "#referenceNumber, #firstPartyName, #firstPartyDesignation, #userName, #userEmail, #userDesignation, #employmentType, #workingHours, #monthlySalary, #contractStartDate, #contractDuration, #userContractCountry, #userContractState, #userContractCity",
+        function () {
+            toggleContractEditorUser("userContractForm");
+        }
+    );
+}
+
+function canEnableContractEditorUser(formId) {
+    if ($("#" + formId + " #referenceNumber").val().trim() === "") return false;
+    if ($("#" + formId + " #contractDate").val().trim() === "") return false;
+    if ($("#" + formId + " #firstPartyName").val().trim() === "") return false;
+    if ($("#" + formId + " #firstPartyDesignation").val().trim() === "") return false;
+    if ($("#" + formId + " #userName").val().trim() === "") return false;
+    if ($("#" + formId + " #userEmail").val().trim() === "") return false;
+    if ($("#" + formId + " #userDesignation").val().trim() === "") return false;
+    if ($("#" + formId + " #employmentType").val() === "") return false;
+    var employmentType = $("#" + formId + " #employmentType").val();
+    if (employmentType === "Full-Time") {
+        if ($("#" + formId + " #workingHours").val().trim() === "") return false;
+    }
+    if ($("#" + formId + " #monthlySalary").val().trim() === "") return false;
+	if ($("#" + formId + " #userContractCountry").val() === "") return false;
+    if ($("#" + formId + " #userContractState").val() === "") return false;
+    if ($("#" + formId + " #userContractCity").val() === "") return false;
+    if ($("#" + formId + " #contractStartDate").val().trim() === "") return false;
+    if ($("#" + formId + " #contractDuration").val() === "0") return false;
+
+    return true;
+}
+
+function toggleContractEditorUser(formId) {
+    if (typeof editor === "undefined") return;
+    if (canEnableContractEditorUser(formId)) {
+        editor.setReadOnly(false);
+        if (editor.value && editor.value.indexOf("Please fill contract details above") !== -1) {
+            editor.value = "";
+        }
+    } else {
+        editor.setReadOnly(true);
+        if (!editor.value || editor.value.trim() === "" || editor.value.trim() == "<p><br></p>") {
+            editor.value = '<p class="text-muted">Please fill contract details above to enable editor.</p>';
+        }
+    }
+	if (editor.options.readonly || isEditorEmpty()) {
+        $("#recipientSignatureUpload").prop("disabled", true);
+        // $("#uploadUserSignatureBtn").prop("disabled", true);
+    } else {
+        $("#recipientSignatureUpload").prop("disabled", false);
+        // $("#uploadUserSignatureBtn").prop("disabled", false);
+    }
+}
+
+function signatureTableUser(formId) {
+	if (typeof editor === "undefined") return;
+	var editorContent = $(".jodit-workplace");
+	if (editorContent.find("#leftSignatureBox").length || editorContent.find("#rightSignatureBox").length) {
+		return;
+	}
+	var firstPartyName = $("#" + formId + " #firstPartyName").val() || "";
+	var firstPartyDesignation = $("#" + formId + " #firstPartyDesignation").val() || "";
+
+	var secondPartyName = $("#" + formId + " #userName").val() || "";
+	var secondPartyDesignation = $("#" + formId + " #userDesignation").val() || "";
+
+	var todayDate = changeDateFormat(new Date(), "MMM-dd-yyyy");
+
+	var html =
+	`<table id="userSignatureBox" style="border-collapse:collapse; width:100%; text-align:center;">
+		<tbody>
+			<tr>
+				<td style="width:50%; padding:10px; vertical-align:top;">
+					For <b>${firstPartyName}</b>
+					<div id="leftSignatureBox" style="margin-top:40px; min-height:80px;"></div>
+					<p style="margin:0;"><i>(Signature)</i></p>
+				</td>
+				<td style="width:50%; padding:10px; vertical-align:top;">
+					For <b>${secondPartyName}</b>
+					<div id="rightSignatureBox" style="margin-top:40px; min-height:80px;"></div>
+					<p style="margin:0;"><i>(Signature)</i></p>
+				</td>
+			</tr>
+
+			<tr>
+				<td style="padding:10px; text-align:left; font-size:14px; text-align: center;">
+					Authorized Signatory - 
+					<span class="txt-capitalize-case">${firstPartyName}</span><br/>
+					Designation – 
+					<span class="txt-capitalize-case">${firstPartyDesignation}</span><br/>
+					Date: ${todayDate}
+				</td>
+
+				<td style="padding:10px; text-align:left; font-size:14px; text-align: center;">
+					Authorized Signatory - 
+					<span class="txt-capitalize-case">${secondPartyName}</span><br/>
+					Designation – 
+					<span class="txt-capitalize-case">${secondPartyDesignation}</span><br/>
+					Date: <span id="rightDate">____</span>
+				</td>
+			</tr>
+		</tbody>
+	</table><br/>`;
+	editor.s.setCursorIn(editor.editor, false);
+	editor.s.insertHTML(html);
+}
+
+function validateUserContractForm(formId) {
+
+    if ($("#" + formId + " #referenceNumber").val().trim() === "") {
+        showMessageTheme2(0, "Please enter reference number");
+        return false;
+    }
+
+    if ($("#" + formId + " #contractDate").val().trim() === "") {
+        showMessageTheme2(0, "Please select contract creation date");
+        return false;
+    }
+
+    if ($("#" + formId + " #firstPartyName").val().trim() === "") {
+        showMessageTheme2(0, "Please enter first party name");
+        return false;
+    }
+
+    if ($("#" + formId + " #firstPartyDesignation").val().trim() === "") {
+        showMessageTheme2(0, "Please enter first party designation");
+        return false;
+    }
+
+    if ($("#" + formId + " #userName").val().trim() === "") {
+        showMessageTheme2(0, "Please enter second party name");
+        return false;
+    }
+
+    if ($("#" + formId + " #userEmail").val().trim() === "") {
+        showMessageTheme2(0, "Please enter second party email");
+        return false;
+    }
+
+    if ($("#" + formId + " #userDesignation").val().trim() === "") {
+        showMessageTheme2(0, "Please enter second party designation");
+        return false;
+    }
+
+    var employmentType = $("#" + formId + " #employmentType").val();
+    if (employmentType === "") {
+        showMessageTheme2(0, "Please select employment type");
+        return false;
+    }
+
+    if (employmentType === "Full-Time") {
+        if ($("#" + formId + " #workingHours").val().trim() === "") {
+            showMessageTheme2(0, "Please enter agreed working hours per month");
+            return false;
+        }
+    }
+
+	if ($("#" + formId + " #monthlySalary").val().trim() === "") {
+		showMessageTheme2(0, "Please enter monthly salary");
+		return false;
+	}
+
+	if ($("#" + formId + " #userContractCountry").val() === "") {
+		showMessageTheme2(0, "Please select country");
+		return false;
+	}
+
+	if ($("#" + formId + " #userContractState").val() === "") {
+		showMessageTheme2(0, "Please select state/province");
+		return false;
+	}
+
+	if ($("#" + formId + " #userContractCity").val() === "") {
+		showMessageTheme2(0, "Please select city");
+		return false;
+	}
+
+     if ($("#" + formId + " #contractStartDate").val().trim() === "") {
+        showMessageTheme2(0, "Please select contract start date");
+        return false;
+    }
+
+    if ($("#" + formId + " #contractEndDate").val().trim() === "") {
+        showMessageTheme2(0, "Please select contract duration");
+        return false;
+    }
+
+    if (typeof editor === "undefined" || editor.value.trim() === "" || editor.value.trim() == "<p><br></p>") {
+        showMessageTheme2(0, "Please add contract comment");
+        return false;
+    }
+
+	if ($("#" + formId + " label[for='recipientSignatureUpload']").text() == "Choose file...") {
+		showMessageTheme2(0, "Please upload your signature");
+		return false;
+	}
+	
+	// if ($("#" + formId + " #teacherSignatureBox").length == 0) {
+	// 	showMessageTheme2(0, "Please upload your signature");
+	// 	return false;
+	// }
+
+    if ($("#" + formId + " #contractValidityStartDate").val().trim() === "") {
+        showMessageTheme2(0, "Please select validity start date");
+        return false;
+    }
+
+    if ($("#" + formId + " #contractValidityEndDate").val().trim() === "") {
+        showMessageTheme2(0, "Please select validity duration");
+        return false;
+    }
+
+    return true;
+}
+
+function getRequestForUserContract(formId, userId) {
+    var requestData = {
+        agreementRefNumber: escapeCharacters($("#" + formId + " #referenceNumber").val()),
+        agreementDate: changeDateFormat(new Date($("#" + formId + " #contractDate").val()), "yyyy-mm-dd") + " 00:00:00",
+        roleType: $("#" + formId + " #roleType").val(),
+        firstPartyRepresentative: escapeCharacters($("#" + formId + " #firstPartyName").val()),
+        firstPartyDesignation: escapeCharacters($("#" + formId + " #firstPartyDesignation").val()),
+        name: escapeCharacters($("#" + formId + " #userName").val()),
+        email: escapeCharacters($("#" + formId + " #userEmail").val()),
+        secondPartyDesignation: toTitleCase($("#" + formId + " #userDesignation").val()),
+        department: toTitleCase($("#" + formId + " #userDepartment").val()),
+        employeeType: $("#" + formId + " #employmentType").val(),
+        workingHours: $("#" + formId + " #workingHours").val(),
+        payOut: $("#" + formId + " #monthlySalary").val(),
+        countryId: parseInt($("#" + formId + " #userContractCountry").val()),
+        stateId: parseInt($("#" + formId + " #userContractState").val()),
+        cityId: parseInt($("#" + formId + " #userContractCity").val()),
+        durationStart: changeDateFormat(new Date($("#" + formId + " #contractStartDate").val()), "yyyy-mm-dd") + " 00:00:00",
+        durationEnd: changeDateFormat(new Date($("#" + formId + " #contractEndDate").val()), "yyyy-mm-dd") + " 23:59:59",
+        durationYears: parseInt($("#" + formId + " #contractDuration").val()),
+        commentData: (typeof editor !== "undefined") ? editor.getEditorValue() : "",
+        validityStart: changeDateFormat(new Date($("#" + formId + " #contractValidityStartDate").val()), "yyyy-mm-dd") + " 00:00:00",
+        validityEnd: changeDateFormat(new Date($("#" + formId + " #contractValidityEndDate").val()), "yyyy-mm-dd") + " 23:59:59",
+        validityDays: parseInt($("#" + formId + " #contractValidityDuration").val()),
+        sessionUserId: parseInt(USER_ID),
+        actionType: "D",
+        entityId: parseInt(userId),
+        entityType: "USER_SCREENING"
+    };
+    return requestData;
+
+}
+
+
+async function saveUserContract(formId, userId){
+	if (!validateUserContractForm(formId)) {
+        return;
+    }
+	var ajaxReqDetails = {
+        method: "POST",
+        url: getURLForHTML("", "save-partner-contract-details"),
+        body: getRequestForUserContract(formId, userId),
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    }
+    var responseData = await callCommonAjax(ajaxReqDetails);
+    if(responseData.status == 1){
+		showMessageTheme2(1, "Agreement draft saved successfully");
+		$("#publishUserContractBtn").show();
+		$("#previewUserContractBtn").show();
+		$("#" + formId + " #contractId").val(responseData.contractId);
+        loadUserApplicationData(false, "filter");
+	}else{
+		showMessageTheme2(0, responseData.message);
+	}
+}
+
+async function publishUserContract(formId, userId){
+    var payload ={
+		actionType: "P",
+		entityId: parseInt(userId),
+		entityType: "USER_SCREENING",
+		contractId: parseInt($("#" + formId + " #contractId").val()),
+		sessionUserId: USER_ID
+	}
+	var ajaxReqDetails = {
+        method: "POST",
+        url: getURLForHTML("", "save-partner-contract-details"),
+        body: payload,
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    }
+    var responseData = await callCommonAjax(ajaxReqDetails);
+    if(responseData.status == 1){
+		showMessageTheme2(1, "Agreement published successfully");
+		$("#addUserContractModal").modal("hide");
+        loadUserApplicationData(false, "filter");
+	}else{
+		showMessageTheme2(0, responseData.message);
+	}
+}
+
+function getAllHiringRoles(key){
+	var html = '';
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForCommon('masters'),
+		data : JSON.stringify(getRequestForMasterForHiring(key)),
+		dataType : 'json',
+		async: false,
+		success : function(data) {
+		   if (data.status == '0' || data.status == '2') {
+			   showMessageTheme2(0, data.message);
+		   } else {
+				$.each(data.mastersData.data, function(k, v) {
+					html+='<option value="'+v.key+'" data-extra="'+v.extra+'">'+v.value+'</option>';
+				});
+			}
+	   }
+   });
+   return html;
 }

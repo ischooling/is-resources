@@ -879,9 +879,9 @@ function scheduleEventListDetails(data, clickFrom, currentPage, boxSearchConditi
 											}
 										}else{
 											if(item.meetingFor == 'Initial-Interview'){
-												html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\'0\',\'Initial-Interview\',\''+item.appliedUserRole+'\', \'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\','+remarkMendatory+',\'25\')">Update</a>';
+												html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\'0\',\'Initial-Interview\',\''+item.appliedUserRole+'\', \'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\','+remarkMendatory+',\'25\',\''+item.currentStatus+'\')">Update</a>';
 											}else if(item.meetingFor == 'Interview'){
-												html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\'0\',\'Interview\',\''+item.appliedUserRole+'\', \'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\','+remarkMendatory+',\'25\')">Update</a>';
+												html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\'0\',\'Interview\',\''+item.appliedUserRole+'\', \'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\','+remarkMendatory+',\'25\',\''+item.currentStatus+'\')">Update</a>';
 											}else{
 												html+='<a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="openUpdateStatusModal(\''+item.meetingId+'\',\'0\')">Update</a>';
 											}
@@ -941,7 +941,7 @@ function scheduleEventListDetails(data, clickFrom, currentPage, boxSearchConditi
 		return html;
 }	
 
-function updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCount, eventName,appliedUserRole){
+function updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCount, eventName, appliedUserRole, currentStatus){
 	const isRemarkMandatory = remarkMendatory && Number(minRemarkCount) > 0;	
 	const statusLabel = (eventName == 'Initial-Interview' || eventName == 'Interview') ? 'Interview Status' : 'Status';
 	const statusOptions = (eventName == 'Initial-Interview' || eventName == 'Interview')
@@ -1010,52 +1010,110 @@ function updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCou
 	const remarksAttributes = isRemarkMandatory ? `class="form-control schedule_remarks remarks" isRemarkMendatory="true" minlength="${minRemarkCount}" required` : 'class="form-control"';
 	const remarksCounter = isRemarkMandatory ? `<small id="scheduleRemarksCounter" class="text-muted">0 / ${minRemarkCount}</small>` : '';
 	var html =
-			`<div id="updateSystemTraningModal" class="modal fade fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-				<div class="modal-dialog modal-md modal-dialog-centered box-shadow-none">
-					<div class="modal-content border-0">
-						<div class="modal-header py-2 bg-primary text-white">
-							<h5 class="modal-title">Update Status</h5>
-							<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							</button>
-						</div>
-						<div class="modal-body">
-							<form action="javascript:void(0);" id="scheduleEventMeetingStatus" name="scheduleEventMeetingStatus" autocomplete="off" class="custom-field-scope">
-								<input type="hidden" name="meetingType" id="meetingType" value="" />
-								<div class="row custom-field-scope">
-									<div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
-										<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
-											<select name="status" id="status" class="form-control" onchange="showHideApplicationStatus(this);">
-												<option value="">Select Status</option>
-												${statusOptions}
-											</select>
-											<label>${statusLabel}</label>
-										</div>
-									</div>
-									${applicationStatusBlock}
-									${tentativeDateBlock}
-									${leadSourceBlock}
-									<div class="col-xl-12 col-lg-7 col-md-7 col-sm-12 col-12">
-										<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
-											<input type="text" name="remarks" id="remarks" ${remarksAttributes} placeholder=" " />
-											<label>Remarks</label>
-										</div>
-										${remarksCounter}
-									</div>
-								</div>
-							</form>
-						</div>
-						<div class="modal-footer">
-							<button type="button" class="btn btn-danger  float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>
-							<button type="button" class="btn btn-success  float-right pr-4 pl-4" onclick="updateMeetingStatus('${meetingId}','${leadId}')">Save</button>
-						</div>
-					</div>
-				</div>
-			</div>`;
-	setTimeout(function () {
-		refreshCustomFieldState($("#updateSystemTraningModal"));
-	}, 0);
-	return html;
+			'<div id="updateSystemTraningModal" class="modal fade fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">'
+				+'<div class="modal-dialog modal-md modal-dialog-centered box-shadow-none">'
+					+'<div class="modal-content border-0">'
+						+'<div class="modal-header py-2 bg-primary text-white">'
+							+'<h5 class="modal-title" >Update Status</h5>'
+							+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">'
+								+'<span aria-hidden="true">&times;</span>'
+							+'</button>'
+						+'</div>'
+						+'<div class="modal-body">'
+							+'<form action="javascript:void(0);" id="scheduleEventMeetingStatus" name="scheduleEventMeetingStatus" autocomplete="off">'
+							+'<input type="hidden" name="meetingType" id="meetingType" value=""  />'
+							+'<input type="hidden" id="appliedUserRoleHidden" value="'+appliedUserRole+'" />'
+							+'<input type="hidden" id="currentStatusHidden" value="'+currentStatus+'" />'
+								+'<div class="row">'
+									+'<div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">'
+										+'<label>';
+										if(eventName == 'Initial-Interview'  || eventName == 'Interview'){
+											html +='Interview Status';
+										}else{
+											html +='Status';
+										}
+										html +='</label>'
+										+'<select name="status" id="status" class="form-control" onchange="showHideApplicationStatus(this);">'
+											+'<option value="">Select Status</option>';
+										if(eventName == 'Initial-Interview' || eventName == 'Interview'){
+											html +='<option value="COMPLETED">Completed</option>'
+													+'<option value="CANCELLED">Cancelled</option>'
+													+'<option value="RESCHEDULE">Reschedule</option>'
+													+'<option value="NOTATTENDED">No Show</option>';
+										}else{
+											html +='<option value="COMPLETED">Completed</option>'
+													+'<option value="COMPLETED-ON-CALL">Completed on Call</option>'
+													+'<option value="NOTATTENDED">No Show</option>'
+													+'<option value="CANCELLED">Cancelled</option>'
+													+'<option value="RESCHEDULE">Reschedule</option>'
+													+'<option value="Demo Confirmed">Demo Confirmed</option>'
+													+'<option value="Demo Not Confirmed">Demo Not Confirmed</option>'
+													+'<option value="Not Interested">Not Interested</option>'
+													+'<option value="Positive to enrollment">Positive to enrollment</option>'
+													+'<option value="Red Flag">Red Flag</option>';
+										}
+										html +='</select>'
+									+'</div>'
+									if(eventName == 'Initial-Interview' || eventName == 'Interview'){
+										html+='<div id="applicationStatusDiv" class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12" style="display: none;">'
+											+'<label>Application Status</label>'
+											+'<select name="applicationStatus" id="applicationStatus" class="form-control" onchange="showAndHideDuration(\'scheduleEventMeetingStatus\');">'
+												+'<option value="">Select Application Status</option>'
+												+'<option value="Another Round of Interview">Another Round of Interview</option>'
+												if(appliedUserRole== 'Teacher'){
+													html+='<option value="Approved for Selection Process">Approved for Selection Process</option>';
+												}else if(
+													currentStatus == 'Approved For Interview' ||
+													currentStatus == 'Another Round of Interview' ||
+													currentStatus == 'Final Round of Interview'
+												){
+													html+='<option value="Professional Details Step">Professional Details Step</option>';
+												}
+												html+='<option value="On Hold">On Hold</option>'
+												+'<option value="Reject">Reject</option>'
+											+'</select>'
+										+'</div>'
+										+'<div id="assignedToInterviewDiv" class="form-group" style="display: none;">'
+											+'<label>Assigned To</label>'
+											+'<select id="assignedToInterview" class="form-control"></select>'
+										+'</div>'
+										+'<div id="durationDiv" class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12" style="display: none;">'
+											+'<label>Duration</label>'
+											+'<select name="duration" id="duration" class="form-control">'
+												+'<option value="15">15 Min</option>'
+												+'<option value="30">30 Min</option>'
+											+'</select>'
+										+'</div>'
+										+'<div id="interviewValidDateDiv" style="display: none;" class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">'
+											+'<label for="interviewValidDate" class="control-label">Interview link is valid till</label>'
+											+'<input type="text" class="form-control" id="interviewValidDate" readonly onkeydown="return false" disabled />'
+										+'</div>'
+										+'<div id="finalInterviewSlotsWrapper" class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mt-2" style="display: none;"></div>'
+									}
+									html+='<div class="col-xl-3 col-lg-5 col-md-5 col-sm-12 col-12 tentative_date" style="display:none">'
+										+'<label class="mb-0">Tentative Date</label>'
+										+'<input type="text" name="tentativeDate" id="tentativeDate" value="" class="form-control tentativeDate" maxlength="50" autocomplete="off" readonly onkeydown="return false" />'
+									+'	</div>'
+									+'<div class="col-xl-3 col-lg-5 col-md-5 col-sm-12 col-12 leadSourceHide">'
+										+'<label class="mb-0">Source</label>'
+										+'<select	name="leadSource" id="leadSource" class="form-control" ><option value="">Select Source</option></select>'
+									+'	</div>'
+									+'<div class="col-xl-12 col-lg-7 col-md-7 col-sm-12 col-12">'
+										+'<label>Remarks</label>'
+										+`<input type="text" name="remarks" id="remarks"  class="form-control ${isRemarkMandatory ? 'schedule_remarks remarks' : ''}" ${isRemarkMandatory ? `isRemarkMendatory="true" minlength="${minRemarkCount}" required` : ''}>`
+										+ `${(!isRemarkMandatory)? '':'<small id="scheduleRemarksCounter" class="text-muted">0 / '+minRemarkCount+'</small>'}`
+									+'</div>'
+								+'</div>'
+							+'</form>'
+						+'</div>'
+						+'<div class="modal-footer">'
+							+'<button type="button" class="btn btn-danger  float-right pr-4 pl-4 ml-2" data-dismiss="modal">Close</button>'
+							+'<button type="button" class="btn btn-success  float-right pr-4 pl-4" onclick="updateMeetingStatus(\''+meetingId+'\',\''+leadId+'\')">Save</button>'
+						+'</div>'
+					+'</div>'
+				+'</div>'
+			+'</div>';
+		return html;
 }
 
 function confirmeUpdateSystemTraningModal(meetingId, leadId, eventName, name, meetingStartTime, meetingEndTime, meetingDate, meetingEndDate, counselorTimeZone, inviteeStartTime, inviteeEndTime, inviteeMeetingDate, inviteeMeetingEndDate, inviteeTimezone, standardName, inviteeName, inviteeEmail, isdCode, phoneNo, countryName, inviteeCountry){

@@ -346,9 +346,9 @@ async function proceedUpdateMeetingStatus(meetingId, leadId) {
 
 
 
-function openUpdateStatusModal(meetingId, leadId, eventName, name, meetingStartTime, meetingEndTime, meetingDate, meetingEndDate, counselorTimeZone, inviteeStartTime, inviteeEndTime, inviteeMeetingDate, inviteeMeetingEndDate, inviteeTimezone, standardName, inviteeName, inviteeEmail, isdCode, phoneNo, countryName, inviteeCountry,remarkMendatory,minRemarkCount){
+function openUpdateStatusModal(meetingId, leadId, eventName, name, meetingStartTime, meetingEndTime, meetingDate, meetingEndDate, counselorTimeZone, inviteeStartTime, inviteeEndTime, inviteeMeetingDate, inviteeMeetingEndDate, inviteeTimezone, standardName, inviteeName, inviteeEmail, isdCode, phoneNo, countryName, inviteeCountry,remarkMendatory,minRemarkCount, currentStatus){
 	confirmationFlag=true;
-	$("#updateModalWrapper").html(updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCount,eventName,name));
+	$("#updateModalWrapper").html(updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCount,eventName,name,currentStatus));
 	$("#confirmeUpdateModalWrapper").html(confirmeUpdateSystemTraningModal(meetingId, leadId, eventName, name, meetingStartTime, meetingEndTime, meetingDate, meetingEndDate, counselorTimeZone, inviteeStartTime, inviteeEndTime, inviteeMeetingDate, inviteeMeetingEndDate, inviteeTimezone, standardName, inviteeName, inviteeEmail, isdCode, phoneNo, countryName, inviteeCountry));
 	$('#updateSystemTraningModal').modal('show');
     $('.tentativeDate').datepicker({
@@ -512,6 +512,7 @@ function moveInterviewData(meetingId) {
 
 function showHideApplicationStatus(src){
     var status = $(src).val();
+
     if (status == "CANCELLED" || status == "RESCHEDULE" || status == ""){
         $("#applicationStatusDiv").hide();
         $("#durationDiv").hide();
@@ -519,14 +520,33 @@ function showHideApplicationStatus(src){
         $("#applicationStatus").val('').trigger('change');
     } else {
         $("#applicationStatusDiv").show();
-        // $("#durationDiv").show();
-        // $("#assignedToInterviewDiv").show();
+
+        var role = $("#appliedUserRoleHidden").val();
+        var cs = $("#currentStatusHidden").val();
+
         if(status == "COMPLETED" || status == "NOTATTENDED"){
+
+            if(cs == 'Final Round of Interview' || cs == 'Final Round of Interview'){
+                $("#applicationStatus option[value='Another Round of Interview']").remove();
+            }
+
             if($("#applicationStatus option[value='Final Round of Interview']").length === 0) {
                 $("#applicationStatus option[value='Another Round of Interview']").after('<option value="Final Round of Interview">Final Round of Interview</option>');
             }
+
+            if(role != 'Teacher' && (cs == 'Approved For Interview' || cs == 'Another Round of Interview' || cs == 'Final Round of Interview' || cs == 'Final Round of Interview')){
+                if($("#applicationStatus option[value='Professional Details Step']").length === 0){
+                    $("#applicationStatus").append('<option value="Professional Details Step">Professional Details Step</option>');
+                }else{
+                    $("#applicationStatus option[value='Professional Details Step']").show();
+                }
+            }else{
+                $("#applicationStatus option[value='Professional Details Step']").hide();
+            }
+
         }else{
             $("#applicationStatus option[value='Final Round of Interview']").remove();
+            $("#applicationStatus option[value='Professional Details Step']").hide();
         }
     }
 }

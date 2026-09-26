@@ -7419,36 +7419,44 @@ function getDashboardDataBasedUrlAndPayloadWithParentUrlForContract(globalflag, 
   });
 }
 
-function getDashboardDataBasedUrlAndPayloadWithParentUrlGET(globalflag, showMessage, url, parentUrl){
-  return new Promise(function (resolve, reject) {
-      $.ajax({
-          type : "GET",
-          contentType : APPLICATION_JSON_VALUE,
-          url: getURLForHTML(parentUrl, url),
-          dataType : 'json',
-          global : globalflag,
-          success : function(data) {
-              if (data.status == '0' || data.status == '2' || data.status == '3') {
-                  if(data.status == '3'){
-                      redirectLoginPage();
-                  }else{
-                      if(showMessage){
-                        showMessageTheme2(0, data.message,'',true);
-                      }
-                  }
-                  resolve(data);
-              } else {
-                  resolve(data);
-              }
-          },
-          error: function (xhr, status, e) {
-              if(showMessage){
-                showMessageTheme2(0, e.responseText,'',true);
-              }
-              reject(e);
-          }
-      });
-  });
+function getDashboardDataBasedUrlAndPayloadWithParentUrlGET(globalflag, showMessage, url, parentUrl) {
+    console.log("AJAX Start: Attempting to fetch", url); 
+
+    return new Promise(function (resolve, reject) {
+        $.ajax({
+            type: "GET",
+           
+            contentType: typeof APPLICATION_JSON_VALUE !== 'undefined' ? APPLICATION_JSON_VALUE : "application/json",
+            url: getURLForHTML(parentUrl, url),
+            dataType: 'json',
+            global: globalflag,
+            success: function (data) {
+                console.log("AJAX Success:", data); 
+           
+                resolve(data);
+                
+               
+                if (data.status == '3') {
+                    redirectLoginPage();
+                } else if ((data.status == '0' || data.status == '2') && showMessage) {
+                    showMessageTheme2(0, data.message, '', true);
+                }
+            },
+            error: function (xhr, status, e) {
+                console.error("AJAX Error Status:", status); 
+                console.error("AJAX Error Detail:", e);
+                
+                if (showMessage) {
+                    try {
+                        showMessageTheme2(0, "Network Error", '', true);
+                    } catch(err) {
+                        console.error("Popup function failed:", err);
+                    }
+                }
+                reject(e);
+            }
+        });
+    });
 }
 
 function callCommonAjax(ajaxReqDetails){
@@ -8454,6 +8462,9 @@ async function previewContractPdf(callFrom){
   }else if(callFrom == "TEACHER"){
     payload["entityId"] = parseInt($("#contractId").val());
     payload["entityType"] = "TEACHER_AGREEMENT_LOG";
+  }else if(callFrom == "USER"){
+    payload["entityId"] = parseInt($("#contractId").val());
+    payload["entityType"] = "USER_SCREENING";
   }
 
 	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrlForContract(true, true, "preview-contracts", payload, "");
@@ -8517,6 +8528,15 @@ function formatOpenAIText(text) {
         .replace(/\n\n/g, "<br/><br/>")
         .replace(/\n/g, "<br/>");
 }
+function isEditorEmpty() {
+  if (typeof editor === "undefined") return true;
+  var val = editor.value.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, "").trim();
+  if (val === "Please fill contract details above to enable editor.") {
+    return true;
+  }
+  return val === "";
+}
+
 
 function getUserInitialsCommon(name, fallback) {
   var defaultValue = fallback || "ST";

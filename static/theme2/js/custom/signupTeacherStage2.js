@@ -999,11 +999,12 @@ function handleSessionsWithData(sessionDataList, completedSessions, inProgressSe
 			
 			actionContent = `
 				<div class="d-flex" style="flex-direction: column; gap: 5px;">
-					<div>
+					<div class="d-flex align-items-center">
 						<a id="playBtn_${session.id}_${index}" href="javascript:void(0);" 
 						onclick="openDemoRecordingModal(demoRecordingUrlMap['${rowKey}'], '${attemptText}')" 
 						class="btn btn-sm btn-primary m-0">Recordings</a>
-						<input class="form-check-input ml-3" type="radio" name="selectedDemoRecording" 
+						<input class="ml-3" type="radio" name="selectedDemoRecording" 
+							style="position: static; margin: 0 0 0 1rem; width: 16px; height: 16px; flex: 0 0 auto;"
 							id="${radioId}" value="${session.meetingId}" data-meetingid="${session.meetingId}" 
 							data-attempt="${attemptNumber}" data-rowkey="${rowKey}" ${checked}>
 					</div>

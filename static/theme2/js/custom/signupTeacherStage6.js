@@ -255,7 +255,7 @@ async function signupTeacherStage6OnLoadEvent(){
 
 function validateTeacherAgreement(formId) {
     if (
-        $("#" + formId + " #rightSignatureBox").html().includes('<br>') &&
+        // $("#" + formId + " #rightSignatureBox").html().includes('<br>') &&
         $("#" + formId + " label[for='recipientSignatureUpload']").text().trim() == "Choose file..."
     ) {
         showMessageTheme2(2, "Please upload your signature");
@@ -283,7 +283,9 @@ function confirmAcceptContractYes() {
 }
 
 async function callForSignupTeacherAgreement(formId, userId, agreementLogId, controlType) {
-	if($("#" + formId + " #rightSignatureBox").html().includes('<br>') && $("#" + formId + " label[for='recipientSignatureUpload']").text().trim() == "Choose file..."){
+	if(
+		// $("#" + formId + " #rightSignatureBox").html().includes('<br>') && 
+		$("#" + formId + " label[for='recipientSignatureUpload']").text().trim() == "Choose file..."){
         showMessageTheme2(2, "Please upload your signature");
         return false;
     }

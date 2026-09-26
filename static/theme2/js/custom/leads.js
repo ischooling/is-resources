@@ -12311,7 +12311,8 @@ function getLeadsDeviceTypeCountChart(data, chartIdSufix){
 
 async function getB2BContractDetails(b2bleadId, type, publishedContractId){
     var payload = {};
-    payload['b2bleadId'] = parseInt(b2bleadId);
+    payload['entityId'] = parseInt(b2bleadId);
+    payload['entityType'] = "B2B_REQUEST";
     if(type == "edit" && parseInt(publishedContractId) > 0){
         payload['contractId'] = parseInt(publishedContractId);
         payload['actionType'] = "V";
@@ -12732,7 +12733,8 @@ async function publishContractDetails() {
 	var b2bLeadId = $("#b2bLeadId").val();
 	var payload ={
 		actionType:"P",
-		b2bLeadId:parseInt(b2bLeadId),
+		entityId:parseInt(b2bLeadId),
+		entityType:"B2B_REQUEST",
 		contractId:parseInt($("#contractId").val()),
 		sessionUserId:USER_ID
 	}
@@ -12753,7 +12755,8 @@ async function publishContractDetails() {
 async function getEmailLogList(requestType, contractId){
 	var payload = {};
 	if(requestType == "V"){
-		payload['b2bleadId'] = parseInt($("#b2bLeadId").val());
+		payload['entityId'] = parseInt($("#b2bLeadId").val());
+		payload['entityType'] = "B2B_REQUEST";
 		payload['contractId'] = parseInt(contractId);
 		payload['actionType'] = "V";
 		payload = "?payload="+encode(JSON.stringify(payload));
@@ -12763,7 +12766,8 @@ async function getEmailLogList(requestType, contractId){
 		$("#viewB2BContractModal #editorData").html(cleanedCommentData);
 		$("#viewB2BContractModal").modal("show");
 	}else{
-		payload['b2bleadId'] = parseInt($("#b2bLeadId").val());
+		payload['entityId'] = parseInt($("#b2bLeadId").val());
+		payload['entityType'] = "B2B_REQUEST";
 		payload = "?payload="+encode(JSON.stringify(payload));
 		responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrlGET(true, false, 'get-all-partner-contracts'+payload, '');
 		if (responseData.status == '0' || responseData.status == '2' || responseData.status == '3') {

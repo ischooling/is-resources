@@ -462,6 +462,9 @@ h3 {
   #step-4 i.fa-edit,
   #step-4 i.fa-plus,
   #step-4 i.fa-minus,
+  .edit-btn i,
+  .review-btn i,
+  .review-edit-actions i,
   #callPaymentStudentModal .fa-star,
   .fa-lock,
   .fa-globe, #step-4 .fa-angle-down

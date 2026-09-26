@@ -217,15 +217,23 @@ function userScreeningFilter(){
                     <select name="applicantsStatus" id="applicantsStatus" class="form-control">
                         <option value="">Select Status</option>
                         <option value="Applied">Applied</option>
-                        <option value="Approved For Interview">Approve For Interview</option>
                         <option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
                         <option value="Few Questions Submitted">Few Questions Submitted</option>
                         <option value="New Applications">New Applications</option>
-                        <option value="On Hold">On Hold</option>
+                        <option value="Approved For Interview">Approve For Interview</option>
                         <option value="Accepted for Contract">Accepted for Contract</option>
+                        <option value="Professional Details Step">Professional Details Step</option>
+                        <option value="Professional Details Submitted">Professional Details Submitted</option>
                         <option value="Another Round of Interview">Another Round of Interview</option>
                         <option value="Final Round of Interview">Final Round of Interview</option>
                         <option value="Hired">Hired</option>
+                        <option value="On Hold">On Hold</option>
+                        <option value="Contract Drafted">Contract Drafted</option>
+                        <option value="Initiated Contract - Acceptance Pending">Initiated Contract - Acceptance Pending</option>
+                        <option value="Contract Accepted & Police Verification Pending">Contract Accepted & Police Verification Pending</option>
+                        <option value="Police Verification Submitted">Police Verification Submitted</option>
+                        <option value="Bank Details Pending">Bank Details Pending</option>
+                        <option value="Ready for Training & Onboarding">Ready for Training & Onboarding</option>
                         <option value="Reject">Rejected</option>
                     </select>
                     <label>Status</label>
@@ -277,7 +285,7 @@ function userApplicationTableContent(){
             </div> 
             <div class="form-inline">
                 <label class="mr-2">Show</label>
-                <select id="recordsPerPageJA" class="form-control form-control-sm" onchange="loadUserApplicationData()">
+                <select id="recordsPerPageJA" class="form-control form-control-sm" onchange="loadUserApplicationData(false, 'records')">
                     <option value="10">10</option>
                     <option value="25">25</option>
                     <option value="50">50</option>
@@ -311,6 +319,7 @@ function userApplicationTableContent(){
                         <th>Resume/CV</th>
                         <th>Recent Photograph</th>
                         <th>Linkedin Profile</th>
+                        <th>Professional Details</th>
                         <th>Q/A</th>
                         <th>Assigned To</th>
                         <th>Applicants Status</th>
@@ -350,6 +359,8 @@ function userApplicationProfileStatusModal(id, status, role, interviewStatus){
                             </table>
                         </div>
                         <form class="full custom-field-scope" autocomplete="off" id="userApplicationProfileStatusForm">`;
+                        html+=`<input type="hidden" id="uaRole" value="${role}">
+                            <input type="hidden" id="uaCurrentStatus" value="${status}">`;
                             if(interviewStatus == "Booked"){
                                 html+=
                                 `<div class="form-group custom-field">
@@ -412,6 +423,13 @@ function userApplicationProfileStatusModal(id, status, role, interviewStatus){
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
                                         }else if(status == "Approved For Interview"){
+                                            html+=`<option value="Professional Details Step">Professional Details Step</option>
+                                            <option value="On Hold">On Hold</option>
+                                            <option value="Reject">Reject</option>`;
+                                        }else if(status == "Professional Details Step"){
+                                            html+=`<option value="On Hold">On Hold</option>
+                                            <option value="Reject">Reject</option>`;
+                                        }else if(status == "Professional Details Submitted"){
                                             html+=`<option value="Accepted for Contract">Accepted for Contract</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
@@ -421,7 +439,7 @@ function userApplicationProfileStatusModal(id, status, role, interviewStatus){
                                         }else if(status == "On Hold"){
                                             html+=`<option value="Step 2 | Few Questions">Step 2 | Few Questions</option>
                                             <option value="Approved For Interview">Approve For Interview</option>
-                                            <option value="Accepted for Contract">Accepted for Contract</option>
+                                            <option value="Professional Details Step">Professional Details Step</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
                                         }else if(status == "Step 2 | Few Questions"){
@@ -433,7 +451,7 @@ function userApplicationProfileStatusModal(id, status, role, interviewStatus){
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
                                         }else if(status == "Another Round of Interview"){
-                                           html+=`<option value="Accepted for Contract">Accepted for Contract</option>
+                                           html+=`<option value="Professional Details Step">Professional Details Step</option>
                                             <option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
                                         }else if(status == "Final Round of Interview"){
@@ -443,13 +461,21 @@ function userApplicationProfileStatusModal(id, status, role, interviewStatus){
                                         }else if(status == "Hired"){
                                            html+=`<option value="On Hold">On Hold</option>
                                             <option value="Reject">Reject</option>`;
+                                        }else if(status == "Police Verification Submitted"){
+                                            // have to verify is the value is correct or not 
+                                            html+=`<option value="Verification Accepted & Redirect to Bank Details">Verification Accepted & Redirect to Bank Details</option>
+                                            <option value="On Hold">On Hold</option>
+                                            <option value="Reject">Reject</option>`;
+                                        }else{
+                                            html+=`<option value="On Hold">On Hold</option>
+                                            <option value="Reject">Reject</option>`;
                                         }
                                     }
                                     if(USER_ROLE == 'DIRECTOR'){
                                         html+=`<option value="Update Assign To">Update Assign To</option>`;
                                     }
                                html+=`</select>
-                                <label for="userApplicationProfileStatus" class="control-label">Application Status:</label>
+                                <label for="userApplicationProfileStatus" class="control-label">Application Status</label>
                             </div>
                             <div id="assignedToInterviewDiv" class="form-group" style="display: none;">
                                 <div class="row">
@@ -507,7 +533,7 @@ function userApplicationProfileStatusModal(id, status, role, interviewStatus){
                             </div>
                             <div class="form-group custom-field">
                                 <textarea id="userApplicationProfileRemarks" class="form-control px-2" placeholder=" " minlength="25" maxlength="200" oninput="wordsCountValidate(this, \'userApplicationProfileRemarksCounter\');" required></textarea>
-                                <label for="userApplicationProfileRemarks" class="control-label">Remarks:</label>
+                                <label for="userApplicationProfileRemarks" class="control-label">Remarks</label>
                                 <small id="userApplicationProfileRemarksCounter" class="text-muted">0 / 25</small>
                                 <p id="remarksPara" class="text-secondary mb-0 font-14 ml-1 mt-1 font-weight-semi-bold d-none">Note- Remarks will be sent to the applicant via email.</p>
                             </div>
@@ -526,7 +552,7 @@ function userApplicationProfileStatusModal(id, status, role, interviewStatus){
 function viewApplicantsAttachementModalContent(){
 	var html=
 	'<div class="modal fade fade-scale" id="viewApplicantsAttachementModal" tabindex="-1">'
-		+'<div class="modal-dialog modal-md  box-shadow-none" role="document">'
+		+'<div class="modal-dialog modal-md modal-dialog-centered box-shadow-none" role="document">'
 			+'<div class="modal-content">'
 				+'<div class="modal-header pt-2 pb-2 bg-primary justify-content-between flex-wrap">'
 					+'<h6 class="heading text-white">Preview File</h6>'
@@ -534,7 +560,7 @@ function viewApplicantsAttachementModalContent(){
 				+'</div>'
 				+'<div class="modal-body m-0 py-2" style="margin-top:0 !important">'
 					+'<div id="pre_upload_image_div" class="full text-center upload_img d-none">'
-						+'<img id="pre_upload_image" class="w-100" src="" />'
+						+'<img id="pre_upload_image" style="max-width:100%;max-height:70vh;object-fit:contain;" src="" />'
 					+'</div>'
                     +'<div id="pre_upload_pdf_div" class=" full text-center upload_pdf d-none">'
                         +'<div class="full">'
@@ -950,5 +976,452 @@ function resendInterviewModalContent(userId, mailName, status){
                 </div>
             </div>
         </div>`
+    return html;
+}
+
+
+function addUserContractModal(data, userId, name, email, contractId, role) {
+    var dayOptions = '';
+    for (var i = 1; i <= 30; i++) {
+        dayOptions += `<option value="${i}">${i} Day${i > 1 ? 's' : ''}</option>`;
+    }
+    var contractDate = data?.agreementDate ? changeDateFormat(new Date(data.agreementDate), "MMM-dd-yyyy") : changeDateFormat(new Date(), "MMM-dd-yyyy");
+    var validityStartDate = data?.validityStart ? changeDateFormat(new Date(data.validityStart), "MMM-dd-yyyy") : "";
+    var validityEndDate = data?.validityEnd ? changeDateFormat(new Date(data.validityEnd), "MMM-dd-yyyy") : "";
+    var validityDuration = 0;
+    if (data?.validityStart && data?.validityEnd) {
+        var start = new Date(data.validityStart);
+        var end = new Date(data.validityEnd);
+        validityDuration = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+    }
+    var isContractFilled = data?.content && data.content.trim() !== "";
+    var html =
+        `<div class="modal right-slide-modal fade show" id="addUserContractModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1">
+            <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header py-2 bg-primary text-white">
+                        <h5 class="modal-title">Add Contract</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i></span>
+                        </button>
+                    </div>
+                    <div class="modal-body overflow-auto">
+                        <form autocomplete="off" id="userContractForm">
+                            <input type="hidden" id="contractId" value="${contractId}">
+                            <h6 class="font-weight-bold mb-2">Contract Details</h6>
+                            <div class="border border-primary rounded p-3 mb-3 bg-light-primary mb-3">
+                                <div class="form-row">
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Reference Number</label>
+                                        <input type="text" class="form-control" id="referenceNumber" value="${data?.agreementRefNumber || ''}">
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Contract Creation Date</label>
+                                        <input type="text" class="form-control" id="contractDate" value="${contractDate}" readonly onkeydown="return false" disabled>
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Role Type</label>
+                                        <input type="text" class="form-control" value="${data?.roleType || role || ''}" id="roleType" ${role || data?.roleType ? "disabled" : ""}>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h6 class="font-weight-bold mb-2">First Party Representative Details</h6>
+                            <div class="border border-primary rounded p-3 mb-3 bg-light-primary mb-3">
+                                <div class="form-row">
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Name</label>
+                                        <input type="text" class="form-control" id="firstPartyName" value="${data?.firstPartyRepresentative || ''}">
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Designation</label>
+                                        <input type="text" class="form-control" id="firstPartyDesignation" value="${data?.firstPartyDesignation || ''}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h6 class="font-weight-bold mb-2">Second Party Representative Details</h6>
+                            <div class="border border-primary rounded p-3 mb-3 bg-light-primary mb-3">
+                                <div class="form-row">
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Name</label>
+                                        <input type="text" class="form-control" value="${data?.name || name || ''}" id="userName" ${name || data?.name ? "disabled" : ""}>
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Email</label>
+                                        <input type="email" class="form-control" value="${email || ''}" id="userEmail" ${email ? "disabled" : ""}>
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Designation</label>
+                                        <input type="text" class="form-control" id="userDesignation" value="${data?.secondPartyDesignation || ''}">
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Department</label>
+                                        <input type="text" class="form-control" id="userDepartment" value="${data?.department || ''}">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Employment Type</label>
+                                        <select class="form-control" id="employmentType">
+                                            <option value="">Select Employment Type</option>
+                                            <option value="Part-Time" ${data?.employeeType === 'Part-Time' ? 'selected' : ''}>Part-Time</option>
+                                            <option value="Full-Time" ${data?.employeeType === 'Full-Time' ? 'selected' : ''}>Full-Time</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Agreed Working Hours per Month</label>
+                                        <input type="text" class="form-control" id="workingHours" onkeydown="return M.digit(event);" maxlength="3" value="${data?.workingHours || ''}">
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Monthly Salary</label>
+                                        <input type="text" class="form-control" id="monthlySalary" onkeydown="return M.digit(event);" value="${data?.payOut || ''}">
+                                    </div>
+                                </div>
+								
+                                <div class="form-row">
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Country</label>
+                                        <select class="form-control" id="userContractCountry"></select>
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>State / Province</label>
+                                        <select class="form-control" id="userContractState"></select>
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>City</label>
+                                        <select class="form-control" id="userContractCity"></select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h6 class="font-weight-bold mb-2">Contract Duration</h6>
+                            <div class="border border-primary rounded p-3 mb-3 bg-light-primary mb-3">
+                                <div class="form-row">
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Starting Date of Contract</label>
+                                        <input
+                                            onchange="calculateEndDate(
+                                                'userContractForm',
+                                                'contractStartDate',
+                                                'contractDuration',
+                                                'contractEndDate',
+                                                'YEAR'
+                                            )"
+                                            type="text" class="form-control" id="contractStartDate" readonly onkeydown="return false" value="${contractDate}"
+                                        >
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Contract Duration</label>
+                                        <select 
+                                            onchange="calculateEndDate(
+                                                'userContractForm',
+                                                'contractStartDate',
+                                                'contractDuration',
+                                                'contractEndDate',
+                                                'YEAR'
+                                            )"
+                                            class="form-control" id="contractDuration"
+                                        >
+                                            <option value="0">Select Duration</option>
+                                            <option value="1" ${data?.durationYears == 1 ? 'selected' : ''}>1 Year</option>
+                                            <option value="2" ${data?.durationYears == 2 ? 'selected' : ''}>2 Years</option>
+                                            <option value="3" ${data?.durationYears == 3 ? 'selected' : ''}>3 Years</option>
+                                            <option value="4" ${data?.durationYears == 4 ? 'selected' : ''}>4 Years</option>
+                                            <option value="5" ${data?.durationYears == 5 ? 'selected' : ''}>5 Years</option>
+                                            <option value="6" ${data?.durationYears == 6 ? 'selected' : ''}>6 Years</option>
+                                            <option value="7" ${data?.durationYears == 7 ? 'selected' : ''}>7 Years</option>
+                                            <option value="8" ${data?.durationYears == 8 ? 'selected' : ''}>8 Years</option>
+                                            <option value="9" ${data?.durationYears == 9 ? 'selected' : ''}>9 Years</option>
+                                            <option value="10" ${data?.durationYears == 10 ? 'selected' : ''}>10 Years</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Effective End Date</label>
+                                        <input type="text" class="form-control" id="contractEndDate" readonly onkeydown="return false" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div id="userContractCommentData"></div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="d-flex align-items-center gap-10 mt-2">
+                                        <div>
+                                            <label class="font-weight-bold d-block mb-2">Upload Your Signature</label>
+                                            <div class="custom-file" style="max-width: 400px;">
+                                                <input type="file" class="custom-file-input" id="recipientSignatureUpload" accept="image/*" onchange="signatureTableUser('userContractForm'); handleRecipientSignatureUpload(this, 'leftSignatureBox'); updateFileName(this); handleFileInputCancel('userContractForm', 'recipientSignatureUpload', 'leftSignatureBox');" ${isContractFilled ? 'disabled' : ''}>
+                                                <label class="custom-file-label text-truncate" for="recipientSignatureUpload">Choose file...</label>
+                                            </div>
+                                            <small class="form-text text-danger font-12 mt-1" style="max-width: 75%;">
+                                                Please upload your signature image (PNG/JPG only, white/transparent background, max size: 300KB).
+                                            </small>
+                                        </div>
+                                        <div>
+                                            <button type="button" id="previewUserContractBtn" class="btn btn-success mb-3" style="display:none;" onclick="previewContractPdf('USER');">Preview Contract</button>
+                                        </div>
+										${/*<label class="font-weight-bold d-block mb-2">Signature</label>
+										<button id="uploadUserSignatureBtn" type="button" class="btn btn-primary" onclick="insertUserSignature('userContractForm')">Upload Signature</button>
+										<button id="previewUserContractBtn" type="button" class="btn btn-success" style="display: none;" onclick="previewContractPdf('USER');">Preview Contract</button>*/''}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h6 class="font-weight-bold mb-2">Set the Validity for Offer of Acceptance</h6>
+                            <div class="border border-primary rounded p-3 mb-3 bg-light-primary mb-3">
+                                <div class="form-row">
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Starting Date of Validity</label>
+                                        <input
+                                            onchange="calculateEndDate(
+                                                'userContractForm',
+                                                'contractValidityStartDate',
+                                                'contractValidityDuration',
+                                                'contractValidityEndDate',
+                                                'DAY'
+                                            )"
+                                            type="text" class="form-control" id="contractValidityStartDate" readonly onkeydown="return false" value="${validityStartDate}"
+                                        >
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Valid Till (Days)</label>
+                                        <select
+                                            onchange="calculateEndDate(
+                                                'userContractForm',
+                                                'contractValidityStartDate',
+                                                'contractValidityDuration',
+                                                'contractValidityEndDate',
+                                                'DAY'
+                                            )"
+                                            class="form-control" id="contractValidityDuration">
+                                            <option value="0">Select Days</option>
+                                            ${dayOptions}
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3 col-12">
+                                        <label>Effective Validity End Date</label>
+                                        <input type="text" class="form-control" id="contractValidityEndDate" readonly onkeydown="return false" disabled value="${validityEndDate}">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="d-flex justify-content-end gap-10">
+                            <button type="button" class="btn btn-success" onclick="saveUserContract('userContractForm', '${userId}');">Save Draft</button>
+                            <button type="button" class="btn btn-primary" id="publishUserContractBtn" data-contract-Id="" onclick="publishUserContract('userContractForm', '${userId}');" style="display: ${isContractFilled ? 'block' : 'none'};">Initiate Contract</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    return html;
+}
+
+async function openVerficationModalForOtherRoles(entityId) {
+    var payload = {
+        entityId: entityId,
+		entityType: "USER_SCREENING"
+    }
+    var ajaxReqDetails = {
+        method: "POST",
+        url: APP_BASE_URL + SCHOOL_UUID + "/get-verification-details",
+        body: payload,
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    }
+    var responseData = await callCommonAjax(ajaxReqDetails);
+    if(responseData.status == 1){
+        if($("#verificationOtherRolesModal").length == 1){
+            $("#verificationOtherRolesModal").remove();
+        }
+        $("body").append(`
+            <div class="modal fade" id="verificationOtherRolesModal" tabindex="-1" role="dialog" aria-labelledby="verificationOtherRolesModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title" id="verificationOtherRolesLabel">Verification Details</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" id="verificationOtherRolesModalBody" style="max-height: 600px; overflow: auto;">
+                            <!-- Content will be injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `);
+        $("#verificationOtherRolesModalBody").html(getVerificationOtherRolesModalContent(responseData.details));
+        $("#verificationOtherRolesModal").modal("show");
+    }else{
+        showMessageTheme2(0, responseData.message);
+    }
+}
+
+function getVerificationOtherRolesModalContent(data) {
+    var html=
+		`<div>
+			<h5 class="text-left font-weight-bold">COMPLETE SOCIAL MEDIA DETAILS (BACKGROUND CHECK)</h5>
+			<div style="border: #eee 2px solid; border-radius: 5px; padding: 10px; margin-bottom: 15px;">
+				<p style="color: red; margin-bottom: 15px">
+					You can add links to all your social media profiles. However, adding at least one profile link is mandatory(*).
+				</p>
+				<div class="form-row mb-2">
+					<div class="form-holder" style="flex: 1; min-width: 250px;">
+						<label><b>LinkedIn Profile URL:</b></label>
+						<p>${checkValueValidation(data.teacherVerification.linkedIn, "-")}</p>
+					</div>
+					<div class="form-holder" style="flex: 1; min-width: 250px;">
+						<label><b>Facebook Profile URL:</b></label>
+						<p>${checkValueValidation(data.teacherVerification.facebook, "-")}</p>
+					</div>
+					<div class="form-holder" style="flex: 1; min-width: 250px;">
+						<label><b>Instagram Profile URL:</b></label>
+						<p>${checkValueValidation(data.teacherVerification.instagram, "-")}</p>
+					</div>
+				</div>
+				<div class="form-row mt-2">
+					<div class="form-holder" style="width: 500px !important;">
+						<label><b>X (Twitter) Profile URL:</b></label>
+						<p>${checkValueValidation(data.teacherVerification.twitter, "-")}</p>
+					</div>
+				</div>`;
+				if(data.teacherVerification?.haveSocialMediaAccount == "Y"){
+					html+=
+					`<div class="form-row">
+						<div class="form-holder">
+                        	<div class="custom-checkbox-policy" style="align-items: center !important;">
+                            	<input type="checkbox" class="mb-2" name="socialMediaCheckbox" id="socialMediaCheckbox" checked disabled>
+                            	<label for="socialMediaCheckbox" class="" style="color:gray;font-size:15px;">I hereby declare that I do not have any active social media accounts.</label>
+                        	</div>
+                    	</div>
+					</div>`
+				}
+			html+=`</div>
+		</div>
+
+		<div>
+			<h5 class="text-left font-weight-bold">RECOMMENDATION LETTER OR ANY REFERENCE</h5>
+			<div style="border: #eee 2px solid; border-radius: 5px; padding: 10px; margin-bottom: 15px;">
+				<p style="color: red; margin-bottom: 15px">
+					NOTE:- Files uploaded (jpg, jpeg, pdf, png). Max size 10 MB.
+				</p>
+				<div class="form-row">
+					<div class="form-holder">
+						<label><b>Recommendation Letter 1:</b></label>
+						<p>${checkValueValidation(data.attachments.recommendationLetter1Name, "-")}`;
+							if(data.attachments.recommendationLetter1URL != null && data.attachments.recommendationLetter1URL != undefined && data.attachments.recommendationLetter1URL != "" ){
+								if(data.attachments.recommendationLetter1URL.split('.').pop() == "pdf"){
+									html+=`<a href="${data.attachments.recommendationLetter1URL}" target="_blank" data-toggle="tooltip" title="View" class="btn btn-primary mt-1 ml-1">
+										<i class="fa fa-eye"></i>
+									</a>`;
+								}else{
+									html+=
+									`<a href="javascript:void(0);" target="_self" data-toggle="tooltip" title="View" class="btn btn-primary mt-1 ml-1" onclick="viewResumeAndPhoto('${data.attachments.recommendationLetter1URL}','viewApplicantsAttachementModal')">
+										<i class="fa fa-eye"></i>
+									</a>`;
+								}
+							}
+						html+=`</p>
+					</div>
+					<div class="form-holder">
+						<label><b>Recommendation Letter 2:</b></label>
+						<p>${checkValueValidation(data.attachments.recommendationLetter2Name, "-")}`;
+							if(data.attachments.recommendationLetter2URL != null && data.attachments.recommendationLetter2URL != undefined && data.attachments.recommendationLetter2URL != "" ){
+								if(data.attachments.recommendationLetter2URL.split('.').pop() == "pdf"){
+									html+=`<a href="${data.attachments.recommendationLetter2URL}" target="_blank" data-toggle="tooltip" title="View" class="btn btn-primary mt-1 ml-1">
+										<i class="fa fa-eye"></i>
+									</a>`;
+								}else{
+									html+=
+									`<a href="javascript:void(0);" target="_self" data-toggle="tooltip" title="View" class="btn btn-primary mt-1 ml-1" onclick="viewResumeAndPhoto('${data.attachments.recommendationLetter2URL}','viewApplicantsAttachementModal')">
+										<i class="fa fa-eye"></i>
+									</a>`;
+								}
+							}
+						html+=`</p>
+					</div>
+				</div>
+				<div>
+					<h6 class="mb-1" style="font-weight: bold;color: gray;">Reference 1</h6>
+					<p><b>Name:</b> ${data.employeeReference?.[0]?.name || "-"}</p>
+					<p><b>Email:</b> ${data.employeeReference?.[0]?.email || "-"}</p>
+					<p><b>Phone:</b> ${data.employeeReference?.[0]?.number || "-"}</p>
+					<p><b>Designation:</b> ${data.employeeReference?.[0]?.designation || "-"}</p>
+
+					<h6 class="mt-2 mb-1" style="font-weight: bold;color: gray;">Reference 2</h6>
+					<p><b>Name:</b> ${data.employeeReference?.[1]?.name || "-"}</p>
+					<p><b>Email:</b> ${data.employeeReference?.[1]?.email || "-"}</p>
+					<p><b>Phone:</b> ${data.employeeReference?.[1]?.number || "-"}</p>
+					<p><b>Designation:</b> ${data.employeeReference?.[1]?.designation || "-"}</p>
+				</div>
+			</div>
+		</div>
+
+		<div>
+			<h5 class="text-left font-weight-bold">POLICE VERIFICATION</h5>
+			<div style="border: #eee 2px solid; border-radius: 5px; padding: 10px; margin-bottom: 15px; color: gray;">
+				<p class="mb-2">I, ${USER_FULL_NAME} do hereby declare and undertake that:</p>
+				<p class="mb-2">I have undergone a police verification process in my city/town of residence and obtained a valid police clearance certificate.</p>
+				<p class="mb-2">The verification confirms that I do not have any criminal record, and I am eligible for employment as per the institution's requirements.</p>
+				<p class="mb-2">I take full responsibility for the accuracy of this information and understand that any false declaration may result in disciplinary action, including termination of employment.</p>
+				<p class="mb-4">I also undertake to notify the institution immediately in case of any legal proceedings initiated against me in the future.</p>
+				<div class="form-row">
+                    <div class="form-holder">
+                        <div class="custom-checkbox-policy" style="align-items: center !important;">
+                            <input type="checkbox" class="mb-2" name="policeVerificationCheck" id="policeVerificationCheck" disabled ${data.teacherVerification?.policeVerificationAcceptance == "Y" ? "checked": ""}>
+                            <label for="policeVerificationCheck" class="" style="color:gray;font-size:15px;">I declare that the above statements are true and correct to the best of my knowledge and belief.</label>
+                        </div>
+                    </div>
+                </div>
+			</div>
+
+		</div>
+
+		<div>
+			<h5 class="text-left font-weight-bold">UPLOAD DOCUMENTS</h5>
+			<div style="border: #eee 2px solid; border-radius: 5px; padding: 10px; margin-bottom: 15px;">
+				<p style="color: red; margin-bottom: 15px">
+					NOTE:- Files uploaded (jpg, jpeg, pdf, png). Max size 10 MB.
+				</p>
+				<div class="form-row">
+					<div class="form-holder">
+						<label><b>Police Verification:</b></label>
+						<p>${checkValueValidation(data.attachments.policeVerificationName, "-")}`;
+							if(data.attachments.policeVerificationURL != null && data.attachments.policeVerificationURL != undefined && data.attachments.policeVerificationURL != "" ){
+								if(data.attachments.policeVerificationURL.split('.').pop() == "pdf"){
+									html+=`<a href="${data.attachments.policeVerificationURL}" target="_blank" data-toggle="tooltip" title="View" class="btn btn-primary mt-1 ml-1">
+										<i class="fa fa-eye"></i>
+									</a>`;
+								}else{
+									html+=
+									`<a href="javascript:void(0);" target="_self" data-toggle="tooltip" title="View" class="btn btn-primary mt-1 ml-1" onclick="viewResumeAndPhoto('${data.attachments.policeVerificationURL}','viewApplicantsAttachementModal')">
+										<i class="fa fa-eye"></i>
+									</a>`;
+								}
+							}
+						html+=`</p>
+					</div>
+					<div class="form-holder">
+						<label><b>Last Salary Slip:</b></label>
+						<p>${checkValueValidation(data.attachments.previousSalarySlipName, "-")}`;
+							if(data.attachments.previousSalarySlipURL != null && data.attachments.previousSalarySlipURL != undefined && data.attachments.previousSalarySlipURL != "" ){
+								if(data.attachments.previousSalarySlipURL.split('.').pop() == "pdf"){
+									html+=`<a href="${data.attachments.previousSalarySlipURL}" target="_blank" data-toggle="tooltip" title="View" class="btn btn-primary mt-1 ml-1">
+										<i class="fa fa-eye"></i>
+									</a>`;
+								}else{
+									html+=
+									`<a href="javascript:void(0);" target="_self" data-toggle="tooltip" title="View" class="btn btn-primary mt-1 ml-1" onclick="viewResumeAndPhoto('${data.attachments.previousSalarySlipURL}','viewApplicantsAttachementModal')">
+										<i class="fa fa-eye"></i>
+									</a>`;
+								}
+							}
+						html+=`</p>
+					</div>
+				</div>
+			</div>
+		</div>`;
     return html;
 }

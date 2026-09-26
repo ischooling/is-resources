@@ -1752,8 +1752,8 @@ function courseSelectionModal(data){
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <input type="submit" class="btn k8-theme-btn secondary-bg white-txt-color" onclick="getSelectedSubjectes()" value="Apply">
-                        <button type="button" class="btn k8-theme-btn-alt pull-left primary-bg white-txt-color" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn k8-theme-btn-alt pull-left primary-bg white-txt-color" data-dismiss="modal">Cancel</button>
+                    <input type="submit" class="btn k8-theme-btn secondary-bg white-txt-color" onclick="getSelectedSubjectes()" value="Apply">
                     </div>
                 </div>
             </div>
@@ -2033,7 +2033,6 @@ function showSkeleton (isShow, skeletonType){
         $("#teacherSignupStage6").hide();
     }
 }
-
 
 function populateRecordingModalForSignup(recordings, title) {
     const titles = {

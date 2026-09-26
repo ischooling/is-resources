@@ -131,19 +131,19 @@ function bindTeacherScreeningData(responseData) {
                             <ul class="dropdown-menu">
                                 <li>
                                     <a class="dropdown-item" href="javascript:void(0);" onclick="openUpdateStatusModal(${teacher.id}, '${teacher.status || ''}')">
-                                        <i class="fas fa-edit me-2"></i>&nbsp;Update Status
+                                        <i class="fas fa-edit"></i>&nbsp;Update Status
                                     </a>
                                 </li>`;
                                 if(teacher.status != ""){
                                     row+=`<li>
                                         <a class="dropdown-item" href="javascript:void(0);" onclick="resendTeacherInterviewLink(${teacher.id})">
-                                            <i class="fas fa-paper-plane me-2"></i>&nbsp;Resend Interview Link
+                                            <i class="fas fa-paper-plane"></i>&nbsp;Resend Interview Link
                                         </a>
                                     </li>`
                                 }
                                 row+=`<li>
                                     <a class="dropdown-item" href="javascript:void(0);" onclick="openCommunicationLogsModalForTeacherApplication(${teacher.id}, 'USER_SCREENING')">
-                                        <i class="fas fa-comment me-2"></i>&nbsp;Remark Logs
+                                        <i class="fas fa-comment"></i>&nbsp;Remark Logs
                                     </a>
                                 </li>
                             </ul>
@@ -352,19 +352,19 @@ function updateTableRowDirectlyTA(teacherId, newStatus, assignedTo) {
                 <ul class="dropdown-menu">
                     <li>
                         <a class="dropdown-item" href="javascript:void(0);" onclick="openUpdateStatusModal(${teacherId}, '${newStatus || ''}')">
-                            <i class="fas fa-edit me-2"></i>&nbsp;Update Status
+                            <i class="fas fa-edit"></i>&nbsp;Update Status
                         </a>
                     </li>`;
         if(newStatus && newStatus !== "" && newStatus !== "N/A") {
             dropdownHtml += `<li>
                         <a class="dropdown-item" href="javascript:void(0);" onclick="resendTeacherInterviewLink(${teacherId})">
-                            <i class="fas fa-paper-plane me-2"></i>&nbsp;Resend Interview Link
+                            <i class="fas fa-paper-plane"></i>&nbsp;Resend Interview Link
                         </a>
                     </li>`;
         }
         dropdownHtml += `<li>
                         <a class="dropdown-item" href="javascript:void(0);" onclick="openCommunicationLogsModalForTeacherApplication(${teacherId}, 'USER_SCREENING')">
-                            <i class="fas fa-comment me-2"></i>&nbsp;Remark Logs
+                            <i class="fas fa-comment"></i>&nbsp;Remark Logs
                         </a>
                     </li>
                 </ul>
