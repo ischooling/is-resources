@@ -14,10 +14,37 @@
  */
 
 var __la = {
-	view: 'NEEDS', offset: 0, hasMore: false, loading: false, openGroupId: null,
+	view: 'ENROLLED', offset: 0, hasMore: false, loading: false, openGroupId: null,
 	summary: null, pollTimer: null, observer: null, insightsLoaded: false
 };
 var LA_PAGE_SIZE = 25;
+
+/** Presets = the report's cases (queue order). Exact email/phone repeats are in the lead list's "Multiple time apply". */
+var LA_CASES = [
+	{ key: 'ENROLLED', label: 'Already enrolled', hint: 'Lead matches an active student / parent account' },
+	{ key: 'SAME_STUDENT', label: 'Same student', hint: 'Same child applied again with a different mobile / email' },
+	{ key: 'SWAPPED', label: 'Name swapped', hint: "Parent's name on one lead is the student's name on the other" },
+	{ key: 'SIBLINGS_IP', label: 'Siblings (same IP)', hint: 'Same IP within 7 days, different children' },
+	{ key: 'SAME_PARENT', label: 'Same parent', hint: 'Same parent name, new contact' },
+	{ key: 'REVIEW', label: 'Review', hint: 'Weaker possible matches' },
+	{ key: 'DOUBLE_ENTRY', label: 'Double entry', hint: 'Two rows with one lead number (saved twice)' }
+];
+
+/** Field-by-field status chips: ✔ match, ≈ near / partial, ✘ different; fields missing on a side are left out. */
+function laChips(fieldsJson) {
+	var f;
+	try { f = typeof fieldsJson === 'string' ? JSON.parse(fieldsJson) : fieldsJson; } catch (e) { f = null; }
+	if (!f) { return ''; }
+	var labels = [['student', 'Student'], ['parent', 'Parent'], ['mobile', 'Mobile'], ['email', 'Email'],
+		['dob', 'DOB'], ['grade', 'Grade'], ['ip', 'IP']];
+	var marks = { Y: ['y', '✔'], '~': ['p', '≈'], N: ['n', '✘'] };
+	var h = '';
+	labels.forEach(function (l) {
+		var m = marks[f[l[0]]];
+		if (m) { h += '<span class="la-chip ' + m[0] + '">' + laEsc(l[1]) + ' ' + m[1] + '</span>'; }
+	});
+	return h ? '<div class="la-chips">' + h + '</div>' : '';
+}
 
 function leadAnalyticsUrl(action, id) {
 	var url = BASE_URL + CONTEXT_PATH + SCHOOL_UUID + '/dashboard/lead-analytics/' + action;
@@ -67,7 +94,7 @@ function laDate(ts) {
 /* ------------------------------------------------------------------ entry */
 async function renderLeadAnalytics(title, roleAndModule, schoolId, userId, userRole) {
 	laStopPolling();
-	__la.view = 'NEEDS'; __la.openGroupId = null; __la.insightsLoaded = false;
+	__la.view = 'ENROLLED'; __la.openGroupId = null; __la.insightsLoaded = false;
 	laInjectCss();
 	try {
 		customLoader(true);
@@ -104,10 +131,13 @@ function laInjectCss() {
 		+ '.la-row.la-open{background:rgba(0,0,0,.035)}'
 		+ '.la-pill{display:inline-block;font-size:11px;padding:2px 9px;border-radius:10px;margin:1px 2px 1px 0;white-space:nowrap}'
 		/* tiers: 1 conflict, 2 existing student, 3 stage clash, 4 existing parent, 5 recent, 6 review */
-		+ '.la-t1,.la-t3{background:var(--light);color:var(--danger);border:1px solid var(--danger)}'
-		+ '.la-t2{background:var(--light);color:var(--success);border:1px solid var(--success)}'
+		/* case tiers: 1 enrolled, 2 same student, 3 swapped, 4 siblings (IP), 5 same parent, 6 review, 7 double entry */
+		+ '.la-t1{background:var(--light);color:var(--success);border:1px solid var(--success)}'
+		+ '.la-t2,.la-t3,.la-t7{background:var(--light);color:var(--danger);border:1px solid var(--danger)}'
 		+ '.la-t4,.la-t5{background:var(--light);color:var(--warning);border:1px solid var(--warning)}'
 		+ '.la-t6{background:var(--light);color:var(--gray-dark)}'
+		+ '.la-chips{margin-top:3px}.la-chip{display:inline-block;font-size:11px;margin:1px 6px 1px 0;white-space:nowrap}'
+		+ '.la-chip.y{color:var(--success)}.la-chip.n{color:var(--danger)}.la-chip.p{color:var(--warning)}.la-chip.m{color:var(--gray)}'
 		+ '.la-cmp .la-fam{background:var(--light)}'
 		+ '.la-sib,.la-master{background:var(--plc);color:var(--pc)}'
 		+ '.la-muted{font-size:11px;color:var(--gray)}'
@@ -148,10 +178,10 @@ function laBuildShell(title, sum) {
 		+ '</div></div>'
 		+ '<div class="d-flex flex-wrap justify-content-between align-items-start">'
 		+ '<div class="la-presets" id="laPresets">'
-		+ '<button type="button" class="btn btn-sm btn-outline-secondary active" data-view="NEEDS">Needs attention · <span id="laCntNeeds">0</span></button>'
-		+ '<button type="button" class="btn btn-sm btn-outline-secondary" data-view="FAMILY">Existing family · <span id="laCntFamily">0</span></button>'
-		+ '<button type="button" class="btn btn-sm btn-outline-secondary" data-view="HIGH">All high · <span id="laCntHigh">0</span></button>'
-		+ '<button type="button" class="btn btn-sm btn-outline-secondary" data-view="MEDIUM">Review medium · <span id="laCntMedium">0</span></button>'
+		+ LA_CASES.map(function (c, i) {
+			return '<button type="button" class="btn btn-sm btn-outline-secondary' + (i === 0 ? ' active' : '') + '" data-view="'
+				+ c.key + '" title="' + laEsc(c.hint) + '">' + laEsc(c.label) + ' · <span data-count="' + c.key + '">0</span></button>';
+		}).join('')
 		+ '</div>'
 		+ '<div class="la-filters form-row" style="max-width:100%">'
 		+ '<div class="col-6 col-md-auto mb-2"><select class="form-control" id="laCounselor">' + opt(sum.counselors, 'All counselors') + '</select></div>'
@@ -187,12 +217,12 @@ function laRenderStats(sum) {
 	$('#laStats').html(''
 		+ '<span class="la-stat"><b>' + Number(sum.groups || 0).toLocaleString() + '</b>groups</span>'
 		+ '<span class="la-stat"><b>' + Number(sum.leads || 0).toLocaleString() + '</b>leads</span>'
-		+ '<span class="la-stat la-danger"><b>' + Number(sum.conflicts || 0).toLocaleString() + '</b>counselor conflicts</span>'
-		+ '<span class="la-stat"><b>' + Number(sum.siblings || 0).toLocaleString() + '</b>sibling suspects</span>');
-	$('#laCntNeeds').text(Number(sum.needsAttention || 0).toLocaleString());
-	$('#laCntFamily').text(Number(sum.families || 0).toLocaleString());
-	$('#laCntHigh').text(Number(sum.allHigh || 0).toLocaleString());
-	$('#laCntMedium').text(Number(sum.reviewMedium || 0).toLocaleString());
+		+ '<span class="la-stat la-danger"><b>' + Number((sum.caseCounts || {}).ENROLLED || 0).toLocaleString() + '</b>already enrolled</span>'
+		+ '<span class="la-stat"><b>' + Number(sum.siblings || 0).toLocaleString() + '</b>possible siblings</span>');
+	var counts = sum.caseCounts || {};
+	LA_CASES.forEach(function (c) {
+		$('#laPresets [data-count="' + c.key + '"]').text(Number(counts[c.key] || 0).toLocaleString());
+	});
 	laRenderFreshness(sum.lastRun);
 }
 
@@ -286,7 +316,7 @@ function laRowHtml(r) {
 		+ '<div class="la-muted">score ' + laEsc(r.maxScore) + ' · ' + laEsc((r.band || '').toLowerCase()) + '</div></td>'
 		+ '<td>' + laDash(r.masterName) + ' · ' + laEsc(r.masterLeadNo) + ' <span class="la-muted">#' + laEsc(r.masterLeadId) + '</span>'
 		+ '<div class="la-muted">' + laEsc(r.masterReason) + '</div></td>'
-		+ '<td>' + laDash(r.summary) + '</td>'
+		+ '<td>' + laDash(r.summary) + laChips(r.fields) + '</td>'
 		+ '<td>' + (r.familyLabel
 			? laEsc(r.familyLabel) + (r.familyType === 'PARENT' ? ' <span class="la-pill la-sib">new child?</span>' : '')
 			: laEsc(r.leadCount) + ' leads') + '</td>'
@@ -439,12 +469,13 @@ function laDetailHtml(res) {
 	};
 	h += '<div class="la-muted mt-3 mb-1">Why they match</div><div>';
 	(res.pairs || []).forEach(function (p) {
-		h += pill(laEsc(p.leadNoA) + ' #' + laEsc(p.leadIdA) + ' ↔ ' + laEsc(p.leadNoB) + ' #' + laEsc(p.leadIdB)
-			+ ': ' + laEsc(p.summary), p.score, p.reasons);
+		h += '<div class="mb-1">' + pill(laEsc(p.leadNoA) + ' #' + laEsc(p.leadIdA) + ' ↔ ' + laEsc(p.leadNoB) + ' #' + laEsc(p.leadIdB)
+			+ ': ' + laEsc(p.summary), p.score, p.reasons) + laChips(p.fields) + '</div>';
 	});
 	family.forEach(function (f) {
 		var who = f.recordType === 'STUDENT' ? 'student ' + (f.rollNo || f.name || '') : 'parent ' + (f.name || '');
-		h += pill(laEsc(f.leadNo) + ' ↔ ' + laEsc(who) + ': ' + laEsc(f.summary), f.score, f.reasons);
+		h += '<div class="mb-1">' + pill(laEsc(f.leadNo) + ' ↔ ' + laEsc(who) + ': ' + laEsc(f.summary), f.score, f.reasons)
+			+ laChips(f.fields) + '</div>';
 	});
 	h += '</div>';
 

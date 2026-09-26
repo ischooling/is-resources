@@ -368,6 +368,14 @@ function getRequestForStudent(){
 	signupStudentDTO['courseProviderId'] = $("#courseProviderId").val();
 	signupStudentDTO['enrollmentFor'] = $("#enrollmentFor").val();
 	signupStudentDTO['studyCenter'] = SCHOOL_ID;
+	signupStudentDTO['utmSource'] = getCookie('us');
+	signupStudentDTO['utmMedium'] = getCookie('um');
+	signupStudentDTO['utmDescription'] = getCookie('uc');
+	signupStudentDTO['originalUrl'] = getCookie('cu');
+	signupStudentDTO['gclid'] = getCookie('gclid');
+	signupStudentDTO['utmCampaign'] = getCookie('ucam');
+	signupStudentDTO['utmTerm'] = getCookie('ut');
+	signupStudentDTO['landingPage'] = getCookie('lu');
 	authentication['hash'] = getHash();authentication['schoolId'] = SCHOOL_ID;authentication['schoolUUID'] = SCHOOL_UUID;
 	authentication['userType'] = 'STUDENT';
 	authentication['userId'] = $("#signupStage1 #userId").val();
