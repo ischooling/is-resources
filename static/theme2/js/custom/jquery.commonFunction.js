@@ -3360,7 +3360,6 @@ function bindFileUploadNew1(
           $("#fileupload" + uploadIndex + "ProgressStatus").addClass(
             "label-error"
           );
-          showMessageTheme2(0, MAX_SIZE_LIMIT, "", false);
         } else if (uploadMethodType == 2) {
           $("#fileupload" + uploadIndex + "Progress .progress-bar").css(
             "width",
@@ -3400,12 +3399,18 @@ function bindFileUploadNew1(
             .find("a.view")
             .attr("style", "display:none;");
         }
-        if (tt == "theme2") {
-          showMessageTheme2(0, MAX_SIZE_LIMIT, "", false);
-        } else {
-          showMessageTheme2(0, MAX_SIZE_LIMIT, "", false);
+        var xhr = data.jqXHR || {};
+        var uploadFailureMessage = "Document upload failed. Please try again.";
+        if (xhr.status === 413) {
+          uploadFailureMessage = "The server rejected this upload as too large. Please choose a smaller file.";
+        } else if (xhr.status === 0) {
+          uploadFailureMessage = "Document upload was interrupted. Check your internet connection and try again.";
         }
-        showMessageTheme2(0, MAX_SIZE_LIMIT, "", false);
+        if (["34", "35", "36", "37", "38"].indexOf(String(uploadCategoryId)) !== -1) {
+          showMessageTheme2ErrorNew(true, uploadFailureMessage, "evaluationDocsError");
+        } else {
+          showMessageTheme2(0, uploadFailureMessage, "", false);
+        }
       },
     })
     .prop("disabled", !$.support.fileInput)

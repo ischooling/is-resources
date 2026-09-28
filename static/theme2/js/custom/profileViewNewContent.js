@@ -2591,10 +2591,11 @@ function restoreExpiredCountModal(details) {
             rowsHtml += `<tr>
                 <td class="text-left">${subject.subjectName}</td>
                 <td class="text-right">${subject.expiredCount}</td>
+                <td class="text-right"><button type="button" class="btn btn-xs btn-outline-primary" onclick="confirmRestoreExpiredCount(${subject.subjectId});">Restore</button></td>
             </tr>`;
         });
     } else {
-        rowsHtml = `<tr><td colspan="2" class="text-center text-muted">No expired classes to restore.</td></tr>`;
+        rowsHtml = `<tr><td colspan="3" class="text-center text-muted">No expired classes to restore.</td></tr>`;
     }
     var html =
         `<div class="modal fade fade-scale" id="restoreExpiredCountModal" tabindex="-1" aria-hidden="true">
@@ -2613,6 +2614,7 @@ function restoreExpiredCountModal(details) {
                                 <tr>
                                     <th class="text-left">Subject</th>
                                     <th class="text-right">Expired Count</th>
+                                    <th class="text-right">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -2622,7 +2624,7 @@ function restoreExpiredCountModal(details) {
                     </div>
                     <div class="modal-footer">
                         <div class="m-auto">
-                            <button type="button" class="btn btn-success mr-2" onclick="confirmRestoreExpiredCount();"${subjects.length === 0 ? ' disabled' : ''}>Restore</button>
+                            <button type="button" class="btn btn-success mr-2" onclick="confirmRestoreExpiredCount(0);"${subjects.length === 0 ? ' disabled' : ''}>Restore All</button>
                             <button type="button" class="btn btn-secondary" onclick="closeRestoreExpiredCountModal();">Cancel</button>
                         </div>
                     </div>
@@ -2637,12 +2639,17 @@ function closeRestoreExpiredCountModal() {
     window.setTimeout(function () { $('#restoreExpiredCountModal').remove(); }, 1000);
 }
 
-function confirmRestoreExpiredCount() {
+function confirmRestoreExpiredCount(subjectId) {
     var payload = {};
     payload['studentStandardId'] = $("#timeStuStandardId").val();
     payload['schoolId'] = SCHOOL_ID;
+    payload['subjectId'] = subjectId || 0;
     getDashboardDataBasedUrlAndPayload(true, true, 'restore-expired-count', payload).then(function (data) {
-        closeRestoreExpiredCountModal();
+        if (!subjectId) {
+            // Restore All (subjectId 0) still closes the modal, since there's nothing left to do here.
+            closeRestoreExpiredCountModal();
+        }
+        // Subject-wise restore (subjectId > 0) keeps the modal open — only the success/fail message is shown.
         showMessageTheme2(1, data.message, '', false);
     });
 }
