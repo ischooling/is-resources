@@ -2273,7 +2273,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 									+'</td>'
 								+'</tr>';
                 //if(USER_ROLE=='DIRECTOR' || objectRights.searchUser){
-                  if(leads.demoSummaryStatus){
+                  //if(leads.demoSummaryStatus){
                     html+='<tr>'
                            +'<td class="border-0 p-1">'
                            +(leads.demoTranscriptUrl
@@ -2303,11 +2303,14 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                            +'</td>'
                           +'<td class="border-0 p-1">'
                               +'<div class="d-flex flex-column align-items-start" style="gap:8px;">'
-                                  +'<button type="button" class="btn btn-sm btn-primary" style="min-width:170px;" onclick="callMeetingRecordingSummary(\''+leads.leadId+'\',\''+leads.leadNo+'\')">View Demo Summary</button>'
+                              +(leads.demoSummaryStatus
+                                  ? '<button type="button" class="btn btn-sm btn-primary" style="min-width:170px;" onclick="callMeetingRecordingSummary(\''+leads.leadId+'\',\''+leads.leadNo+'\')">View Demo Summary</button>'
+                                  : ''
+                              )
                               +'</div>'
                           +'</td>'
                         +'</tr>';
-                  }
+                  //}
                 //}
                     
 								html+='</tbody>'
