@@ -125,13 +125,15 @@ function initializeStudentOwnSummaryChart(data){
     var totalHeld = Number(data.totalClassesHeldThisMonth || 0);
     var attended = Number(data.classesAttended || 0);
     var late = Number(data.late || 0);
-    var earlyLeave = Number(data.earlyLeave || 0);
+    // Early Leave hidden from this widget per product decision -- commented out (not
+    // deleted) so it can be brought back later by uncommenting these lines.
+    // var earlyLeave = Number(data.earlyLeave || 0);
     var absent = Number(data.absent || 0);
 
     var countSeries = [
         attended,
         late,
-        earlyLeave,
+        // earlyLeave,
         absent
     ];
 
@@ -139,10 +141,10 @@ function initializeStudentOwnSummaryChart(data){
         ? [
             (attended / totalHeld) * 100,
             (late / totalHeld) * 100,
-            (earlyLeave / totalHeld) * 100,
+            // (earlyLeave / totalHeld) * 100,
             (absent / totalHeld) * 100
         ].map(v => Number(v.toFixed(1)))
-        : [0, 0, 0, 0];
+        : [0, 0, 0];
 
     var options = {
         series: percentSeries,
@@ -174,8 +176,8 @@ function initializeStudentOwnSummaryChart(data){
                 }
             }
         },
-        colors: ['#16a34a', '#ffbb38', '#027ffe', '#ff4181'],
-        labels: ['Present', 'Late', 'Early Leave', 'Absent']
+        colors: ['#16a34a', '#ffbb38', /* '#027ffe', */ '#ff4181'],
+        labels: ['Present', 'Late', /* 'Early Leave', */ 'Absent']
     };
 
     if (window.studentOwnSummaryChart &&
