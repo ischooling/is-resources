@@ -22,6 +22,7 @@ var LA_PAGE_SIZE = 25;
 /** Presets = the report's cases (queue order). Exact email/phone repeats are in the lead list's "Multiple time apply". */
 var LA_CASES = [
 	{ key: 'ENROLLED', label: 'Already enrolled', hint: 'Lead matches an active student / parent account' },
+	{ key: 'MENTIONED', label: 'Linked in conversation', hint: "A counselor remark / meeting / WhatsApp of one lead names the other" },
 	{ key: 'SAME_STUDENT', label: 'Same student', hint: 'Same child applied again with a different mobile / email' },
 	{ key: 'SWAPPED', label: 'Name swapped', hint: "Parent's name on one lead is the student's name on the other" },
 	{ key: 'SIBLINGS_IP', label: 'Siblings (same IP)', hint: 'Same IP within 7 days, different children' },
@@ -30,13 +31,24 @@ var LA_CASES = [
 	{ key: 'DOUBLE_ENTRY', label: 'Double entry', hint: 'Two rows with one lead number (saved twice)' }
 ];
 
+/** The conversation text that linked two leads (counselor remark / meeting / WhatsApp), shown under the pair. */
+function laSnippets(reasonsJson) {
+	var h = '';
+	try {
+		(JSON.parse(reasonsJson || '[]') || []).forEach(function (x) {
+			if (x.rule === 'CONVERSATION_SNIPPET' && x.text) { h += '<div class="la-snippet">' + laEsc(x.text) + '</div>'; }
+		});
+	} catch (e) { /* ignore bad JSON */ }
+	return h;
+}
+
 /** Field-by-field status chips: ✔ match, ≈ near / partial, ✘ different; fields missing on a side are left out. */
 function laChips(fieldsJson) {
 	var f;
 	try { f = typeof fieldsJson === 'string' ? JSON.parse(fieldsJson) : fieldsJson; } catch (e) { f = null; }
 	if (!f) { return ''; }
 	var labels = [['student', 'Student'], ['parent', 'Parent'], ['mobile', 'Mobile'], ['email', 'Email'],
-		['dob', 'DOB'], ['grade', 'Grade'], ['ip', 'IP']];
+		['dob', 'DOB'], ['grade', 'Grade'], ['ip', 'IP'], ['conversation', 'Conversation']];
 	var marks = { Y: ['y', '✔'], '~': ['p', '≈'], N: ['n', '✘'] };
 	var h = '';
 	labels.forEach(function (l) {
@@ -125,17 +137,19 @@ function laInjectCss() {
 		+ '.la-stat.la-danger b{color:var(--danger)}'
 		+ '.la-presets .btn{border-radius:18px;margin:0 6px 6px 0}'
 		+ '.la-presets .btn.active{background:var(--pc);border-color:var(--pc);color:var(--white)}'
+		+ '.la-presets-off .btn.active{background:transparent;color:var(--gray-dark);border-color:var(--gray)}'
 		+ '.la-filters .form-control{height:32px;font-size:13px}'
 		+ '.la-table td,.la-table th{font-size:13px;vertical-align:top}'
 		+ '.la-row{cursor:pointer}.la-row:hover{background:rgba(0,0,0,.02)}'
 		+ '.la-row.la-open{background:rgba(0,0,0,.035)}'
 		+ '.la-pill{display:inline-block;font-size:11px;padding:2px 9px;border-radius:10px;margin:1px 2px 1px 0;white-space:nowrap}'
 		/* tiers: 1 conflict, 2 existing student, 3 stage clash, 4 existing parent, 5 recent, 6 review */
-		/* case tiers: 1 enrolled, 2 same student, 3 swapped, 4 siblings (IP), 5 same parent, 6 review, 7 double entry */
+		/* case tiers: 1 enrolled, 2 conversation, 3 same student, 4 swapped, 5 siblings (IP), 6 same parent, 7 review, 8 double */
 		+ '.la-t1{background:var(--light);color:var(--success);border:1px solid var(--success)}'
-		+ '.la-t2,.la-t3,.la-t7{background:var(--light);color:var(--danger);border:1px solid var(--danger)}'
-		+ '.la-t4,.la-t5{background:var(--light);color:var(--warning);border:1px solid var(--warning)}'
-		+ '.la-t6{background:var(--light);color:var(--gray-dark)}'
+		+ '.la-t2,.la-t3,.la-t4,.la-t8{background:var(--light);color:var(--danger);border:1px solid var(--danger)}'
+		+ '.la-t5,.la-t6{background:var(--light);color:var(--warning);border:1px solid var(--warning)}'
+		+ '.la-t7{background:var(--light);color:var(--gray-dark)}'
+		+ '.la-snippet{font-size:11px;color:var(--gray-dark);border-left:3px solid var(--pc);padding:2px 8px;margin:2px 0 6px;border-radius:0}'
 		+ '.la-chips{margin-top:3px}.la-chip{display:inline-block;font-size:11px;margin:1px 6px 1px 0;white-space:nowrap}'
 		+ '.la-chip.y{color:var(--success)}.la-chip.n{color:var(--danger)}.la-chip.p{color:var(--warning)}.la-chip.m{color:var(--gray)}'
 		+ '.la-cmp .la-fam{background:var(--light)}'
@@ -461,7 +475,7 @@ function laDetailHtml(res) {
 	var pill = function (text, score, reasons) {
 		var tip = '';
 		try {
-			tip = JSON.parse(reasons || '[]').map(function (x) {
+			tip = JSON.parse(reasons || '[]').filter(function (x) { return x.points !== 0; }).map(function (x) {
 				return (x.text || x.rule) + ' ' + (x.points > 0 ? '+' : '') + x.points;
 			}).join(', ');
 		} catch (e) { tip = ''; }
@@ -470,7 +484,7 @@ function laDetailHtml(res) {
 	h += '<div class="la-muted mt-3 mb-1">Why they match</div><div>';
 	(res.pairs || []).forEach(function (p) {
 		h += '<div class="mb-1">' + pill(laEsc(p.leadNoA) + ' #' + laEsc(p.leadIdA) + ' ↔ ' + laEsc(p.leadNoB) + ' #' + laEsc(p.leadIdB)
-			+ ': ' + laEsc(p.summary), p.score, p.reasons) + laChips(p.fields) + '</div>';
+			+ ': ' + laEsc(p.summary), p.score, p.reasons) + laChips(p.fields) + laSnippets(p.reasons) + '</div>';
 	});
 	family.forEach(function (f) {
 		var who = f.recordType === 'STUDENT' ? 'student ' + (f.rollNo || f.name || '') : 'parent ' + (f.name || '');
@@ -587,6 +601,8 @@ function laBindEvents() {
 	var t = null;
 	$('#laSearch').on('input', function () {
 		clearTimeout(t);
+		// Searching covers all cases, so the case preset is shown as inactive while text is typed.
+		$('#laPresets').toggleClass('la-presets-off', $.trim($(this).val()).length > 0);
 		t = setTimeout(function () { laLoadQueue(true); }, 400);
 	});
 	$('#laQueueBody').on('click', '.la-row', function () { laToggleGroup($(this)); });

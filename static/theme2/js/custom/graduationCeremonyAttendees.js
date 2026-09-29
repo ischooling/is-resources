@@ -98,21 +98,41 @@ function loadGraduationCeremonyAttendees(){
                     <small>Time Slot: ${callbackTimeSlot}</small><br>
                     <small>Date & Time: ${formattedDateAccToTZ}</small>
                 `;
-                const attendeesInfo = attendee.attendees && attendee.attendees.length > 0
-                    ? attendee.attendees.map(function(person, personIndex){
-                        const amountText = person.amount === null || person.amount === undefined || person.amount === "null"
-                            ? "N/A"
-                            : `$${person.amount}`;
-                        const statusText = replaceGraduationCeremonyScheduledStatus(person.amountStatus ? person.amountStatus : "PENDING");
-                        const paidBadgeClass = (person.isPaid || "").toUpperCase() === "Y" ? "success" : "warning";
+                // Rows with type ITEM (e.g. physical transcript) are purchases, not people:
+                // list them separately under "Items" and keep the attendee numbering for people only.
+                const allAttendeeRows = Array.isArray(attendee.attendees) ? attendee.attendees : [];
+                const isItemRow = function(row){ return (row.type || "").toUpperCase() === "ITEM"; };
+                const personRows = allAttendeeRows.filter(function(row){ return !isItemRow(row); });
+                const itemRows = allAttendeeRows.filter(isItemRow);
+                const renderAttendeeRowMeta = function(row){
+                    const amountText = row.amount === null || row.amount === undefined || row.amount === "null"
+                        ? "N/A"
+                        : `$${row.amount}`;
+                    const statusText = replaceGraduationCeremonyScheduledStatus(row.amountStatus ? row.amountStatus : "PENDING");
+                    const paidBadgeClass = (row.isPaid || "").toUpperCase() === "Y" ? "success" : "warning";
+                    return `<span class="ml-1">- ${amountText}</span>
+                                <span class="badge badge-${paidBadgeClass} ml-1">${statusText}</span>`;
+                };
+                const personsInfo = personRows.map(function(person, personIndex){
                         return `<div class="mb-1" style="white-space:nowrap;">
                             <small>
                                 <strong>${personIndex + 1}.</strong> ${person.name ? person.name : "N/A"}${person.relation ? ` (${person.relation})` : ""}${person.gender ? ` - ${person.gender}` : ""}
-                                <span class="ml-1">- ${amountText}</span>
-                                <span class="badge badge-${paidBadgeClass} ml-1">${statusText}</span>
+                                ${renderAttendeeRowMeta(person)}
+                            </small>
+                        </div>`;
+                    }).join("");
+                const itemsInfo = itemRows.length > 0
+                    ? `<div class="mt-2 mb-1"><small><strong>Items:</strong></small></div>` + itemRows.map(function(item){
+                        return `<div class="mb-1" style="white-space:nowrap;">
+                            <small>
+                                <i class="fa fa-file-text-o text-primary" aria-hidden="true"></i> ${item.name && item.name !== "N/A" ? item.name : item.relation}
+                                ${renderAttendeeRowMeta(item)}
                             </small>
                         </div>`;
                     }).join("")
+                    : "";
+                const attendeesInfo = personsInfo || itemsInfo
+                    ? personsInfo + itemsInfo
                     : `<small>N/A</small>`;
                 const amountInfo = hasPaidGuests && pendingAmount > 0
                     ? `<small><strong>Pending:</strong> $${pendingAmount}</small><br>
