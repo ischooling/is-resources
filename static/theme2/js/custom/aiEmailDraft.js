@@ -5,6 +5,7 @@ var AI_EMAIL_DRAFT_STATE = {
     sortDir: 'asc',
     page: 1,
     pageSize: 10,
+    allCounselorAccess: false,
     totalPages: 1,
     totalRecords: 0
 };
@@ -29,6 +30,16 @@ function loadAiDraftLearningCount() {
         url: getURLForHTML('/api/v1/leads', 'get-ai-draft-learning'),
         data: JSON.stringify(params), dataType: 'json',
         success: function (data) {
+            // ADMIN-DASHBOARD-SPACIAL-RIGHTS se aata hai — role se andaza lagana band
+            AI_EMAIL_DRAFT_STATE.allCounselorAccess = !!(data && data.allCounselorAccess);
+            if (AI_EMAIL_DRAFT_STATE.allCounselorAccess) {
+                // filter init isse pehle chal kar apni ID select kar chuka hota hai — use hata do
+                $('#aiEmailDraftCounselorFilter')
+                    .prop('disabled', false)
+                    .removeData('lockedValue')
+                    .val('')
+                    .trigger('change');
+            }
             if (data && data.learning) {
                 var count = Array.isArray(data.learning) ? data.learning.length : 0;
                 $('#aedLearningCount').text(count);
@@ -70,7 +81,8 @@ async function initAiEmailDraftFilters() {
         await callLeadAssignUserList('aiEmailDraftFilterForm', 'B2C', 'aiEmailDraftCounselorFilter', true, true, USER_ID);
     }
     // Non-admin: lock dropdown to own counselor ID
-    var isAdmin = (USER_ROLE === 'DIRECTOR' || USER_ROLE === 'SUPER_ADMIN');
+    var isAdmin = (USER_ROLE === 'DIRECTOR' || USER_ROLE === 'SUPER_ADMIN')
+               || AI_EMAIL_DRAFT_STATE.allCounselorAccess === true;
     if (!isAdmin) {
         $('#aiEmailDraftCounselorFilter').val(String(USER_ID)).prop('disabled', true);
     }
@@ -122,7 +134,8 @@ function bindAiEmailDraftEvents() {
         $('#aiEmailDraftLeadNoFilter').val('');
         AI_EMAIL_DRAFT_STATE.pageSize = 10;
         $('#aiEmailDraftExcludeStatus').val(null).trigger('change');
-        var isAdmin = (USER_ROLE === 'DIRECTOR' || USER_ROLE === 'SUPER_ADMIN');
+        var isAdmin = (USER_ROLE === 'DIRECTOR' || USER_ROLE === 'SUPER_ADMIN')
+                   || AI_EMAIL_DRAFT_STATE.allCounselorAccess === true;
         if (isAdmin) {
             $('#aiEmailDraftCounselorFilter').val('').trigger('change');
         }
@@ -265,7 +278,10 @@ function fetchAiEmailDrafts(singleLeadId, forcedLanguage) {
     // Read counselor value even if dropdown is disabled
     var $counselorEl = $('#aiEmailDraftCounselorFilter');
     var counselorId  = $counselorEl.val() || $counselorEl.data('lockedValue') || '';
-    if (!counselorId && $counselorEl.prop('disabled')) counselorId = String(USER_ID);
+    // special-rights wale user ki apni id zabardasti mat bhejo — unhe sabka data milna chahiye
+    if (!counselorId && $counselorEl.prop('disabled') && !AI_EMAIL_DRAFT_STATE.allCounselorAccess) {
+        counselorId = String(USER_ID);
+    }
     if (counselorId) params.counselorId = counselorId;
     var countryVal  = $('#aiEmailDraftCountryFilter').val()   || '';
     var campaignVal = $('#aiEmailDraftCampaignFilter').val()  || '';
@@ -609,8 +625,15 @@ function renderAiEmailDraftTable(rows) {
                   + 'title="AI Analysis dekhein" style="color:' + (hasAnalysis ? '#3d5af1' : '#b9bfcc') + ';">'
                   + '<i class="fa fa-chevron-down"></i></a>'
             + '</td>'
-            + '<td><a href="javascript:void(0)" onclick="getAsPost(\'/dashboard/lead-data-list?moduleId=111&leadId=' + esc(d.leadNo || d.leadId) + '&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid=' + ENCRYPTED_USER_ID + '&leadType=B2C\');">' + esc(d.leadNo || d.leadId) + '</a>' + (d.grade ? '<br><small class="text-muted">' + esc(d.grade) + '</small>' : '') + '</td>'
-            + '<td>' + esc(d.country) + (d.utmCampaign ? '<br><small class="text-muted">' + esc(d.utmCampaign) + '</small>' : '') + '</td>'
+            + '<td><a href="javascript:void(0)" onclick="getAsPost(\'/dashboard/lead-data-list?moduleId=111&leadId=' + esc(d.leadNo || d.leadId) + '&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid=' + ENCRYPTED_USER_ID + '&leadType=B2C\');">' + esc(d.leadNo || d.leadId) + '</a>'
+                + (d.leadName ? '<br><span style="font-weight:600;">' + esc(d.leadName) + '</span>' : '')
+                + (d.grade ? '<br><small class="text-muted">' + esc(d.grade) + '</small>' : '')
+            + '</td>'
+            + '<td>' + esc(d.country)
+                + (d.utmCampaign ? '<br><small class="text-muted">' + esc(d.utmCampaign) + '</small>' : '')
+                + (d.email ? '<br><small class="text-muted"><i class="fa fa-envelope-o mr-1"></i>' + esc(d.email) + '</small>' : '')
+                + (d.phoneNo ? '<br><small class="text-muted"><i class="fa fa-phone mr-1"></i>' + esc(d.phoneNo) + '</small>' : '')
+            + '</td>'
             + '<td>' + esc(d.counselorName) + '</td>'
             + '<td>' + esc(d.leadStatus) + '</td>'
             + '<td class="text-center">' + esc(d.demodatetime || '—') + '</td>'
@@ -916,7 +939,10 @@ function fetchFullDraft(leadId, forcedLanguage, attempt, token) {
     if (forcedLanguage && forcedLanguage !== 'English') params.forcedLanguage = forcedLanguage;
     var $counselorEl = $('#aiEmailDraftCounselorFilter');
     var counselorId  = $counselorEl.val() || $counselorEl.data('lockedValue') || '';
-    if (!counselorId && $counselorEl.prop('disabled')) counselorId = String(USER_ID);
+    // special-rights wale user ki apni id zabardasti mat bhejo — unhe sabka data milna chahiye
+    if (!counselorId && $counselorEl.prop('disabled') && !AI_EMAIL_DRAFT_STATE.allCounselorAccess) {
+        counselorId = String(USER_ID);
+    }
     if (counselorId) params.counselorId = counselorId;
     var ctry2 = $('#aiEmailDraftCountryFilter').val()  || '';
     var camp2 = $('#aiEmailDraftCampaignFilter').val() || '';
@@ -1066,7 +1092,9 @@ function regenerateAiEmailDraft(counselorFeedback) {
 
     var $counselorEl2 = $('#aiEmailDraftCounselorFilter');
     var counselorId2  = $counselorEl2.val() || $counselorEl2.data('lockedValue') || '';
-    if (!counselorId2 && $counselorEl2.prop('disabled')) counselorId2 = String(USER_ID);
+    if (!counselorId2 && $counselorEl2.prop('disabled') && !AI_EMAIL_DRAFT_STATE.allCounselorAccess) {
+        counselorId2 = String(USER_ID);
+    }
     var params = {
         schoolId: SCHOOL_ID,
         dateType:  $('#aiEmailDraftDateType').val() || 'TODAY',
