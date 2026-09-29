@@ -1,9 +1,10 @@
 var AI_EMAIL_DRAFT_STATE = {
     drafts: {},        // leadId -> draft object (in-session edits)
-    allData: [],       // raw API response array (current page only — 10 leads)
+    allData: [],       // raw API response array (current page only)
     sortField: 'followUpDueDate',
     sortDir: 'asc',
     page: 1,
+    pageSize: 10,
     totalPages: 1,
     totalRecords: 0
 };
@@ -54,6 +55,15 @@ async function initAiEmailDraftFilters() {
     }
     $('#aiEmailDraftCampaignFilter').select2({ theme: 'bootstrap4' });
 
+    // Exclude Status — LEAD-STATUS-LIST master se (multi select)
+    if (typeof callLeadStatusList === 'function') {
+        callLeadStatusList('aiEmailDraftFilterForm', 'B2C', 'aiEmailDraftExcludeStatus', false);
+    }
+    setTimeout(function () {
+        $('#aiEmailDraftExcludeStatus option[value="0"]').remove();   // "Select Status" multi-select me nahi chahiye
+        $('#aiEmailDraftExcludeStatus').select2({ theme: 'bootstrap4', placeholder: 'Exclude Status', allowClear: true });
+    }, 800);
+
     // Counselor dropdown — await data load, then init select2 so it picks up options correctly
     $('#aiEmailDraftCounselorFilter').html('<option value="">All Academic Counselor</option>');
     if (typeof callLeadAssignUserList === 'function') {
@@ -92,12 +102,26 @@ function bindAiEmailDraftEvents() {
         fetchAiEmailDrafts();
     });
 
+    // page size badalte hi pehle page se dobara load (pager dobara render hota hai, isliye delegated)
+    $(document).off('change.aedps', '#aiEmailDraftPageSize').on('change.aedps', '#aiEmailDraftPageSize', function () {
+        AI_EMAIL_DRAFT_STATE.pageSize = parseInt($(this).val(), 10) || 10;
+        AI_EMAIL_DRAFT_STATE.page = 1;
+        fetchAiEmailDrafts();
+    });
+
+    $('#aiEmailDraftLeadNoFilter').off('keypress.aedln').on('keypress.aedln', function (e) {
+        if (e.which === 13) { e.preventDefault(); $('#aiEmailDraftGenerateBtn').trigger('click'); }
+    });
+
     $('#aiEmailDraftResetBtn').off('click').on('click', function () {
         $('#aiEmailDraftDateType').val('TODAY').trigger('change');
         $('#aiEmailDraftPriorityFilter').val('').trigger('change');
         $('#aiEmailDraftStatusFilter').val('').trigger('change');
         $('#aiEmailDraftCountryFilter').val('').trigger('change');
         $('#aiEmailDraftCampaignFilter').val('').trigger('change');
+        $('#aiEmailDraftLeadNoFilter').val('');
+        AI_EMAIL_DRAFT_STATE.pageSize = 10;
+        $('#aiEmailDraftExcludeStatus').val(null).trigger('change');
         var isAdmin = (USER_ROLE === 'DIRECTOR' || USER_ROLE === 'SUPER_ADMIN');
         if (isAdmin) {
             $('#aiEmailDraftCounselorFilter').val('').trigger('change');
@@ -108,6 +132,14 @@ function bindAiEmailDraftEvents() {
             $('#aiEmailDraftFromDate').datepicker('setDate', today);
             $('#aiEmailDraftToDate').datepicker('setDate', today);
         }
+        // chal rahi background backfill / draft request ko bhi rok do, warna wo reset ke baad
+        // purana data wapas memory me likh deti hai
+        AED_BACKFILL.token++;
+        AED_BACKFILL.queue = [];
+        AED_BACKFILL.running = 0;
+        AED_BACKFILL.active = false;
+        AED_DRAFT_REQ.token++;
+
         AI_EMAIL_DRAFT_STATE.drafts = {};
         AI_EMAIL_DRAFT_STATE.allData = [];
         AI_EMAIL_DRAFT_STATE.page = 1;
@@ -147,6 +179,17 @@ function bindAiEmailDraftEvents() {
     $('#aedModalSave').off('click').on('click', function () { saveAiEmailDraftEdits('saved'); });
     $('#aedModalCopy').off('click').on('click', copyAiEmailDraft);
     $('#aedModalRegenerate').off('click').on('click', function () { regenerateAiEmailDraft(); });
+
+    // "Generate Draft" — draft tabhi banta hai jab counselor maange
+    $(document).off('click.aedgen', '#aedGenerateDraftBtn').on('click.aedgen', '#aedGenerateDraftBtn', function () {
+        var leadId = $('#aiEmailDraftModal').data('leadid');
+        if (!leadId) { return; }
+        var lang = $('#aedModalLanguage').val() || 'English';
+        var busy = '<div class="text-center py-4 text-muted" style="font-size:13px;">'
+                 + '<i class="fa fa-spinner fa-spin fa-lg mr-2 text-primary"></i>Generating draft… please wait (~10-15s)</div>';
+        $('#aedTabEmail,#aedTabWhatsapp,#aedTabCall').html(busy);
+        fetchFullDraft(leadId, lang);
+    });
     $('#aedModalSendEmail').off('click').on('click', sendAiDraftEmail);
 
     // Feedback panel toggle
@@ -210,8 +253,11 @@ function fetchAiEmailDrafts(singleLeadId, forcedLanguage) {
         dateType:  dateType,
         dataType:  'DEMO',
         userId:   USER_ID,
-        page:     singleLeadId ? 1 : (AI_EMAIL_DRAFT_STATE.page || 1)
+        page:     singleLeadId ? 1 : (AI_EMAIL_DRAFT_STATE.page || 1),
+        pageSize: AI_EMAIL_DRAFT_STATE.pageSize || 10
     };
+    // list turant aaye — AI wale fields background me bharte hain (Lead & Demo Dashboard jaisa)
+    if (!singleLeadId) { params.skipAi = true; }
     if (dateType === 'CUSTOM') {
         params.startDate = ($('#aiEmailDraftFromDate').val() || '') + ' 00:00';
         params.endDate   = ($('#aiEmailDraftToDate').val()   || '') + ' 23:59';
@@ -225,6 +271,13 @@ function fetchAiEmailDrafts(singleLeadId, forcedLanguage) {
     var campaignVal = $('#aiEmailDraftCampaignFilter').val()  || '';
     if (countryVal)  params.countryId = countryVal;
     if (campaignVal) params.campaign = campaignVal;
+    // Search — Lead No / naam / email / phone, kuch bhi. Diya ho to date range ignore hota hai (backend me)
+    var searchVal = ($('#aiEmailDraftLeadNoFilter').val() || '').trim();
+    if (searchVal) params.search = searchVal;
+    // Exclude Status — in statuses wali leads list se bahar rahengi
+    var excludeStatusVals = $('#aiEmailDraftExcludeStatus').val() || [];
+    excludeStatusVals = excludeStatusVals.filter(function (v) { return v && v !== '0'; });
+    if (excludeStatusVals.length) params.excludeStatus = excludeStatusVals.join(',');
     if (singleLeadId)   params.leadId = singleLeadId;
     if (forcedLanguage) params.forcedLanguage = forcedLanguage;
 
@@ -257,6 +310,7 @@ function fetchAiEmailDrafts(singleLeadId, forcedLanguage) {
             }
             renderAiEmailDraftTable(AI_EMAIL_DRAFT_STATE.allData);
             updateAiEmailDraftCards(AI_EMAIL_DRAFT_STATE.allData);
+            if (!singleLeadId) { aedStartAiBackfill(); }
             if (!singleLeadId && rows.length > 0 && rows[0].counselorCounts) {
                 renderCounselorCountBoxes(rows[0].counselorCounts);
             }
@@ -281,7 +335,172 @@ function fetchAiEmailDrafts(singleLeadId, forcedLanguage) {
     });
 }
 
-// ── Pagination (10 leads per page — see AiEmailDraftUtil.getLeadsTimeLine) ──────
+// ── AI backfill ──────────────────────────────────────────────────────────────
+// List bina AI ke turant aati hai; jin rows me AI fields khali hain unhe yahan se
+// 3-3 karke bhara jata hai (har lead ka sirf table-field wala chhota AI call).
+var AED_BACKFILL = { queue: [], running: 0, active: false, token: 0, attempts: {} };
+var AED_BACKFILL_MAX_TRIES = 3;
+var AED_BACKFILL_CONCURRENCY = 3;
+
+function aedNeedsAi(d) {
+    // 'pending' = AI chala hi nahi (server ne sirf fallback bhara). emailSubject ko check me
+    // nahi rakhte — AI kabhi khali subject deta hai, us par baar-baar retry bekaar hai.
+    return d.draftStatus === 'pending' || d.draftStatus === 'error' || !d.aiPriority;
+}
+
+function aedStartAiBackfill() {
+    AED_BACKFILL.token++;
+    var myToken = AED_BACKFILL.token;
+    var pend = (AI_EMAIL_DRAFT_STATE.allData || []).filter(aedNeedsAi);
+    // jinke paas transcript hai unhe pehle — unka analysis sabse zyada kaam ka hota hai
+    pend.sort(function (a, b) { return (b.transcript ? 1 : 0) - (a.transcript ? 1 : 0); });
+    AED_BACKFILL.queue    = pend.map(function (d) { return d.leadId; });
+    AED_BACKFILL.attempts = {};
+    AED_BACKFILL.running = 0;
+    AED_BACKFILL.active  = AED_BACKFILL.queue.length > 0;
+    if (!AED_BACKFILL.active) { return; }
+    renderAiEmailDraftTable(AI_EMAIL_DRAFT_STATE.allData);   // "Analyzing…" dikhane ke liye
+    for (var i = 0; i < AED_BACKFILL_CONCURRENCY; i++) { aedBackfillNext(myToken); }
+}
+
+function aedBackfillNext(myToken) {
+    if (myToken !== AED_BACKFILL.token) { return; }            // filter/page badal gaya
+    if (!AED_BACKFILL.queue.length) {
+        if (AED_BACKFILL.running === 0) {
+            AED_BACKFILL.active = false;
+            renderAiEmailDraftTable(AI_EMAIL_DRAFT_STATE.allData);
+            updateAiEmailDraftCards(AI_EMAIL_DRAFT_STATE.allData);
+        }
+        return;
+    }
+    var leadId = AED_BACKFILL.queue.shift();
+    AED_BACKFILL.attempts[leadId] = (AED_BACKFILL.attempts[leadId] || 0) + 1;
+    AED_BACKFILL.running++;
+
+    var dateType = $('#aiEmailDraftDateType').val() || 'TODAY';
+    var params = {
+        schoolId: SCHOOL_ID, dataType: 'DEMO', userId: USER_ID,
+        dateType: dateType, page: 1, pageSize: AI_EMAIL_DRAFT_STATE.pageSize || 10,
+        leadId: String(leadId), bulkOnly: true
+    };
+    if (dateType === 'CUSTOM') {
+        params.startDate = ($('#aiEmailDraftFromDate').val() || '') + ' 00:00';
+        params.endDate   = ($('#aiEmailDraftToDate').val()   || '') + ' 23:59';
+    }
+    var $cEl = $('#aiEmailDraftCounselorFilter');
+    var cId  = $cEl.val() || ($cEl.prop('disabled') ? String(USER_ID) : '');
+    if (cId) { params.counselorId = cId; }
+
+    $.ajax({
+        type: 'POST', contentType: APPLICATION_JSON_VALUE,
+        url: getURLForHTML('/api/v1/leads', 'get-lead-timeline-summary'),
+        data: JSON.stringify(params), dataType: 'json', timeout: 120000,
+        global: false,   // background call — poore page ka loader mat dikhao
+        success: function (data) {
+            var rows = Array.isArray(data) ? data : (data && data.data ? data.data : []);
+            rows.forEach(function (r) {
+                var idx = AI_EMAIL_DRAFT_STATE.allData.findIndex(function (x) { return x.leadId == r.leadId; });
+                if (idx >= 0) {
+                    AI_EMAIL_DRAFT_STATE.allData[idx] = Object.assign({}, AI_EMAIL_DRAFT_STATE.allData[idx], r);
+                }
+                // table render drafts[] ko pehle dekhta hai — usme purani copy padi ho to
+                // backfill ka naya data dikhta hi nahi, isliye wahan bhi merge kar dete hain
+                if (AI_EMAIL_DRAFT_STATE.drafts[r.leadId]) {
+                    AI_EMAIL_DRAFT_STATE.drafts[r.leadId] = Object.assign({}, AI_EMAIL_DRAFT_STATE.drafts[r.leadId], r);
+                }
+            });
+            if (myToken === AED_BACKFILL.token) { renderAiEmailDraftTable(AI_EMAIL_DRAFT_STATE.allData); }
+        },
+        complete: function () {
+            // abhi bhi pending hai (AI fail/timeout) to dobara koshish — max 3 baar
+            var cur = (AI_EMAIL_DRAFT_STATE.allData || []).find(function (x) { return x.leadId == leadId; });
+            if (cur && aedNeedsAi(cur) && (AED_BACKFILL.attempts[leadId] || 0) < AED_BACKFILL_MAX_TRIES
+                && myToken === AED_BACKFILL.token) {
+                AED_BACKFILL.queue.push(leadId);
+            }
+            AED_BACKFILL.running--;
+            aedBackfillNext(myToken);
+        }
+    });
+}
+
+// Follow-up date nikal chuki ho to laal + "overdue" — counselor ko turant dikhe
+function aedFollowUpCell(dateStr) {
+    var txt = formatAedDate(dateStr) || '—';
+    if (!dateStr) { return txt; }
+    var d = new Date(dateStr);
+    if (isNaN(d.getTime())) { return txt; }
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+    d.setHours(0, 0, 0, 0);
+    if (d < today) {
+        return '<span style="color:#c62828;font-weight:600;">' + txt + '</span>'
+             + '<br><small style="color:#c62828;">overdue</small>';
+    }
+    return txt;
+}
+
+// AI ka text list ki tarah dikhe: "(1) .. (2) .." ya "1." ya "-" ko <ol>/<ul> me badalta hai
+function aedRichText(v) {
+    if (!v) return '—';
+    var raw = String(v).replace(/\s+/g, ' ').trim();
+
+    // (1) ... (2) ... (3) ...
+    var parts = raw.split(/\(\s*\d+\s*\)\s*/);
+    if (parts.length >= 3) {
+        var intro = (parts.shift() || '').trim();
+        var lis = parts.map(function (x) {
+            return '<li style="margin-bottom:4px;">' + esc(x.replace(/[;,]\s*$/, '').trim()) + '</li>';
+        }).join('');
+        return (intro ? '<div style="margin-bottom:6px;">' + esc(intro) + '</div>' : '')
+             + '<ol style="margin:0;padding-left:18px;">' + lis + '</ol>';
+    }
+
+    // har line "1." / "1)" / "-" / "•" se shuru ho
+    var lines = String(v).split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean);
+    var marked = lines.filter(function (l) { return /^(\d+[\).]|[-•*])\s+/.test(l); });
+    if (lines.length > 1 && marked.length >= 2) {
+        var lis2 = lines.map(function (l) {
+            return '<li style="margin-bottom:4px;">' + esc(l.replace(/^(\d+[\).]|[-•*])\s+/, '')) + '</li>';
+        }).join('');
+        return '<ul style="margin:0;padding-left:18px;">' + lis2 + '</ul>';
+    }
+
+    return esc(v).replace(/\n/g, '<br>');
+}
+
+// AI Analysis — wahi sections jo modal me dikhte hain, listing me expand karke
+function aedAnalysisHtml(d) {
+    // wahi global esc() jo table render karti hai
+    var items = [
+        ['fa-clock-o',      'Enrollment Urgency',      d.enrollmentUrgency],
+        ['fa-users',        'Parent / Student Intent', d.intentSummary],
+        ['fa-exclamation-triangle', 'Main Objection',  d.mainObjection],
+        ['fa-random',       'Competitor Signals',      d.competitorSignals],
+        ['fa-rocket',       'Next Best Action',        d.nextBestAction],
+        ['fa-bell',         'CRM Alert / Task',        d.crmAlert],
+        ['fa-info-circle',  'Why This Recommendation', d.explainableReason]
+    ].filter(function (x) { return x[2]; });
+
+    if (!items.length) {
+        return '<div class="text-muted" style="font-size:12px;">'
+             + '<i class="fa fa-info-circle mr-1"></i>AI Analysis is not ready yet. '
+             + 'Click "Open" — the analysis is generated along with the draft and will appear here.'
+             + '</div>';
+    }
+
+    var cards = items.map(function (x) {
+        return '<div style="flex:1 1 320px;min-width:260px;background:#fff;border:1px solid #e6eaf2;border-radius:6px;padding:10px 12px;">'
+             + '<div style="font-size:11px;font-weight:700;color:#3d5af1;margin-bottom:4px;">'
+                 + '<i class="fa ' + x[0] + ' mr-1"></i>' + x[1]
+             + '</div>'
+             + '<div style="font-size:12px;color:#333;line-height:1.5;">' + aedRichText(x[2]) + '</div>'
+             + '</div>';
+    }).join('');
+
+    return '<div class="d-flex flex-wrap" style="gap:10px;">' + cards + '</div>';
+}
+
+// ── Pagination (page size UI se: 10/20/50/100 — see AiEmailDraftUtil.getLeadsTimeLine) ──
 
 function renderAiEmailDraftPagination() {
     var page  = AI_EMAIL_DRAFT_STATE.page || 1;
@@ -291,12 +510,40 @@ function renderAiEmailDraftPagination() {
         $('#aiEmailDraftPagination').html('');
         return;
     }
-    var html = '<div class="text-muted mb-1" style="font-size:12px;">Page ' + page + ' of ' + total + ' &middot; ' + records + ' lead(s)</div>'
-        + '<button type="button" class="btn btn-sm btn-outline-secondary" id="aiEmailDraftPrevPage" style="margin-right:6px;" ' + (page <= 1 ? 'disabled' : '') + '><i class="fa fa-chevron-left"></i> Prev</button>'
-        + '<button type="button" class="btn btn-sm btn-outline-secondary" id="aiEmailDraftNextPage" ' + (page >= total ? 'disabled' : '') + '>Next <i class="fa fa-chevron-right"></i></button>';
+    var size  = AI_EMAIL_DRAFT_STATE.pageSize || 10;
+    var from  = ((page - 1) * size) + 1;
+    var to    = Math.min(page * size, records);
+
+    $('#aiEmailDraftPageSize').val(String(size));   // top-left dropdown ko state ke saath rakho
+
+    // page numbers — 5 ka window
+    var start = Math.max(1, page - 2);
+    var end   = Math.min(total, start + 4);
+    start = Math.max(1, end - 4);
+    var pageBtns = '';
+    for (var i = start; i <= end; i++) {
+        pageBtns += '<button type="button" class="btn ' + (i === page ? 'btn-primary' : 'btn-outline-secondary')
+                 + ' aed-page-btn" data-page="' + i + '">' + i + '</button>';
+    }
+
+    var html = ''
+        + '<div class="d-flex flex-wrap align-items-center justify-content-between" '
+             + 'style="width:100%;gap:10px;border-top:1px solid #eee;padding-top:10px;">'
+            + '<span class="text-muted" style="font-size:12px;white-space:nowrap;">'
+                + 'Showing ' + from + '&ndash;' + to + ' of ' + records + ' lead(s)'
+            + '</span>'
+            + '<div class="btn-group btn-group-sm" role="group" style="white-space:nowrap;">'
+                + '<button type="button" class="btn btn-outline-secondary" id="aiEmailDraftPrevPage" '
+                    + (page <= 1 ? 'disabled' : '') + '><i class="fa fa-chevron-left"></i></button>'
+                + pageBtns
+                + '<button type="button" class="btn btn-outline-secondary" id="aiEmailDraftNextPage" '
+                    + (page >= total ? 'disabled' : '') + '><i class="fa fa-chevron-right"></i></button>'
+            + '</div>'
+        + '</div>';
     $('#aiEmailDraftPagination').html(html);
     $('#aiEmailDraftPrevPage').off('click').on('click', function () { changeAiEmailDraftPage(page - 1); });
     $('#aiEmailDraftNextPage').off('click').on('click', function () { changeAiEmailDraftPage(page + 1); });
+    $('.aed-page-btn').off('click').on('click', function () { changeAiEmailDraftPage(parseInt($(this).attr('data-page'), 10)); });
 }
 
 function changeAiEmailDraftPage(newPage) {
@@ -346,29 +593,65 @@ function renderAiEmailDraftTable(rows) {
     var html = '';
     filtered.forEach(function (row, idx) {
         var d = AI_EMAIL_DRAFT_STATE.drafts[row.leadId] || row;
-        var priorityBadge = getPriorityBadge(d.aiPriority);
-        var riskBadge     = getRiskBadge(d.riskLevel);
+        var pending = AED_BACKFILL.active && aedNeedsAi(d);
+        var wait = '<span class="text-muted font-italic" style="font-size:11px;">Analyzing…</span>';
+        var priorityBadge = pending ? wait : getPriorityBadge(d.aiPriority);
+        var riskBadge     = pending ? wait : getRiskBadge(d.riskLevel);
         var statusBadge   = getDraftStatusBadge(d.draftStatus);
         var subjectPreview = (d.emailSubject || '').substring(0, 45) + ((d.emailSubject || '').length > 45 ? '…' : '');
 
+        var hasAnalysis = !!(d.enrollmentUrgency || d.intentSummary || d.mainObjection
+                          || d.competitorSignals || d.nextBestAction || d.crmAlert || d.explainableReason);
+
         html += '<tr>'
-            + '<td>' + (idx + 1) + '</td>'
+            + '<td style="white-space:nowrap;">' + (idx + 1)
+                + '<a href="javascript:void(0)" class="aed-analysis-toggle ml-1" data-leadid="' + esc(d.leadId) + '" '
+                  + 'title="AI Analysis dekhein" style="color:' + (hasAnalysis ? '#3d5af1' : '#b9bfcc') + ';">'
+                  + '<i class="fa fa-chevron-down"></i></a>'
+            + '</td>'
             + '<td><a href="javascript:void(0)" onclick="getAsPost(\'/dashboard/lead-data-list?moduleId=111&leadId=' + esc(d.leadNo || d.leadId) + '&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid=' + ENCRYPTED_USER_ID + '&leadType=B2C\');">' + esc(d.leadNo || d.leadId) + '</a>' + (d.grade ? '<br><small class="text-muted">' + esc(d.grade) + '</small>' : '') + '</td>'
             + '<td>' + esc(d.country) + (d.utmCampaign ? '<br><small class="text-muted">' + esc(d.utmCampaign) + '</small>' : '') + '</td>'
             + '<td>' + esc(d.counselorName) + '</td>'
             + '<td>' + esc(d.leadStatus) + '</td>'
             + '<td class="text-center">' + esc(d.demodatetime || '—') + '</td>'
             + '<td class="text-center">' + priorityBadge + '</td>'
-            + '<td class="text-center"><strong>' + (d.priorityScore || 0) + '</strong></td>'
+            + '<td class="text-center">' + (pending ? '—' : '<strong>' + (d.priorityScore || 0) + '</strong>') + '</td>'
             + '<td class="text-center">' + riskBadge + '</td>'
-            + '<td class="text-center">' + esc(formatAedDate(d.followUpDueDate) || '—') + '</td>'
+            + '<td class="text-center">' + aedFollowUpCell(d.followUpDueDate) + '</td>'
             + '<td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + esc(d.emailSubject) + '">' + esc(d.emailSubject || '—') + '</td>'
             + '<td class="text-center">' + statusBadge + '</td>'
-            + '<td class="text-center"><button class="btn btn-primary btn-sm aed-open-modal-btn" style="height:28px;line-height:28px;padding:0 12px;font-size:12px;white-space:nowrap;" data-leadid="' + esc(d.leadId) + '"><i class="fa fa-envelope-open mr-1"></i>Open</button></td>'
+            + '<td class="text-center" style="white-space:nowrap;">'
+                + '<button class="btn btn-primary btn-sm aed-open-modal-btn" style="height:28px;line-height:28px;padding:0 12px;font-size:12px;white-space:nowrap;" data-leadid="' + esc(d.leadId) + '"><i class="fa fa-envelope-open mr-1"></i>Open</button>'
+                + (d.transcript
+                    ? '<button class="btn btn-outline-primary btn-sm aed-transcript-btn ml-1" style="height:28px;line-height:28px;padding:0 10px;font-size:12px;white-space:nowrap;" data-url="' + esc(d.transcript) + '" title="Demo transcript"><i class="fa fa-file-text-o mr-1"></i>Transcript</button>'
+                    : '')
+            + '</td>'
+            + '</tr>'
+            + '<tr class="aed-analysis-row" data-leadid="' + esc(d.leadId) + '" style="display:none;background:#f7f9ff;">'
+                + '<td colspan="13" style="padding:12px 16px;">' + aedAnalysisHtml(d) + '</td>'
             + '</tr>';
     });
 
     $('#aiEmailDraftTableBody').html(html);
+
+    $('#aiEmailDraftTableBody').off('click.aedan').on('click.aedan', '.aed-analysis-toggle', function () {
+        var id  = $(this).attr('data-leadid');
+        var $row = $('.aed-analysis-row[data-leadid="' + id + '"]');
+        var $ico = $(this).find('i');
+        $row.toggle();
+        $ico.toggleClass('fa-chevron-down fa-chevron-up');
+    });
+
+    $('#aiEmailDraftTableBody').off('click.aedtr').on('click.aedtr', '.aed-transcript-btn', function (e) {
+        e.stopPropagation();
+        var url = $(this).attr('data-url') || '';
+        if (!url) { showMessageTheme2(0, 'Transcript is not available for this lead.', '', true); return; }
+        if (typeof showVTTFile === 'function') {
+            showVTTFile(url, 'Transcript', false);
+        } else {
+            showMessageTheme2(0, 'Transcript viewer failed to load. Please refresh the page.', '', true);
+        }
+    });
 
     $('#aiEmailDraftTableBody').off('click.aed').on('click.aed', '.aed-open-modal-btn', function () {
         var leadId = $(this).data('leadid');
@@ -458,7 +741,7 @@ function openAiEmailDraftModal(d) {
         '<i class="fa fa-user mr-1 text-primary"></i><strong>' + esc(d.leadNo || d.leadId) + '</strong>'
         + ' &nbsp;|&nbsp; Priority: ' + priorityBadge + ' (Score: <strong>' + (d.priorityScore || 0) + '</strong>)'
         + ' &nbsp;|&nbsp; Risk: ' + riskBadge
-        + ' &nbsp;|&nbsp; Follow-up: <strong>' + esc(formatAedDate(d.followUpDueDate) || '—') + '</strong>'
+        + ' &nbsp;|&nbsp; Follow-up: <strong>' + aedFollowUpCell(d.followUpDueDate) + '</strong>'
         + ' &nbsp;|&nbsp; <i class="fa fa-clock-o mr-1"></i>' + esc(formatAedDateTime(d.generatedAt) || '')
     );
     $('#aedModalLabel').html('<i class="fa fa-envelope mr-2"></i>AI Email Draft — ' + esc(d.leadNo || d.leadId));
@@ -469,30 +752,96 @@ function openAiEmailDraftModal(d) {
     $('#aedModalFeedbackToggle').removeClass('active');
     $('#aedDraftTabs a[href="#aedTabEmail"]').tab('show');
 
-    // If full draft not yet loaded (emailBody empty) → show loading state then auto-fetch full draft
+    // Draft apne aap nahi banta — counselor jab chahe tab "Generate Draft" dabaye.
     if (!d.emailBody) {
-        var loadingMsg = '<div class="text-center py-4 text-muted" style="font-size:13px;"><i class="fa fa-spinner fa-spin fa-lg mr-2 text-primary"></i>Generating full draft… please wait (~15-30s)</div>';
+        var askMsg = '<div class="text-center py-4" style="font-size:13px;">'
+            + '<div class="text-muted mb-2"><i class="fa fa-envelope-o mr-1"></i>No draft generated yet for this lead.</div>'
+            + '<button type="button" class="btn btn-primary btn-sm px-3" id="aedGenerateDraftBtn">'
+            + '<i class="fa fa-magic mr-1"></i>Generate Draft</button>'
+            + '<div class="text-muted mt-2" style="font-size:11px;">Takes about 10-15 seconds.</div>'
+            + '</div>';
         $('#aedModalTo').val(d.email || d.emailTo || '');
         $('#aedModalFrom').val(d.counselorEmail || '');
         $('#aedModalSubject').val(d.emailSubject || '');
         $('#aedModalBody').val('');
         $('#aedModalWhatsapp').val('');
         $('#aedModalCallPitch').val('');
-        $('#aedTabEmail').html(loadingMsg);
-        $('#aedTabWhatsapp').html(loadingMsg);
-        $('#aedTabCall').html(loadingMsg);
-        $('#aedSignalUrgency,#aedSignalIntent,#aedSignalObjection,#aedSignalCompetitor,#aedSignalNextAction,#aedSignalCrmAlert,#aedSignalReason').text('Generating…');
+        $('#aedTabEmail').html(askMsg);
+        $('#aedTabWhatsapp').html(askMsg);
+        $('#aedTabCall').html(askMsg);
+        // jo analysis pehle se hai wo dikha do, warna '—'
+        $('#aedSignalUrgency').html(aedRichText(d.enrollmentUrgency));
+        $('#aedSignalIntent').html(aedRichText(d.intentSummary));
+        $('#aedSignalObjection').html(aedRichText(d.mainObjection));
+        $('#aedSignalCompetitor').html(aedRichText(d.competitorSignals));
+        $('#aedSignalNextAction').html(aedRichText(d.nextBestAction));
+        $('#aedSignalCrmAlert').html(aedRichText(d.crmAlert));
+        $('#aedSignalReason').html(aedRichText(d.explainableReason));
         $('#aedModalSave,#aedModalCopy,#aedModalMarkReviewed,#aedModalSendEmail').prop('disabled', true);
+        $('#aedModalRegenerate').hide();     // draft hi nahi hai to "Re-generate" ka matlab nahi
+        aedRenderFollowupForm(d);
         $('#aiEmailDraftModal').modal('show');
-
-        // Auto-trigger full draft fetch for this lead
-        fetchFullDraft(d.leadId, lang);
         return;
     }
+    $('#aedModalRegenerate').show();
 
     // Full draft already available — populate normally
     populateModalContent(d);
+    aedRenderFollowupForm(d);
     $('#aiEmailDraftModal').modal('show');
+}
+
+// Lead status update form — Lead List wala hi submitFollowupSaveFromLeadList() use karta hai.
+// Wo function #leadStatus-<leadId> / #followupRemarks-<leadId> dhoondta hai aur success par
+// lead-list ke kuch elements chhuta hai, isliye wahi id/class yahan bhi bana dete hain.
+var AED_MIN_REMARK = 20;
+
+function aedRenderFollowupForm(d) {
+    var $body = $('#aedFollowupBody');
+    if (!$body.length) return;
+    var id = d.leadId;
+
+    $body.html(
+        '<select id="leadStatus-' + id + '" name="leadStatus-' + id + '" class="form-control form-control-sm mb-2">'
+            + '<option value="">Select Status</option>'
+        + '</select>'
+        + '<textarea id="followupRemarks-' + id + '" name="followupRemarks-' + id + '" rows="2" '
+            + 'class="form-control form-control-sm" placeholder="Follow-up remarks (min ' + AED_MIN_REMARK + ' characters)"></textarea>'
+        + '<small id="leadListRemarksCounter_' + id + '" class="text-muted">0 / ' + AED_MIN_REMARK + '</small>'
+        + '<div class="text-right mt-2">'
+            + '<button type="button" class="btn btn-info btn-sm px-3" id="aedFollowupSaveBtn">'
+                + '<i class="fa fa-check mr-1"></i>Follow-up</button>'
+        + '</div>'
+        // lead-list ke DOM hooks — na hone par us function me JS error aata hai
+        + '<div style="display:none;">'
+            + '<span class="nextSchedule-' + id + '"></span><span class="nextFollow-' + id + '"></span>'
+            + '<span class="leadlist-status-' + id + '"></span><span class="leadlist-remark-' + id + '"></span>'
+            + '<span class="demo-status-row-' + id + '"></span>'
+            + '<div class="lead-row-' + id + ' aed-hook"></div>'
+            + '<div class="lead-row-td-' + id + ' aed-hook"></div>'
+        + '</div>'
+    );
+
+    // status list wahi master se
+    if (typeof callLeadStatusList === 'function') {
+        callLeadStatusList('followupSaveForm', 'B2C', 'leadStatus-' + id, false);
+    }
+
+    // remark counter
+    $('#followupRemarks-' + id).off('input.aedfc').on('input.aedfc', function () {
+        var len = ($(this).val() || '').trim().length;
+        $('#leadListRemarksCounter_' + id)
+            .attr('class', len >= AED_MIN_REMARK ? 'text-success' : 'text-muted')
+            .html(len + ' / ' + AED_MIN_REMARK);
+    });
+
+    $('#aedFollowupSaveBtn').off('click.aedfs').on('click.aedfs', function () {
+        if (typeof submitFollowupSaveFromLeadList !== 'function') {
+            showMessageTheme2(0, 'Follow-up action failed to load. Please refresh the page.', '', true);
+            return;
+        }
+        submitFollowupSaveFromLeadList('followupSaveForm', String(id), 'B2C', '111', 'new-lead', true, AED_MIN_REMARK);
+    });
 }
 
 function populateModalContent(d) {
@@ -505,13 +854,13 @@ function populateModalContent(d) {
     $('#aedModalBody').val(d.emailBody || '');
     $('#aedModalWhatsapp').val(d.whatsappDraft || '');
     $('#aedModalCallPitch').val(d.callPitch || '');
-    $('#aedSignalUrgency').text(d.enrollmentUrgency    || '—');
-    $('#aedSignalIntent').text(d.intentSummary         || '—');
-    $('#aedSignalObjection').text(d.mainObjection      || '—');
-    $('#aedSignalCompetitor').text(d.competitorSignals || '—');
-    $('#aedSignalNextAction').text(d.nextBestAction    || '—');
-    $('#aedSignalCrmAlert').text(d.crmAlert            || '—');
-    $('#aedSignalReason').text(d.explainableReason     || '—');
+    $('#aedSignalUrgency').html(aedRichText(d.enrollmentUrgency));
+    $('#aedSignalIntent').html(aedRichText(d.intentSummary));
+    $('#aedSignalObjection').html(aedRichText(d.mainObjection));
+    $('#aedSignalCompetitor').html(aedRichText(d.competitorSignals));
+    $('#aedSignalNextAction').html(aedRichText(d.nextBestAction));
+    $('#aedSignalCrmAlert').html(aedRichText(d.crmAlert));
+    $('#aedSignalReason').html(aedRichText(d.explainableReason));
     $('#aedModalSave,#aedModalCopy,#aedModalMarkReviewed,#aedModalSendEmail').prop('disabled', false);
     // Token usage display
     var inTok = d.inputTokens || 0, outTok = d.outputTokens || 0;
@@ -550,9 +899,20 @@ function restoreModalTabs() {
     }
 }
 
-function fetchFullDraft(leadId, forcedLanguage) {
+var AED_DRAFT_REQ = { token: 0 };
+
+function fetchFullDraft(leadId, forcedLanguage, attempt, token) {
+    attempt = attempt || 1;
+    // naya request (Open / Re-generate) shuru hote hi token badal jata hai, isliye purani
+    // koshish ka jawab ya uski queued retry UI ko dobara loading me nahi dal sakti
+    if (!token) { token = ++AED_DRAFT_REQ.token; }
     var dateType = $('#aiEmailDraftDateType').val() || 'TODAY';
     var params = { schoolId: SCHOOL_ID, dateType: dateType, dataType: 'DEMO', userId: USER_ID, leadId: leadId };
+    // CUSTOM par dates bhi bhejni zaroori hain, warna server date parse par gir jata tha
+    if (dateType === 'CUSTOM') {
+        params.startDate = ($('#aiEmailDraftFromDate').val() || '') + ' 00:00';
+        params.endDate   = ($('#aiEmailDraftToDate').val()   || '') + ' 23:59';
+    }
     if (forcedLanguage && forcedLanguage !== 'English') params.forcedLanguage = forcedLanguage;
     var $counselorEl = $('#aiEmailDraftCounselorFilter');
     var counselorId  = $counselorEl.val() || $counselorEl.data('lockedValue') || '';
@@ -566,22 +926,14 @@ function fetchFullDraft(leadId, forcedLanguage) {
     $.ajax({
         type: 'POST', contentType: APPLICATION_JSON_VALUE,
         url: getURLForHTML('/api/v1/leads', 'get-lead-timeline-summary'),
-        data: JSON.stringify(params), dataType: 'json',
+        data: JSON.stringify(params), dataType: 'json', timeout: 180000,
         success: function (data) {
-            var rows = Array.isArray(data) ? data : [];
+            if (token !== AED_DRAFT_REQ.token) { return; }   // purana jawab — ignore
+            var rows = Array.isArray(data) ? data : (data && data.data ? data.data : []);
             // Find the specific lead we requested, not just rows[0]
             var r = rows.find(function (x) { return String(x.leadId) === String(leadId); });
-            if (!r) {
-                restoreModalTabs();
-                showMessageTheme2(0, 'Could not generate full draft. Please try Re-generate.', '', true);
-                $('#aedModalSave,#aedModalCopy,#aedModalMarkReviewed,#aedModalSendEmail').prop('disabled', false);
-                return;
-            }
-            // If emailBody still empty (AI timed out), show error
-            if (!r.emailBody) {
-                restoreModalTabs();
-                showMessageTheme2(0, 'AI timed out generating draft. Please click Re-generate.', '', true);
-                $('#aedModalSave,#aedModalCopy,#aedModalMarkReviewed,#aedModalSendEmail').prop('disabled', false);
+            if (!r || !r.emailBody) {
+                aedFullDraftFallback(leadId, forcedLanguage, attempt, token);
                 return;
             }
             // Merge full draft into allData and drafts
@@ -595,11 +947,32 @@ function fetchFullDraft(leadId, forcedLanguage) {
             populateModalContent(fresh);
         },
         error: function () {
-            restoreModalTabs();
-            showMessageTheme2(0, 'Error generating full draft. Please try Re-generate.', '', true);
-            $('#aedModalSave,#aedModalCopy,#aedModalMarkReviewed,#aedModalSendEmail').prop('disabled', false);
+            if (token !== AED_DRAFT_REQ.token) { return; }
+            aedFullDraftFallback(leadId, forcedLanguage, attempt, token);
         }
     });
+}
+
+// Draft na bane to: pehli baar chup-chaap dobara koshish; phir bhi na ho to modal
+// khali chhodne ke bajaye jo data hai wahi dikhao + saaf, non-scary message.
+function aedFullDraftFallback(leadId, forcedLanguage, attempt, token) {
+    if (token && token !== AED_DRAFT_REQ.token) { return; }     // beech me naya request aa gaya
+    if ((attempt || 1) < 2) {
+        setTimeout(function () {
+            if (token && token !== AED_DRAFT_REQ.token) { return; }
+            // is beech draft mil chuka ho to dobara mat maango
+            var have = AI_EMAIL_DRAFT_STATE.drafts[leadId];
+            if (have && have.emailBody) { return; }
+            fetchFullDraft(leadId, forcedLanguage, (attempt || 1) + 1, token);
+        }, 1200);
+        return;
+    }
+    restoreModalTabs();
+    var d = AI_EMAIL_DRAFT_STATE.drafts[leadId]
+         || (AI_EMAIL_DRAFT_STATE.allData || []).find(function (x) { return String(x.leadId) === String(leadId); });
+    if (d) { populateModalContent(d); }     // subject/analysis jo mila hai wo to dikhe
+    $('#aedModalSave,#aedModalCopy,#aedModalMarkReviewed,#aedModalSendEmail').prop('disabled', false);
+    showMessageTheme2(0, 'Draft could not be generated. Please click Re-generate or try again in a moment.', '', true);
 }
 
 function saveAiEmailDraftEdits(draftStatus, onSuccess, suppressToast) {

@@ -96,7 +96,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
         "lead-demo-dashboard":{url:"",file:[{role:"",fileName:["leadDemoDashboardContent.js","leadDemoDashboard.js","leads.js","commonRecordings.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         // Student Management > Dashboard (Student Enrollment Dashboard) - Phase 1
         "student-enrollment-dashboard":{url:"",file:[{role:"",fileName:["studentEnrollmentDashboardContent.js","studentEnrollmentDashboard.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
-        "ai-email-draft":{url:"",file:[{role:"",fileName:["AIEmailDraftContent.js","aiEmailDraft.js","leads.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "ai-email-draft":{url:"",file:[{role:"",fileName:["AIEmailDraftContent.js","aiEmailDraft.js","leads.js","commonRecordings.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-setting":{url:"",file:[{role:"",fileName:["LeadSettingListContent.js","LeadSettings.js","leads.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "counselor-daily-report":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/counselor-daily-report?moduleId="+moduleId+"&userId="+USER_ID},
         "lead-sales-research":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/lead-sales-research?moduleId="+moduleId+"&userId="+USER_ID},

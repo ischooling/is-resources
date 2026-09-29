@@ -43,6 +43,21 @@ function getAiEmailDraftContent(title) {
 
                     + '<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 mb-2">'
                         + '<div class="custom-field mb-0">'
+                            + '<select class="form-control" id="aiEmailDraftExcludeStatus" multiple="multiple">'
+                            + '</select>'
+                            + '<label class="text-primary m-0" for="aiEmailDraftExcludeStatus">Exclude Status</label>'
+                        + '</div>'
+                    + '</div>'
+
+                    + '<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 mb-2">'
+                        + '<div class="custom-field mb-0">'
+                            + '<input type="text" class="form-control" id="aiEmailDraftLeadNoFilter" placeholder="Lead No / Name / Email / Phone" autocomplete="off" />'
+                            + '<label class="text-primary m-0" for="aiEmailDraftLeadNoFilter">Search</label>'
+                        + '</div>'
+                    + '</div>'
+
+                    + '<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 mb-2">'
+                        + '<div class="custom-field mb-0">'
                             + '<select class="form-control" id="aiEmailDraftCounselorFilter">'
                                 + '<option value="">All Academic Counselor</option>'
                             + '</select>'
@@ -143,7 +158,18 @@ function getAiEmailDraftContent(title) {
         // ── Table Card ────────────────────────────────────────────────────
         + '<div class="main-card mb-3 card">'
             + '<div class="card-body">'
-                + '<div class="table-responsive mt-2">'
+                + '<div class="d-flex align-items-center" style="gap:6px;">'
+                    + '<span style="font-size:12px;color:#5b6577;">Show</span>'
+                    + '<select class="form-control form-control-sm" id="aiEmailDraftPageSize" '
+                        + 'style="width:75px;height:31px;padding:2px 6px;font-size:12px;">'
+                        + '<option value="10">10</option>'
+                        + '<option value="20">20</option>'
+                        + '<option value="50">50</option>'
+                        + '<option value="100">100</option>'
+                    + '</select>'
+                    + '<span style="font-size:12px;color:#5b6577;">entries</span>'
+                + '</div>'
+                + '<div class="table-responsive mt-2" style="width:100%;overflow-x:auto;">'
                     + '<table class="table table-bordered table-hover" id="aiEmailDraftTable" style="min-width:1400px;font-size:12px;">'
                         + '<thead>'
                             + '<tr class="bg-primary text-white">'
@@ -167,7 +193,7 @@ function getAiEmailDraftContent(title) {
                         + '</tbody>'
                     + '</table>'
                 + '</div>'
-                + '<div class="text-center mt-2" id="aiEmailDraftPagination"></div>'
+                + '<div class="mt-2" id="aiEmailDraftPagination" style="width:100%;clear:both;"></div>'
             + '</div>'
         + '</div>'
 
@@ -311,6 +337,16 @@ function getAiEmailDraftContent(title) {
                             + getAiSignalAccordion('aedSignalNextAction', 'Next Best Action',        'pe-7s-rocket')
                             + getAiSignalAccordion('aedSignalCrmAlert',   'CRM Alert / Task',        'pe-7s-bell')
                             + getAiSignalAccordion('aedSignalReason',     'Why This Recommendation', 'pe-7s-info')
+
+                            // ── Lead status update (wahi follow-up form jo Lead List me hai) ──
+                            + '<div id="aedFollowupSection" style="margin-top:14px;border:1px solid #e6eaf2;border-radius:6px;background:#fff;">'
+                                + '<div style="padding:8px 12px;border-bottom:1px solid #eef1f7;font-size:12px;font-weight:700;color:#3d5af1;">'
+                                    + '<i class="fa fa-check-circle mr-1"></i>Update Lead Status'
+                                + '</div>'
+                                + '<form id="followupSaveForm" onsubmit="return false;" style="padding:12px;">'
+                                    + '<div id="aedFollowupBody"></div>'
+                                + '</form>'
+                            + '</div>'
 
                         + '</div>'
                     + '</div>'
