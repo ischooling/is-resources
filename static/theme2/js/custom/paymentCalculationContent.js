@@ -223,6 +223,16 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 															</tr>
 															<tr>
 																<td>
+																	<label>Premium on Payable Fee Reason</label>
+																</td>
+																<td width="200px">
+																	<div class="custom-field flex-fill mb-0">
+																		<input type="text" id="premiumReason" name="premiumReason" class="form-control" value="" placeholder=" " maxlength="100" />
+																	</div>
+																</td>
+															</tr>
+															<tr>
+																<td>
 																	<label>Payable Fee after Premium</label>
 																</td>
 																<td width="200px">
@@ -480,6 +490,7 @@ function renderAdvancePayment(userId, studentStandardId, schoolWebsite, logoUrl,
 	$('#paymentMode').val(advanceFeeDetails.paymentMode);
 	$('#courseFee').val(getNumberWithPrecision(advanceFeeDetails.courseFee, 2));
 	$('#transactionCharge').val(getNumberWithPrecision(advanceFeeDetails.transactionCharge, 2));
+	$('#transactionChargeReason').val(advanceFeeDetails.transactionChargeReason);
 	if (advanceFeeDetails.learningPlan == 'SCHOLARSHIP') {
 		$('#progressionDiscount').val('0.00');
 	} else {
@@ -584,6 +595,12 @@ function customAdvanceContent(responseData, userId, studentStandardId, schoolWeb
 													<div class="position-relative form-group mb-3 custom-field">
 														<input id="transactionCharge" value="" placeholder=" " type="text" class="form-control text-right py-1"   onkeyup="calculatePayableAdvanceFee()">
 														<label class="m-0">Transaction Charges</label>
+													</div>
+												</div>
+												<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
+													<div class="position-relative form-group mb-3 custom-field">
+														<input id="transactionChargeReason" value="" placeholder=" " type="text" class="form-control py-1" maxlength="100">
+														<label class="m-0">Transaction Charges Reason</label>
 													</div>
 												</div>
 												<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
@@ -1026,6 +1043,10 @@ function getPaymentOptionDetails(planDiscount, alreadyPaid) {
 function validateAdvancePayment() {
 	if ($('#learningProgram').val() == '') {
 		showMessageTheme2(0, 'Select Learning Program', '', false);
+		return false;
+	}
+	if (parseFloat($('#transactionCharge').val() || 0) > 0 && $.trim($('#transactionChargeReason').val() || '') == '') {
+		showMessageTheme2(0, 'Please enter the transaction charges reason', '', false);
 		return false;
 	}
 	if (parseFloat($('#additionalDiscount').val() || 0) > 0 && $.trim($('#discountReason').val() || '') == '') {

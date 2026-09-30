@@ -103,6 +103,7 @@ function getPaymentDetails() {
 
 				$('#premiumPercentage').val(customPlan['premiumPercentage'].toFixed(2) + '%');
 				$('#premiumAmount').val(customPlan['premiumAmount'].toFixed(2))
+				$('#premiumReason').val(customPlan['premiumReason'])
 				$('#payableFeeAfterPremium').val(customPlan['payableFeeAfterPremium'].toFixed(2))
 				$('#discountPercentage').val(customPlan['discountPercentage'].toFixed(2) + '%');
 				$('#discountAmount').val(customPlan['discountAmount'].toFixed(2))
@@ -507,6 +508,10 @@ function saveCustomPaymentPlan(status) {
 			showMessageTheme2(0, 'Please note the Calculated Course Fee and the Net Payable Fee do not match');
 			return false;
 		}
+		if (parseFloat($('#premiumAmount').val() || 0) > 0 && $.trim($('#premiumReason').val() || '') == '') {
+			showMessageTheme2(0, 'Please enter the premium on payable fee reason');
+			return false;
+		}
 		if (parseFloat($('#discountAmount').val() || 0) > 0 && $.trim($('#discountReason').val() || '') == '') {
 			showMessageTheme2(0, 'Please enter the discount reason');
 			return false;
@@ -574,6 +579,7 @@ function getRequestForSaveCustomPaymentPlan(status) {
 	saveCustomPlan['premiumType'] = $('#premiumType').val();
 	saveCustomPlan['premiumPercentage'] = $('#premiumPercentage').val().replace('%', '');
 	saveCustomPlan['premiumAmount'] = $('#premiumAmount').val();
+	saveCustomPlan['premiumReason'] = $('#premiumReason').val();
 	saveCustomPlan['payableFeeAfterPremium'] = $('#payableFeeAfterPremium').val();
 	saveCustomPlan['discountType'] = $('#discountType').val();
 	saveCustomPlan['discountPercentage'] = $('#discountPercentage').val().replace('%', '');
@@ -1070,6 +1076,7 @@ function getRequestForSaveAdvanceFeeDetails(status) {
 
 	saveAdvanceFee['courseFee'] = $('#courseFee').val();
 	saveAdvanceFee['transactionCharge'] = $('#transactionCharge').val();
+	saveAdvanceFee['transactionChargeReason'] = $('#transactionChargeReason').val();
 	saveAdvanceFee['progressionDiscount'] = $('#progressionDiscount').val();
 	saveAdvanceFee['planDiscount'] = $('#planDiscount').val();
 	saveAdvanceFee['discountReason'] = $('#discountReason').val();
