@@ -440,6 +440,20 @@ function aedBackfillNext(myToken) {
     });
 }
 
+// Last follow-up: date + chhota remark; lamba ho to "more" se poora remark expand row me
+function aedLastFollowUpCell(d) {
+    var date = d.lastFollowUpDate ? '<div style="font-size:11.5px;font-weight:600;">' + esc(d.lastFollowUpDate) + '</div>' : '';
+    var rem  = (d.lastRemark || '').trim();
+    if (!date && !rem) { return '<span class="text-muted">—</span>'; }
+    if (!rem) { return date; }
+    var short = rem.length > 60 ? rem.substring(0, 60) + '…' : rem;
+    var more  = rem.length > 60
+        ? ' <a href="javascript:void(0)" class="aed-analysis-toggle" data-leadid="' + esc(d.leadId) + '" '
+          + 'style="font-size:11px;">more</a>'
+        : '';
+    return date + '<div class="text-muted" style="font-size:11.5px;line-height:1.4;">' + esc(short) + more + '</div>';
+}
+
 // Follow-up date nikal chuki ho to laal + "overdue" — counselor ko turant dikhe
 function aedFollowUpCell(dateStr) {
     var txt = formatAedDate(dateStr) || '—';
@@ -497,6 +511,19 @@ function aedAnalysisHtml(d) {
         ['fa-info-circle',  'Why This Recommendation', d.explainableReason]
     ].filter(function (x) { return x[2]; });
 
+    var lastRem = (d.lastRemark || '').trim();
+    var remBlock = lastRem
+        ? '<div style="flex:1 1 100%;background:#fffdf5;border:1px solid #f0e6c8;border-radius:6px;padding:10px 12px;">'
+          + '<div style="font-size:11px;font-weight:700;color:#8a6d1f;margin-bottom:4px;">'
+          + '<i class="fa fa-comment-o mr-1"></i>Last Follow-up Remark'
+          + (d.lastFollowUpDate ? ' — ' + esc(d.lastFollowUpDate) : '') + '</div>'
+          + '<div style="font-size:12px;color:#333;line-height:1.5;">' + aedRichText(lastRem) + '</div>'
+          + '</div>'
+        : '';
+
+    if (!items.length && (d.lastRemark || '').trim()) {
+        return '<div class="d-flex flex-wrap" style="gap:10px;">' + remBlock + '</div>';
+    }
     if (!items.length) {
         return '<div class="text-muted" style="font-size:12px;">'
              + '<i class="fa fa-info-circle mr-1"></i>AI Analysis is not ready yet. '
@@ -513,7 +540,7 @@ function aedAnalysisHtml(d) {
              + '</div>';
     }).join('');
 
-    return '<div class="d-flex flex-wrap" style="gap:10px;">' + cards + '</div>';
+    return '<div class="d-flex flex-wrap" style="gap:10px;">' + remBlock + cards + '</div>';
 }
 
 // ── Pagination (page size UI se: 10/20/50/100 — see AiEmailDraftUtil.getLeadsTimeLine) ──
@@ -634,9 +661,12 @@ function renderAiEmailDraftTable(rows) {
                 + (d.email ? '<br><small class="text-muted"><i class="fa fa-envelope-o mr-1"></i>' + esc(d.email) + '</small>' : '')
                 + (d.phoneNo ? '<br><small class="text-muted"><i class="fa fa-phone mr-1"></i>' + esc(d.phoneNo) + '</small>' : '')
             + '</td>'
-            + '<td>' + esc(d.counselorName) + '</td>'
-            + '<td>' + esc(d.leadStatus) + '</td>'
-            + '<td class="text-center">' + esc(d.demodatetime || '—') + '</td>'
+            + '<td style="max-width:170px;">' + esc(d.counselorName)
+                + (d.demodatetime ? '<br><small class="text-muted">' + esc(d.demodatetime) + '</small>' : '')
+            + '</td>'
+            + '<td style="max-width:230px;">' + esc(d.leadStatus)
+                + '<div style="margin-top:3px;">' + aedLastFollowUpCell(d) + '</div>'
+            + '</td>'
             + '<td class="text-center">' + priorityBadge + '</td>'
             + '<td class="text-center">' + (pending ? '—' : '<strong>' + (d.priorityScore || 0) + '</strong>') + '</td>'
             + '<td class="text-center">' + riskBadge + '</td>'
@@ -651,7 +681,7 @@ function renderAiEmailDraftTable(rows) {
             + '</td>'
             + '</tr>'
             + '<tr class="aed-analysis-row" data-leadid="' + esc(d.leadId) + '" style="display:none;background:#f7f9ff;">'
-                + '<td colspan="13" style="padding:12px 16px;">' + aedAnalysisHtml(d) + '</td>'
+                + '<td colspan="12" style="padding:12px 16px;">' + aedAnalysisHtml(d) + '</td>'
             + '</tr>';
     });
 
