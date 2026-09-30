@@ -256,6 +256,16 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 															</tr>
 															<tr>
 																<td>
+																	<label>Discount Reason</label>
+																</td>
+																<td width="200px">
+																	<div class="custom-field flex-fill mb-0">
+																		<input type="text" id="discountReason" name="discountReason" class="form-control" value="" placeholder=" " maxlength="100" />
+																	</div>
+																</td>
+															</tr>
+															<tr>
+																<td>
 																	<label>Net Payable Fee</label>
 																</td>
 																<td width="200px">
@@ -476,10 +486,10 @@ function renderAdvancePayment(userId, studentStandardId, schoolWebsite, logoUrl,
 		$('#progressionDiscount').val(getNumberWithPrecision(advanceFeeDetails.progressionDiscount, 2));
 	}
 	$('#planDiscount').val(getNumberWithPrecision(advanceFeeDetails.planDiscount, 2));
+	$('#discountReason').val(advanceFeeDetails.discountReason);
 	$('#additionalDiscount').val(getNumberWithPrecision(advanceFeeDetails.additionalDiscount, 2));
 	$('#alreadyPaid').val(getNumberWithPrecision(advanceFeeDetails.alreadyPaid, 2));
-	$('#payableFee').html('<b>' + getNumberWithPrecision(advanceFeeDetails.payableFee, 2) + '</b>');
-	$('#payableFee').attr('payablefee-data', getNumberWithPrecision(advanceFeeDetails.payableFee, 2));
+	calculatePayableAdvanceFee();
 	getAdvanceFeeDetailsContentDetails(advanceFeeDetails.paymentMode, responseData);
 
 	if (responseData['alreadyPaid']) {
@@ -589,9 +599,15 @@ function customAdvanceContent(responseData, userId, studentStandardId, schoolWeb
 													</div>
 												</div>
 												<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
-													<div class="position-relative form-group mb-0 custom-field">
+													<div class="position-relative form-group mb-3 custom-field">
 														<input id="additionalDiscount" value="" placeholder=" " type="text" class="form-control text-right py-1"   onkeyup="calculatePayableAdvanceFee()">
 														<label class="m-0">Additional Discount</label>
+													</div>
+												</div>
+												<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
+													<div class="position-relative form-group mb-3 custom-field">
+														<input id="discountReason" value="" placeholder=" " type="text" class="form-control py-1" maxlength="100">
+														<label class="m-0">Discount Reason</label>
 													</div>
 												</div>
 												<div class="col-lg-12 col-mg-12 col-sm-12 col-12">
@@ -1010,6 +1026,10 @@ function getPaymentOptionDetails(planDiscount, alreadyPaid) {
 function validateAdvancePayment() {
 	if ($('#learningProgram').val() == '') {
 		showMessageTheme2(0, 'Select Learning Program', '', false);
+		return false;
+	}
+	if (parseFloat($('#additionalDiscount').val() || 0) > 0 && $.trim($('#discountReason').val() || '') == '') {
+		showMessageTheme2(0, 'Please enter the discount reason', '', false);
 		return false;
 	}
 	showWarningMessageShow('Are you sure you want to save the advance payment details? Please note you will not be able to edit them once saved.', 'saveAdvanceFeeDetails(\'C\')', false)

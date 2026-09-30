@@ -107,6 +107,7 @@ function getPaymentDetails() {
 				$('#discountPercentage').val(customPlan['discountPercentage'].toFixed(2) + '%');
 				$('#discountAmount').val(customPlan['discountAmount'].toFixed(2))
 				$('#payableFeeAfterDiscount').val(customPlan['payableAmountAfterDiscount'].toFixed(2))
+				$('#discountReason').val(customPlan['discountReason'])
 
 				$('#firstInstallmentPercentage').val(customPlan['firstPaymentPercentage'].toFixed(2) + '%');
 				$('#firstInstallment').val(customPlan['firstPaymentAmount'].toFixed(2))
@@ -399,7 +400,7 @@ function getPaymentTitleCalculation(index, durationWithin) {
 		gradeName = data[1];
 	}
 	if ($('#noOfInstallment').val() == 1) {
-		return gradeName+' - One Time Payment';
+		return gradeName+' - Pay-in-full Payment';
 	}
 	if (index == 1) {
 		return gradeName+' - 1<sup>st</sup> of ' + durationWithin + ' Months Installment';
@@ -506,6 +507,10 @@ function saveCustomPaymentPlan(status) {
 			showMessageTheme2(0, 'Please note the Calculated Course Fee and the Net Payable Fee do not match');
 			return false;
 		}
+		if (parseFloat($('#discountAmount').val() || 0) > 0 && $.trim($('#discountReason').val() || '') == '') {
+			showMessageTheme2(0, 'Please enter the discount reason');
+			return false;
+		}
 	}
 	customLoader(true);
 	$.ajax({
@@ -579,6 +584,7 @@ function getRequestForSaveCustomPaymentPlan(status) {
 	saveCustomPlan['gapBetweenTwoIntstallment'] = $('#gapBetweenTwoIntstallment').val();
 	saveCustomPlan['tentativeFirstPayDate'] = $('#tentativeFirstPayDate').val();
 	saveCustomPlan['discountApplicableFor'] = $('#discountApplicableFor').val();
+	saveCustomPlan['discountReason'] = $('#discountReason').val();
 
 	var schedulePayments = [];
 	$("#paymentScheduleTable tbody tr").each(function () {
@@ -595,11 +601,7 @@ function getRequestForSaveCustomPaymentPlan(status) {
 			}
 		}
 	});
-	if(schedulePayments.length>1){
-		saveCustomPlan['customPlanNamme'] = 'c_installment';
-	}else{
-		saveCustomPlan['customPlanNamme'] = 'c_annually';
-	}
+	saveCustomPlan['customPlanNamme'] = $('#customPaymentPlan').val();
 	var savePaymentCalculationRequest = {}
 	savePaymentCalculationRequest['uniqueId'] = UNIQUEUUID;
 	savePaymentCalculationRequest['status'] = status;
@@ -1070,6 +1072,7 @@ function getRequestForSaveAdvanceFeeDetails(status) {
 	saveAdvanceFee['transactionCharge'] = $('#transactionCharge').val();
 	saveAdvanceFee['progressionDiscount'] = $('#progressionDiscount').val();
 	saveAdvanceFee['planDiscount'] = $('#planDiscount').val();
+	saveAdvanceFee['discountReason'] = $('#discountReason').val();
 	saveAdvanceFee['additionalDiscount'] = $('#additionalDiscount').val();
 	saveAdvanceFee['alreadyPaid'] = $('#alreadyPaid').val();
 	saveAdvanceFee['payableFee'] = $('#payableFee').attr('payableFee-data');
