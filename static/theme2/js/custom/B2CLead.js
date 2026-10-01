@@ -185,6 +185,12 @@ function renderPlainTextSummaryPopup(rawSummary, leadNo) {
     return formatOpenAIText(rawSummary);
   }
 
+  // New labeled format ("Outcome: ...", "Student: ...") -> render as a clean label/value listing
+  var labeledItems = parseLabeledSummary(text);
+  if (labeledItems) {
+    return renderLabeledSummaryHtml(labeledItems, leadNo);
+  }
+
   var sectionRegex = /^([A-K])\.\s+(.+)$/i;
   var lines = text.split(/\r?\n/);
   var sections = [];
@@ -220,6 +226,48 @@ function renderPlainTextSummaryPopup(rawSummary, leadNo) {
   }
 
   html += "</div>";
+  return html;
+}
+
+// Splits the labeled plain-text summary into {label, value} items. Works whether the AI used real
+// line breaks or collapsed everything onto one line (splits before each known label). Returns null
+// when it does not look like the labeled format, so the caller can fall back.
+function parseLabeledSummary(text) {
+  if (!text) return null;
+  var labels = ["Outcome", "Student", "Parent", "Location", "Why online school", "Main concerns",
+    "Doubts and answers", "Learning mode", "Schedule", "Fees", "Documents", "Competitor / comparison",
+    "Commitments", "Next step", "Follow-up", "Objections / risks", "Sentiment", "Recommended next action"];
+  var escaped = labels.map(function (l) { return l.replace(/[.*+?^${}()|[\]\\\/-]/g, "\\$&"); });
+  var splitRe = new RegExp("\\s*(?=(?:" + escaped.join("|") + ")\\s*:)", "g");
+  var flat = String(text).replace(/\s+/g, " ").trim();
+  var parts = flat.split(splitRe);
+  var items = [];
+  for (var i = 0; i < parts.length; i++) {
+    var p = (parts[i] || "").trim();
+    if (!p) continue;
+    var m = p.match(/^([^:]{1,40}):\s*([\s\S]*)$/);
+    if (m) { items.push({ label: m[1].trim(), value: m[2].trim() }); }
+  }
+  return items.length >= 4 ? items : null;
+}
+
+// Renders the labeled summary as a two-column label/value listing inside the Meeting Analysis card.
+function renderLabeledSummaryHtml(items, leadNo) {
+  var html = '<div style="padding:10px;background:#f8f9fb;border-radius:12px;">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">';
+  html += '<h4 style="margin:0;font-weight:700;color:#111827;">Meeting Analysis</h4>';
+  html += '<span style="background:#0d6efd;color:#fff;padding:6px 10px;border-radius:20px;font-weight:600;">Lead: ' + escapeHtml(leadNo || "N/A") + "</span>";
+  html += "</div>";
+  html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">';
+  for (var i = 0; i < items.length; i++) {
+    var last = (i === items.length - 1);
+    var bg = (i % 2 === 0) ? "#ffffff" : "#f9fafb";
+    html += '<div style="display:flex;flex-wrap:wrap;gap:4px 14px;padding:10px 14px;background:' + bg + ';' + (last ? "" : "border-bottom:1px solid #eef0f3;") + '">';
+    html += '<div style="flex:0 0 165px;min-width:120px;font-size:13px;font-weight:700;color:#0d6efd;">' + escapeHtml(items[i].label) + "</div>";
+    html += '<div style="flex:1;min-width:200px;font-size:13px;line-height:1.5;color:#374151;">' + escapeHtml(items[i].value) + "</div>";
+    html += "</div>";
+  }
+  html += "</div></div>";
   return html;
 }
 

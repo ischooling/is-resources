@@ -179,8 +179,16 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
         
         // 
         var eventType = normalizeEventType(rawEvent);
-        // assignments carry dueDate/paceDate instead of start — use it so they appear on the calendar
-        var startMoment = normalizeDateTime(rawEvent.start || rawEvent.startDateTime || rawEvent.date || rawEvent.dueDate || rawEvent.paceDate, rawEvent.timezone);
+        // ASSIGNMENT events only carry a plain due date (no time/timezone) -- treat it as that
+        // exact calendar day with no UTC round-trip, so it never shifts back a day for students
+        // whose timezone is behind UTC. Every other event type keeps using normalizeDateTime
+        // exactly as before, since those carry a real start time that does need converting.
+        var startMoment;
+        if (eventType === "assignment" && (rawEvent.dueDate || rawEvent.paceDate)) {
+            startMoment = moment(rawEvent.dueDate || rawEvent.paceDate, "YYYY-MM-DD");
+        } else {
+            startMoment = normalizeDateTime(rawEvent.start || rawEvent.startDateTime || rawEvent.date || rawEvent.dueDate || rawEvent.paceDate, rawEvent.timezone);
+        }
         var endMoment = normalizeDateTime(rawEvent.end || rawEvent.endDateTime, rawEvent.timezone);
         var allDay = rawEvent.allDay === true || eventType === "holiday";
         var courseId = getCourseId(rawEvent)

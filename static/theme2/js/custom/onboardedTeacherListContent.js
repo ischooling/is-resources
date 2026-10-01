@@ -768,7 +768,7 @@ function successFailedWatiMessagesModal(allData) {
 											</div>
 										</div>
 										
-										<form id="resendWatiMessages" class="full d-flex flex-column" action="javascript:void(0);">
+										<form id="resendWatiMessages" class="full d-flex flex-column" action="javascript:void(0);"`+(fData.length === 0 ? ' style="display:none;"' : '')+`>
 											<div id='failedWatiDiv' class='border border-danger rounded-10'>
 												<div class="d-flex justify-content-between align-items-center">
 													<p class="m-0 p-1 d-flex align-items-center" style='gap:5px;'>
@@ -1026,8 +1026,10 @@ function sendWatiNotification(templateName, index){
 			showMessageTheme2(0, 'Please check any one user to send message','',false);
 			return false;
 		}else{
-			var selectedUsers = JSON.stringify(getSelectedUsersData());
-			showWarningMessageShow('Are you sure you want to send this data?','sendWatiNotificationToUserForTeacher( '+index+',\''+templateName+'\',\''+selectedUsers+'\',\'send\')', 'info-modal-sm');
+			// Keep the payload out of the inline onclick string: names/template names containing
+			// quotes or backslashes would otherwise break the generated JS (SyntaxError).
+			window.pendingWatiBroadcast = {index: index, templateName: templateName, selectedUsers: JSON.stringify(getSelectedUsersData())};
+			showWarningMessageShow('Are you sure you want to send this data?','sendWatiNotificationToUserForTeacher(window.pendingWatiBroadcast.index,window.pendingWatiBroadcast.templateName,window.pendingWatiBroadcast.selectedUsers,\'send\')', 'info-modal-sm');
 		}
 
 	});

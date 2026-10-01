@@ -2467,6 +2467,11 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 				if(data['leadDashboardCommon']!=null){
 					if(data['leadDashboardCommon']['leadCommonDTO']!=null){
 					   var leadDemo = data['leadDashboardCommon']['leadCommonDTO'][0];
+					   if(controlType=='edit'){
+							loadDemoAttribution(formId, leadDemo.leadModifyDTO.leadId);
+						}else{
+							$("#"+formId+" #demoAttributionDiv").html('');
+						}
 					   if(controlType=='addLeadClone'){
 							$("#"+formId+" #parentleadId").val(leadDemo.leadModifyDTO.leadId);
 							$("#"+formId+" #academicId").val(leadDemo.leadModifyDTO.academicId);
@@ -5427,6 +5432,7 @@ function resetLeadUpdate(){
 	$('#leadPopupForm').modal('hide');
 	$('#supportHtmlFollowup').html('');
 	$('#documentDiv').html('');
+	$('#demoAttributionDiv').html('');
 }
 
 function resetLeadChat(callFrom){
@@ -13495,4 +13501,246 @@ function renderLeadStatusLogHistory(leadId, rows) {
 
 			$(".leadMultipletimes_" + leadId).html(html);
 		}
+}
+
+// ============ DEMO LEAD ATTRIBUTION (LEADS.DEMO_LEAD_ID) ============
+// Links a lead to the lead that owns its family's demo, so the demo is credited to every sibling.
+
+function demoAttrEsc(value) {
+	return $('<div/>').text(value == null ? '' : String(value)).html();
+}
+
+function demoAttrRequest(data) {
+	data = data || {};
+	data['authentication'] = { hash: getHash(), schoolId: SCHOOL_ID, schoolUUID: SCHOOL_UUID, userId: USER_ID };
+	return JSON.stringify(data);
+}
+
+function demoAttrDemoText(demo) {
+	if (!demo) {
+		return '<span class="text-danger">No active demo</span>';
+	}
+	var parts = [];
+	if (demo.demoTime) parts.push(demoAttrEsc(demo.demoTime));
+	if (demo.counselor) parts.push(demoAttrEsc(demo.counselor));
+	if (demo.sessionStatus) parts.push(demoAttrEsc(demo.sessionStatus));
+	return '<span class="text-success"><i class="fa fa-check-circle"></i> ' + (parts.length ? parts.join(' · ') : 'Demo booked') + '</span>';
+}
+
+// Called when the Update Lead form opens: only renders the button, no search until it is clicked.
+function loadDemoAttribution(formId, leadId) {
+	var $div = $('#' + formId + ' #demoAttributionDiv');
+	if (!$div.length) {
+		return;
+	}
+	// Only ADMIN-DASHBOARD-SPACIAL-RIGHTS users (page-level flag, see CommonCustomScript.jsp).
+	if (typeof ADMIN_DASHBOARD_SPECIAL_RIGHTS === 'undefined' || ADMIN_DASHBOARD_SPECIAL_RIGHTS !== true || !leadId || leadId == '0') {
+		$div.html('');
+		return;
+	}
+	$div.data('leadId', leadId).data('formId', formId).removeData('attr');
+	$div.html('<div class="card border mt-3 mb-2"><div class="card-body py-2">'
+		+ '<div class="d-flex flex-wrap align-items-center justify-content-between">'
+		+ '<div class="small mb-1"><b class="text-primary mr-2">Demo Attribution</b><span class="text-muted">Check which demo this lead belongs to.</span></div>'
+		+ '<div class="mb-1"><button type="button" class="btn btn-sm btn-primary" onclick="fetchDemoAttribution(\'' + formId + '\')"><i class="fa fa-search"></i> Find Family Demo</button></div>'
+		+ '</div></div></div>');
+}
+
+function fetchDemoAttribution(formId) {
+	var $div = $('#' + formId + ' #demoAttributionDiv');
+	var leadId = $div.data('leadId');
+	if (!leadId) {
+		return;
+	}
+	$div.find('button').prop('disabled', true);
+	$div.find('.fa-search').removeClass('fa-search').addClass('fa-spinner fa-spin');
+	$.ajax({
+		type: 'POST',
+		contentType: APPLICATION_JSON_VALUE,
+		url: getURLFor('leads', 'get-family-demo-candidates'),
+		data: demoAttrRequest({ leadId: parseInt(leadId) }),
+		dataType: 'json',
+		cache: false,
+		timeout: 600000,
+		success: function (data) {
+			if (data && data.statusCode == '1') {
+				$div.data('attr', data);
+				renderDemoAttribution(formId, !data.ownDemo);
+			} else {
+				showMessageTheme2(0, (data && data.message) ? data.message : 'Unable to load family demo', '', true);
+				loadDemoAttribution(formId, leadId);
+			}
+		},
+		error: function () {
+			loadDemoAttribution(formId, leadId);
+		}
+	});
+}
+
+function renderDemoAttribution(formId, expanded) {
+	var $div = $('#' + formId + ' #demoAttributionDiv');
+	var data = $div.data('attr');
+	if (!data) {
+		return;
+	}
+	var current = data.current;
+	var candidates = data.candidates || [];
+	var demoFamily = candidates.filter(function (c) { return c.hasDemo; }).length;
+
+	var status;
+	if (data.ownDemo) {
+		status = '<span class="badge badge-success mr-2">Own demo</span> This lead booked its own demo and is credited to itself.';
+	} else if (current) {
+		status = '<span class="badge badge-success mr-2">Linked</span> <b>' + demoAttrEsc(current.demoLeadNo) + '</b>'
+			+ (current.childName ? ' · ' + demoAttrEsc(current.childName) : '')
+			+ (current.guardianName ? ' · Parent: ' + demoAttrEsc(current.guardianName) : '')
+			+ ' · ' + demoAttrDemoText(current.demo);
+	} else {
+		status = '<span class="badge badge-secondary mr-2">Not linked</span> No demo lead linked.';
+		if (data.recommendedDemoLeadId) {
+			status += ' <span class="badge badge-warning ml-1">1 family demo found</span>';
+		} else if (demoFamily > 1) {
+			status += ' <span class="badge badge-warning ml-1">' + demoFamily + ' family demos found, pick one</span>';
+		}
+	}
+
+	var actions = '';
+	if (!data.ownDemo) {
+		actions += '<button type="button" class="btn btn-sm btn-primary" onclick="toggleFamilyDemoPanel(\'' + formId + '\')"><i class="fa fa-search"></i> '
+			+ (current ? 'Change' : 'Find Family Demo') + '</button>';
+		if (current) {
+			actions += ' <button type="button" class="btn btn-sm btn-outline-danger ml-1" onclick="unlinkDemoLead(\'' + formId + '\')">Unlink</button>';
+		}
+	}
+
+	var html = '<div class="card border mt-3 mb-2"><div class="card-body py-2">'
+		+ '<div class="d-flex flex-wrap align-items-center justify-content-between">'
+		+ '<div class="small mb-1"><b class="text-primary mr-2">Demo Attribution</b>' + status + '</div>'
+		+ '<div class="mb-1">' + actions + '</div>'
+		+ '</div>'
+		+ '<div id="familyDemoPanel" class="mt-2 w-100" style="clear:both;display:' + (expanded ? 'block' : 'none') + '">' + getFamilyDemoPanelHtml(formId, data) + '</div>'
+		+ '</div></div>';
+	$div.html(html);
+}
+
+function getFamilyDemoPanelHtml(formId, data) {
+	var candidates = data.candidates || [];
+	var currentId = data.current ? data.current.demoLeadId : null;
+	var html = '';
+	if (candidates.length) {
+		html += '<div class="table-responsive w-100" style="flex:0 0 100%;"><table class="table table-sm table-bordered mb-2 small">'
+			+ '<thead class="thead-light"><tr><th>Lead No</th><th>Child</th><th>Parent</th><th>Matched by</th><th>Demo</th><th></th></tr></thead><tbody>';
+		candidates.forEach(function (c) {
+			var tags = '';
+			if (c.recommended) tags += ' <span class="badge badge-success">Recommended</span>';
+			if (c.sharedContact) tags += ' <span class="badge badge-warning" title="This contact is used by many unrelated leads">Shared contact, verify</span>';
+			var btn = (currentId && currentId == c.leadId)
+				? '<span class="badge badge-info">Linked</span>'
+				: '<button type="button" class="btn btn-sm ' + (c.hasDemo ? 'btn-success' : 'btn-outline-secondary') + '" onclick="mapDemoLead(\'' + formId + '\', ' + c.leadId + ', null, false)">Link</button>';
+			html += '<tr>'
+				+ '<td>' + demoAttrEsc(c.leadNo) + tags + '</td>'
+				+ '<td>' + demoAttrEsc(c.childName) + '</td>'
+				+ '<td>' + demoAttrEsc(c.guardianName) + '</td>'
+				+ '<td>' + demoAttrEsc(c.matchedBy) + '</td>'
+				+ '<td>' + demoAttrDemoText(c.demo) + '</td>'
+				+ '<td class="text-nowrap">' + btn + '</td>'
+				+ '</tr>';
+		});
+		html += '</tbody></table></div>';
+	} else {
+		html += '<div class="small text-muted mb-2 w-100">No other lead shares this email or phone.</div>';
+	}
+	html += '<div class="d-flex flex-wrap align-items-center w-100 small" style="flex:0 0 100%;gap:8px;">'
+		+ '<span class="text-nowrap">Not listed? Demo Lead No</span>'
+		+ '<input type="text" class="form-control form-control-sm" id="manualDemoLeadNo" placeholder="e.g. 020826063829" style="width:200px;max-width:100%;height:31px;">'
+		+ '<button type="button" class="btn btn-sm btn-primary" onclick="mapDemoLeadByNo(\'' + formId + '\')">Link</button>'
+		+ '</div>'
+		+ '<div id="demoOverrideBox" class="alert alert-warning small mt-2 mb-0 py-2 w-100" style="display:none"></div>';
+	return html;
+}
+
+function toggleFamilyDemoPanel(formId) {
+	$('#' + formId + ' #familyDemoPanel').slideToggle(150);
+}
+
+function mapDemoLeadByNo(formId) {
+	var leadNo = $.trim($('#' + formId + ' #manualDemoLeadNo').val());
+	if (!leadNo) {
+		showMessageTheme2(0, 'Please enter the demo lead number', '', true);
+		return;
+	}
+	mapDemoLead(formId, null, leadNo, false);
+}
+
+function mapDemoLead(formId, demoLeadId, demoLeadNo, override) {
+	var $div = $('#' + formId + ' #demoAttributionDiv');
+	var leadId = $div.data('leadId');
+	var req = { leadId: parseInt(leadId), override: !!override };
+	if (demoLeadId) req.demoLeadId = parseInt(demoLeadId);
+	if (demoLeadNo) req.demoLeadNo = demoLeadNo;
+	$.ajax({
+		type: 'POST',
+		contentType: APPLICATION_JSON_VALUE,
+		url: getURLFor('leads', 'map-demo-lead'),
+		data: demoAttrRequest(req),
+		dataType: 'json',
+		cache: false,
+		timeout: 600000,
+		success: function (data) {
+			if (data && data.statusCode == '1') {
+				showMessageTheme2(data.warning ? 2 : 1, data.message, '', true);
+				fetchDemoAttribution(formId);
+			} else if (data && data.requireOverride) {
+				var $box = $('#' + formId + ' #demoOverrideBox');
+				$box.html('<i class="fa fa-exclamation-triangle"></i> ' + demoAttrEsc(data.message)
+					+ ' <button type="button" class="btn btn-sm btn-warning ml-2" id="demoOverrideYes">Yes, link anyway</button>'
+					+ ' <button type="button" class="btn btn-sm btn-light ml-1" id="demoOverrideNo">Cancel</button>').show();
+				$box.find('#demoOverrideYes').on('click', function () {
+					$box.hide();
+					mapDemoLead(formId, demoLeadId, demoLeadNo, true);
+				});
+				$box.find('#demoOverrideNo').on('click', function () {
+					$box.hide();
+				});
+			} else {
+				showMessageTheme2(0, (data && data.message) ? data.message : 'Unable to link demo lead', '', true);
+			}
+		}
+	});
+}
+
+function unlinkDemoLead(formId) {
+	var $div = $('#' + formId + ' #demoAttributionDiv');
+	var leadId = $div.data('leadId');
+	var $panel = $('#' + formId + ' #familyDemoPanel');
+	if (!$panel.is(':visible')) {
+		renderDemoAttribution(formId, true);
+	}
+	var $box = $('#' + formId + ' #demoOverrideBox');
+	$box.html('Remove the demo link from this lead?'
+		+ ' <button type="button" class="btn btn-sm btn-danger ml-2" id="demoUnlinkYes">Yes, unlink</button>'
+		+ ' <button type="button" class="btn btn-sm btn-light ml-1" id="demoUnlinkNo">Cancel</button>').show();
+	$box.find('#demoUnlinkNo').on('click', function () {
+		$box.hide();
+	});
+	$box.find('#demoUnlinkYes').on('click', function () {
+		$box.hide();
+		$.ajax({
+			type: 'POST',
+			contentType: APPLICATION_JSON_VALUE,
+			url: getURLFor('leads', 'unmap-demo-lead'),
+			data: demoAttrRequest({ leadId: parseInt(leadId) }),
+			dataType: 'json',
+			cache: false,
+			timeout: 600000,
+			success: function (data) {
+				if (data && data.statusCode == '1') {
+					showMessageTheme2(1, data.message, '', true);
+					fetchDemoAttribution(formId);
+				} else {
+					showMessageTheme2(0, (data && data.message) ? data.message : 'Unable to unlink demo lead', '', true);
+				}
+			}
+		});
+	});
 }

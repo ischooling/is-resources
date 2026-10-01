@@ -305,7 +305,7 @@ function classesThumbsContentNew(data) {
   var classWeekCount = data.classData.week[0];
   var html=
     `<div class="bg-primary rounded-10 p-3 text-white text-center">
-      <h5 class="font-18">Your Complimentry Classes</h5>`;
+      <h5 class="font-18">Your Complimentary Classes</h5>`;
       if(classYearCount.comp>0){
         html+=
         `<div class="d-flex flex-wrap align-items-center justify-content-between">

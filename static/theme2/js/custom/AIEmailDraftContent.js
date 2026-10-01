@@ -49,6 +49,15 @@ function getAiEmailDraftContent(title) {
                         + '</div>'
                     + '</div>'
 
+                    // Lead Status (include) — sirf inhi status ki leads aayengi (Exclude ka ulta)
+                    + '<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 mb-2">'
+                        + '<div class="custom-field mb-0">'
+                            + '<select class="form-control" id="aiEmailDraftLeadStatus" multiple="multiple">'
+                            + '</select>'
+                            + '<label class="text-primary m-0" for="aiEmailDraftLeadStatus">Lead Status</label>'
+                        + '</div>'
+                    + '</div>'
+
                     + '<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 mb-2">'
                         + '<div class="custom-field mb-0">'
                             + '<input type="text" class="form-control" id="aiEmailDraftLeadNoFilter" placeholder="Lead No / Name / Email / Phone" autocomplete="off" />'

@@ -1582,6 +1582,28 @@ function callForBuzzSession(controllType, moduleId,studentStandardId){
 	});
 }
 
+// Manage Enrollments dropdown action: re-run the Buzz grading sync for just this one student
+// (startUserId/endUserId are ignored by the backend whenever userId is passed, so fixed 0/50 is fine here)
+function updateGradingActivity(userId){
+	$.ajax({
+		type : "GET",
+		url : "/crons/save-student-grading?startUserId=0&endUserId=50&userId=" + userId,
+		dataType : 'json',
+		cache : false,
+		success : function(response) {
+			if(response && response.code == "SUCCESS"){
+				showMessageTheme2(1, response.message ? response.message : "Grading activity updated.");
+			}else{
+				showMessageTheme2(0, response && response.message ? response.message : "Failed to update grading activity.");
+			}
+		},
+		error : function(e) {
+			showMessageTheme2(0, "Failed to update grading activity.");
+		}
+	});
+	return false;
+}
+
 function changeEnrollmentStatus(rowPosition){
 	var subjectStatus = $('#subjectStatus'+rowPosition).val().trim();
 	if(subjectStatus=='MOVE'){

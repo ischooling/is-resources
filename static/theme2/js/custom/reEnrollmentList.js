@@ -255,6 +255,8 @@ function bindReEnrollmentEvents() {
         catch (e) { $('#reelCardCountry').val([]); $('#reelCardGrade').val([]); }
         reelCardListFetch(0);
     });
+    // DIRECTOR-only export of the popup's currently-filtered student list
+    $(document).off('click', '#reelCardExportExcel').on('click', '#reelCardExportExcel', function () { reelCardExport('excel'); });
 }
 
 /* ============================================================
@@ -349,7 +351,7 @@ function reEnrollOpenStudentDetail(ssid, uid, roll, name, grade, reg, enrol) {
 
 function reEnrollFetch(pageNumber) {
     REEL_PAGE = pageNumber || 0;
-    $('#reelBody').html('<tr><td colspan="21" class="reel-empty">Loading…</td></tr>');
+    $('#reelBody').html('<tr><td colspan="9" class="reel-empty">Loading…</td></tr>');
     var req = getRequestForReEnrollment(REEL_PAGE);
     $.ajax({
         type: 'POST',
@@ -362,7 +364,7 @@ function reEnrollFetch(pageNumber) {
         success: function (data) {
             if (data['status'] == '3') { redirectLoginPage(); return; }
             if (data['status'] == '0' || data['status'] == '2') {
-                $('#reelBody').html('<tr><td colspan="21" class="reel-empty">Unable to load data.</td></tr>');
+                $('#reelBody').html('<tr><td colspan="9" class="reel-empty">Unable to load data.</td></tr>');
                 return;
             }
             if (!REEL_SESSIONS_LOADED) {
@@ -388,7 +390,7 @@ function reEnrollFetch(pageNumber) {
         },
         error: function () {
             if (typeof checkonlineOfflineStatus === 'function' && checkonlineOfflineStatus()) { return; }
-            $('#reelBody').html('<tr><td colspan="21" class="reel-empty">Unable to load data. Please retry.</td></tr>');
+            $('#reelBody').html('<tr><td colspan="9" class="reel-empty">Unable to load data. Please retry.</td></tr>');
         }
     });
 }
@@ -592,44 +594,100 @@ function reEnrollRowsHtml(rows, srBase) {
         if (r.studentStandardId) {
             idCell = '<a href="javascript:void(0)" class="reel-stu-link" data-ssid="' + r.studentStandardId + '" data-uid="' + (r.userId || '') + '" data-roll="' + reEnrollEsc(r.rollNo || '') + '" data-name="' + reEnrollEsc(r.name || '') + '" data-grade="' + reEnrollEsc(r.grade || '') + '" data-reg="' + reEnrollEsc(r.regType || '') + '" data-enrol="' + reEnrollEsc(r.enrolType || '') + '">' + reEnrollEsc(r.rollNo || '-') + '</a>';
         }
+        // grouped columns: Name(+Grade/Email/Contact), Parent(+Email/Contact), Reg(+Enrolment), Academic(Start/End)
+        var nameCell = '<div style="font-weight:600;">' + reEnrollEsc(r.name || '-') + '</div>'
+            + reEnrollSub('Grade', r.grade) + reEnrollSub('Email', r.email) + reEnrollSub('Contact', r.contact);
+        var parentCell = '<div style="font-weight:600;">' + reEnrollEsc(r.parentName || '-') + '</div>'
+            + reEnrollSub('Email', r.parentEmail) + reEnrollSub('Contact', r.parentContact) + reEnrollSub('Country', r.country, true);
+        var regCell = reEnrollSub('Reg', r.regType, true) + reEnrollSub('Enrolment', r.enrolType);
+        var datesCell = reEnrollSub('Pay Date', r.payDate, true) + reEnrollSub('Acad Start', r.semStart || r.acadStart)
+            + reEnrollSub('Acad End', r.acadEnd) + reEnrollSub('Transcript', r.transcriptIssue);
+        var statusCell = reEnrollSub('Progress', prog, true) + reEnrollSub('Profile', r.profileStatus) + reEnrollSub('Last Logout', r.lastLogout);
         h += '<tr>'
             + '<td class="reel-n">' + (srBase + i + 1) + '</td>'
             + '<td>' + idCell + '</td>'
-            + '<td>' + reEnrollEsc(r.name || '-') + '</td>'
-            + '<td>' + reEnrollEsc(r.email || '-') + '</td>'
-            + '<td>' + reEnrollEsc(r.contact || '-') + '</td>'
-            + '<td>' + reEnrollEsc(r.parentName || '-') + '</td>'
-            + '<td>' + reEnrollEsc(r.parentEmail || '-') + '</td>'
-            + '<td>' + reEnrollEsc(r.parentContact || '-') + '</td>'
-            + '<td>' + reEnrollEsc(r.country || '-') + '</td>'
-            + '<td>' + reEnrollEsc(r.grade || '-') + '</td>'
-            + '<td>' + reEnrollEsc(r.regType || '-') + '</td>'
-            + '<td>' + reEnrollEsc(r.enrolType || '-') + '</td>'
-            + '<td>' + reEnrollEsc(r.payDate || '-') + '</td>'
-            + '<td>' + reEnrollEsc(r.semStart || r.acadStart || '-') + '</td>'
-            + '<td>' + reEnrollEsc(r.acadEnd || '-') + '</td>'
-            + '<td>' + reEnrollEsc(r.transcriptIssue || '-') + '</td>'
-            + '<td>' + prog + '</td>'
-            + '<td>' + reEnrollEsc(r.profileStatus || '-') + '</td>'
-            + '<td>' + reEnrollEsc(r.lastLogout || '-') + '</td>'
+            + '<td>' + nameCell + '</td>'
+            + '<td>' + parentCell + '</td>'
+            + '<td>' + regCell + '</td>'
+            + '<td>' + datesCell + '</td>'
+            + '<td>' + statusCell + '</td>'
             + '<td>' + adv + '</td>'
-            + '<td>' + reEnrollLastStatusCell(r.lastStatus) + '</td>'
+            + '<td class="reel-ls-cell">' + reEnrollLastStatusCell(r) + '</td>'
             + '</tr>';
     }
     return h;
 }
 
-// latest COMMON_COMMENTS status shown as a soft badge; "Negative for Re-enrolment" stands out in red
-function reEnrollLastStatusCell(v) {
-    var s = (v === null || v === undefined) ? '' : String(v).trim();
-    if (!s) { return '<span class="reel-lsbadge reel-ls-none">—</span>'; }
-    var cls = /negative/i.test(s) ? 'reel-ls-neg' : 'reel-ls-set';
-    return '<span class="reel-lsbadge ' + cls + '">' + reEnrollEsc(s) + '</span>';
+// one labeled sub-line inside a grouped cell: small muted label + value (value bold when bold=true)
+function reEnrollSub(label, v, bold) {
+    var val = (v === null || v === undefined || v === '') ? '-' : reEnrollEsc(String(v));
+    if (bold) { val = '<b style="color:#1f2937;">' + val + '</b>'; }
+    return '<div style="font-size:11px;line-height:1.35;color:#475467;"><span style="color:#98a2b3;">' + label + ':</span> ' + val + '</div>';
 }
+
+// Remarks COMMON_COMMENTS me HTML ke saath save hote hain (<p>..</p>) — plain text nikal lo.
+function reEnrollPlainText(v) {
+    if (v === null || v === undefined) { return ''; }
+    return String(v)
+        .replace(/<br\s*\/?>/gi, ' ')
+        .replace(/<\/(p|div|li)>/gi, ' ')
+        .replace(/<[^>]*>/g, '')
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/&amp;/gi, '&').replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/&quot;/gi, '"')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+var REEL_LS_SEQ = 0;
+var REEL_LS_SHORT = 70; // itne chars ke baad "more" dikhega
+
+// latest COMMON_COMMENTS status: badge + kisne mark kiya + kab + short remark ("more" se pura).
+// "Negative for Re-enrolment" red me stand out karta hai.
+function reEnrollLastStatusCell(r) {
+    r = r || {};
+    var s = String(r.lastStatus || '').trim();
+    var by = String(r.lastStatusBy || '').trim();
+    var at = String(r.lastStatusAt || '').trim();
+    var rem = reEnrollPlainText(r.lastStatusRemark);
+    if (!s && !by && !at && !rem) { return '<span class="reel-lsbadge reel-ls-none">—</span>'; }
+
+    var h = '';
+    if (s) {
+        var cls = /negative/i.test(s) ? 'reel-ls-neg' : 'reel-ls-set';
+        h += '<span class="reel-lsbadge ' + cls + '">' + reEnrollEsc(s) + '</span>';
+    }
+    if (by || at) {
+        h += '<div class="reel-ls-meta">' + reEnrollEsc(by || '—')
+            + (at ? ' <span class="reel-ls-dot">·</span> ' + reEnrollEsc(at) : '') + '</div>';
+    }
+    if (rem) {
+        if (rem.length > REEL_LS_SHORT) {
+            var id = 'reelLs' + (++REEL_LS_SEQ);
+            h += '<div class="reel-ls-rem">'
+                + '<span id="' + id + 's">' + reEnrollEsc(rem.substring(0, REEL_LS_SHORT)) + '…</span>'
+                + '<span id="' + id + 'f" style="display:none;">' + reEnrollEsc(rem) + '</span> '
+                + '<a href="javascript:void(0)" class="reel-ls-more" data-lsid="' + id + '">more</a>'
+                + '</div>';
+        } else {
+            h += '<div class="reel-ls-rem">' + reEnrollEsc(rem) + '</div>';
+        }
+    }
+    return h;
+}
+
+// "more" / "less" toggle — delegated, isliye re-render ke baad bhi chalta hai.
+$(document).on('click', '.reel-ls-more', function () {
+    var id = $(this).data('lsid');
+    var $full = $('#' + id + 'f');
+    var open = $full.is(':visible');
+    $full.toggle(!open);
+    $('#' + id + 's').toggle(open);
+    $(this).text(open ? 'more' : 'less');
+});
 
 function reEnrollRenderRows(rows, pageNumber, pageSize) {
     if (!rows.length) {
-        $('#reelBody').html('<tr><td colspan="21" class="reel-empty">No students found for the selected filters.</td></tr>');
+        $('#reelBody').html('<tr><td colspan="9" class="reel-empty">No students found for the selected filters.</td></tr>');
         return;
     }
     $('#reelBody').html(reEnrollRowsHtml(rows, (pageNumber || 0) * (pageSize || 25)));
@@ -685,7 +743,11 @@ var REEL_EXPORT_COLS = [
     { h: 'Avg Progress', k: 'avgProgress' },
     { h: 'Profile Status', k: 'profileStatus' },
     { h: 'Last Logout', k: 'lastLogout' },
-    { h: 'Payment', k: 'advance' }
+    { h: 'Payment', k: 'advance' },
+    { h: 'Last Status', k: 'lastStatus' },
+    { h: 'Last Status By', k: 'lastStatusBy' },
+    { h: 'Last Status On', k: 'lastStatusAt' },
+    { h: 'Last Status Remark', k: 'lastStatusRemark' }
 ];
 
 function reEnrollExportVal(r, col, idx) {
@@ -695,6 +757,7 @@ function reEnrollExportVal(r, col, idx) {
         return (r.avgProgress === '' || r.avgProgress === null || r.avgProgress === undefined) ? '' : (r.avgProgress + '%');
     }
     if (col.h === 'Payment') { return reEnrollAdvLabel(r.advPayment); }
+    if (col.h === 'Last Status Remark') { return reEnrollPlainText(r.lastStatusRemark); }
     var v = r[col.k];
     return (v === null || v === undefined) ? '' : String(v);
 }
@@ -816,7 +879,7 @@ function reelCardListOpen(cm, sess, title, preset, prevSess) {
     reelClearCountryClock();
     if (preset && preset.countryName) { reelStartCountryClock(preset.countryName); }
     $('#reelListSub').html('&nbsp;');
-    $('#reelCardBody').html('<tr><td colspan="21" class="reel-empty">Loading…</td></tr>');
+    $('#reelCardBody').html('<tr><td colspan="9" class="reel-empty">Loading…</td></tr>');
     $('#reelCardPager').html('');
     reelCardInitFilters(preset);
     $('#reelListOverlay').addClass('show');
@@ -883,7 +946,7 @@ function reelCardListFetch(pageNumber) {
     req.search = (($('#reelCardSearch').val() || '').trim());
     req.reStatus = ($('#reelCardReStatus').val() || []);
     if (page > 0) { req.knownTotal = REEL_CARD_LIST_TOTAL; } else { delete req.knownTotal; }
-    $('#reelCardBody').html('<tr><td colspan="21" class="reel-empty">Loading…</td></tr>');
+    $('#reelCardBody').html('<tr><td colspan="9" class="reel-empty">Loading…</td></tr>');
     $.ajax({
         type: 'POST',
         contentType: APPLICATION_JSON_VALUE,
@@ -895,14 +958,14 @@ function reelCardListFetch(pageNumber) {
         success: function (data) {
             if (data['status'] == '3') { redirectLoginPage(); return; }
             if (data['status'] == '0' || data['status'] == '2') {
-                $('#reelCardBody').html('<tr><td colspan="21" class="reel-empty">Unable to load data.</td></tr>');
+                $('#reelCardBody').html('<tr><td colspan="9" class="reel-empty">Unable to load data.</td></tr>');
                 return;
             }
             if (page === 0) { REEL_CARD_LIST_TOTAL = Number(data.count || 0); }
             var rows = data.data || [];
             var pageSize = req.pageSize || 25;
             if (!rows.length) {
-                $('#reelCardBody').html('<tr><td colspan="21" class="reel-empty">No students found.</td></tr>');
+                $('#reelCardBody').html('<tr><td colspan="9" class="reel-empty">No students found.</td></tr>');
             } else {
                 $('#reelCardBody').html(reEnrollRowsHtml(rows, page * pageSize));
             }
@@ -914,7 +977,56 @@ function reelCardListFetch(pageNumber) {
         },
         error: function () {
             if (typeof checkonlineOfflineStatus === 'function' && checkonlineOfflineStatus()) { return; }
-            $('#reelCardBody').html('<tr><td colspan="21" class="reel-empty">Unable to load data. Please retry.</td></tr>');
+            $('#reelCardBody').html('<tr><td colspan="9" class="reel-empty">Unable to load data. Please retry.</td></tr>');
+        }
+    });
+}
+
+// DIRECTOR-only: export ALL rows matching the popup's current card + filters to Excel.
+// Reuses the same request shape as reelCardListFetch (page 0, big page size) and the shared
+// reEnrollDownloadExcel() writer used by the main list.
+function reelCardExport(type) {
+    var $btn = $('#reelCardExportExcel');
+    if ($btn.data('busy')) { return; }
+    var orig = $btn.html();
+    $btn.data('busy', true).addClass('disabled').html('<i class="fa fa-spinner fa-spin"></i>&nbsp;Preparing…');
+
+    var req = getRequestForReEnrollment(0);
+    req.cardMetric = REEL_CARD_LIST_CM;
+    if (REEL_CARD_LIST_SESS) { req.sessionId = parseInt(REEL_CARD_LIST_SESS, 10) || req.sessionId; }
+    if (REEL_CARD_LIST_PREV) { req.prevSessionId = parseInt(REEL_CARD_LIST_PREV, 10) || 0; }
+    req.country = ($('#reelCardCountry').val() || []);
+    var cardGrades = ($('#reelCardGrade').val() || []);
+    if (cardGrades.length) { req.grade = cardGrades; req.gradeMode = 'in'; }
+    req.exWithdrawn = $('#reelCardExWd').is(':checked') ? 1 : 0;
+    if (REEL_CARD_LIST_REG) { req.regType = REEL_CARD_LIST_REG; }
+    req.progress = ($('#reelCardProgress').val() || '');
+    req.advPayment = ($('#reelCardAdv').val() || '');
+    req.search = (($('#reelCardSearch').val() || '').trim());
+    req.reStatus = ($('#reelCardReStatus').val() || []);
+    req.pageSize = Math.max(1, Number(REEL_CARD_LIST_TOTAL) || 0) || 100000;
+    if (req.pageSize > 100000) { req.pageSize = 100000; }
+    delete req.knownTotal;
+
+    $.ajax({
+        type: 'POST',
+        contentType: APPLICATION_JSON_VALUE,
+        url: getURLForHTML('dashboard', 're-enrollment-list'),
+        data: JSON.stringify(req),
+        dataType: 'json',
+        cache: false,
+        timeout: 600000,
+        success: function (data) {
+            $btn.data('busy', false).removeClass('disabled').html(orig);
+            if (data && data['status'] == '3') { redirectLoginPage(); return; }
+            var rows = (data && data.data) ? data.data : [];
+            if (!rows.length) { alert('No records to export for the selected filters.'); return; }
+            reEnrollDownloadExcel(rows);
+        },
+        error: function () {
+            $btn.data('busy', false).removeClass('disabled').html(orig);
+            if (typeof checkonlineOfflineStatus === 'function' && checkonlineOfflineStatus()) { return; }
+            alert('Unable to export. Please retry.');
         }
     });
 }

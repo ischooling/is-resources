@@ -75,6 +75,15 @@ async function initAiEmailDraftFilters() {
         $('#aiEmailDraftExcludeStatus').select2({ theme: 'bootstrap4', placeholder: 'Exclude Status', allowClear: true });
     }, 800);
 
+    // Lead Status (include) — LEAD-STATUS-LIST master se (multi select); Exclude ka ulta
+    if (typeof callLeadStatusList === 'function') {
+        callLeadStatusList('aiEmailDraftFilterForm', 'B2C', 'aiEmailDraftLeadStatus', false);
+    }
+    setTimeout(function () {
+        $('#aiEmailDraftLeadStatus option[value="0"]').remove();   // "Select Status" multi-select me nahi chahiye
+        $('#aiEmailDraftLeadStatus').select2({ theme: 'bootstrap4', placeholder: 'Lead Status', allowClear: true });
+    }, 800);
+
     // Counselor dropdown — await data load, then init select2 so it picks up options correctly
     $('#aiEmailDraftCounselorFilter').html('<option value="">All Academic Counselor</option>');
     if (typeof callLeadAssignUserList === 'function') {
@@ -134,6 +143,7 @@ function bindAiEmailDraftEvents() {
         $('#aiEmailDraftLeadNoFilter').val('');
         AI_EMAIL_DRAFT_STATE.pageSize = 10;
         $('#aiEmailDraftExcludeStatus').val(null).trigger('change');
+        $('#aiEmailDraftLeadStatus').val(null).trigger('change');
         var isAdmin = (USER_ROLE === 'DIRECTOR' || USER_ROLE === 'SUPER_ADMIN')
                    || AI_EMAIL_DRAFT_STATE.allCounselorAccess === true;
         if (isAdmin) {
@@ -294,6 +304,10 @@ function fetchAiEmailDrafts(singleLeadId, forcedLanguage) {
     var excludeStatusVals = $('#aiEmailDraftExcludeStatus').val() || [];
     excludeStatusVals = excludeStatusVals.filter(function (v) { return v && v !== '0'; });
     if (excludeStatusVals.length) params.excludeStatus = excludeStatusVals.join(',');
+    // Lead Status (include) — sirf inhi status wali leads aayengi
+    var leadStatusVals = $('#aiEmailDraftLeadStatus').val() || [];
+    leadStatusVals = leadStatusVals.filter(function (v) { return v && v !== '0'; });
+    if (leadStatusVals.length) params.leadStatus = leadStatusVals.join(',');
     if (singleLeadId)   params.leadId = singleLeadId;
     if (forcedLanguage) params.forcedLanguage = forcedLanguage;
 
