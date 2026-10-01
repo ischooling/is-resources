@@ -194,9 +194,10 @@ function calculatePremiumAmount() {
 	var premiumAmount = $('#premiumAmount').val();
 	if (premiumAmount == '') {
 		premiumAmount = 0.00;
-	} else if (parseFloat(premiumAmount) > parseFloat(payableFee)) {
-		premiumAmount = payableFee;
 	}
+	// else if (parseFloat(premiumAmount) > parseFloat(payableFee)) {
+	// 	premiumAmount = payableFee;
+	// }
 	var premiumPercentage = parseFloat((premiumAmount * 100) / payableFee);
 	var payableFeeAfterPremium = parseFloat(payableFee) + parseFloat(premiumAmount);
 	$('#payableFeeAfterPremium').val(parseFloat(payableFeeAfterPremium).toFixed(2));
@@ -210,8 +211,6 @@ function premiumPercentageChange() {
 	var payableFee = $('#payableFee').val();
 	if (premiumPercentage == '') {
 		premiumPercentage = 0.00;
-	} else if (parseFloat(premiumPercentage) > parseFloat(100.00)) {
-		premiumPercentage = 100.00;
 	}
 	var premiumAmount = parseFloat((payableFee * premiumPercentage * 0.01));
 	$('#premiumAmount').val(premiumAmount.toFixed(2))
