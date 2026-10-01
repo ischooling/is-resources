@@ -253,15 +253,9 @@ function getB2CListHeaderContent(roleAndModule, objRights) {
 					<p id="unassignedLeads" class="mb-0 text-white px-2 rounded" style="background-color:#898989;">-</p>
 				</div>`;
   }
-  html += `<div class="d-flex flex-column align-items-stretch w-100" style="background-color: #FFF6DC;border-radius: 5px;padding: 10px;font-weight: bold;border: 1.5px solid #EFD597;gap:3px;">
-				<div class="d-flex justify-content-between align-items-center w-100" style="gap:2px;">
-					<p class="mb-0">Followup Lead</p>
-					<p id="followupLeadsCount" class="mb-0 px-2 rounded text-dark" style="background-color:#EFD597;">-</p>
-				</div>
-				<div class="d-flex justify-content-between align-items-center w-100" style="gap:2px;">
-					<p class="mb-0">Today Followup Lead</p>
-					<p id="todayFollowupLeadsCount" class="mb-0 px-2 rounded text-dark" style="background-color:#EFD597;">-</p>
-				</div>
+  html += `<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #FFF6DC;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #EFD597">
+				<p class="mb-0">Followup Lead</p>
+				<p id="followupLeadsCount" class="mb-0 px-2 rounded text-dark" style="background-color:#EFD597;">-</p>
 			</div>`;
   html += "</div>";
   html += `<div class="mt-2 d-flex" style="font-size:11px;gap:6px;">
@@ -1447,12 +1441,6 @@ function getLeadB2CTotalCountList(leadTotalData) {
       ? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'scrapeLead','${leadTotalData.leadFrom}')">${leadTotalData.scrapeLead}</a>`
       : "-";
   $("#scrapeLeadsCount").html(`${scrapeLeadsCountHTML}`);
-
-  var todayFollowupLeadsHTML =
-    leadTotalData.todayFollowupLead > 0
-      ? `<a href="javascript:void(0);" class="text-dark" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'todayFollowupLead','${leadTotalData.leadFrom}')">${leadTotalData.todayFollowupLead}</a>`
-      : "-";
-  $("#todayFollowupLeadsCount").html(`${todayFollowupLeadsHTML}`);
 }
 
 function getLeadB2CTotalHotCountList(leadTotalData) {
