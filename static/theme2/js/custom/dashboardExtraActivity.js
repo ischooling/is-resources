@@ -521,6 +521,31 @@ function activeInactiveExtraActivity(formId,status,id,roleModuleId) {
 
 }
 
+function updateExtraActivityRegistration(id, enableRegistration, roleModuleId) {
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForHTML('dashboard', 'api/update-extra-activity-registration'),
+		data : JSON.stringify({ id : id, enableRegistration : enableRegistration }),
+		dataType : 'json',
+		cache : false,
+		timeout : 600000,
+		success : function(data) {
+			if (data['status'] == '0' || data['status'] == '2') {
+				showMessageTheme2(0, data['message']);
+			} else {
+				showMessageTheme2(1, data['message']);
+				setTimeout(function() {
+					callDashboardPageSchool(roleModuleId,'extra-activity');}, 2000);
+			}
+			return false;
+		},
+		error : function() {
+			showMessageTheme2(0, 'Something went wrong');
+		}
+	});
+}
+
 function editExtraActivity(id){
 	var request = {};
 	var authentication = {};

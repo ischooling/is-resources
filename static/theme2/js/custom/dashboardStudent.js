@@ -1466,6 +1466,23 @@ function validateRequestForSaveUserEditedLmsContent(formId,controllType){
 			showMessageTheme2(0, 'Password and confirm password does not match.');
 			return false;
 		}
+	} else {
+		var pwdVal = $("#"+formId+" #password").val();
+		var confirmPwdVal = $("#"+formId+" #confirmPassword").val();
+		if ((pwdVal != null && pwdVal.trim() != '') || (confirmPwdVal != null && confirmPwdVal.trim() != '')) {
+			if (pwdVal == null || pwdVal.trim() == '') {
+				showMessageTheme2(0, 'Password is required');
+				return false;
+			}
+			if (confirmPwdVal == null || confirmPwdVal.trim() == '') {
+				showMessageTheme2(0, 'Confirm Password is required');
+				return false;
+			}
+			if (pwdVal.trim() != confirmPwdVal.trim()) {
+				showMessageTheme2(0, 'Password and confirm password does not match.');
+				return false;
+			}
+		}
 	}
 	return true;
 }
