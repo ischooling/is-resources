@@ -278,12 +278,12 @@ function migrationDetailsOptionContent(data) {
 										+'</div>'
 									}
 									else {
-										if(studentCredit.currentGradeId==8 || studentCredit.currentGradeId==9 || studentCredit.currentGradeId==10 || studentCredit.currentGradeId==19 || studentCredit.currentGradeId==20 || studentCredit.currentGradeId==21){
+										if((studentCredit.currentGradeId==8 || studentCredit.currentGradeId==9 || studentCredit.currentGradeId==10 || studentCredit.currentGradeId==19 || studentCredit.currentGradeId==20 || studentCredit.currentGradeId==21) && studentCredit.currentLearningProgram == studentCredit.nextLearningProgram){
 											html+=
 												'<div class="col text-center">'
 													if(studentCredit.currentLearningProgram == "ONE_TO_ONE_FLEX"){
 														if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
-															html+='<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15" href="javascript:void(0);" onclick="callForStudentNextSession(' + studentCredit.nextGradeId + ',\'REGISTRATION_NEXT_GRADE\',\'' + studentCredit.currentLearningProgram + '\');">'
+															html+='<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15" href="javascript:void(0);" onclick="callForStudentNextSession(' + studentCredit.nextGradeId + ',\'REGISTRATION_NEXT_GRADE\',\'' + (studentCredit.currentLearningProgram == studentCredit.nextLearningProgram ? studentCredit.currentLearningProgram : studentCredit.nextLearningProgram) + '\');">'
 															html+='<i class="fa fa-rocket mr-2"></i>';
 														}else{
 															html+='<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">'
@@ -293,7 +293,7 @@ function migrationDetailsOptionContent(data) {
 															// 	html+='<i class="fa fa-rocket mr-2"></i>';
 															// }
 														// }
-														html+='Continue in '+(studentCredit.currentLearningProgram == "ONE_TO_ONE_FLEX" ? studentCredit.currentGrade:studentCredit.nextGrade)+'</a>';
+														html+='Continue in '+(studentCredit.currentLearningProgram == studentCredit.nextLearningProgram ? studentCredit.currentGrade:studentCredit.nextGrade)+'</a>';
 													}else{
 														html+='<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15" href="javascript:void(0);" onclick="submitCourse(\'' + data.enrollmentBy + '\')">'
 														if(data.registrationType!="ONE_TO_ONE_FLEX"){
