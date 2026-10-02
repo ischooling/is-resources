@@ -103,6 +103,22 @@ function getInlineCopyHtml(value, uniqueId,color) {
   );
 }
 
+// Lead came from the website's Next Generation Scholarship form (LEADS_DETAILS.IS_SCHOLARSHIP = 'Y').
+function getScholarshipCapsuleHtml() {
+	return ' <span class="badge ml-1" data-toggle="tooltip" data-placement="top" data-original-title="Applied through the Next Generation Scholarship form" '
+		+ 'style="background:#FFC857;color:#0A0E3A;border:1px solid #F2B230;font-size:11px;font-weight:700;vertical-align:middle;padding:3px 8px;border-radius:10px;">'
+		+ '<i class="fa fa-graduation-cap" style="margin-right:4px;"></i>Scholarship</span>';
+}
+
+// LEADS.GENDER is stored as MALE / FEMALE / OTHER by the website and free text by older forms.
+function getLeadGenderLabel(gender) {
+	if (gender == null || String(gender).trim() == '') {
+		return 'N/A';
+	}
+	var g = String(gender).trim().toLowerCase();
+	return g.charAt(0).toUpperCase() + g.slice(1);
+}
+
 function getDuplicateLeadRemarkHtml(remark, moduleId) {
   if (!remark) {
     return "N/A";
@@ -1688,6 +1704,9 @@ function getB2cLeadList(leaddata, objRights, roleModule){
         // <span class="leadInfoTime"></span>
         // '+objRights.countryOffsetTimezone+'
 				html+='<span class="lead-no-cell lead-no-cell-'+leads.leadId+'">'+leads.srNo+'.&nbsp;Filled details &nbsp;<span class="font-weight-bold">'+leads.leadNo + getInlineCopyHtml(leads.leadNo, 'Leadno_'+leads.leadId,"text-white")+'</span></span> | Lead Score: <span class="'+lScoreColor+' text-white bold p-1 rounded">'+(leads.leadScore!=''?leads.leadScore:'0')+'</span>'
+				if(leads.isScholarship=='Y'){
+					html+=getScholarshipCapsuleHtml();
+				}
 				html+='<br><div class="d-flex justify-content-center"><p class="bold font-12 p-1 bg-white text-dark w-fit-content mt-1 mb-0 rounded" id="timerLeadDisplay_'+leads.leadId+'"></p></div>'
             var priorityColor='bg-warning text-dark';
             if(leads.priority=='Urgent'){
@@ -2120,6 +2139,10 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                         +'<tr>'
                           +'<th class="border-0 p-1" style="width:165px">Age:</th>'
                           +'<td class="border-0 p-1">'+childAge+'</td>'
+                        +'</tr>'
+                        +'<tr>'
+                          +'<th class="border-0 p-1" style="width:165px">Gender:</th>'
+                          +'<td class="border-0 p-1"><span class="lead-child-gender-'+leads.leadId+'">'+getLeadGenderLabel(leads.gender)+'</span></td>'
                         +'</tr>'
                         +'<tr>'
                           +'<th class="border-0 p-1">Grade: </th>'
