@@ -2469,8 +2469,10 @@ function callLeadsByLeadId(formId, leadId, userId, controlType, modalId,leadType
 					   var leadDemo = data['leadDashboardCommon']['leadCommonDTO'][0];
 					   if(controlType=='edit'){
 							loadDemoAttribution(formId, leadDemo.leadModifyDTO.leadId);
+							loadEnrollmentLink(formId, leadDemo.leadModifyDTO.leadId);
 						}else{
 							$("#"+formId+" #demoAttributionDiv").html('');
+							$("#"+formId+" #enrollmentLinkDiv").html('');
 						}
 					   if(controlType=='addLeadClone'){
 							$("#"+formId+" #parentleadId").val(leadDemo.leadModifyDTO.leadId);
@@ -5433,6 +5435,7 @@ function resetLeadUpdate(){
 	$('#supportHtmlFollowup').html('');
 	$('#documentDiv').html('');
 	$('#demoAttributionDiv').html('');
+	$('#enrollmentLinkDiv').html('');
 }
 
 function resetLeadChat(callFrom){
@@ -13739,6 +13742,232 @@ function unlinkDemoLead(formId) {
 					fetchDemoAttribution(formId);
 				} else {
 					showMessageTheme2(0, (data && data.message) ? data.message : 'Unable to unlink demo lead', '', true);
+				}
+			}
+		});
+	});
+}
+
+// ============ ENROLLMENT LEAD LINK (STUDENT_STANDARD_DETAILS.LEAD_ID) ============
+// Links an enrolled student (enrollment) to this lead, so conversion no longer depends on email.
+
+function enrollLinkHasRights() {
+	return typeof ADMIN_DASHBOARD_SPECIAL_RIGHTS !== 'undefined' && ADMIN_DASHBOARD_SPECIAL_RIGHTS === true;
+}
+
+// Called when the Update Lead form opens: only renders the button, no search until it is clicked.
+function loadEnrollmentLink(formId, leadId) {
+	var $div = $('#' + formId + ' #enrollmentLinkDiv');
+	if (!$div.length) {
+		return;
+	}
+	if (!enrollLinkHasRights() || !leadId || leadId == '0') {
+		$div.html('');
+		return;
+	}
+	$div.data('leadId', leadId).removeData('data');
+	$div.html('<div class="card border mt-2 mb-2"><div class="card-body py-2">'
+		+ '<div class="d-flex flex-wrap align-items-center justify-content-between">'
+		+ '<div class="small mb-1"><b class="text-primary mr-2">Enrollment Link</b><span class="text-muted">Link the enrolled student(s) of this lead.</span></div>'
+		+ '<div class="mb-1"><button type="button" class="btn btn-sm btn-primary" onclick="fetchEnrollmentLink(\'' + formId + '\')"><i class="fa fa-search"></i> Find Enrolled Student</button></div>'
+		+ '</div></div></div>');
+}
+
+function fetchEnrollmentLink(formId, search) {
+	var $div = $('#' + formId + ' #enrollmentLinkDiv');
+	var leadId = $div.data('leadId');
+	if (!leadId) {
+		return;
+	}
+	$div.find('button').prop('disabled', true);
+	$div.find('.fa-search').removeClass('fa-search').addClass('fa-spinner fa-spin');
+	$.ajax({
+		type: 'POST',
+		contentType: APPLICATION_JSON_VALUE,
+		url: getURLFor('leads', 'get-enrollment-link-data'),
+		data: demoAttrRequest({ leadId: parseInt(leadId), search: search || '' }),
+		dataType: 'json',
+		cache: false,
+		timeout: 600000,
+		success: function (data) {
+			if (data && data.statusCode == '1') {
+				$div.data('data', data).data('search', search || '');
+				renderEnrollmentLink(formId);
+			} else {
+				showMessageTheme2(0, (data && data.message) ? data.message : 'Unable to load enrollment details', '', true);
+				loadEnrollmentLink(formId, leadId);
+			}
+		},
+		error: function () {
+			loadEnrollmentLink(formId, leadId);
+		}
+	});
+}
+
+function enrollLinkPaidText(row) {
+	return row.paid
+		? '<span class="text-success"><i class="fa fa-check-circle"></i> Paid ' + demoAttrEsc(row.payDate) + '</span>'
+		: '<span class="text-danger">Not paid</span>';
+}
+
+function enrollLinkStudentText(row) {
+	return '<b>' + demoAttrEsc(row.studentName) + '</b><br><span class="text-muted">' + demoAttrEsc(row.email)
+		+ (row.studentId ? ' · ID ' + demoAttrEsc(row.studentId) : '') + '</span>';
+}
+
+function enrollLinkGradeText(row) {
+	var parts = [];
+	if (row.grade) parts.push(demoAttrEsc(row.grade));
+	if (row.academicYear) parts.push(demoAttrEsc(row.academicYear));
+	if (row.enrollmentType) parts.push('<span class="text-muted">' + demoAttrEsc(row.enrollmentType) + '</span>');
+	return parts.join('<br>');
+}
+
+function renderEnrollmentLink(formId) {
+	var $div = $('#' + formId + ' #enrollmentLinkDiv');
+	var data = $div.data('data');
+	if (!data) {
+		return;
+	}
+	var linked = data.linked || [];
+	var candidates = data.candidates || [];
+
+	var status = linked.length
+		? '<span class="badge badge-success mr-2">Linked</span> ' + linked.length + ' enrollment' + (linked.length > 1 ? 's' : '')
+		: '<span class="badge badge-secondary mr-2">Not linked</span> No enrollment linked to this lead.';
+	if (data.leadStatus) {
+		status += ' <span class="text-muted ml-2">Lead status: ' + demoAttrEsc(data.leadStatus) + '</span>';
+	}
+
+	var html = '<div class="card border mt-2 mb-2"><div class="card-body py-2">'
+		+ '<div class="d-flex flex-wrap align-items-center justify-content-between">'
+		+ '<div class="small mb-1"><b class="text-primary mr-2">Enrollment Link</b>' + status + '</div>'
+		+ '</div>'
+		+ '<div class="mt-2 w-100" style="clear:both;">';
+
+	if (linked.length) {
+		html += '<div class="small font-weight-bold mb-1 w-100">Linked enrollments</div>'
+			+ '<div class="table-responsive w-100" style="flex:0 0 100%;"><table class="table table-sm table-bordered mb-2 small">'
+			+ '<thead class="thead-light"><tr><th>Student</th><th>Grade / Year</th><th>Registration</th><th></th></tr></thead><tbody>';
+		linked.forEach(function (r) {
+			html += '<tr><td>' + enrollLinkStudentText(r) + '</td><td>' + enrollLinkGradeText(r) + '</td><td>' + enrollLinkPaidText(r) + '</td>'
+				+ '<td class="text-nowrap"><button type="button" class="btn btn-sm btn-outline-danger" onclick="unlinkEnrollmentLead(\'' + formId + '\', ' + r.studentStandardId + ')">Unlink</button></td></tr>';
+		});
+		html += '</tbody></table></div>';
+	}
+
+	html += '<div class="small font-weight-bold mb-1 w-100">' + (data.searched ? 'Search results' : 'Matching students (same email / phone)') + '</div>';
+	var rows = candidates.filter(function (c) { return !c.linkedToThisLead; });
+	if (rows.length) {
+		html += '<div class="table-responsive w-100" style="flex:0 0 100%;"><table class="table table-sm table-bordered mb-2 small">'
+			+ '<thead class="thead-light"><tr><th>Student</th><th>Grade / Year</th><th>Registration</th><th>Matched by</th><th>Linked lead</th><th></th></tr></thead><tbody>';
+		rows.forEach(function (r) {
+			html += '<tr><td>' + enrollLinkStudentText(r) + '</td><td>' + enrollLinkGradeText(r) + '</td><td>' + enrollLinkPaidText(r) + '</td>'
+				+ '<td>' + demoAttrEsc(r.matchedBy) + '</td>'
+				+ '<td>' + (r.linkedLeadNo ? demoAttrEsc(r.linkedLeadNo) : '<span class="text-muted">-</span>') + '</td>'
+				+ '<td class="text-nowrap"><button type="button" class="btn btn-sm ' + (r.paid ? 'btn-success' : 'btn-outline-secondary') + '" onclick="linkEnrollmentLead(\'' + formId + '\', ' + r.studentStandardId + ', false)">Link</button></td></tr>';
+		});
+		html += '</tbody></table></div>';
+	} else {
+		html += '<div class="small text-muted mb-2 w-100">' + (data.searched ? 'No student found.' : 'No enrolled student shares this email or phone.') + '</div>';
+	}
+
+	html += '<div class="d-flex flex-wrap align-items-center w-100 small" style="flex:0 0 100%;gap:8px;">'
+		+ '<span class="text-nowrap">Search student</span>'
+		+ '<input type="text" class="form-control form-control-sm" id="enrollLinkSearch" placeholder="Email, name, student ID or phone" style="width:260px;max-width:100%;height:31px;" value="' + demoAttrEsc($div.data('search') || '') + '">'
+		+ '<button type="button" class="btn btn-sm btn-primary" onclick="searchEnrollmentLink(\'' + formId + '\')">Search</button>'
+		+ '</div>'
+		+ '<div id="enrollLinkConfirmBox" class="alert alert-warning small mt-2 mb-0 py-2 w-100" style="display:none"></div>'
+		+ '</div></div></div>';
+	$div.html(html);
+	$div.find('#enrollLinkSearch').on('keydown', function (e) {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			searchEnrollmentLink(formId);
+		}
+	});
+}
+
+function searchEnrollmentLink(formId) {
+	var search = $.trim($('#' + formId + ' #enrollLinkSearch').val());
+	fetchEnrollmentLink(formId, search);
+}
+
+function linkEnrollmentLead(formId, studentStandardId, override) {
+	var $div = $('#' + formId + ' #enrollmentLinkDiv');
+	var leadId = $div.data('leadId');
+	$.ajax({
+		type: 'POST',
+		contentType: APPLICATION_JSON_VALUE,
+		url: getURLFor('leads', 'link-enrollment-lead'),
+		data: demoAttrRequest({ leadId: parseInt(leadId), studentStandardId: parseInt(studentStandardId), override: !!override }),
+		dataType: 'json',
+		cache: false,
+		timeout: 600000,
+		success: function (data) {
+			if (data && data.statusCode == '1') {
+				showMessageTheme2(1, data.message, '', true);
+				if (data.converted) {
+					syncLeadFormStatusConverted(formId);
+				}
+				fetchEnrollmentLink(formId, $div.data('search') || '');
+			} else if (data && data.requireOverride) {
+				var $box = $('#' + formId + ' #enrollLinkConfirmBox');
+				$box.html('<i class="fa fa-exclamation-triangle"></i> ' + demoAttrEsc(data.message)
+					+ ' <button type="button" class="btn btn-sm btn-warning ml-2" id="enrollLinkYes">Yes, move</button>'
+					+ ' <button type="button" class="btn btn-sm btn-light ml-1" id="enrollLinkNo">Cancel</button>').show();
+				$box.find('#enrollLinkYes').on('click', function () {
+					$box.hide();
+					linkEnrollmentLead(formId, studentStandardId, true);
+				});
+				$box.find('#enrollLinkNo').on('click', function () {
+					$box.hide();
+				});
+			} else {
+				showMessageTheme2(0, (data && data.message) ? data.message : 'Unable to link enrollment', '', true);
+			}
+		}
+	});
+}
+
+// The lead was converted on the server; keep the open form in sync so Save does not revert it.
+function syncLeadFormStatusConverted(formId) {
+	var $status = $('#' + formId + ' #leadStatus');
+	var $opt = $status.find('option').filter(function () {
+		return $(this).val() === 'Converted' || $.trim($(this).text()) === 'Converted';
+	}).first();
+	if ($opt.length) {
+		$status.val($opt.val()).trigger('change');
+	} else {
+		showMessageTheme2(2, 'Lead marked Converted. Close and reopen this form before saving other changes.', '', true);
+	}
+}
+
+function unlinkEnrollmentLead(formId, studentStandardId) {
+	var $div = $('#' + formId + ' #enrollmentLinkDiv');
+	var $box = $('#' + formId + ' #enrollLinkConfirmBox');
+	$box.html('Remove this enrollment from the lead? (Lead status will not change.)'
+		+ ' <button type="button" class="btn btn-sm btn-danger ml-2" id="enrollUnlinkYes">Yes, unlink</button>'
+		+ ' <button type="button" class="btn btn-sm btn-light ml-1" id="enrollUnlinkNo">Cancel</button>').show();
+	$box.find('#enrollUnlinkNo').on('click', function () {
+		$box.hide();
+	});
+	$box.find('#enrollUnlinkYes').on('click', function () {
+		$box.hide();
+		$.ajax({
+			type: 'POST',
+			contentType: APPLICATION_JSON_VALUE,
+			url: getURLFor('leads', 'unlink-enrollment-lead'),
+			data: demoAttrRequest({ studentStandardId: parseInt(studentStandardId) }),
+			dataType: 'json',
+			cache: false,
+			timeout: 600000,
+			success: function (data) {
+				if (data && data.statusCode == '1') {
+					showMessageTheme2(1, data.message, '', true);
+					fetchEnrollmentLink(formId, $div.data('search') || '');
+				} else {
+					showMessageTheme2(0, (data && data.message) ? data.message : 'Unable to unlink enrollment', '', true);
 				}
 			}
 		});

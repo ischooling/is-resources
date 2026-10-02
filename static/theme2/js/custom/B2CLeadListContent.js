@@ -11,6 +11,222 @@ function nextFollowupColorStyle(dateStr) {
   } catch (e) { return ""; }
 }
 
+// Injects (once) the blink/pulse animation for the "Today's Follow-ups" box — amber glow like the
+// "Multiple time apply" badge, but keeps the yellow theme.
+function ensureTodayFollowupBlinkStyle() {
+  if (document.getElementById('today-followup-blink-style')) { return; }
+  var style = document.createElement('style');
+  style.id = 'today-followup-blink-style';
+  style.textContent =
+    '@keyframes todayFollowupBlink {' +
+      '0%, 100% { box-shadow: 0 0 0 0 rgba(217,153,40,0.0); transform: scale(1); background-color:#FFF5DC; }' +
+      '50% { box-shadow: 0 0 0 9px rgba(217,153,40,0.35); transform: scale(1.03); background-color:#ffe49c; }' +
+    '}' +
+    '.today-followup-blink {' +
+      'animation: todayFollowupBlink 1.1s ease-in-out infinite;' +
+      'border-color:#d99928 !important;' +
+    '}';
+  document.head.appendChild(style);
+}
+
+// ---- Unattended Lead hourly popup (B2C) ----------------------------------------------------------
+// First popup after ~5 min, then every N minutes (N from CONFIGURATION / UNATTENDED_LEAD_POPUP_INTERVAL_MINUTES).
+// Counselor sees own unattended leads; ADMIN-DASHBOARD-SPACIAL-RIGHTS emails see all.
+var UNATTENDED_POPUP_TIMER = null;
+var UNATTENDED_POPUP_STARTED = false;
+var UNATT_SUPPRESS_DP = false;
+
+function ensureUnattendedLeadPopupModal() {
+  if (document.getElementById('unattendedLeadPopup')) { return; }
+  var html = ''
+    + '<style>'
+    + '#unattendedLeadPopup .modal-dialog{max-width:96vw;}'
+    + '#unattendedLeadPopup td,#unattendedLeadPopup th{white-space:nowrap;vertical-align:middle;}'
+    + '#unattendedLeadPopup td.unatt-cmt{white-space:normal;max-width:260px;}'
+    + '</style>'
+    + '<div id="unattendedLeadPopup" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">'
+    + '  <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">'
+    + '    <div class="modal-content">'
+    + '      <div class="modal-header" style="background:#2d7ff9;color:#fff;">'
+    + '        <div class="d-flex align-items-center flex-wrap" style="gap:10px;">'
+    + '          <h5 class="modal-title mb-0">Unattended Leads <span id="unattendedLeadPopupCount" class="badge badge-light ml-1"></span></h5>'
+    + '          <input type="text" id="unattendedPopupDate" class="form-control form-control-sm" readonly style="width:140px;background:#fff;cursor:pointer;" title="Filter by created date (your timezone)" placeholder="Today">'
+    + '          <a href="javascript:void(0)" class="text-white" style="font-size:12px;text-decoration:underline;" onclick="clearUnattendedPopupDate()">Today</a>'
+    + '        </div>'
+    + '        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
+    + '      </div>'
+    + '      <div class="modal-body p-2" id="unattendedLeadPopupBody" style="max-height:72vh;overflow:auto;"></div>'
+    + '    </div>'
+    + '  </div>'
+    + '</div>';
+  $('body').append(html);
+  // Use the system-standard bootstrap-datepicker (same as rest of the app), not the browser native date control.
+  try {
+    $('#unattendedPopupDate').datepicker({
+      autoclose: true,
+      format: 'M dd, yyyy',
+      endDate: new Date()
+    }).on('changeDate', function () {
+      if (UNATT_SUPPRESS_DP) { return; } // ignore programmatic updates, only react to user picks
+      reloadUnattendedLeadPopupForDate();
+    });
+  } catch (e) {}
+}
+
+// Read the picked date as YYYY-MM-DD (backend format); '' when cleared / today.
+function unattGetPickedDate() {
+  try {
+    var d = $('#unattendedPopupDate').datepicker('getDate');
+    if (!d || isNaN(d.getTime())) { return ''; }
+    return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+  } catch (e) { return ''; }
+}
+
+// Set the picker from a YYYY-MM-DD string ('' clears it). Suppresses the changeDate handler.
+function unattSetPickedDate(ymd) {
+  UNATT_SUPPRESS_DP = true;
+  try {
+    if (ymd) {
+      var p = String(ymd).split('-');
+      var d = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+      $('#unattendedPopupDate').datepicker('update', d);
+    } else {
+      $('#unattendedPopupDate').val('');
+      try { $('#unattendedPopupDate').datepicker('update'); } catch (e2) {}
+    }
+  } catch (e) { $('#unattendedPopupDate').val(ymd || ''); }
+  setTimeout(function () { UNATT_SUPPRESS_DP = false; }, 0);
+}
+
+function renderUnattendedLeadPopup(resp) {
+  var leads = resp.leads || [];
+  var all = !!resp.allAccess;
+  var cols = all ? 8 : 7;
+  var h = '<div class="table-responsive"><table class="table table-sm table-bordered mb-0" style="font-size:12px;">';
+  h += '<thead><tr style="background:#f1f3f7;"><th>#</th><th>Lead No</th><th>Name</th><th>Phone</th><th>Created</th>'
+     + (all ? '<th>Assigned To</th>' : '') + '<th>Status</th><th>Comment</th></tr></thead><tbody>';
+  for (var i = 0; i < leads.length; i++) {
+    var l = leads[i];
+    var cmt = String(l.comment || '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/gi, ' ').replace(/\s+/g, ' ').trim();
+    var cmtCell = cmt ? escapeHtml(cmt) : '<span class="text-muted">Unattended</span>';
+    var leadNo = l.leadNo || '';
+    var euid = (typeof ENCRYPTED_USER_ID !== 'undefined' ? ENCRYPTED_USER_ID : '');
+    var leadUrl = '/dashboard/lead-data-list?moduleId=111&leadId=' + encodeURIComponent(leadNo)
+      + '&leadFrom=LEAD&clickFrom=list&startDate=&endDate=&country=0&campaign=&currentPage=0&euid='
+      + euid + '&leadType=B2C';
+    var leadNoCell = leadNo
+      ? '<a href="javascript:void(0)" onclick="unattOpenLead(\'' + leadUrl + '\');">' + escapeHtml(leadNo) + '</a>'
+      : '';
+    h += '<tr>'
+      + '<td>' + (i + 1) + '</td>'
+      + '<td>' + leadNoCell + '</td>'
+      + '<td>' + escapeHtml(l.name || '') + '</td>'
+      + '<td>' + escapeHtml(l.phone || '') + '</td>'
+      + '<td>' + escapeHtml(l.created || '') + '</td>'
+      + (all ? '<td>' + escapeHtml(l.assignName || '-') + '</td>' : '')
+      + '<td>' + escapeHtml(l.leadStatus || '') + '</td>'
+      + '<td class="unatt-cmt">' + cmtCell + '</td>'
+      + '</tr>';
+  }
+  if (!leads.length) { h += '<tr><td colspan="' + cols + '" class="text-center text-muted">No unattended leads.</td></tr>'; }
+  h += '</tbody></table></div>';
+  return h;
+}
+
+function scheduleUnattendedLeadPopup(delayMs) {
+  if (UNATTENDED_POPUP_TIMER) { clearTimeout(UNATTENDED_POPUP_TIMER); }
+  UNATTENDED_POPUP_TIMER = setTimeout(fetchUnattendedLeadPopup, delayMs);
+}
+
+function unattendedPopupAjax(dateStr) {
+  var payload = { userId: USER_ID };
+  if (dateStr) { payload.date = dateStr; }
+  return getDashboardDataBasedUrlAndPayloadWithParentUrl(false, false, 'unattended-lead-popup', payload, 'api/v1/leads');
+}
+
+// timer cycle: fetch all (session-scoped), show if any, then reschedule using the server interval
+async function fetchUnattendedLeadPopup() {
+  try {
+    var resp = await unattendedPopupAjax('');
+    if (!resp) { scheduleUnattendedLeadPopup(60 * 60 * 1000); return; }
+    if (resp.status == '3') { if (typeof redirectLoginPage === 'function') { redirectLoginPage(); } return; }
+    var intervalMs = (parseInt(resp.intervalMinutes, 10) || 60) * 60 * 1000;
+    var enabled = (resp.enabled !== false && resp.enabled !== 'N');
+    if (enabled && (resp.count || 0) > 0) {
+      ensureUnattendedLeadPopupModal();
+      unattSetPickedDate(resp.filterDate || '');
+      $('#unattendedLeadPopupCount').text(resp.count);
+      $('#unattendedLeadPopupBody').html(renderUnattendedLeadPopup(resp));
+      $('#unattendedLeadPopup').modal('show');
+    }
+    scheduleUnattendedLeadPopup(intervalMs);
+  } catch (e) {
+    scheduleUnattendedLeadPopup(60 * 60 * 1000);
+  }
+}
+
+// Open a lead from the popup in a new tab (app standard, same as the duplicate-lead link).
+function unattOpenLead(url) {
+  if (typeof getAsPost === 'function') { getAsPost(url); }
+}
+
+// Open the popup on demand (e.g. clicking the "Unattended Lead" chip today-count) for today's leads.
+async function openUnattendedLeadPopupNow() {
+  try {
+    ensureUnattendedLeadPopupModal();
+    var resp = await unattendedPopupAjax('');
+    if (!resp) { return; }
+    if (resp.status == '3') { if (typeof redirectLoginPage === 'function') { redirectLoginPage(); } return; }
+    unattSetPickedDate(resp.filterDate || '');
+    $('#unattendedLeadPopupCount').text(resp.count || 0);
+    $('#unattendedLeadPopupBody').html(renderUnattendedLeadPopup(resp));
+    $('#unattendedLeadPopup').modal('show');
+  } catch (e) {}
+}
+
+// manual refresh when the header date filter changes (keeps popup open, does not touch the timer)
+async function reloadUnattendedLeadPopupForDate() {
+  try {
+    var dateStr = unattGetPickedDate();
+    var resp = await unattendedPopupAjax(dateStr);
+    if (!resp) { return; }
+    if (resp.status == '3') { if (typeof redirectLoginPage === 'function') { redirectLoginPage(); } return; }
+    unattSetPickedDate(resp.filterDate || '');
+    $('#unattendedLeadPopupCount').text(resp.count || 0);
+    $('#unattendedLeadPopupBody').html(renderUnattendedLeadPopup(resp));
+  } catch (e) {}
+}
+
+function clearUnattendedPopupDate() {
+  unattSetPickedDate('');
+  reloadUnattendedLeadPopupForDate();
+}
+
+function startUnattendedLeadPopupOnce() {
+  if (UNATTENDED_POPUP_STARTED) { return; }
+  // Only on the B2C Lead List page — NOT on the lead detail page (/dashboard/lead-data-list/...),
+  // which reuses this same dashboard content. Avoids the popup opening in the opened-lead tab.
+  if (String(window.location.pathname || '').indexOf('lead-data-list') !== -1) { return; }
+  UNATTENDED_POPUP_STARTED = true;
+  bootstrapUnattendedLeadPopup();
+}
+
+// Read the popup timing from settings first, then schedule the FIRST show after the configured
+// initial-delay (UNATTENDED_LEAD_POPUP_INITIAL_DELAY_MINUTES). This bootstrap call does NOT show the popup.
+async function bootstrapUnattendedLeadPopup() {
+  try {
+    var resp = await unattendedPopupAjax('');
+    if (!resp) { scheduleUnattendedLeadPopup(5 * 60 * 1000); return; }
+    if (resp.status == '3') { if (typeof redirectLoginPage === 'function') { redirectLoginPage(); } return; }
+    var enabled = (resp.enabled !== false && resp.enabled !== 'N');
+    if (!enabled) { return; } // popup turned off in settings
+    var initialMs = (parseInt(resp.initialDelayMinutes, 10) || 5) * 60 * 1000;
+    scheduleUnattendedLeadPopup(initialMs); // first popup after the settings initial-delay
+  } catch (e) {
+    scheduleUnattendedLeadPopup(5 * 60 * 1000);
+  }
+}
+
 function confirmAndOpenWhatsAppChat(name, phone, leadId, rightTime, leadNo) {
   var $curSpan = $("#leadCurTimeText_" + leadId + " span").first();
   var currentTime = ($curSpan.text() || "").trim() || "—";
@@ -255,7 +471,7 @@ function getB2CListHeaderContent(roleAndModule, objRights) {
 			  </div>`;
       }
 			
-			html+=`<div class="d-flex justify-content-between align-items-center w-100" style="background-color: #FFF5DC;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #d4d481">
+			html+=`<div id="todayFollowupBox" class="d-flex justify-content-between align-items-center w-100" style="background-color: #FFF5DC;border-radius: 5px;padding: 5px 10px;font-weight: bold;border: 1.5px solid #d4d481">
 				<p class="mb-0">Today\'s Follow-ups</p>
 				<p id="todayFollowup" class="mb-0 px-2 rounded text-dark" style="background-color:#EFD597;">-</p>
 			</div>
@@ -605,6 +821,7 @@ function getLeadFormPopup(objRights) {
     "				</div>" +
     '				<div id="documentDiv"></div>' +
     '				<div id="demoAttributionDiv"></div>' +
+    '				<div id="enrollmentLinkDiv"></div>' +
     "			</form>" +
     "        </div>" +
     '        <div class="modal-footer">' +
@@ -1377,6 +1594,13 @@ function getLeadB2CTotalCountList(leadTotalData) {
       ? `<a href="javascript:void(0);" class="text-dark" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'todayScheduleCall','${leadTotalData.leadFrom}')">${leadTotalData.todayScheduleCall}</a>`
       : "-";
   $("#todayFollowup").html(`${todayFollowupHTML}`);
+  // blink the "Today's Follow-ups" box (like "Multiple time apply") only when there are followups due today
+  ensureTodayFollowupBlinkStyle();
+  if (leadTotalData.todayScheduleCall > 0) { $("#todayFollowupBox").addClass("today-followup-blink"); }
+  else { $("#todayFollowupBox").removeClass("today-followup-blink"); }
+
+  // B2C lead list loaded -> kick off the hourly unattended-lead popup (once per page)
+  startUnattendedLeadPopupOnce();
 
   var todaySchoolDemoHTML =
     leadTotalData.todayDemo > 0
@@ -1425,8 +1649,13 @@ function getLeadB2CTotalCountList(leadTotalData) {
   var unattendedLeadsHTML =
     leadTotalData.unattendedLead > 0
       ? `<a href="javascript:void(0);" class="text-white" onclick="clickTotalLeads('${leadTotalData.clickFrom}-${leadTotalData.clickUserid}', '0', 'unattendedLead','${leadTotalData.leadFrom}')">${leadTotalData.unattendedLead}</a>`
-      : "-";
-  $("#unattendedLeads").html(`${unattendedLeadsHTML}`);
+      : "0";
+  var unattendedTodayNum = (leadTotalData.unattendedToday != null ? leadTotalData.unattendedToday : 0);
+  var unattendedTodayVal =
+    unattendedTodayNum > 0
+      ? `<a href="javascript:void(0);" class="text-white" title="Open today's unattended leads" onclick="openUnattendedLeadPopupNow()">${unattendedTodayNum}</a>`
+      : unattendedTodayNum;
+  $("#unattendedLeads").html(`${unattendedLeadsHTML} | ${unattendedTodayVal}`);
 
   var totalSchoolDemoHTML =
     leadTotalData.demoLead > 0
