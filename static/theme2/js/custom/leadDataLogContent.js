@@ -1,3 +1,17 @@
+function _ldlSourceBadge(title) {
+  var t = (title || '').toLowerCase();
+  var label, bg;
+  if (t === 'zoho chat') { label = 'Zoho SalesIQ'; bg = '#F0A030'; }
+  else if (t === 'conversations') { label = 'WhatsApp'; bg = '#25D366'; }
+  else if (t === 'call pick' || t === 'call not pick') { label = 'Call'; bg = '#6C63FF'; }
+  else if (t.indexOf('demo booked') > -1 || t.indexOf('follow-up meeting booked') > -1) { label = 'Demo'; bg = '#E91E63'; }
+  else if (t.indexOf('demo schedule') > -1 || t.indexOf('follow-up meeting schedule') > -1) { label = 'Demo'; bg = '#E91E63'; }
+  else if (t === 'no show') { label = 'Demo'; bg = '#E91E63'; }
+  else if (t.indexOf('whatsapp') > -1) { label = 'WhatsApp'; bg = '#25D366'; }
+  else { label = 'CRM'; bg = 'var(--info)'; }
+  return '<span class="badge" style="background:' + bg + ';color:#fff;font-size:10px;vertical-align:middle;">' + label + '</span>';
+}
+
 function renderLeadDataLogContent(rootId, leadData) {
   var data = leadData || getLeadDataLogDummyData();
   var root = $('#' + rootId);
@@ -39,7 +53,7 @@ function renderLeadDataLogContent(rootId, leadData) {
 
   html += '<div class="row">';
 
-  html += '<div class="col-lg-8 mb-3">';
+  html += '<div class="col-lg-8 mb-3" id="ldlLeftCol">';
   html += '<div class="main-card card">';
   html += '<div class="card-header bg-primary text-white">Basic Info Section</div>';
   html += '<div class="card-body p-3">';
@@ -293,10 +307,13 @@ function renderLeadDataLogContent(rootId, leadData) {
   html += '</div></div>';
   html += '</div>';
 
-  html += '<div class="col-lg-4 mb-3">';
+  html += '<div class="col-lg-4 mb-3" id="ldlRightCol">';
 
   html += '<div class="main-card mb-3 card">';
-  html += '<div class="card-header bg-primary text-white">Follow-up Logs (Timeline)</div>';
+  html += '<div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">'
+        + '<span>Follow-up Logs (Timeline)</span>'
+        + '<button class="btn btn-sm btn-light ml-2" id="ldlTimelineToggle" title="Collapse timeline"><i class="fa fa-chevron-right"></i></button>'
+        + '</div>';
   html += '<div class="card-body">';
   html += '<div class="vertical-without-time vertical-timeline vertical-timeline--animate vertical-timeline--one-column">';
 
@@ -307,7 +324,7 @@ function renderLeadDataLogContent(rootId, leadData) {
         + '<span class="vertical-timeline-element-icon bounce-in"><i class="badge badge-dot badge-dot-xl badge-primary d-inline-block"> </i></span>'
         + '<div class="vertical-timeline-element-content bounce-in">'
         + '<h5 class="timeline-title mb-1"><i class="fa fa-calendar-alt mr-1"></i>' + safe(f.at) + '</h5>'
-        + '<span class="bold">' + safe(f.title) + '</span>'
+        + '<span class="bold">' + safe(f.title) + '</span> ' + _ldlSourceBadge(f.title)
         + '<p class="mb-1">' + safe(f.remarks) + '</p>'
         // + '<small class="text-muted">' + safe(f.by) + '</small>'
         + '</div></div></div>';
@@ -325,6 +342,32 @@ function renderLeadDataLogContent(rootId, leadData) {
   html += '</div>';
 
   root.html(html);
+
+  $('#ldlTimelineToggle').on('click', function () {
+    var $left = $('#ldlLeftCol'), $right = $('#ldlRightCol');
+    var collapsed = $right.hasClass('ldl-collapsed');
+    $('.ldlTimelineExpandBtn').remove();
+    if (collapsed) {
+      $right.removeClass('ldl-collapsed').show();
+      $left.removeClass('col-lg-12').addClass('col-lg-8');
+      $(this).html('<i class="fa fa-chevron-right"></i>').attr('title', 'Collapse timeline');
+    } else {
+      $right.addClass('ldl-collapsed').hide();
+      $left.removeClass('col-lg-8').addClass('col-lg-12');
+      $(this).html('<i class="fa fa-chevron-left"></i>').attr('title', 'Expand timeline');
+      $left.prepend(
+        '<div class="ldlTimelineExpandBtn text-right mb-3">'
+        + '<button class="btn btn-sm btn-outline-primary"><i class="fa fa-columns mr-1"></i>Show Timeline</button>'
+        + '</div>'
+      );
+      $left.append(
+        '<div class="ldlTimelineExpandBtn text-right mb-3">'
+        + '<button class="btn btn-sm btn-outline-primary"><i class="fa fa-columns mr-1"></i>Show Timeline</button>'
+        + '</div>'
+      );
+      $('.ldlTimelineExpandBtn').on('click', function () { $('#ldlTimelineToggle').click(); });
+    }
+  });
 }
 
 function renderLeadDataLogPage(containerId, pageConfig, leadData) {
