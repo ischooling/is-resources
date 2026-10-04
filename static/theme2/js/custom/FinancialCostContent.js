@@ -182,6 +182,9 @@ function fcBuildShell(data) {
 		+ '      <select id="fcSessionSelect" class="form-control form-control-sm" style="width:auto;">' + sessionOpts + '</select>'
 		+ '      <label class="mb-0 small text-muted">Month</label>'
 		+ '      <select id="fcTopMonth" class="form-control form-control-sm" style="width:auto;">' + monthOpts + '</select>'
+		+ '      <button type="button" id="fcRefreshHoursBtn" class="btn btn-sm btn-outline-secondary" title="Rebuild teacher hours cache (normally auto-refreshed every 2 hours)">'
+		+ '        <i class="fa fa-refresh"></i> Refresh hours'
+		+ '      </button>'
 		+ '    </div>'
 		+ '  </div>'
 		+ '  <ul class="nav nav-tabs mb-3" id="fcTabs">'
@@ -511,6 +514,24 @@ function fcBindEvents() {
 	$('#fcRepReset').off('click').on('click', function () {
 		$('#fcRepPicker').val(''); $('#fcRepEntity').val(''); fcRepPrompt();
 	});
+	$('#fcRefreshHoursBtn').off('click').on('click', fcRefreshTeacherHours);
+}
+
+async function fcRefreshTeacherHours() {
+	var btn = $('#fcRefreshHoursBtn');
+	btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Refreshing…');
+	try {
+		var res = await callCommonAjax({ method: 'POST', url: financialCostUrl('refresh-teacher-hours'), global: false, showMessage: false });
+		if (res && res.status === '1') {
+			showMessageTheme2(1, res.message || 'Teacher hours refreshed.');
+		} else {
+			showMessageTheme2(0, (res && res.message) ? res.message : 'Could not refresh teacher hours. Please try again.');
+		}
+	} catch (e) {
+		showMessageTheme2(0, 'Could not refresh teacher hours. Please try again.');
+	} finally {
+		btn.prop('disabled', false).html('<i class="fa fa-refresh"></i> Refresh hours');
+	}
 }
 
 /** Placeholder message shown in the report body when no teacher/student is picked. */

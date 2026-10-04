@@ -1,14 +1,41 @@
 var _zohoConvPage = 0;
 var _zohoConvSize = 50;
 var _zohoConvTotal = 0;
+var _zohoRefreshTimer = null;
+var _zohoPageObserver = null;
+var _zohoActiveCard = 'total';
 
 function renderZohoConversationList(title, roleAndModule, schoolId, userId, userRole) {
+    _zohoStopRefresh();
     _zohoConvPage = 0;
     _zohoConvTotal = 0;
+    _zohoActiveCard = 'total';
     $('#dashboardContentInHTML').html(_zohoShellHtml());
     _zohoBindEvents();
     _zohoCheckConnection();
+    _zohoLoadStats();
     _zohoLoadChats();
+    _zohoStartRefresh();
+}
+
+function _zohoStartRefresh() {
+    _zohoStopRefresh();
+    _zohoRefreshTimer = setInterval(_zohoLoadStats, 60000);
+    _zohoPageObserver = new MutationObserver(function (mutations) {
+        for (var i = 0; i < mutations.length; i++) {
+            if (!document.getElementById('zohoStatsStrip')) {
+                _zohoStopRefresh();
+                break;
+            }
+        }
+    });
+    var container = document.getElementById('dashboardContentInHTML');
+    if (container) _zohoPageObserver.observe(container, { childList: true });
+}
+
+function _zohoStopRefresh() {
+    if (_zohoRefreshTimer) { clearInterval(_zohoRefreshTimer); _zohoRefreshTimer = null; }
+    if (_zohoPageObserver) { _zohoPageObserver.disconnect(); _zohoPageObserver = null; }
 }
 
 var _zohoConnStatus = null;
@@ -116,6 +143,26 @@ function _zohoOpenAuthorize(scopes) {
 
 function _zohoShellHtml() {
     return ''
+        + '<style>'
+        + '.zoho-stat-strip{display:flex;gap:6px;margin-bottom:10px}'
+        + '.zoho-stat-card{flex:1;display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;'
+        + ' background:#f8fafc;cursor:pointer;border:1.5px solid transparent;transition:border-color .15s,box-shadow .15s;min-width:0}'
+        + '.zoho-stat-card:hover{box-shadow:0 1px 4px rgba(0,0,0,.06)}'
+        + '.zoho-stat-active{border-color:var(--pc,#2563eb)!important;background:rgba(37,99,235,.04)!important}'
+        + '.zoho-stat-icon{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}'
+        + '.zoho-stat-num{font-size:15px;font-weight:800;line-height:1}'
+        + '.zoho-stat-lbl{font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;color:#64748b;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+        + '.zs-total .zoho-stat-icon{background:rgba(37,99,235,.1);color:#2563eb} .zs-total .zoho-stat-num{color:#2563eb}'
+        + '.zs-attended .zoho-stat-icon{background:rgba(22,163,74,.1);color:#16a34a} .zs-attended .zoho-stat-num{color:#16a34a}'
+        + '.zs-missed .zoho-stat-icon{background:rgba(220,38,38,.1);color:#dc2626} .zs-missed .zoho-stat-num{color:#dc2626}'
+        + '.zs-waiting .zoho-stat-icon{background:rgba(217,119,6,.1);color:#d97706} .zs-waiting .zoho-stat-num{color:#d97706}'
+        + '.zs-proactive .zoho-stat-icon{background:rgba(124,58,237,.1);color:#7c3aed} .zs-proactive .zoho-stat-num{color:#7c3aed}'
+        + '.zs-linked .zoho-stat-icon{background:rgba(8,145,178,.1);color:#0891b2} .zs-linked .zoho-stat-num{color:#0891b2}'
+        + '.zs-cron .zoho-stat-icon{background:rgba(71,85,105,.1);color:#475569} .zs-cron .zoho-stat-num{color:#475569}'
+        + '.zs-webhook .zoho-stat-icon{background:rgba(234,88,12,.1);color:#ea580c} .zs-webhook .zoho-stat-num{color:#ea580c}'
+        + '.zoho-live-dot{width:5px;height:5px;border-radius:50%;background:var(--pc,#2563eb);animation:zohoPulse 2s ease-in-out infinite;display:inline-block}'
+        + '@keyframes zohoPulse{0%,100%{opacity:.3}50%{opacity:1}}'
+        + '</style>'
         + '<div class="main-card mb-3 card">'
         + '  <div class="card-header d-flex justify-content-between align-items-center">'
         + '    <span>Zoho SalesIQ Conversations</span>'
@@ -127,6 +174,20 @@ function _zohoShellHtml() {
         + '    </div>'
         + '  </div>'
         + '  <div class="card-body">'
+        + '    <div class="zoho-stat-strip" id="zohoStatsStrip">'
+        + _zohoStatCard('total', '&#x2211;', 'Total', true)
+        + _zohoStatCard('attended', '&#x2714;', 'Attended', false)
+        + _zohoStatCard('missed', '&#x2716;', 'Missed', false)
+        + _zohoStatCard('waiting', '&#x23F3;', 'Waiting', false)
+        + _zohoStatCard('proactive', '&#x25B6;', 'Proactive', false)
+        + _zohoStatCard('linked', '&#x1F517;', 'Linked', false)
+        + _zohoStatCard('cron', '&#x23F0;', 'Cron', false)
+        + _zohoStatCard('webhook', '&#x26A1;', 'Webhook', false)
+        + '    </div>'
+        + '    <div class="d-flex align-items-center justify-content-end mb-2">'
+        + '      <span class="zoho-live-dot mr-1"></span>'
+        + '      <small class="text-muted" style="font-size:9px;">Live &middot; refreshes every 60s</small>'
+        + '    </div>'
         + '    <form class="row align-items-end custom-field-scope" id="zohoFilterForm">'
         + '      <div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12 mb-2">'
         + '        <div class="custom-field mb-0">'
@@ -213,6 +274,13 @@ function _zohoShellHtml() {
         + '</div>';
 }
 
+function _zohoStatCard(key, icon, label, active) {
+    return '<div class="zoho-stat-card zs-' + key + (active ? ' zoho-stat-active' : '') + '" id="zohoCard_' + key + '" onclick="_zohoOnCardClick(\'' + key + '\')">'
+        + '  <div class="zoho-stat-icon">' + icon + '</div>'
+        + '  <div><div class="zoho-stat-num" id="zohoStat_' + key + '">-</div><div class="zoho-stat-lbl">' + label + '</div></div>'
+        + '</div>';
+}
+
 function _zohoBindEvents() {
     $('#zohoDateRange').on('change', function () {
         if ($(this).val() === 'custom') {
@@ -232,6 +300,10 @@ function _zohoBindEvents() {
 
     $('#zohoSearchBtn').on('click', function () {
         _zohoConvPage = 0;
+        _zohoActiveCard = 'total';
+        $('.zoho-stat-card').removeClass('zoho-stat-active');
+        $('#zohoCard_total').addClass('zoho-stat-active');
+        _zohoLoadStats();
         _zohoLoadChats();
     });
 
@@ -250,17 +322,82 @@ function _zohoBindEvents() {
     });
 }
 
-function _zohoGetFilterParams() {
+function _zohoGetBaseFilterParams() {
     return {
         dateRange: $('#zohoDateRange').val(),
         startDate: $('#zohoFromDate').val() || '',
         endDate: $('#zohoToDate').val() || '',
         email: $('#zohoEmail').val() || '',
         phone: $('#zohoPhone').val() || '',
-        visitorName: $('#zohoVisitorName').val() || '',
-        page: _zohoConvPage,
-        size: _zohoConvSize
+        visitorName: $('#zohoVisitorName').val() || ''
     };
+}
+
+function _zohoGetFilterParams() {
+    var p = _zohoGetBaseFilterParams();
+    p.page = _zohoConvPage;
+    p.size = _zohoConvSize;
+    var cardFilters = _zohoGetCardFilter();
+    if (cardFilters.status) p.status = cardFilters.status;
+    if (cardFilters.statusGroup) p.statusGroup = cardFilters.statusGroup;
+    if (cardFilters.source) p.source = cardFilters.source;
+    if (cardFilters.linkedOnly) p.linkedOnly = 1;
+    return p;
+}
+
+function _zohoGetCardFilter() {
+    var f = { status: '', statusGroup: '', source: '', linkedOnly: false };
+    switch (_zohoActiveCard) {
+        case 'attended': f.statusGroup = 'attended'; break;
+        case 'missed': f.status = 'missed'; break;
+        case 'waiting': f.statusGroup = 'waiting'; break;
+        case 'proactive': f.status = 'proactive'; break;
+        case 'linked': f.linkedOnly = true; break;
+        case 'cron': f.source = 'CRON'; break;
+        case 'webhook': f.source = 'WEBHOOK'; break;
+    }
+    return f;
+}
+
+function _zohoLoadStats() {
+    var params = _zohoGetBaseFilterParams();
+    $.ajax({
+        url: getURLForHTML('', 'api/v1/zoho/salesiq/chats/stats'),
+        type: 'GET',
+        data: params,
+        global: false,
+        success: function (s) {
+            _zohoRenderStats(s);
+        },
+        error: function () {
+            $('#zohoStatsStrip').hide();
+        }
+    });
+}
+
+function _zohoRenderStats(s) {
+    var map = {
+        total: s.total || 0,
+        attended: s.attended || 0,
+        missed: s.missed || 0,
+        waiting: s.waiting || 0,
+        proactive: s.proactive || 0,
+        linked: s.linkedToLead || 0,
+        cron: s.cronSource || 0,
+        webhook: s.webhookSource || 0
+    };
+    for (var key in map) {
+        var $el = $('#zohoStat_' + key);
+        if ($el.length) $el.text(map[key].toLocaleString());
+    }
+}
+
+function _zohoOnCardClick(card) {
+    _zohoActiveCard = card;
+    _zohoConvPage = 0;
+    $('.zoho-stat-card').removeClass('zoho-stat-active');
+    $('#zohoCard_' + card).addClass('zoho-stat-active');
+    _zohoLoadChats();
 }
 
 function _zohoLoadChats() {
