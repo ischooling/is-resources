@@ -108,6 +108,7 @@ const contentHandlers = {
     'lead-setting': () => initLeadSetting(),
     'email-status': () => $("#dashboardContentInHTML").html(getEmailVerifyContent("Email Verification", false)),
     'email-logs': () => initEmailLogs(),
+    'email-recovery': () => initEmailRecovery(),
     'wati-numbers': () => renderWatiNumbersContent(),
     'partner-school-payment': () => initPartnerSchoolPayment(),
     'graduation-ceremony-attendees': () => initGraduationCeremonyAttendees(),
@@ -222,6 +223,7 @@ const contentHandlers = {
     'contract-management': () => initContractManagement(),
     'manage-batch-student': () => renderManageBatchStudentDashboard('Manage Group Students', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'enrollment-tracker': () => renderEnrollmentTracker('Enrollment Tracker', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'zoho-conversation': () => renderZohoConversationList('Zoho Conversations', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'student-feedback-received': () => initStudentFeedbackReceived(),
 };
 

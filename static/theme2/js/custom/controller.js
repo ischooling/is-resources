@@ -358,6 +358,8 @@ function getContent(moduleId, pageNo, replaceDiv, extraParam){
 
 		});
 		getEmailLogsByEmail()
+	} else if (pageNo == "email-recovery") {
+		initEmailRecovery();
 	} else if (pageNo === "meeting-management") {
     	getMeetingManagementContent("Meeting Management")
 	} else if (pageNo == "wati-numbers") {
