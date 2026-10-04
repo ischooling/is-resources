@@ -1,3 +1,34 @@
+function _ldlChatBubbles(text) {
+  if (!text) return '';
+  var parts = text.split(/(?=\b[A-Za-z][A-Za-z0-9_ ]{0,30}?:\s)/);
+  if (parts.length < 2) return '<p class="mb-1">' + safe(text) + '</p>';
+  var names = {};
+  var colors = ['#2563eb', '#16a34a', '#d97706', '#7c3aed', '#dc2626', '#0891b2'];
+  var ci = 0;
+  var html = '<div style="max-height:300px;overflow-y:auto;padding:6px 0;">';
+  for (var i = 0; i < parts.length; i++) {
+    var p = parts[i].trim();
+    if (!p) continue;
+    var idx = p.indexOf(':');
+    if (idx < 1 || idx > 32) { html += '<div style="font-size:12px;color:#666;padding:2px 8px;">' + safe(p) + '</div>'; continue; }
+    var name = p.substring(0, idx).trim();
+    var msg = p.substring(idx + 1).trim();
+    if (!msg) continue;
+    if (!names[name]) { names[name] = colors[ci % colors.length]; ci++; }
+    var isFirst = ci <= 1 && i === 0;
+    var align = isFirst ? 'flex-start' : (Object.keys(names)[0] === name ? 'flex-start' : 'flex-end');
+    var bg = align === 'flex-end' ? names[name] : '#f1f5f9';
+    var fg = align === 'flex-end' ? '#fff' : '#1e293b';
+    html += '<div style="display:flex;justify-content:' + align + ';margin:3px 0;">'
+      + '<div style="max-width:85%;padding:5px 10px;border-radius:10px;background:' + bg + ';color:' + fg + ';font-size:12px;line-height:1.4;">'
+      + '<div style="font-weight:700;font-size:10px;margin-bottom:1px;opacity:.7;">' + safe(name) + '</div>'
+      + safe(msg)
+      + '</div></div>';
+  }
+  html += '</div>';
+  return html;
+}
+
 function _ldlSourceBadge(title) {
   var t = (title || '').toLowerCase();
   var label, bg;
@@ -325,7 +356,7 @@ function renderLeadDataLogContent(rootId, leadData) {
         + '<div class="vertical-timeline-element-content bounce-in">'
         + '<h5 class="timeline-title mb-1"><i class="fa fa-calendar-alt mr-1"></i>' + safe(f.at) + '</h5>'
         + '<span class="bold">' + safe(f.title) + '</span> ' + _ldlSourceBadge(f.title)
-        + '<p class="mb-1">' + safe(f.remarks) + '</p>'
+        + (f.title === 'Zoho Chat' ? _ldlChatBubbles(f.remarks) : '<p class="mb-1">' + safe(f.remarks) + '</p>')
         // + '<small class="text-muted">' + safe(f.by) + '</small>'
         + '</div></div></div>';
     }
