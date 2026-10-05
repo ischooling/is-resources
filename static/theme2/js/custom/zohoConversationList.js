@@ -297,7 +297,9 @@ function _zohoBindEvents() {
     $('#zohoFromDate, #zohoToDate').datepicker({
         format: 'yyyy-mm-dd',
         autoclose: true,
-        todayHighlight: true
+        todayHighlight: true,
+        zIndexOffset: 1050,
+        orientation: 'bottom auto'
     });
 
     $('#zohoAuthorizeBtn').on('click', _zohoOpenScopeModal);
@@ -603,14 +605,18 @@ function _zohoFormatDateTime(dt) {
         if (isNaN(d.getTime())) return dt;
         var now = new Date();
         var isToday = d.toDateString() === now.toDateString();
-        var h = d.getHours();
-        var m = d.getMinutes();
-        var ampm = h >= 12 ? 'PM' : 'AM';
-        h = h % 12 || 12;
-        var time = h + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
-        if (isToday) return time;
+        if (isToday) {
+            var h = d.getHours(), m = d.getMinutes();
+            var ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12;
+            return h + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
+        }
+        var yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
         var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        return d.getDate() + ' ' + months[d.getMonth()] + ' ' + time;
+        if (d.getFullYear() === now.getFullYear()) return months[d.getMonth()] + ' ' + d.getDate();
+        return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
     } catch (e) {
         return dt;
     }
