@@ -6,9 +6,6 @@ $(document).ready(function() {
 		event.preventDefault();
 	});
 });
-$('#signupStage2 #parentEmailId').blur(function(){
-	emailCheck($('#signupStage2 #parentEmailId').val(), 'STUDENT');
-});
 $("#pCountryId").unbind().bind("change",function(){
 	$('#pCountryId').valid();
 	callStates('signupStage2', this.value, 'pCountryId', 'pStateId', 'pCityId');
@@ -21,6 +18,237 @@ $("#pStateId").unbind().bind("change",function(){
 $("#pCityId").unbind().bind("change",function(){
 	$('#pCityId').valid();
 });
+
+/* ===== Relation-based Father/Mother/Guardian parent fields =====
+   #parentFirstName / #parentlastName / #parentPhoneNumber always hold whichever person is
+   CURRENTLY selected in #relation (this is unchanged -- same fields, same save-parent-details
+   contract as before). When Relation is Father or Mother, #otherParentFirstName /
+   #otherParentLastName / #otherParentPhoneNumber additionally collect the OTHER parent's
+   info, always optional. Guardian gets no extra fields.
+
+   window.__relationData holds Father/Mother/Guardian buckets IN MEMORY so switching Relation
+   back and forth during the same visit never mixes up or loses what was typed for each person
+   (Father -> Mother -> Guardian -> Father must come back to the original Father values, not
+   stale/blank/crossed-over ones). It is seeded from the saved signupParent record (for
+   whichever relation is already saved) and from the otherParent localStorage cache (see
+   getStoredRelationData in signupStudentContent.js) for the other two. */
+window.__relationData = window.__relationData || { Father: {}, Mother: {}, Guardian: {} };
+window.__currentParentRelation = window.__currentParentRelation || '';
+
+function getOtherRelationName(relation){
+	if(relation == 'Father'){ return 'Mother'; }
+	if(relation == 'Mother'){ return 'Father'; }
+	return '';
+}
+
+function readParentPrimaryFieldsFromDom(){
+	return {
+		firstName: $('#signupStage2 #parentFirstName').val() || '',
+		lastName: $('#signupStage2 #parentlastName').val() || '',
+		contactNumber: $('#signupStage2 #parentPhoneNumber').val() || '',
+		countryCode: $('#signupStage2 #parentCountryDailCode').val() || '',
+		countryIsdCode: $('#signupStage2 #parentCountryIsd').val() || ''
+	};
+}
+
+function readParentOtherFieldsFromDom(){
+	return {
+		firstName: $('#signupStage2 #otherParentFirstName').val() || '',
+		lastName: $('#signupStage2 #otherParentLastName').val() || '',
+		contactNumber: $('#signupStage2 #otherParentPhoneNumber').val() || '',
+		countryCode: $('#signupStage2 #otherParentCountryDailCode').val() || '',
+		countryIsdCode: $('#signupStage2 #otherParentCountryIsd').val() || ''
+	};
+}
+
+function writeParentPrimaryFieldsToDom(bucket){
+	bucket = bucket || {};
+	$('#signupStage2 #parentFirstName').val(bucket.firstName || '');
+	$('#signupStage2 #parentlastName').val(bucket.lastName || '');
+	$('#signupStage2 #parentPhoneNumber').val(bucket.contactNumber || '');
+	$('#signupStage2 #parentCountryDailCode').val(bucket.countryCode || '');
+	$('#signupStage2 #parentCountryIsd').val(bucket.countryIsdCode || '');
+	// Default to US when this bucket has no saved country (e.g. a relation switch into a
+	// person who was never filled in before), instead of leaving whatever country was
+	// selected for the PREVIOUS person who occupied this same field.
+	if(typeof itiSetCountry === 'function' && typeof itiParent !== 'undefined' && itiParent){
+		try{ itiSetCountry(itiParent, bucket.countryIsdCode || 'us'); }catch(e){}
+	}
+}
+
+function writeParentOtherFieldsToDom(bucket){
+	bucket = bucket || {};
+	// if(STUDENT_SINGUP_CURRENT_STEP >= 2){
+	// 	bucket.firstName="";
+	// 	bucket.lastName="";
+	// 	bucket.contactNumber="";
+	// 	bucket.firstName="";
+	// 	bucket.countryIsdCode="US"
+	// }
+	$('#signupStage2 #otherParentFirstName').val(bucket.firstName || '');
+	$('#signupStage2 #otherParentLastName').val(bucket.lastName || '');
+	$('#signupStage2 #otherParentPhoneNumber').val(bucket.contactNumber || '');
+	// Same US default as writeParentPrimaryFieldsToDom above.
+	if(typeof itiSetCountry === 'function' && typeof itiOtherParent !== 'undefined' && itiOtherParent){
+		try{ itiSetCountry(itiOtherParent, bucket.countryIsdCode || 'us'); }catch(e){}
+	}
+}
+
+// Relabels the primary First/Last/Mobile fields and the "other parent" block's heading for
+// the given relation, and shows/hides the "other parent" block (Guardian never gets it).
+function applyParentRelationLabels(relation){
+	var $firstNameLabel = $('#signupStage2 label[for="parentFirstName"] .relation-label-text');
+	var $lastNameLabel = $('#signupStage2 label[for="parentlastName"] .relation-label-text');
+	var $phoneLabel = $('#signupStage2 label[for="parentPhoneNumber"] .relation-label-text');
+	var $otherRow = $('#signupStage2 #otherParentFieldsRow');
+	var $otherLabels = $('#signupStage2 .other-parent-label-text');
+
+	if(relation == 'Father' || relation == 'Mother'){
+		$firstNameLabel.text(relation+"'s First Name");
+		$lastNameLabel.text(relation+"'s Last Name");
+		$phoneLabel.text(relation+"'s Mobile Number");
+		var otherRelation = getOtherRelationName(relation);
+		$otherLabels.each(function(){
+			var base = $(this).text().replace(/^(Father's|Mother's)\s*/, '');
+			$(this).text(otherRelation+"'s "+base);
+		});
+		$otherRow.show();
+	}else if(relation == 'Guardian'){
+		$firstNameLabel.text("Guardian's First Name");
+		$lastNameLabel.text("Guardian's Last Name");
+		$phoneLabel.text("Guardian's Mobile Number");
+		$otherRow.hide();
+	}else{
+		// No relation chosen yet: keep the original generic labels.
+		$firstNameLabel.text('First Name');
+		$lastNameLabel.text('Last Name');
+		$phoneLabel.text('Parent Mobile Number');
+		$otherRow.hide();
+	}
+}
+
+// Persists the current "other parent" field values into window.__relationData AND the
+// otherParent localStorage cache (so they survive a page refresh -- see
+// getStoredRelationData/saveStoredRelationBucket in signupStudentContent.js). Called on blur
+// of the other-parent fields (no arg -- reads the CURRENT #relation, since it hasn't changed
+// yet), and from onParentRelationChanged while switching away from a relation (passes that
+// relation explicitly, since by the time this fires #relation already holds the NEW value --
+// relying on re-reading it here saved the fields into the WRONG bucket, e.g. Father's other-
+// parent block (Mother's data) got saved back into the Father bucket instead of the Mother
+// bucket when switching Father -> Mother, making Father incorrectly show Mother's values).
+function persistOtherParentFieldsToCache(relation){
+	relation = relation || $('#signupStage2 #relation').val();
+	var otherRelation = getOtherRelationName(relation);
+	if(!otherRelation){ return; }
+	var bucket = readParentOtherFieldsFromDom();
+	window.__relationData[otherRelation] = bucket;
+	if(typeof saveStoredRelationBucket === 'function'){
+		saveStoredRelationBucket(otherRelation, bucket);
+	}
+}
+
+// Sets a field's green-tick/red-cross wrapper state to match its CURRENT value, for the
+// relation-switch case only (see onParentRelationChanged): empty always goes NEUTRAL (never
+// red) since a programmatic switch is not the user leaving the field blank; a non-empty text
+// field is always a valid tick; a non-empty phone field is checked against the passed intl-
+// tel-input instance the same way the field's own blur handler does.
+function refreshParentFieldValidityState(id, iti){
+	var val = $('#signupStage2 #'+id).val();
+	val = (val == null) ? '' : String(val);
+	if(val.trim() === ''){
+		validEndInvalidField(null, id);
+		return;
+	}
+	if(typeof iti !== 'undefined'){
+		var valEnabled = (typeof isPhoneValidationEnabled !== 'function') || isPhoneValidationEnabled();
+		var isValid = (typeof itiIsValidNumber === 'function') ? itiIsValidNumber(iti) : null;
+		validEndInvalidField(!(valEnabled && iti && isValid === false), id);
+		return;
+	}
+	validEndInvalidField(true, id);
+}
+
+// Runs the full swap when Relation changes from one value to another: saves the DOM's current
+// primary (and, if applicable, other-parent) values under the OLD relation, then loads the NEW
+// relation's primary value and its other-parent value back into the DOM, then relabels.
+function onParentRelationChanged(){
+	var newRelation = $('#signupStage2 #relation').val();
+	var oldRelation = window.__currentParentRelation;
+
+	if(oldRelation == 'Father' || oldRelation == 'Mother' || oldRelation == 'Guardian'){
+		window.__relationData[oldRelation] = readParentPrimaryFieldsFromDom();
+	}
+	if(oldRelation == 'Father' || oldRelation == 'Mother'){
+		persistOtherParentFieldsToCache(oldRelation);
+	}
+
+	writeParentPrimaryFieldsToDom(window.__relationData[newRelation]);
+	if(newRelation == 'Father' || newRelation == 'Mother'){
+		var otherRelation = getOtherRelationName(newRelation);
+		var cached = window.__relationData[otherRelation];
+		if((!cached || (!cached.firstName && !cached.lastName && !cached.contactNumber)) && typeof getStoredRelationData === 'function'){
+			cached = getStoredRelationData()[otherRelation] || {};
+			window.__relationData[otherRelation] = cached;
+		}
+		writeParentOtherFieldsToDom(cached);
+	}else{
+		writeParentOtherFieldsToDom({});
+	}
+
+	applyParentRelationLabels(newRelation);
+	// The swap above only changes these fields' VALUES via .val() -- it reuses the same DOM
+	// nodes (no re-render), so each field's .valid-field green-tick/red-cross wrapper class
+	// stays whatever it was for the PREVIOUS relation's value (e.g. Father's filled, valid
+	// "parentFirstName" leaves a green tick behind even once the field is blanked out for a
+	// freshly-selected Mother). Refresh each field's tick/cross to match its NEW value -- but
+	// an empty field goes NEUTRAL here, not red: this is a programmatic relation switch, not
+	// the user leaving a field blank on blur, so a freshly-blank mandatory field should look
+	// exactly like the Father/Mother row looks the first time it is ever shown (untouched,
+	// no red border) until the user actually interacts with it or clicks Next.
+	refreshParentFieldValidityState('parentFirstName');
+	refreshParentFieldValidityState('parentlastName');
+	refreshParentFieldValidityState('parentPhoneNumber', itiParent);
+	refreshParentFieldValidityState('otherParentFirstName');
+	refreshParentFieldValidityState('otherParentLastName');
+	refreshParentFieldValidityState('otherParentPhoneNumber', typeof itiOtherParent !== 'undefined' ? itiOtherParent : null);
+	if(typeof refreshCustomFieldState === "function"){
+		refreshCustomFieldState('#signupStage2');
+	}
+	window.__currentParentRelation = newRelation;
+}
+
+// Called once right after Stage 2 is (re)rendered (see renderParentDetails in
+// signupStudentContent.js): seeds window.__relationData for the relation already saved on the
+// student (signupParent.relationship/firstName/lastName/contactNumber -- the authoritative,
+// backend-persisted record for whichever relation that is) and for the other relation from the
+// otherParent localStorage cache, then applies the correct labels/visibility for the first time.
+function initParentRelationDynamicFields(signupParent){
+	window.__relationData = { Father: {}, Mother: {}, Guardian: {} };
+	var relation = signupParent && signupParent.relationship;
+	if(relation == 'Father' || relation == 'Mother' || relation == 'Guardian'){
+		window.__relationData[relation] = {
+			firstName: signupParent.firstName || '',
+			lastName: signupParent.lastName || '',
+			contactNumber: signupParent.contactNumber || '',
+			countryCode: signupParent.countryCode || '',
+			countryIsdCode: signupParent.countryIsdCode2 || ''
+		};
+	}
+	if(typeof getStoredRelationData === 'function'){
+		var stored = getStoredRelationData();
+		['Father','Mother'].forEach(function(key){
+			if(key != relation && stored[key]){
+				window.__relationData[key] = stored[key];
+			}
+		});
+	}
+	window.__currentParentRelation = relation || '';
+	if(relation == 'Father' || relation == 'Mother'){
+		writeParentOtherFieldsToDom(window.__relationData[getOtherRelationName(relation)]);
+	}
+	applyParentRelationLabels(relation || '');
+}
+
 function callForSignUpParents(fromReview) {
 	hideMessage('');
 	if(!validateRequestForSignupParent()){
@@ -65,6 +293,17 @@ function callForSignUpParents(fromReview) {
 			} else {
 				var windowWidth = $(window).width();
 				var msg = "";
+				// Guardian saved successfully: the backend record now holds the Guardian's info
+				// (it only ever stores ONE parent record), so any previously-cached Father/Mother
+				// data is stale -- wipe it so switching Relation back to Father/Mother later
+				// starts blank instead of resurrecting the old values.
+				if($('#signupStage2 #relation').val() == 'Guardian'){
+					window.__relationData.Father = {};
+					window.__relationData.Mother = {};
+					if(typeof clearStoredRelationData === 'function'){
+						clearStoredRelationData();
+					}
+				}
 				if(fromReview !== true){
 					getAllCourseDetails('N','');
 				}
@@ -135,6 +374,7 @@ function highlightRequiredParentFields(){
 		mark('parentFirstName', emptyText('parentFirstName'));
 		mark('parentlastName', emptyText('parentlastName'));
 		mark('relation', emptySelect('relation'));
+		mark('parentPhoneNumber', emptyText('parentPhoneNumber'));
 		mark('pCountryId', emptySelect('pCountryId'));
 		mark('pStateId', emptySelect('pStateId'));
 		mark('pCityId', emptySelect('pCityId'));
@@ -179,12 +419,17 @@ function validateRequestForSignupParent(){
 				showMessageTheme2(0, 'Relation with student is required');
 				return false
 			}
+			if ($("#signupStage2 #parentPhoneNumber").val()=="") {
+				showMessageTheme2(0, 'Mobile Number is required');
+				return false
+			}
 			if ($("#signupStage2 #parentPhoneNumber").val().length <= 2 && $("#signupStage2 #parentPhoneNumber").val().length > 0) {
 				showMessageTheme2(0, 'Invalid Phone Number');
 				return false
 			}
-			// intl-tel-input v29.2 country-aware validation - only when a (optional) parent
-			// phone number was actually entered; an empty field stays valid/optional as before.
+			// intl-tel-input v29.2 country-aware validation (parentPhoneNumber is mandatory --
+			// the empty check above already returned false, so this only runs on a non-empty
+			// value).
 			var _phoneValEnabled2 = (typeof isPhoneValidationEnabled !== 'function') || isPhoneValidationEnabled();
 			var _parentPhoneValid = (typeof itiIsValidNumber === 'function') ? itiIsValidNumber(itiParent) : (itiParent && itiParent.isValidNumber());
 			if (_phoneValEnabled2 && $("#signupStage2 #parentPhoneNumber").val().length > 0 && typeof itiParent !== 'undefined' && itiParent && _parentPhoneValid === false) {
@@ -202,6 +447,21 @@ function validateRequestForSignupParent(){
 			if ($("#signupStage2 #pCityId").val()==0 || $("#signupStage2 #pCityId").val()=='') {
 				showMessageTheme2(0, 'City is required');
 				return false
+			}
+			// Optional "other parent" mobile number (Father/Mother relation only): same
+			// reused mobile-number validation as the primary parentPhoneNumber above --
+			// empty stays valid, a non-empty value must still pass country-aware validation.
+			if(getOtherRelationName($("#signupStage2 #relation").val())){
+				var otherPhoneVal = $("#signupStage2 #otherParentPhoneNumber").val();
+				if (otherPhoneVal.length <= 2 && otherPhoneVal.length > 0) {
+					showMessageTheme2(0, 'Invalid Phone Number');
+					return false
+				}
+				var _otherPhoneValid = (typeof itiIsValidNumber === 'function') ? itiIsValidNumber(itiOtherParent) : (typeof itiOtherParent !== 'undefined' && itiOtherParent && itiOtherParent.isValidNumber());
+				if (_phoneValEnabled2 && otherPhoneVal.length > 0 && typeof itiOtherParent !== 'undefined' && itiOtherParent && _otherPhoneValid === false) {
+					showMessageTheme2(0, typeof getIntlPhoneValidationMessage === 'function' ? getIntlPhoneValidationMessage(itiOtherParent.getValidationError()) : 'Please enter a valid mobile number for the selected country');
+					return false
+				}
 			}
 			if ($("#signupStage2 #referralCode").val()=="") {
 				// showMessageTheme2(0, 'Referral Code is required.');
@@ -243,6 +503,8 @@ function getRequestForSignupParent(){
 	var saveParentDetailsRequestDTO = {};
 	var authentication = {};
 	var signupParentDTO = {};
+	var additionalParent = {};
+	var relations;
 	signupParentDTO['themeType'] = 'theme2';
 	if($('#learingProgramHeader').val()=='ONE_TO_ONE_FLEX' ){
 		signupParentDTO['workingProfession'] = $("#signupStage2 #workingProfession").val();
@@ -250,16 +512,14 @@ function getRequestForSignupParent(){
 		signupParentDTO['institutionCountryId'] = $("#signupStage2 #institutionCountryId").val();
 	}else{
 		signupParentDTO['relationship'] = $("#signupStage2 #relation").val();
-		var relations = $("#signupStage2 #relation").val();//$("#signupStage2  #relation option:selected").text();
+		relations = $("#signupStage2 #relation").val();//$("#signupStage2  #relation option:selected").text();
 		if(relations == 'Other'){
 			signupParentDTO['otherRelationName'] = $("#signupStage2 #otherName").val();
 		}else{
 			signupParentDTO['otherRelationName'] ='';
 		}
 		signupParentDTO['firstName'] = $("#signupStage2 #parentFirstName").val();
-		signupParentDTO['middleName'] = $("#signupStage2 #parentMiddletName").val();
 		signupParentDTO['lastName'] = $("#signupStage2 #parentlastName").val();
-		signupParentDTO['email'] = $("#signupStage2 #parentEmailId").val();
 		if ($("#signupStage2 #parentSwitchIntput").is(":checked")){
 			signupParentDTO['skipParent'] = "N";
 			signupParentDTO['password'] = $("#signupStage2 #parentPassword").val();
@@ -283,6 +543,8 @@ function getRequestForSignupParent(){
 		signupParentDTO['countryId'] = $("#signupStage2 #pCountryId").val();
 		signupParentDTO['stateId'] = $("#signupStage2 #pStateId").val();
 		signupParentDTO['cityId'] = $("#signupStage2 #pCityId").val();
+
+		
 	}
 
 	if($("#signupStage2 #referralCode").length>0){
@@ -302,59 +564,46 @@ function getRequestForSignupParent(){
 	authentication['userId'] = $("#userId").val();
 	saveParentDetailsRequestDTO['authentication'] = authentication;
 	saveParentDetailsRequestDTO['signupParent'] = signupParentDTO;
-	return saveParentDetailsRequestDTO;
-}
+	// Optional "other parent" info (only collected for Father/Mother, never Guardian).
+	// NOTE -- backend impact: SignupParentDTO (com.c2e.is.v1.dto.SignupParentDTO) has no
+	// fatherXxx/motherXxx properties yet, so the backend currently drops these extra JSON
+	// properties silently (FAIL_ON_UNKNOWN_PROPERTIES is not enabled). Sending them is
+	// forward-compatible and does not change the existing save-parent-details contract,
+	// but they will NOT be persisted server-side until SignupParentDTO (and the
+	// save-parent-details handling that maps it) is extended to store them. See the
+	// localStorage-based client-side fallback used for the Review screen in
+	// signupStudentContent.js (getStoredRelationData/saveStoredRelationBucket).
+	var otherRelation = getOtherRelationName(relations);
+	if(otherRelation && relations != "Guardian"){
+		var otherFirstName = $("#signupStage2 #otherParentFirstName").val();
+		var otherLastName = $("#signupStage2 #otherParentLastName").val();
+		var otherContactNumber = $("#signupStage2 #otherParentPhoneNumber").val();
+		
+		if(otherContactNumber && otherContactNumber.trim() != ""){
+			otherCountryCode = $("#signupStage2 #otherParentCountryDailCode").val();
+			otherCountryIsdCode = $("#signupStage2 #otherParentCountryIsd").val();
+		}
+		if(otherRelation == 'Mother'){
+			additionalParent['firstName'] = otherFirstName;
+			additionalParent['lastName'] = otherLastName;
+			additionalParent['contactNumber'] = otherContactNumber;
+			additionalParent['relationship'] = "Mother";
+		}else{
+			additionalParent['firstName'] = otherFirstName;
+			additionalParent['lastName'] = otherLastName;
+			additionalParent['contactNumber'] = otherContactNumber;
+			additionalParent['relationship'] = "Father";
+		}
 
-function emailCheckForParent(parentEmail, module, userId, studentId, parentName) {
-	var result="";
-	hideMessage('');
-		if (!validateEmail(parentEmail)) {
-			showMessageTheme2(0, 'Parent email is either empty or invalid');
-			return false;
-		}
-	$.ajax({
-		type : "POST",
-		contentType : APPLICATION_JSON_VALUE,
-		url : getURLForCommon('is-user-available-for-parent'),
-		data : JSON.stringify(getCallRequestForEmailCheckForParent(parentEmail, module, userId, studentId)),
-		dataType : 'json',
-		async:false,
-		global : false,
-		success : function(data) {
-			if (data['statusCode'] == '0003') {
-				showMessageTheme2(1, data['message']);
-				result = false;
-			}else if (data['status'] == '0' || data['status'] == '2') {
-				result = data['extra']+'|'+data['extra2'];
-			}else if (data['status'] == '3') {
-				showMessageTheme2(0, data['message']);
-				result = false;
-			}else{
-				result=true;
-			}
-		},
-		error: function(e){
-			if (checkonlineOfflineStatus()) {
-				return;
-			}
-		}
-	});
-	return result;
-}
-function getCallRequestForEmailCheckForParent(parentEmail, module, userId, studentId, parentName){
-	var request = {};
-	var authentication = {};
-	var data = {};
-	data['requestKey'] = 'EMAIL-AVAILABLE';
-	data['email'] = parentEmail;
-	data['userId'] = userId;
-	data['studentId'] = studentId;
-	data['parentName'] = parentName;
-	authentication['hash'] = getHash();authentication['schoolId'] = SCHOOL_ID;authentication['schoolUUID'] = SCHOOL_UUID;
-	authentication['userType'] = module;
-	request['authentication'] = authentication;
-	request['data'] = data;
-	return request;
+		persistOtherParentFieldsToCache();
+	}else if(relations == "Guardian"){
+		additionalParent['firstName'] = "";
+		additionalParent['lastName'] = "";
+		additionalParent['contactNumber'] = "";
+		additionalParent['relationship'] = "";
+	}
+	saveParentDetailsRequestDTO['additionalParent'] = additionalParent;
+	return saveParentDetailsRequestDTO;
 }
 
 function emailCheckForParentUser(parentEmail, module, userId, studentId, parentName) {
@@ -403,57 +652,6 @@ function getCallRequestForEmailCheckForParentUser(parentEmail, module, userId, s
 	return request;
 }
 
-function mapParentAndAlreadyExistStudent(){
-	if (!validateEmail($("#signupStage2 #parentEmailId").val())) {
-		showMessageTheme2(0, 'Parent email is empty or invalid');
-		return false
-	}
-	if (!validateEmail($("#signupStage2 #verifyMailId").val())) {
-		showMessageTheme2(0, 'Existing student email is empty or invalid');
-		return false
-	}
-	$.ajax({
-		type : "POST",
-		url : getURLFor('student','signup/stage-3-mapping-parent-student'),
-		data : JSON.stringify(getRequestForSignupParentMapping()),
-		dataType : 'json',
-		contentType : APPLICATION_JSON_VALUE,
-		success : function(data) {
-			if (data['status'] == '0' || data['status'] == '2') {
-				showMessageTheme2(0, data['message']);
-			}else{
-				showMessageTheme2(1, data['message']);
-				$('#verifyStudentName').val(data['extra']);
-				$('#parentEmailVerifyStatus').val(1);
-				$('#parentSwitchIntput').attr("disabled",false);
-				if(data['extra1']=='Y'){
-					$('#parentSwitchIntput').prop("checked",true);
-					$('#parentSwitchIntput').attr("disabled",true);
-				}
-				populateParentData(data['signupParentDTO'])
-			}
-			return false;
-		}
-	});
-	return false;
-}
-
-function getRequestForSignupParentMapping(){
-	var request = {};
-	var authentication = {};
-	var requestData = {};
-	var signupParentStudentMappingDTO = {};
-	signupParentStudentMappingDTO['parentEmail'] = $("#signupStage2 #parentEmailId").val();
-	signupParentStudentMappingDTO['studentEmail'] = $("#signupStage2 #verifyMailId").val();
-	signupParentStudentMappingDTO['studentId'] = $("#signupStage2 #studentId").val();
-	requestData['signupParentStudentMappingDTO'] = signupParentStudentMappingDTO;
-	authentication['hash'] = getHash();authentication['schoolId'] = SCHOOL_ID;authentication['schoolUUID'] = SCHOOL_UUID;
-	authentication['userType'] = 'STUDENT';
-	authentication['userId'] = $("#signupStage2 #userId").val();
-	request['authentication'] = authentication;
-	request['requestData'] = requestData;
-	return request;
-}
 function proceedWithExistingMappings(){
 	if(!$("#signupStage2 #checkTerms").prop("checked")){
 		showModalMessage(true, 'Please click terms and conditions');
@@ -466,7 +664,6 @@ function populateParentData(signupParentDTO){
 	$('#signupStage2 #relation').val(signupParentDTO.relationship).trigger('change');
 	$('#signupStage2 #otherName').val(signupParentDTO.otherRelationName);
 	$('#signupStage2 #parentFirstName').val(signupParentDTO.firstName);
-	$('#signupStage2 #parentMiddletName').val(signupParentDTO.middleName);
 	$('#signupStage2 #parentlastName').val(signupParentDTO.lastName);
 	$('#signupStage2 #parentGender').val(signupParentDTO.gender).trigger('change');
 	$('#signupStage2 #responsibleConfirm').val(signupParentDTO.responsibleConfirm);
@@ -486,7 +683,6 @@ function disabledParentData(flag){
 	$('#signupStage2 #relation').prop('disabled', flag);
 	$('#signupStage2 #otherName').prop('disabled', flag);
 	$('#signupStage2 #parentFirstName').prop('disabled', flag);
-	$('#signupStage2 #parentMiddletName').prop('disabled', flag);
 	$('#signupStage2 #parentlastName').prop('disabled', flag);
 	$('#signupStage2 #parentGender').prop('disabled', flag);
 	$('#signupStage2 #responsibleConfirm').prop('disabled', flag);
@@ -531,48 +727,6 @@ function getDataForParentOTPVerification(parentEmail, parentName, userId){
 	requestData['email'] = parentEmail;
 	requestData['schoolId'] = SCHOOL_ID;
 	requestData['parentName'] = parentName;
-	authentication['hash'] = getHash();
-	authentication['schoolId'] = SCHOOL_ID;
-	authentication['schoolUUID'] = SCHOOL_UUID;
-	request['authentication'] = authentication;
-	request['requestData'] = requestData;
-	return request;
-}
-
-function verifyOtp(){
-	if($('#otp').val()=="" ||$('#otp').val()==undefined ){
-		showMessageTheme2(0, " Invalid Otp ", "",true);
-		return false;
-	}
-	$.ajax({
-		type : "POST",
-		contentType : APPLICATION_JSON_VALUE,
-		url : getURLForCommon('verify-otp'),
-		data : JSON.stringify(getDataForOtpVerification()),
-		dataType : 'json',
-		async:false,
-		success : function(data) {
-			if(data['statusCode'] == "2"){
-				$(".otp-process").hide();
-				$('#parentUserCreateRequest').show();
-				showMessageTheme2(1, data['message'], "",true);
-			}else if(data['statusCode'] == "0"){
-				showMessageTheme2(0, data['message'], "",true);
-			}else if(data['statusCode'] == "3"){
-				showMessageTheme2(2, data['message'], "",true);
-			}else{
-				showMessageTheme2(0, data['message'], "",true);
-			}
-		}
-	});
-}
-
-function getDataForOtpVerification(){
-	var request = {};
-	var authentication = {};
-	var requestData = {};
-	requestData['requestValue'] =  $('#parentEmailId').val();;
-	requestData['requestExtra1'] = $('#otp').val().trim();
 	authentication['hash'] = getHash();
 	authentication['schoolId'] = SCHOOL_ID;
 	authentication['schoolUUID'] = SCHOOL_UUID;

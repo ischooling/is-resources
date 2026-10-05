@@ -300,6 +300,41 @@ function initEnrollmentStepFlags(uniqueId){
 	}catch(e){}
 }
 
+/* ===== Father/Mother "other parent" optional data (localStorage) =====
+   The backend SignupParentDTO only stores ONE parent record (whichever Relation is
+   selected). The Father/Mother relation-based UI below also collects a non-mandatory
+   record for the OTHER parent, which the backend has no property for yet (see the
+   required backend change noted alongside getRequestForSignupParent in
+   signupStudentStage2.js). Until that exists, the only way for that optional data to
+   survive a page refresh / re-visiting Stage 2 is this UUID-scoped localStorage cache,
+   keyed the same way as the enrollment step flags above. */
+function getOtherParentStorageKey(){
+	var uid = window.__enrollUuid || (typeof UNIQUEUUID !== 'undefined' && UNIQUEUUID) || 'default';
+	return 'otherParentData_' + uid;
+}
+function getStoredRelationData(){
+	try{
+		var raw = localStorage.getItem(getOtherParentStorageKey());
+		return raw ? JSON.parse(raw) : {};
+	}catch(e){ return {}; }
+}
+function saveStoredRelationBucket(relation, bucket){
+	if(relation !== 'Father' && relation !== 'Mother'){ return; }
+	try{
+		var all = getStoredRelationData();
+		all[relation] = bucket;
+		localStorage.setItem(getOtherParentStorageKey(), JSON.stringify(all));
+	}catch(e){}
+}
+// Wipes both the Father and Mother cached buckets. Called once a save-parent-details with
+// Relation = Guardian actually succeeds (see callForSignUpParents in signupStudentStage2.js):
+// Guardian has no "other parent" concept, and the backend record itself has just been
+// overwritten with the Guardian's info, so any previously-cached Father/Mother data is now
+// stale and must not resurface if the user later switches Relation back to Father or Mother.
+function clearStoredRelationData(){
+	try{ localStorage.removeItem(getOtherParentStorageKey()); }catch(e){}
+}
+
 async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, moduleName, programLabel, moduleId, learningProgram, MAINTENANCEDOWNTIME, signupType, studentUserId) {
 	initEnrollmentStepFlags(UNIQUEUUID);
 	if(signupType == "Offline" && studentUserId != USER_ID){
@@ -368,8 +403,6 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 	    rules: {
 		   firstName: {
 			  required: true,
-		   },
-		   middleName: {
 		   },
 		   lastName: {
 			  required: true,
@@ -463,8 +496,6 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 			  required: true,
 
 		   },
-		   parentMiddletName: {
-		   },
 		   parentlastName: {
 			  required: true,
 		   },
@@ -477,6 +508,16 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 		   },
 		   // responsible:"required",
 		   parentPhoneNumber: {
+			  required: true,
+			  mobileRegex: true,
+			  minlength: 5,
+			  maxlength: 15
+		   },
+		   otherParentFirstName: {
+		   },
+		   otherParentLastName: {
+		   },
+		   otherParentPhoneNumber: {
 			  required: false,
 			  mobileRegex: true,
 			  minlength: 5,
@@ -507,6 +548,9 @@ async function renderEnrollmentPage(courseProviderId, signupPage, UNIQUEUUID, mo
 			  required: "",
 		   },
 		   otherName: {
+			  required: ""
+		   },
+		   parentPhoneNumber: {
 			  required: ""
 		   },
 		   pCountryId: {
@@ -973,14 +1017,6 @@ function renderStudentDetails(data, signupType){
 			validEndInvalidField(true, "firstName");
 		}
 	});
-	$("#middleName").blur(function() {
-		if (signupFieldValue('middleName').trim()=="") {
-			validEndInvalidField(null, "middleName");
-			return false
-		}else{
-			validEndInvalidField(true, "middleName");
-		}
-	});
 	$("#lastName").blur(function() {
 		$('#lastName').valid();
 		if (signupFieldValue('lastName').trim()=="") {
@@ -1140,9 +1176,6 @@ function renderStudentDetails(data, signupType){
 	var nonMandatoryFields=[];
 	if(signupStudent.firstName !=''){
 		mandatoryFields.push('firstName');
-	}
-	if(signupStudent.middleName !=''){
-		nonMandatoryFields.push('middleName');
 	}
 	if(signupStudent.lastName !=''){
 		mandatoryFields.push('lastName');
@@ -1359,16 +1392,6 @@ function getStudentDetailsContent(data, signupType) {
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-account"></i>
                 <div class="custom-field">
-                    <input type="text" name="middleName" style="text-transform:capitalize" id="middleName" class="form-control-field"
-                        value="${signupStudent.middleName}" maxlength="40"
-                        ${data.paymentStatus === 'SUCCESS' ? 'disabled' : ''}
-                        onkeydown="return M.isChars(event);" placeholder=" " tabindex="${++tabindex}">
-                    <label for="middleName">Middle Name</label>
-                </div>
-            </div>
-            <div class="form-holder valid-field">
-                <i class="zmdi zmdi-account"></i>
-                <div class="custom-field">
                     <input type="text" name="lastName" style="text-transform:capitalize" id="lastName" class="form-control-field"
                         value="${signupStudent.lastName}" maxlength="40"
                         ${data.paymentStatus === 'SUCCESS' ? 'disabled' : ''}
@@ -1376,6 +1399,7 @@ function getStudentDetailsContent(data, signupType) {
                     <label for="lastName">Last Name<sup class="sup">*</sup></label>
                 </div>
             </div>
+			
         </div>
 		<div class="form-row">
 			<div class="form-holder valid-field">
@@ -1415,16 +1439,16 @@ function getStudentDetailsContent(data, signupType) {
 			</div>
 		</div>
         <div class="form-row">
-            <div class="form-holder valid-field">
+			<div class="form-holder valid-field">
                 <i class="zmdi zmdi-email"></i>
                 <div class="custom-field">
                     <input type="email" name="communicationEmail" id="communicationEmail" class="form-control-field"
                         value="${signupStudent.communicationEmail}" ${signupStudent.communicationEmail == "" ? "" : "disabled"}
                         placeholder=" " tabindex="${++tabindex}">
-                    <label for="communicationEmail">Email<sup class="sup">*</sup></label>
+                    <label for="communicationEmail">Student's Email<sup class="sup">*</sup></label>
                 </div>
             </div>
-            <div class="form-holder password valid-field">
+			<div class="form-holder password valid-field">
                 <i class="zmdi zmdi-smartphone-android"></i>
                 <div class="custom-field">
                     <input type="tel" name="contactNumber" id="contactNumber" class="form-control-field"
@@ -1442,14 +1466,14 @@ function getStudentDetailsContent(data, signupType) {
                     </select>
                     <label for="nationality">Nationality <span class="text-black">(You must have a valid National ID)</span><sup class="sup">*</sup></label>
                 </div>
-                
             </div>
+			
         </div>
         ${/*<div class="form-row mb-2 student-current-location">
             <strong>Student's Current Location</strong>
         </div>*/''}
         <div class="form-row">
-            <div class="form-holder valid-field">
+			<div class="form-holder valid-field">
                 <i class="zmdi zmdi-pin"></i>
                 <div class="custom-field">
                     <select name="countryId" id="countryId" class="form-control-field" required tabindex="${++tabindex}"
@@ -1480,7 +1504,7 @@ function getStudentDetailsContent(data, signupType) {
                     <label for="cityId">City<sup class="sup">*</sup></label>
                 </div>
             </div>
-        </div>
+		</div>
 		<div class="dual-diploma form-row mb-2" style="display:none;">
 			<strong>Current School Details</strong>
 		</div>
@@ -1548,9 +1572,9 @@ function renderParentDetails(data){
                 // (MOBILE, FIXED_LINE) is kept.
                 // "Parent Phone Number" is optional and generic (not mobile-only),
                 // so we keep the library default number types. Preselect the saved
-                // country; when none is saved, leave the country unset (empty),
-                // matching the previous behaviour.
-                var parentInitialCountry = '';
+                // country; when none is saved, default to US rather than leaving the
+                // country unset.
+                var parentInitialCountry = 'us';
                 if(signupParent.countryIsdCode2!=null && signupParent.countryIsdCode2!=''){
                     parentInitialCountry = IGNORECOUNTRYARRAY.includes(signupParent.countryIsdCode2) ? 'us' : signupParent.countryIsdCode2;
                 }
@@ -1594,6 +1618,26 @@ function renderParentDetails(data){
 				scriptExecuted1 = true
 			}
 		}
+		inputOtherParentPhone = document.querySelector("#otherParentPhoneNumber");
+		if(inputOtherParentPhone!=null && inputOtherParentPhone!=''){
+			// Default to US when nothing is cached yet; initParentRelationDynamicFields (called
+			// right below) overrides this via itiSetCountry if a cached "other parent" country
+			// already exists for the current relation.
+			itiOtherParent = initPhoneInputV29(inputOtherParentPhone, {
+				initialCountry: 'us',
+				onCountryChange: function (country) {
+					$('#otherParentCountryIsd').val(country ? country.iso2 : '');
+					$('#otherParentCountryDailCode').val(country ? country.dialCode : '');
+					if(typeof refreshCustomFieldState === "function"){
+						refreshCustomFieldState($(inputOtherParentPhone).closest(".custom-field"));
+					}
+				}
+			});
+			clearContactNumberOnCountryChange(inputOtherParentPhone);
+		}
+		if(typeof initParentRelationDynamicFields === "function"){
+			initParentRelationDynamicFields(signupParent);
+		}
 		$("#parentFirstName").blur(function() {
 			if (signupFieldValue('parentFirstName').trim()=="") {
 				validEndInvalidField(false, "parentFirstName");
@@ -1601,14 +1645,6 @@ function renderParentDetails(data){
 				return false
 			}else{
 				validEndInvalidField(true, "parentFirstName");
-			}
-		});
-		$("#parentMiddletName").blur(function() {
-			if (signupFieldValue('parentMiddletName').trim()=="") {
-				validEndInvalidField(null, "parentMiddletName");
-				return false
-			}else{
-				validEndInvalidField(true, "parentMiddletName");
 			}
 		});
 		$("#parentlastName").blur(function() {
@@ -1628,17 +1664,8 @@ function renderParentDetails(data){
 			}else{
 				validEndInvalidField(true, "relation");
 			}
-		});
-		$("#parentEmailId").blur(function() {
-			if (signupFieldValue('parentEmailId').trim()=="") {
-				validEndInvalidField(null, "parentEmailId");
-				return true
-			}else if (!validateEmail(signupFieldValue('parentEmailId').trim())) {
-				//showMessage(false, 'Email is either empty or invalid');
-				validEndInvalidField(false, "parentEmailId");
-				return false
-			}else{
-				validEndInvalidField(true, "parentEmailId");
+			if(typeof onParentRelationChanged === "function"){
+				onParentRelationChanged();
 			}
 		});
 		$("#parentPhoneNumber").blur(function() {
@@ -1647,8 +1674,11 @@ function renderParentDetails(data){
 				return false
 			}
 			if (signupFieldValue('parentPhoneNumber').trim()=="" || signupFieldValue('parentPhoneNumber').length == 0 ) {
-				// validEndInvalidField(false, "parentPhoneNumber");
-				//showMessage(0, 'Gendar is required');
+				// Mandatory field, left empty on actual blur: red, same as parentFirstName/
+				// parentlastName. (A relation SWITCH that blanks this field goes through
+				// refreshParentFieldValidityState instead, which shows neutral, not red, since
+				// that is not the user leaving the field blank themselves.)
+				validEndInvalidField(false, "parentPhoneNumber");
 				// No number entered: don't carry a leftover/default country selection
 				// (e.g. the widget's default "us") into the saved data or the review
 				// screen. getRequestForSignupParent() also guards this at save time,
@@ -1665,6 +1695,53 @@ function renderParentDetails(data){
 				} else {
 					validEndInvalidField(true, "parentPhoneNumber");
 				}
+			}
+		});
+		$("#otherParentFirstName").blur(function() {
+			if (signupFieldValue('otherParentFirstName').trim()=="") {
+				validEndInvalidField(null, "otherParentFirstName");
+				return true
+			}else{
+				validEndInvalidField(true, "otherParentFirstName");
+			}
+		});
+		$("#otherParentLastName").blur(function() {
+			if (signupFieldValue('otherParentLastName').trim()=="") {
+				validEndInvalidField(null, "otherParentLastName");
+				return true
+			}else{
+				validEndInvalidField(true, "otherParentLastName");
+			}
+		});
+		$("#otherParentPhoneNumber").blur(function() {
+			if (signupFieldValue('otherParentPhoneNumber').length < 5 && signupFieldValue('otherParentPhoneNumber').length > 0 ) {
+				validEndInvalidField(false, "otherParentPhoneNumber");
+				return false
+			}
+			if (signupFieldValue('otherParentPhoneNumber').trim()=="" || signupFieldValue('otherParentPhoneNumber').length == 0 ) {
+				// Optional field, empty: neutral (no tick/cross) -- see the same fix on
+				// #parentPhoneNumber's blur handler above for why this matters on a relation
+				// switch, which reuses this field for whichever parent is now "the other one".
+				validEndInvalidField(null, "otherParentPhoneNumber");
+				$('#otherParentCountryIsd').val('');
+				$('#otherParentCountryDailCode').val('');
+				return false
+			}else{
+				var _valEnabledOP = (typeof isPhoneValidationEnabled !== 'function') || isPhoneValidationEnabled();
+				var _validOP = (typeof itiIsValidNumber === 'function') ? itiIsValidNumber(itiOtherParent) : null;
+				if (_valEnabledOP && _validOP === false) {
+					validEndInvalidField(false, "otherParentPhoneNumber");
+				} else {
+					validEndInvalidField(true, "otherParentPhoneNumber");
+				}
+			}
+			if(typeof persistOtherParentFieldsToCache === "function"){
+				persistOtherParentFieldsToCache();
+			}
+		});
+		$("#otherParentFirstName, #otherParentLastName").on("blur", function(){
+			if(typeof persistOtherParentFieldsToCache === "function"){
+				persistOtherParentFieldsToCache();
 			}
 		});
 	}
@@ -1745,14 +1822,17 @@ function renderParentDetails(data){
 		if(signupParent.communicationEmail!=''){
 			pMandatoryFields.push('pcModeEmail');
 		}
-		if(signupParent.middleName!=''){
-			pNonMandatoryFields.push('parentMiddletName');
-		}
-		if(signupParent.email!=''){
-			pNonMandatoryFields.push('parentEmailId');
-		}
 		if(signupParent.contactNumber!=''){
-			pNonMandatoryFields.push('parentPhoneNumber');
+			pMandatoryFields.push('parentPhoneNumber');
+		}
+		if($('#signupStage2 #otherParentFirstName').val()!=''){
+			pNonMandatoryFields.push('otherParentFirstName');
+		}
+		if($('#signupStage2 #otherParentLastName').val()!=''){
+			pNonMandatoryFields.push('otherParentLastName');
+		}
+		if($('#signupStage2 #otherParentPhoneNumber').val()!=''){
+			pNonMandatoryFields.push('otherParentPhoneNumber');
 		}
 		if(signupParent.referralCode!=''){
 			pNonMandatoryFields.push('referralCode');
@@ -1918,37 +1998,10 @@ function getParentDetailsContent(data) {
         html += `
         <input type="hidden" id="parentCountryIsd" value="${signupParent.countryIsdCode2}">
         <input type="hidden" id="parentCountryDailCode" value="${signupParent.countryCode}">
-        <div class="form-row " style="${hideClass}">
-            <div class="form-holder valid-field">
-                <i class="zmdi zmdi-account"></i>
-                <div class="custom-field">
-                    <input type="text" class="form-control-field" style="text-transform:capitalize" name="parentFirstName" id="parentFirstName"
-                        value="${signupParent.firstName}" maxlength="40" onkeydown="return M.isChars(event);"
-                        placeholder=" " tabindex="${++tabindex}">
-                    <label for="parentFirstName">First Name<sup class="sup">*</sup></label>
-                </div>
-            </div>
-            <div class="form-holder valid-field">
-                <i class="zmdi zmdi-account"></i>
-                <div class="custom-field">
-                    <input type="text" class="form-control-field" style="text-transform:capitalize" name="parentMiddletName" id="parentMiddletName"
-                        name="parentMiddletName" value="${signupParent.middleName}" maxlength="40"
-                        onkeydown="return M.isChars(event);" placeholder=" " tabindex="${++tabindex}">
-                    <label for="parentMiddletName">Middle Name</label>
-                </div>
-            </div>
-            <div class="form-holder valid-field">
-                <i class="zmdi zmdi-account"></i>
-                <div class="custom-field">
-                    <input type="text" class="form-control-field" style="text-transform:capitalize" name="parentlastName" id="parentlastName"
-                        name="parentlastName" value="${signupParent.lastName}" maxlength="40"
-                        onkeydown="return M.isChars(event);" placeholder=" " tabindex="${++tabindex}">
-                    <label for="parentlastName">Last Name<sup class="sup">*</sup></label>
-                </div>
-            </div>
-        </div>
-        <div class="form-row " style="${hideClass}">
-            <div class="form-holder valid-field">
+        <input type="hidden" id="otherParentCountryIsd" value="">
+        <input type="hidden" id="otherParentCountryDailCode" value="">
+		<div class="form-row " style="${hideClass}">
+			<div class="form-holder valid-field mx-auto" style="max-width:420px">
                 <i class="zmdi zmdi-map"></i>
                 <div class="custom-field">
                     <select name="relation" id="relation" class="form-control-field" required tabindex="15">
@@ -1957,24 +2010,62 @@ function getParentDetailsContent(data) {
                     <label for="relation">Relation with student<sup class="sup">*</sup></label>
                 </div>
             </div>
-            <div class="form-holder valid-field bottom-error-message">
-                <i class="zmdi zmdi-email"></i>
-                <i class="zmdi zmdi-check-circle verified-mail-id"></i>
+		</div>
+        <div class="form-row " style="${hideClass}">
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-account"></i>
                 <div class="custom-field">
-                    <input type="email" class="form-control-field parent-email" id="parentEmailId" name="parentEmailId"
-                        placeholder=" " value="${signupParent.email}"
-                        autocomplete="off" tabindex="${++tabindex}">
-                    <label for="parentEmailId">Parent Email <span class="text-black">(Optional)</span></label>
+                    <input type="text" class="form-control-field" style="text-transform:capitalize" name="parentFirstName" id="parentFirstName"
+                        value="${signupParent.firstName}" maxlength="40" onkeydown="return M.isChars(event);"
+                        placeholder=" " tabindex="${++tabindex}">
+                    <label for="parentFirstName"><span class="relation-label-text">First Name</span><sup class="sup">*</sup></label>
                 </div>
-                <a href="javascript:void(0)" class="input-over-btn send-mail-btn primary-bg white-txt-color" onclick="resendOtp();">Verify Mail</a>
+            </div>
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-account"></i>
+                <div class="custom-field">
+                    <input type="text" class="form-control-field" style="text-transform:capitalize" name="parentlastName" id="parentlastName"
+                        name="parentlastName" value="${signupParent.lastName}" maxlength="40"
+                        onkeydown="return M.isChars(event);" placeholder=" " tabindex="${++tabindex}">
+                    <label for="parentlastName"><span class="relation-label-text">Last Name</span><sup class="sup">*</sup></label>
+                </div>
             </div>
             <div class="form-holder valid-field bottom-error-message">
                 <i class="zmdi zmdi-smartphone-android"></i>
                 <div class="custom-field">
-                    <input type="tel" class="form-control-field parent-phone" name="parentPhoneNumber" id="parentPhoneNumber"
+                    <input type="tel" class="form-control-field parent-phone" name="parentPhoneNumber" id="parentPhoneNumber" required
                         maxlength="15" placeholder=" " value="${signupParent.contactNumber}"
                         autocomplete="off" onkeydown="return M.digit(event);" tabindex="${++tabindex}">
-                    <label for="parentPhoneNumber">Parent Mobile Number <span class="text-black">(Optional)</span></label>
+                    <label for="parentPhoneNumber"><span class="relation-label-text">Parent Mobile Number</span><sup class="sup">*</sup></label>
+                </div>
+            </div>
+        </div>
+        <div class="form-row other-parent-fields-row" id="otherParentFieldsRow" style="display:none;">
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-account"></i>
+                <div class="custom-field">
+                    <input type="text" class="form-control-field" style="text-transform:capitalize" name="otherParentFirstName" id="otherParentFirstName"
+                        value="" maxlength="40" onkeydown="return M.isChars(event);"
+                        placeholder=" " tabindex="${++tabindex}">
+                    <label for="otherParentFirstName"><span class="other-parent-label-text">First Name</span> <span class="text-black">(Optional)</span></label>
+                </div>
+            </div>
+            <div class="form-holder valid-field">
+                <i class="zmdi zmdi-account"></i>
+                <div class="custom-field">
+                    <input type="text" class="form-control-field" style="text-transform:capitalize" name="otherParentLastName" id="otherParentLastName"
+                        value="" maxlength="40" onkeydown="return M.isChars(event);"
+                        placeholder=" " tabindex="${++tabindex}">
+                    <label for="otherParentLastName"><span class="other-parent-label-text">Last Name</span> <span class="text-black">(Optional)</span></label>
+                </div>
+            </div>
+            <div class="form-holder valid-field bottom-error-message">
+                <i class="zmdi zmdi-smartphone-android"></i>
+                <div class="custom-field">
+                    <input type="tel" class="form-control-field other-parent-phone" name="otherParentPhoneNumber" id="otherParentPhoneNumber"
+                        maxlength="15" placeholder=" " value=""
+                        autocomplete="off" onkeydown="return M.digit(event);" tabindex="${++tabindex}">
+                    <label for="otherParentPhoneNumber"><span class="other-parent-label-text">Mobile Number</span> <span class="text-black">(Optional)</span></label>
                 </div>
             </div>
         </div>
@@ -3644,7 +3735,7 @@ function studentDetailsPreview(data){
 					+'<tbody>'
 						+'<tr>'
 							+'<th class="review_th_title">Name</th>'
-							+'<td data-review-td="name">'+signupStudent.firstName+' '+signupStudent.middleName+' '+signupStudent.lastName+'</td>'
+							+'<td data-review-td="name">'+signupStudent.firstName+' '+signupStudent.lastName+'</td>'
 						+'</tr>';
 						if(gradeLabel != ''){
 							html+=
@@ -3765,28 +3856,18 @@ function parentDetailsPreview(data){
 							if(data.signupStudent.courseProviderId==39){
 
 							}else{
+								var relationNoun = (signupParent.relationship=='Father' || signupParent.relationship=='Mother') ? signupParent.relationship+"'s" : (signupParent.relationship || 'Parent/Guardian');
 								html+=
 								'<tr>'
-									+'<th class="review_th_title">Name</th>'
-									+'<td data-review-td="name">'+signupParent.firstName+' '+signupParent.middleName+' '+signupParent.lastName+'</td>'
+									+'<th class="review_th_title">'+relationNoun+' Name</th>'
+									+'<td data-review-td="name">'+signupParent.firstName+' '+signupParent.lastName+'</td>'
 								+'</tr>'
 								+'<tr>'
 									+'<th class="review_th_title">Relation with student</th>'
 									+'<td data-review-td="relation">'+signupParent.relationshipName+'</td>'
 								+'</tr>'
 								+'<tr>'
-									+'<th class="review_th_title">Email</th>'
-									+'<td data-review-td="email">';
-										if(signupParent.email == null || signupParent.email==''){
-											html+='N/A';
-										}else{
-											html+=signupParent.email;
-										}
-									html+=
-									'</td>'
-								+'</tr>'
-								+'<tr>'
-									+'<th class="review_th_title">Phone Number</th>'
+									+'<th class="review_th_title">'+relationNoun+' Mobile Number</th>'
 									+'<td data-review-td="phone">';
 										if(signupParent.contactNumber==null || signupParent.contactNumber==''){
 											html+='N/A';
@@ -3801,6 +3882,29 @@ function parentDetailsPreview(data){
 									+'<th class="review_th_title">Country | State | City</th>'
 									+'<td data-review-td="location">'+signupParent.countryName+ " | " +signupParent.stateName+ " | " +signupParent.cityName+'</td>'
 								+'</tr>';
+								// Optional "other parent" info (Father's details shown under a Mother
+								// relation, and vice versa). Not sent by the backend review response --
+								// see the localStorage cache note by getOtherParentStorageKey -- so it is
+								// read from that cache, keyed by the CURRENT relationship. Always rendered
+								// (with an N/A fallback) rather than only when filled, so the row's
+								// data-review-td marker always exists -- that marker is what lets
+								// moveReviewFieldsToTable find and move the real Father/Mother form fields
+								// into this same edit layout as Stage 2 (see REVIEW_EDIT_MAP.parent.fields.
+								// otherParent), rather than the fields being unreachable from Review until
+								// something was already saved. Never shown for Guardian.
+								if(signupParent.relationship=='Father' || signupParent.relationship=='Mother'){
+									var otherNoun = signupParent.relationship=='Father' ? 'Mother' : 'Father';
+									var otherData = (typeof getStoredRelationData === 'function' ? getStoredRelationData() : {})[otherNoun] || {};
+									var otherName = ((otherData.firstName||'')+' '+(otherData.lastName||'')).trim();
+									html+='<tr>'
+											+'<th class="review_th_title">'+otherNoun+'\'s Name</th>'
+											+'<td data-review-td="otherParent">'+(otherName!='' ? otherName : 'N/A')+'</td>'
+										+'</tr>'
+										+'<tr>'
+											+'<th class="review_th_title">'+otherNoun+'\'s Mobile Number</th>'
+											+'<td>'+(otherData.contactNumber ? ((otherData.countryCode?('+'+otherData.countryCode+'&nbsp;'):'')+otherData.contactNumber) : 'N/A')+'</td>'
+										+'</tr>';
+								}
 								if(signupParent.referralCode!=null && signupParent.referralCode!=''){
 									html+='<tr>'
 											+'<th class="review_th_title">Referral Code</th>'
@@ -3965,7 +4069,7 @@ function courseDetailsPreview(data){
 // td-key -> step field ids. '__grade' and '__communication' are resolved at runtime.
 var REVIEW_EDIT_MAP = {
 	student: { box:'#student-details-info', formSel:'#signupStage1', content:'#signupStage1Content', fields:{
-		name:['firstName','middleName','lastName'],
+		name:['firstName','lastName'],
 		grade:['__grade'],
 		dob:['dob'],
 		gender:['gender'],
@@ -3977,11 +4081,14 @@ var REVIEW_EDIT_MAP = {
 		studyingGrade:['studyingGradeId'],
 		countryOfSchool:['countryIdOfSchool']
 	}},
+	// Key order below drives buildReviewEditRows' row layout, chosen to match the Parent |
+	// Guardian Details Stage 2 form exactly: Relation alone on its own row, then First/Last/
+	// Mobile together, then (Father's or Mother's) the other parent's First/Last/Mobile
+	// together, then Country/State/City, then the communication-preference checkboxes.
 	parent: { box:'#student-parent-info', formSel:'#signupStage2', content:'#signupStage2Content', fields:{
-		name:['parentFirstName','parentMiddletName','parentlastName'],
 		relation:['relation'],
-		email:['parentEmailId'],
-		phone:['parentPhoneNumber'],
+		name:['parentFirstName','parentlastName','parentPhoneNumber'],
+		otherParent:['otherParentFirstName','otherParentLastName','otherParentPhoneNumber'],
 		location:['pCountryId','pStateId','pCityId'],
 		communication:['__communication']
 	}}

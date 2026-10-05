@@ -334,7 +334,6 @@ function getRequestForStudent(){
 	var signupStudentDTO = {};
 	signupStudentDTO['themeType'] = 'theme2';
 	signupStudentDTO['firstName'] = $("#signupStage1 #firstName").val();
-	signupStudentDTO['middleName'] = $("#signupStage1 #middleName").val();
 	signupStudentDTO['lastName'] = $("#signupStage1 #lastName").val();
 	var dobd =getDateInDateFormat($("#signupStage1 #dob").val());
 	dobd = changeDateFormat(dobd, 'mm-dd-yyyy')
@@ -692,21 +691,6 @@ async function moveStep(moveType){
 		}else if(prevStep==2){
 			var flag = callForSignUpParents('signupStage2');
 			if (flag && signupStage2Form.valid() && validateRequestForSignupParent()) {
-
-				var parentEmail = $('#signupStage2 #parentEmailId').val();
-				if(parentEmail!=''){
-					var userId=$('#userId').val();
-					var studentId = $('#signupStage2 #studentId').val();
-					var status=emailCheckForParent(parentEmail, 'STUDENT', userId, studentId);
-					if(status){
-
-					}else if(status==null){
-
-					}else if(status==false){
-						return false;
-					}else{
-					}
-				}
 				callForSignUpParents('signupStage2');
 			}else{
 				return false;
