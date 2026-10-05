@@ -130,7 +130,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 				if(demoDetails!=undefined){
 					if(demoDetails.length>0){
 						if($("#demo2DetailsModal").length>0){
-							$("#demo2DetailsModal").remove();
+							safeRemoveModal("#demo2DetailsModal");
 						}
 						$('body').append(forceDemo2UpdateModalContent(data3));
 						$("#demo2DetailsModal").modal("show");
@@ -144,7 +144,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 				if(leadDetails!=undefined){
 					if(leadDetails.length>0){
 						if($("#leadDetailsModal").length>0){
-							$("#leadDetailsModal").remove();
+							safeRemoveModal("#leadDetailsModal");
 						}
 						$('body').append(forceLeadUpdateModalContent(data2));
 						$("#leadDetailsModal").modal("show");
@@ -158,7 +158,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 				if(demoDetails!=undefined){
 					if(demoDetails.length>0){
 						if($("#demoDetailsModal").length>0){
-							$("#demoDetailsModal").remove();
+							safeRemoveModal("#demoDetailsModal");
 						}
 						$('body').append(forceDemoUpdateModalContent(data));
 						$("#demoDetailsModal").modal("show");
@@ -173,7 +173,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 					if(callbackDetails!=undefined){
 						if(callbackDetails.length>0){
 							if($("#callbackDetailsModal").length>0){
-								$("#callbackDetailsModal").remove();
+								safeRemoveModal("#callbackDetailsModal");
 							}
 							$('body').append(forceCallbackUpdateModalContent(data4));
 							setTimeout(() => {
@@ -485,7 +485,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 			if(demoDetails!=undefined){
 				if(demoDetails.length>0){
 					if($("#demo2DetailsModal").length>0){
-						$("#demo2DetailsModal").remove();
+						safeRemoveModal("#demo2DetailsModal");
 					}
 					$('body').append(forceDemo2UpdateModalContent(data3));
 					$("#demo2DetailsModal").modal("show");
@@ -499,7 +499,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 			if(leadDetails!=undefined){
 				if(leadDetails.length>0){
 					if($("#leadDetailsModal").length>0){
-						$("#leadDetailsModal").remove();
+						safeRemoveModal("#leadDetailsModal");
 					}
 					$('body').append(forceLeadUpdateModalContent(data2));
 					$("#leadDetailsModal").modal("show");
@@ -513,7 +513,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 			if(demoDetails!=undefined){
 				if(demoDetails.length>0){
 					if($("#demoDetailsModal").length>0){
-						$("#demoDetailsModal").remove();
+						safeRemoveModal("#demoDetailsModal");
 					}
 					$('body').append(forceDemoUpdateModalContent(data));
 					$("#demoDetailsModal").modal("show");
@@ -528,7 +528,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 				if(callbackDetails!=undefined){
 					if(callbackDetails.length>0){
 						if($("#callbackDetailsModal").length>0){
-							$("#callbackDetailsModal").remove();
+							safeRemoveModal("#callbackDetailsModal");
 						}
 						$('body').append(forceCallbackUpdateModalContent(data4));
 						setTimeout(() => {
@@ -1598,7 +1598,7 @@ function getTotalLead(leadType){
 			if(demoDetails!=undefined){
 				if(demoDetails.length>0){
 					if($("#demo2DetailsModal").length>0){
-						$("#demo2DetailsModal").remove();
+						safeRemoveModal("#demo2DetailsModal");
 					}
 					$('body').append(forceDemo2UpdateModalContent(data3));
 					$("#demo2DetailsModal").modal("show");
@@ -1612,7 +1612,7 @@ function getTotalLead(leadType){
 			if(leadDetails!=undefined){
 				if(leadDetails.length>0){
 					if($("#leadDetailsModal").length>0){
-						$("#leadDetailsModal").remove();
+						safeRemoveModal("#leadDetailsModal");
 					}
 					$('body').append(forceLeadUpdateModalContent(data2));
 					$("#leadDetailsModal").modal("show");
@@ -1626,7 +1626,7 @@ function getTotalLead(leadType){
 			if(demoDetails!=undefined){
 				if(demoDetails.length>0){
 					if($("#demoDetailsModal").length>0){
-						$("#demoDetailsModal").remove();
+						safeRemoveModal("#demoDetailsModal");
 					}
 					$('body').append(forceDemoUpdateModalContent(data));
 					$("#demoDetailsModal").modal("show");
@@ -1641,7 +1641,7 @@ function getTotalLead(leadType){
 				if(callbackDetails!=undefined){
 					if(callbackDetails.length>0){
 						if($("#callbackDetailsModal").length>0){
-							$("#callbackDetailsModal").remove();
+							safeRemoveModal("#callbackDetailsModal");
 						}
 						$('body').append(forceCallbackUpdateModalContent(data4));
 						setTimeout(() => {
@@ -1685,7 +1685,7 @@ function clickTotalLeads(clickFrom, currentPage, callbadge, leadfrom){
 				if(demoDetails!=undefined){
 					if(demoDetails.length>0){
 						if($("#demo2DetailsModal").length>0){
-							$("#demo2DetailsModal").remove();
+							safeRemoveModal("#demo2DetailsModal");
 						}
 						$('body').append(forceDemo2UpdateModalContent(data3));
 						$("#demo2DetailsModal").modal("show");
@@ -1699,7 +1699,7 @@ function clickTotalLeads(clickFrom, currentPage, callbadge, leadfrom){
 				if(leadDetails!=undefined){
 					if(leadDetails.length>0){
 						if($("#leadDetailsModal").length>0){
-							$("#leadDetailsModal").remove();
+							safeRemoveModal("#leadDetailsModal");
 						}
 						$('body').append(forceLeadUpdateModalContent(data2));
 						$("#leadDetailsModal").modal("show");
@@ -1713,7 +1713,7 @@ function clickTotalLeads(clickFrom, currentPage, callbadge, leadfrom){
 				if(demoDetails!=undefined){
 					if(demoDetails.length>0){
 						if($("#demoDetailsModal").length>0){
-							$("#demoDetailsModal").remove();
+							safeRemoveModal("#demoDetailsModal");
 						}
 						$('body').append(forceDemoUpdateModalContent(data));
 						$("#demoDetailsModal").modal("show");
@@ -1728,7 +1728,7 @@ function clickTotalLeads(clickFrom, currentPage, callbadge, leadfrom){
 					if(callbackDetails!=undefined){
 						if(callbackDetails.length>0){
 							if($("#callbackDetailsModal").length>0){
-								$("#callbackDetailsModal").remove();
+								safeRemoveModal("#callbackDetailsModal");
 							}
 							$('body').append(forceCallbackUpdateModalContent(data4));
 							setTimeout(() => {

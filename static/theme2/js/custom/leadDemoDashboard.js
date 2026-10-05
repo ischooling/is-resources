@@ -466,6 +466,7 @@ function fetchLeadDemoDashboardAll(fromAutoRefreshTimer) {
     fetchLeadDemoDashboardSection('countryPerf');
     fetchLeadDemoDashboardSection('charts');
     fetchLeadDemoDashboardSection('counselorPerf');
+    fetchLeadDemoDashboardSection('leadsHandled');
     fetchLeadDemoDashboardSection('responseHealth');
     fetchLeadDemoDashboardLeadPriorityAuto(!!fromAutoRefreshTimer);
 }
@@ -557,6 +558,7 @@ function showLeadDemoDashboardSectionLoading(section) {
         case 'countryPerf': $('#lddCountryTableBody').html(leadDemoDashboardSectionSpinnerRow()); break;
         case 'charts': $('#lddTrendChart').html(leadDemoDashboardSectionSpinnerBlock()); break;
         case 'counselorPerf': $('#lddCounselorTableBody').html(leadDemoDashboardSectionSpinnerRow()); break;
+        case 'leadsHandled': $('#lddLeadsHandledBody').html(leadDemoDashboardSectionSpinnerRow()); break;
         case 'responseHealth': $('#lddResponseHealthBody').html(leadDemoDashboardSectionSpinnerBlock()); break;
     }
 }
@@ -571,6 +573,7 @@ function showLeadDemoDashboardSectionError(section) {
         case 'countryPerf': $('#lddCountryTableBody').html(rowErr); break;
         case 'charts': $('#lddTrendChart').html(blockErr); break;
         case 'counselorPerf': $('#lddCounselorTableBody').html(rowErr); break;
+        case 'leadsHandled': $('#lddLeadsHandledBody').html(rowErr); break;
         case 'responseHealth': $('#lddResponseHealthBody').html(blockErr); break;
         case 'kpis':
             $('#lddKpiLeads,#lddKpiNotContacted,#lddKpiDemos,#lddKpiRunning,#lddKpiAwaiting,#lddKpiCompleted,#lddKpiNoShow').text('—');
@@ -588,6 +591,7 @@ function renderLeadDemoDashboardSection(section, data) {
         case 'countryPerf': renderLeadDemoDashboardGroupTable(data.countries || [], 'lddCountryTableBody', true); break;
         case 'charts': renderLeadDemoDashboardCharts(data); break;
         case 'counselorPerf': renderLeadDemoDashboardCounselors(data.counselors || [], data); break;
+        case 'leadsHandled': renderLeadDemoDashboardLeadsHandled(data.persons || []); break;
         case 'responseHealth': renderLeadDemoDashboardResponseHealth(data || {}); break;
     }
 }
@@ -1202,6 +1206,27 @@ function renderLeadDemoDashboardCounselors(counselors, sectionData) {
     renderLeadDemoDashboardDemoActivityOverall(sd.demoActivityOverall || []);
     renderLeadDemoDashboardDemoActivityHeatmap(counselors || []);
     leadDemoDashboardBindChartTooltips();
+}
+
+// ── Leads Handled by Person — distinct leads each active support-role user remarked on (current + history) ──
+function renderLeadDemoDashboardLeadsHandled(persons) {
+    var html = '';
+    if (!persons || !persons.length) {
+        html = '<tr><td colspan="3" class="text-center">No records found</td></tr>';
+    } else {
+        $.each(persons, function (i, p) {
+            var cnt = (p.leadsHandled != null ? p.leadsHandled : 0);
+            var cntHtml = cnt > 0
+                ? '<span class="font-weight-bold" style="color:#199e70;">' + cnt + '</span>'
+                : '<span class="text-muted">0</span>';
+            html += '<tr>'
+                + '<td>' + (i + 1) + '</td>'
+                + '<td>' + (p.personName || 'N/A') + '</td>'
+                + '<td class="text-center">' + cntHtml + '</td>'
+            + '</tr>';
+        });
+    }
+    $('#lddLeadsHandledBody').html(html);
 }
 
 // One "best conversion time" cell — the hour window in bold green + the converted-demo count in muted

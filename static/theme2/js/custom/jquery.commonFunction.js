@@ -6057,6 +6057,53 @@ $(document).on("show.bs.modal", ".modal", function () {
 });
 
 
+// -------------------------------------------------------------------------
+// Modal teardown safety net
+// -------------------------------------------------------------------------
+// The stacking manager below only runs on "hidden.bs.modal". Several screens
+// instead throw a LIVE modal straight out of the DOM with .remove() before
+// re-appending a fresh copy (the force Lead/Demo/Callback remark popups do
+// this on every page load AND again inside clickTotalLeads). jQuery's
+// .remove() fires no Bootstrap event, so nothing ever clears:
+//
+//   * body.modal-open   -> body { overflow: hidden } -> PAGE CANNOT SCROLL
+//   * that modal's .modal-backdrop -> an invisible fixed overlay left on top
+//
+// syncModalBodyState() recomputes both from what is actually still open, and
+// safeRemoveModal() is the drop-in replacement for $(sel).remove() on a modal.
+
+function syncModalBodyState() {
+    var openModalCount = $(".modal.show").length;
+    if (openModalCount > 0) {
+        $("body").addClass("modal-open");
+        // never more backdrops than open modals - drop the oldest extras
+        var $backdrops = $(".modal-backdrop");
+        while ($backdrops.length > openModalCount) {
+            $backdrops.first().remove();
+            $backdrops = $(".modal-backdrop");
+        }
+    } else {
+        $(".modal-backdrop").remove();
+        $("body").removeClass("modal-open");
+        // Bootstrap also pads <body> for the scrollbar it hid; drop that too.
+        $("body").css("padding-right", "");
+    }
+}
+
+// Remove a modal from the DOM without leaving the page scroll-locked.
+function safeRemoveModal(selector) {
+    var $modal = $(selector);
+    if (!$modal.length) { syncModalBodyState(); return; }
+    try { $modal.modal("hide"); } catch (e) {}
+    try { $modal.modal("dispose"); } catch (e) {}
+    $modal.removeClass("show").remove();
+    // .modal("hide") is async (fade transition), so the backdrop it owns can
+    // still be in the DOM right now - settle the state immediately and again
+    // after the transition window.
+    syncModalBodyState();
+    setTimeout(syncModalBodyState, 350);
+}
+
 $(document).on("hidden.bs.modal", ".modal", function () {
 
     var $modal = $(this);
@@ -6136,6 +6183,8 @@ $(document).on("hidden.bs.modal", ".modal", function () {
         // Nothing left open: clean up any leftover backdrop and unlock the body.
         $(".modal-backdrop").remove();
         $("body").removeClass("modal-open");
+        // Bootstrap pads <body> for the scrollbar it hid while a modal was up.
+        $("body").css("padding-right", "");
 
     }
 

@@ -8,7 +8,7 @@ $(document).ready(function(){
 			if(demoDetails!=undefined){
 				if(demoDetails.length>0){
 					if($("#demo2DetailsModal").length>0){
-						$("#demo2DetailsModal").remove();
+						safeRemoveModal("#demo2DetailsModal");
 					}
 					$('body').append(forceDemo2UpdateModalContent(data3));
 					$("#demo2DetailsModal").modal("show");
@@ -22,7 +22,7 @@ $(document).ready(function(){
 			if(leadDetails!=undefined){
 				if(leadDetails.length>0){
 					if($("#leadDetailsModal").length>0){
-						$("#leadDetailsModal").remove();
+						safeRemoveModal("#leadDetailsModal");
 					}
 					$('body').append(forceLeadUpdateModalContent(data2));
 					$("#leadDetailsModal").modal("show");
@@ -36,7 +36,7 @@ $(document).ready(function(){
 			if(demoDetails!=undefined){
 				if(demoDetails.length>0){
 					if($("#demoDetailsModal").length>0){
-						$("#demoDetailsModal").remove();
+						safeRemoveModal("#demoDetailsModal");
 					}
 					$('body').append(forceDemoUpdateModalContent(data));
 					$("#demoDetailsModal").modal("show");
@@ -51,7 +51,7 @@ $(document).ready(function(){
 				if(callbackDetails!=undefined){
 					if(callbackDetails.length>0){
 						if($("#callbackDetailsModal").length>0){
-							$("#callbackDetailsModal").remove();
+							safeRemoveModal("#callbackDetailsModal");
 						}
 						$('body').append(forceCallbackUpdateModalContent(data4));
 						setTimeout(() => {
