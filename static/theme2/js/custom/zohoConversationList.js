@@ -267,6 +267,7 @@ function _zohoShellHtml() {
         + '          <div>'
         + '            <div class="font-weight-bold" id="zohoChatName"></div>'
         + '            <small class="text-muted" id="zohoChatMeta"></small>'
+        + '            <small class="text-muted d-block" id="zohoChatTime" style="font-size:11px;"></small>'
         + '          </div>'
         + '        </div>'
         + '      </div>'
@@ -519,11 +520,20 @@ function _zohoLoadTranscript(id, $item) {
     $('#zohoChatMeta').text(metaParts.join(' | '));
 
     $('#zohoChatBody').html('<div class="text-center p-4"><i class="fa fa-spinner fa-spin"></i></div>');
+    $('#zohoChatTime').text('');
 
     $.ajax({
         url: getURLForHTML('', 'api/v1/zoho/salesiq/chats/transcript') + '?id=' + id,
         type: 'GET',
         success: function (chat) {
+            var timeParts = [];
+            if (chat.chatStartTime) timeParts.push(_zohoFormatFullDateTime(chat.chatStartTime));
+            if (chat.chatStartTime && chat.chatEndTime) {
+                var dur = Math.round((new Date(chat.chatEndTime) - new Date(chat.chatStartTime)) / 60000);
+                if (dur > 0) timeParts.push(dur + ' min');
+            }
+            if (chat.status) timeParts.push(chat.status);
+            $('#zohoChatTime').text(timeParts.join('  •  '));
             _zohoRenderTranscript(chat, name);
         },
         error: function () {
@@ -546,30 +556,40 @@ function _zohoRenderTranscript(chat, visitorName) {
         var line = lines[i].trim();
         if (!line) continue;
 
-        var colonIdx = line.indexOf(':');
+        var timeStr = '';
+        var rest = line;
+        var timeMatch = line.match(/^\[(.+?)\]\s*/);
+        if (timeMatch) {
+            timeStr = _zohoFormatMsgTime(timeMatch[1]);
+            rest = line.substring(timeMatch[0].length);
+        }
+
+        var colonIdx = rest.indexOf(':');
         var sender = 'Unknown';
-        var text = line;
+        var text = rest;
         if (colonIdx > 0 && colonIdx < 30) {
-            sender = line.substring(0, colonIdx).trim();
-            text = line.substring(colonIdx + 1).trim();
+            sender = rest.substring(0, colonIdx).trim();
+            text = rest.substring(colonIdx + 1).trim();
         }
 
         var isVisitor = sender.toLowerCase() === 'visitor'
             || sender.toLowerCase() === visitorName.toLowerCase()
             || sender.toLowerCase().indexOf('visitor') >= 0;
 
+        var timeHtml = timeStr ? '<span style="font-size:10px;opacity:0.5;margin-left:6px;">' + _zohoEsc(timeStr) + '</span>' : '';
+
         if (isVisitor) {
             html += '<div class="d-flex justify-content-end mb-2">'
                 + '  <div style="max-width:70%;background:var(--pc,#2563eb);color:#fff;padding:8px 12px;border-radius:12px 12px 0 12px;font-size:13px;">'
                 + _zohoEsc(text)
-                + '    <div style="font-size:10px;opacity:0.7;margin-top:4px;">' + _zohoEsc(sender) + '</div>'
+                + '    <div style="font-size:10px;opacity:0.7;margin-top:4px;">' + _zohoEsc(sender) + timeHtml + '</div>'
                 + '  </div>'
                 + '</div>';
         } else {
             html += '<div class="d-flex justify-content-start mb-2">'
                 + '  <div style="max-width:70%;background:#f0f0f0;color:#333;padding:8px 12px;border-radius:12px 12px 12px 0;font-size:13px;">'
                 + _zohoEsc(text)
-                + '    <div style="font-size:10px;opacity:0.6;margin-top:4px;">' + _zohoEsc(sender) + '</div>'
+                + '    <div style="font-size:10px;opacity:0.6;margin-top:4px;">' + _zohoEsc(sender) + timeHtml + '</div>'
                 + '  </div>'
                 + '</div>';
         }
@@ -620,6 +640,36 @@ function _zohoFormatDateTime(dt) {
     } catch (e) {
         return dt;
     }
+}
+
+function _zohoFormatMsgTime(raw) {
+    if (!raw) return '';
+    try {
+        var d = new Date(raw);
+        if (isNaN(d.getTime())) {
+            var num = Number(raw);
+            if (!isNaN(num)) d = new Date(num > 9999999999 ? num : num * 1000);
+            if (isNaN(d.getTime())) return raw;
+        }
+        var h = d.getHours(), m = d.getMinutes();
+        var ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        return h + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
+    } catch (e) { return raw; }
+}
+
+function _zohoFormatFullDateTime(dt) {
+    if (!dt) return '';
+    try {
+        var d = new Date(dt);
+        if (isNaN(d.getTime())) return dt;
+        var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        var h = d.getHours(), m = d.getMinutes();
+        var ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        var time = h + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
+        return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear() + ', ' + time;
+    } catch (e) { return dt; }
 }
 
 function _zohoEsc(text) {

@@ -157,7 +157,12 @@ function buildBatchTimeHtml(dates, bt, ctx, isDay, dIdx, bIdx) {
 					} else {
 						html += '<a onclick="cancelClassModal(\'' + bcEsc(bt.rescheduleClassId) + '\',\'' + bt.id + '\',\'' + slotDate + '\',\'' + bcJsArg(bt.batchName) + '\',\'' + bcJsArg(bt.subjectName) + '\',\'' + bcJsArg(bt.scheduleTime) + '\',\'' + bcJsArg(bt.teacherName) + '\',\'' + dateForShow + '\',\'cancel\')" href="javascript:void(0);" class="join-btn-url">Cancel</a><br />';
 					}
-					html += '<a href="javascript:void(0);" onclick="rescheduleContentModal(\'' + bcEsc(bt.rescheduleClassId) + '\',\'' + bt.id + '\',\'' + bt.subjectId + '\',\'' + slotDate + '\', \'' + dates.weekdaynum + '\', \'' + bcJsArg(bt.batchStartDate) + '\', \'' + bcJsArg(bt.batchEndDate) + '\',\'' + bcJsArg(bt.batchName) + '\',\'' + bcJsArg(bt.subjectName) + '\',\'' + bcJsArg(bt.scheduleTime) + '\',\'' + bcJsArg(bt.teacherName) + '\',\'' + dateForShow + '\',\'' + bcJsArg(bt.timeZone) + '\', \'' + bt.teacherId + '\');" class="join-btn-url">Reschedule</a><br />';
+					// RULE: a class must be cancelled first, then rescheduled. So the Reschedule button is shown
+					// only on a cancelled class (classStatus 'cancel'). Normal and already-rescheduled classes show
+					// only Cancel. After Cancel the calendar reloads and this button appears.
+					if (bt.classStatus === 'cancel') {
+						html += '<a href="javascript:void(0);" onclick="rescheduleContentModal(\'' + bcEsc(bt.rescheduleClassId) + '\',\'' + bt.id + '\',\'' + bt.subjectId + '\',\'' + slotDate + '\', \'' + dates.weekdaynum + '\', \'' + bcJsArg(bt.batchStartDate) + '\', \'' + bcJsArg(bt.batchEndDate) + '\',\'' + bcJsArg(bt.batchName) + '\',\'' + bcJsArg(bt.subjectName) + '\',\'' + bcJsArg(bt.scheduleTime) + '\',\'' + bcJsArg(bt.teacherName) + '\',\'' + dateForShow + '\',\'' + bcJsArg(bt.timeZone) + '\', \'' + bt.teacherId + '\');" class="join-btn-url">Reschedule</a><br />';
+					}
 					if (bt.classStatus === 'cancel' || bt.classStatus === 'reschedule') {
 						html += '<a onclick="sendMailClass(\'' + bt.id + '\',\'' + slotDate + '\',\'sendmail-' + bcEsc(bt.classStatus) + '\')" href="javascript:void(0);" class="send-btn-url">Send Mail</a><br />';
 					}
