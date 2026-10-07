@@ -506,6 +506,21 @@ function validateRequestForStudentBookSessionSlots(formId, moduleId) {
   return true;
 }
 
+// Guards against double / repeated clicks on "Confirm" while a booking request is in flight.
+var bookClassSubmitInProgress = false;
+
+function setBookClassConfirmButtonsDisabled(disabled) {
+  var $footerBtns = $("#weeklyBookClassConfirmationModal .modal-footer .btn");
+  var $confirmBtn = $("#weeklyBookClassConfirmationModal .modal-footer .btn-success");
+  if (disabled) {
+    $footerBtns.addClass("disabled").css("pointer-events", "none").attr("aria-disabled", "true");
+    $confirmBtn.text("Booking...");
+  } else {
+    $footerBtns.removeClass("disabled").css("pointer-events", "").removeAttr("aria-disabled");
+    $confirmBtn.text("Confirm");
+  }
+}
+
 function callForStudentBookClassSlots(formId, moduleId, roleModuleId) {
   if (!getSession()) {
     redirectLoginPage();
@@ -524,6 +539,12 @@ function callForStudentBookClassSlots(formId, moduleId, roleModuleId) {
     ); }, 1000);
     return false;
   }
+  if (bookClassSubmitInProgress) {
+    showMessageTheme2(0, "Your booking request is already being processed. Please wait, or refresh the page and check your booked classes.", "", false);
+    return false;
+  }
+  bookClassSubmitInProgress = true;
+  setBookClassConfirmButtonsDisabled(true);
   $.ajax({
     type: "POST",
     contentType: APPLICATION_JSON_VALUE,
@@ -533,7 +554,9 @@ function callForStudentBookClassSlots(formId, moduleId, roleModuleId) {
     cache: false,
     timeout: 600000,
     success: function (data) {
+      bookClassSubmitInProgress = false;
       if (data["status"] == "0" || data["status"] == "2") {
+        setBookClassConfirmButtonsDisabled(false);
         showMessageTheme2(0, data["message"], "", false);
       } else {
          showMessageTheme2(1, data["message"], "", false);
@@ -550,6 +573,12 @@ function callForStudentBookClassSlots(formId, moduleId, roleModuleId) {
       return false;
     },
     error: function (e) {
+      // Request outcome is unknown (timeout / network / server error): the class may already be booked.
+      // Keep Confirm locked so it cannot create a duplicate, and ask the student to verify first.
+      var $modal = $("#weeklyBookClassConfirmationModal");
+      $modal.find(".modal-footer .btn-success").addClass("disabled").css("pointer-events", "none").text("Confirm");
+      $modal.find(".modal-footer .btn-danger").removeClass("disabled").css("pointer-events", "").removeAttr("aria-disabled");
+      showMessageTheme2(0, "We could not confirm whether your class was booked. Please refresh the page and check your booked classes before trying again.", "", false);
       return false;
     },
   });
