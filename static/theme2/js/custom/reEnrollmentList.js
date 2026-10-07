@@ -625,7 +625,7 @@ function reEnrollSub(label, v, bold) {
     return '<div style="font-size:11px;line-height:1.35;color:#475467;"><span style="color:#98a2b3;">' + label + ':</span> ' + val + '</div>';
 }
 
-// Remarks COMMON_COMMENTS me HTML ke saath save hote hain (<p>..</p>) — plain text nikal lo.
+// remarks HTML ke saath save hote hain, plain text nikal lo
 function reEnrollPlainText(v) {
     if (v === null || v === undefined) { return ''; }
     return String(v)
@@ -641,8 +641,7 @@ function reEnrollPlainText(v) {
 var REEL_LS_SEQ = 0;
 var REEL_LS_SHORT = 70; // itne chars ke baad "more" dikhega
 
-// latest COMMON_COMMENTS status: badge + kisne mark kiya + kab + short remark ("more" se pura).
-// "Negative for Re-enrolment" red me stand out karta hai.
+// status badge + kisne/kab + short remark ("more" se pura); negative = red
 function reEnrollLastStatusCell(r) {
     r = r || {};
     var s = String(r.lastStatus || '').trim();
@@ -675,7 +674,7 @@ function reEnrollLastStatusCell(r) {
     return h;
 }
 
-// "more" / "less" toggle — delegated, isliye re-render ke baad bhi chalta hai.
+// delegated, taki re-render ke baad bhi chale
 $(document).on('click', '.reel-ls-more', function () {
     var id = $(this).data('lsid');
     var $full = $('#' + id + 'f');

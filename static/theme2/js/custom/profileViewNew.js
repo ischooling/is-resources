@@ -5346,6 +5346,9 @@ function getRequestForUpdateProfile(eleID,keyId,userId,studentStandardId,moduleI
                     relationType = PROFILE_RESPONSE_DATA.profileData.studentProfile[1].relationType;                
                 }
                 requestProfileData['primaryParent'] = escapeCharacters(relationType);
+                if (parentMappingConsent === 'Y') {
+                    requestProfileData['fieldValue1'] = 'Y';
+                }
                 if (keyId == 'motherEmail') {
                     requestProfileData['parentType'] = "Mother";
                 } else if (keyId == 'fatherEmail') {
