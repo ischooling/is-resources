@@ -133,6 +133,7 @@ function verifyAirwallexPayment(userPaymentDetailsId, serialNum) {
 }
 
 async function getAdvancePaymentSearchResult(formId, data, moduleId) {
+    const isCopyLinkAllowed = data && data.copyLinkAllowed === true;
     const allowedUsers = getSettingsByTypeAndKey('CONFIGURATION','ALLOW_EDIT_CUSTOM_PAYMENTS');
     var allowedUserIds = JSON.parse(allowedUsers).data.metaValue.split(",").map(id => id.trim());
     const isUserAllowed = allowedUserIds.includes(USER_ID.toString());
@@ -171,13 +172,21 @@ async function getAdvancePaymentSearchResult(formId, data, moduleId) {
 				<td>${serialNum}</td>
 				<td>
 					<span>
-						${apsrSingle.shareLink ? `
+						${(apsrSingle.shareLink && isCopyLinkAllowed) ? `
 							<input type="text" id="copyId${serialNum}" style="float:right; opacity:0; height:0;padding:0;" value="${apsrSingle.shareLink}">
-							<div class="d-flex align-items-center mb-3">
-								<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="copyToClipboardNew('copyId${serialNum}', 'copy-message${serialNum}')">
+							<div class="d-flex align-items-center mb-2 flex-wrap">
+								<a href="javascript:void(0)" class="btn btn-primary btn-sm mr-1" onclick="copyToClipboardNew('copyId${serialNum}', 'copy-message${serialNum}')">
 									Copy Payment Link <i class="pe-7s-copy-file" aria-hidden="true"></i>
 								</a>
 								<span id="copy-message${serialNum}" style="display:block; color: green; margin-left: 6px; font-weight:600;"></span>
+							</div>` : ''
+						}
+						${apsrSingle.paymentStatus !== 'SUCCESS' ? `
+							<div class="d-flex align-items-center mb-3 flex-wrap">
+								<a href="javascript:void(0)" id="send-mail-btn-${serialNum}" class="btn btn-success btn-sm mr-1" onclick="showWarningMessageShow('Are you sure you want to send the payment link email to the student?', 'sendPaymentLinkEmail(${apsrSingle.userPaymentDetailsId}, ${serialNum})', '')">
+									Send Mail <i class="pe-7s-mail" aria-hidden="true"></i>
+								</a>
+								<span id="send-mail-message-${serialNum}" style="display:block; margin-left: 6px; font-weight:600;"></span>
 							</div>` : ''
 						}
 						<strong>Trans. Ref. No.:</strong> <span id="trans-ref-${serialNum}">${apsrSingle.transactionRefNumber}</span>
@@ -742,6 +751,7 @@ function getAddPaymentModal(schoolId, moduleId) {
                                                 <button type="button" class="btn btn-danger  float-right pr-4 pl-4 ml-2" data-dismiss="modal" id="closePaymentModal">Close</button>
                                                 <button type="button" class="btn btn-success  float-right pr-4 pl-4 ml-2" id="addStudentPaymentbtn" onclick="addStudentPayment('addStudentPaymentForm', ${moduleId})">Add</button>
                                                 <button type="button" class="btn btn-primary  float-right pr-4 pl-4" id="copyViewPaymentUrlElement" style="display:none" onclick="copyToClipboard('viewPaymentUrlElement', 'closePaymentModal')">Copy Payment Url</button>
+                                                <button type="button" class="btn btn-success  float-right pr-4 pl-4 mr-2" id="sendPaymentUrlMailElement" style="display:none" onclick="">Send Mail</button>
                                             </div>
                                         </div>
                                     </div>

@@ -386,7 +386,7 @@ function customPaymentContent(userId, studentStandardId, schoolWebsite, logoUrl,
 																<tr>
 																	<th class="text-center">S. No.</th>
 																	<th class="text-center">Schedule Date</th>
-																	<th class="text-center">Payment Title</th>
+																	<th class="text-center" style="width:95px">Payment Title</th>
 																	<th class="text-center">Payable Fee</th>
 																	<th class="text-center">Payment Link</th>
 																</tr>
@@ -757,17 +757,15 @@ function getOnetimeFeeContent(responseData) {
 										} else {
 											html+=`<td>&nbsp;</td>`;
 										}
-										if(installment.paymentLink) {
-											html+=
+										html+=
 											`<td class="text-center" id="paymentLink${k + 1}">
 												<span>
-													<input type="text" id="paymentCopyLink${k + 1}" style="float:right; opacity:0; height:0;padding:0;" value="${installment.paymentLink}">
-													<a href="javascript:void(0)" class="btn btn-primary btn-sm text-nowrap" onclick="copyToClipboard('paymentCopyLink${k + 1}')">Copy Payment Link&nbsp;<i class="fa fa-clone" aria-hidden="true"></i></a>
+													${installment.paymentLink ? `<input type="text" id="paymentCopyLink${k + 1}" style="float:right; opacity:0; height:0;padding:0;" value="${installment.paymentLink}">` : ''}
+													${installment.paymentLink && isCopyPaymentLinkAllowed() ? `<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="copyToClipboard('paymentCopyLink${k + 1}')"><i class="fa fa-clone" aria-hidden="true">Copy Payment Link</i></a>` : ''}
+													${installment.id ? `<a href="javascript:void(0)" class="btn btn-success btn-sm mt-1" onclick="showWarningMessageShow('Are you sure you want to send the payment link email to the student?', 'sendPaymentLinkEmail(${installment.id})', '')">Send Mail&nbsp;<i class="fa fa-envelope" aria-hidden="true"></i></a>` : ''}
+													${(!installment.id && !(installment.paymentLink && isCopyPaymentLinkAllowed())) ? 'NA' : ''}
 												</span>
 											</td>`;
-										} else {
-											html+=`<td class="text-center" id="paymentLink${k + 1}">NA</td>`;
-										}
 									html+=
 									`</tr>`;
 								});
@@ -877,17 +875,15 @@ function getIntallmentFeeContent(responseData) {
 									}else {
 										html += `<td>SCHEDULED</td>`;
 									}
-									if(installment.paymentLink) {
-										html+=
+									html+=
 										`<td class="text-center" id="paymentLink${k + 1}">
 											<span>
-												<input type="text" id="paymentCopyLink${k + 1}" style="float:right; opacity:0; height:0;padding:0;" value="${installment.paymentLink}">
-												<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="copyToClipboard('paymentCopyLink${k + 1}')"><i class="fa fa-clone" aria-hidden="true">Copy Payment Link</i></a>
+												${installment.paymentLink ? `<input type="text" id="paymentCopyLink${k + 1}" style="float:right; opacity:0; height:0;padding:0;" value="${installment.paymentLink}">` : ''}
+												${installment.paymentLink && isCopyPaymentLinkAllowed() ? `<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="copyToClipboard('paymentCopyLink${k + 1}')"><i class="fa fa-clone" aria-hidden="true">Copy Payment Link</i></a>` : ''}
+												${installment.id ? `<a href="javascript:void(0)" class="btn btn-success btn-sm mt-1" onclick="showWarningMessageShow('Are you sure you want to send the payment link email to the student?', 'sendPaymentLinkEmail(${installment.id})', '')">Send Mail&nbsp;<i class="fa fa-envelope" aria-hidden="true"></i></a>` : ''}
+												${(!installment.id && !(installment.paymentLink && isCopyPaymentLinkAllowed())) ? 'NA' : ''}
 											</span>
 										</td>`;
-									}else{
-										html+=`<td class="text-center" id="paymentLink${k + 1}">NA</td>`;
-									}
 								html+=
 								`</tr>`;
 							});
@@ -998,17 +994,15 @@ function getPartialFeeContent(responseData) {
 										} else {
 											html += `<td>SCHEDULED</td>`;
 										}
-										if (installment.paymentLink) {
-											html+=
+										html+=
 											`<td class="text-center" id="paymentLink${k + 1}">
 												<span>
-													<input type="text" id="paymentCopyLink${k + 1}" style="float:right; opacity:0; height:0;padding:0;" value="${installment.paymentLink}">
-													<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="copyToClipboard('paymentCopyLink${k + 1}')"><i class="fa fa-clone" aria-hidden="true">Copy Payment Link</i></a>
+													${installment.paymentLink ? `<input type="text" id="paymentCopyLink${k + 1}" style="float:right; opacity:0; height:0;padding:0;" value="${installment.paymentLink}">` : ''}
+													${installment.paymentLink && isCopyPaymentLinkAllowed() ? `<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="copyToClipboard('paymentCopyLink${k + 1}')"><i class="fa fa-clone" aria-hidden="true">Copy Payment Link</i></a>` : ''}
+													${installment.id ? `<a href="javascript:void(0)" class="btn btn-success btn-sm mt-1" onclick="showWarningMessageShow('Are you sure you want to send the payment link email to the student?', 'sendPaymentLinkEmail(${installment.id})', '')">Send Mail&nbsp;<i class="fa fa-envelope" aria-hidden="true"></i></a>` : ''}
+													${(!installment.id && !(installment.paymentLink && isCopyPaymentLinkAllowed())) ? 'NA' : ''}
 												</span>
 											</td>`;
-										} else {
-											html += `<td class="text-center" id="paymentLink${k + 1}">NA</td>`;
-										}
 									html += `</tr>`;
 								});
 							}

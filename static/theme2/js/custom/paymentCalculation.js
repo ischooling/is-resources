@@ -22,6 +22,7 @@ function getPaymentDetails() {
 		global: false,
 		success: function (data) {
 			customLoader(false);
+			window.__COPY_PAYMENT_LINK_ALLOWED = !!(data && data.copyLinkAllowed === true);
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if (data['status'] == '3') {
 					redirectLoginPage()
@@ -456,12 +457,15 @@ function singleIntallment(id, index, scheduleDate, paymentTitle, scheduleFee, pa
 	}
 	if (islastRow) {
 		tr += '<td class="text-center" id="paymentLink' + index + '">';
-		if(paymentLink!=null && paymentLink!=''){
-			tr+='<span><input type="text" id="paymentCopyLink' + index + '" style="float:right; opacity:0; height:0;padding:0;" value="'+paymentLink+'">'+'<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="copyToClipboard(\'paymentCopyLink' + index + '\')"><i class="fa fa-clone" aria-hidden="true">Copy Payment Link</i></a></span>';
-		}else{
-			tr+='NA';
+		tr += '<span>';
+		if(paymentLink!=null && paymentLink!='' && isCopyPaymentLinkAllowed()){
+			tr+='<input type="text" id="paymentCopyLink' + index + '" style="float:right; opacity:0; height:0;padding:0;" value="'+paymentLink+'">'+'<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="copyToClipboard(\'paymentCopyLink' + index + '\')"><i class="fa fa-clone" aria-hidden="true">Copy Payment Link</i></a>';
 		}
-		+'</td>';
+		if(paymentLink!=null && paymentLink!='' && id!=null && id!==''){
+			tr+='<a href="javascript:void(0)" class="btn btn-success btn-sm mt-1" onclick="showWarningMessageShow(\'Are you sure you want to send the payment link email to the student?\', \'sendPaymentLinkEmail('+id+')\', \'\')">Send Mail&nbsp;<i class="fa fa-envelope" aria-hidden="true"></i></a>';
+		}
+		tr += '</span>';
+		tr +='</td>';
 	}else{
 		tr += '<td class="text-center">&nbsp;</td>';
 	}
@@ -533,7 +537,7 @@ function saveCustomPaymentPlan(status) {
 					showMessageTheme2(0, data['message'], '', true);
 				}
 			} else {
-				setCopyPaymentLink(data.paymentLinks)
+				setCopyPaymentLink(data.paymentLinks, data.paymentIds)
 				showMessageTheme2(1, data['message'], '', true);
 				if (status == 'C') {
 					$('.card-body *').prop('disabled', true);
@@ -555,10 +559,14 @@ function saveCustomPaymentPlan(status) {
 	});
 }
 
-function setCopyPaymentLink(paymentListArray){
+function setCopyPaymentLink(paymentListArray, paymentIdArray){
 	if(paymentListArray!=null && paymentListArray.length>0){
+		var allowed = isCopyPaymentLinkAllowed();
 		for(i=0;i<paymentListArray.length;i++){
-			$("#paymentLink"+(i+1)).html('<span>'+'<input type="text" id="paymentCopyLink' + (i+1) + '" style="float:right; opacity:0; height:0;padding:0;" value="'+paymentListArray[i]+'">'+'<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="copyToClipboard(\'paymentCopyLink' + (i+1) + '\')"><i class="fa fa-clone" aria-hidden="true">Copy Payment Link</i></a>'+'</span>');
+			var payId = (paymentIdArray!=null && paymentIdArray[i]!=null) ? paymentIdArray[i] : '';
+			var copyPart = allowed ? ('<input type="text" id="paymentCopyLink' + (i+1) + '" style="float:right; opacity:0; height:0;padding:0;" value="'+paymentListArray[i]+'">'+'<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="copyToClipboard(\'paymentCopyLink' + (i+1) + '\')"><i class="fa fa-clone" aria-hidden="true">Copy Payment Link</i></a>') : '';
+			var sendMailBtn = payId!=='' ? '<a href="javascript:void(0)" class="btn btn-success btn-sm mt-1" onclick="showWarningMessageShow(\'Are you sure you want to send the payment link email to the student?\', \'sendPaymentLinkEmail(' + payId + ')\', \'\')">Send Mail&nbsp;<i class="fa fa-envelope" aria-hidden="true"></i></a>' : '';
+			$("#paymentLink"+(i+1)).html('<span>'+ copyPart + sendMailBtn +'</span>');
 		}
 	}
 }
@@ -771,6 +779,7 @@ function getAdvancePaymentDetails(studentStandardId) {
 		async: false,
 		success: function (data) {
 			customLoader(false);
+			window.__COPY_PAYMENT_LINK_ALLOWED = !!(data && data.copyLinkAllowed === true);
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if (data['status'] == '3') {
 					redirectLoginPage()
@@ -1266,7 +1275,7 @@ function generateScheduleAdv(responseData) {
 				}
 			}
 			if(responseData != undefined && responseData.schedulePayments != null ){
-				singleIntallmentAdv(index, index, changeDateFormat(scheduleDate, 'MMM-dd-yyyy'), getPaymentTitleCalculation(index, durationWithin), scheduleFee, responseData.schedulePayments[index-1].paymentLink, true)
+				singleIntallmentAdv(index, index, changeDateFormat(scheduleDate, 'MMM-dd-yyyy'), getPaymentTitleCalculation(index, durationWithin), scheduleFee, responseData.schedulePayments[index-1].paymentLink, true, responseData.schedulePayments[index-1].id)
 			}else{
 				singleIntallmentAdv(index, index, changeDateFormat(scheduleDate, 'MMM-dd-yyyy'), getPaymentTitleCalculation(index, durationWithin), scheduleFee, '', true)
 			}
@@ -1277,7 +1286,7 @@ function generateScheduleAdv(responseData) {
 	}
 }
 
-function singleIntallmentAdv(id, index, scheduleDate, paymentTitle, scheduleFee, paymentLink, islastRow) {
+function singleIntallmentAdv(id, index, scheduleDate, paymentTitle, scheduleFee, paymentLink, islastRow, payId) {
 	var tr =
 		'<tr id="updid' + id + '">'
 		+ '<td class="text-center">' + index + '</td>';
@@ -1306,19 +1315,11 @@ function singleIntallmentAdv(id, index, scheduleDate, paymentTitle, scheduleFee,
 			tr += '<td>'+scheduleDate+'</td>';
 		}
 	if (islastRow) {
-		if(paymentLink) {
-			tr += '<td class="text-center" id="paymentLink'+(index)+'">'
-				+'<span>'
-					+'<input type="text" id="paymentCopyLink'+(index)+'" style="float:right; opacity:0; height:0;padding:0;" value="'+paymentLink+'">'
-					+'<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="copyToClipboard(\'paymentCopyLink' + (index) + '\')"><i class="fa fa-clone" aria-hidden="true">Copy Payment Link</i></a>'
-				+'</span>'
-			+'</td>';
-		} else {
-			tr +='<td class="text-center" id="paymentLink"'+index+'>NA</td>';
-		}
-		
+		var advCopyPart = (paymentLink && isCopyPaymentLinkAllowed()) ? ('<input type="text" id="paymentCopyLink'+(index)+'" style="float:right; opacity:0; height:0;padding:0;" value="'+paymentLink+'">'+'<a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="copyToClipboard(\'paymentCopyLink' + (index) + '\')"><i class="fa fa-clone" aria-hidden="true">Copy Payment Link</i></a>') : '';
+		var advSendMail = (paymentLink && payId!=null && payId!=='') ? ('<a href="javascript:void(0)" class="btn btn-success btn-sm mt-1" onclick="showWarningMessageShow(\'Are you sure you want to send the payment link email to the student?\', \'sendPaymentLinkEmail('+payId+')\', \'\')">Send Mail&nbsp;<i class="fa fa-envelope" aria-hidden="true"></i></a>') : '';
+		tr += '<td class="text-center" id="paymentLink'+(index)+'"><span>'+ advCopyPart + advSendMail +'</span></td>';
 	} else {
-		tr +='<td class="text-center" id="paymentLink"'+index+'>&nbsp;</td>';
+		tr +='<td class="text-center" id="paymentLink'+(index)+'">&nbsp;</td>';
 	}
 	tr += '</tr>'
 	$("#paymentScheduleTablePartial tbody").append(tr);

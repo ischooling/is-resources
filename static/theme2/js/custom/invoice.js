@@ -224,19 +224,33 @@ function saveInvoice() {
             } else {
                 isDiscountApplied = false;
                 // if(type == 'save'){
-                    showMessageTheme2(1, "Invoice saved successfully! You can copy the payment link now.");
+                    showMessageTheme2(1, "Invoice saved successfully!");
                     $("#invoiceButtonWrapper").hide();
                     $("#invoiceCopyButtonWrapper").show();
                     $("#invoiceCopyButtonWrapper").addClass("d-flex");
-                    var payloadObj = {
-                        withStamp: "",
-                        onlyHtml: "",
-                        payId: res.payId
-                    };
-                    var payload = btoa(unescape(encodeURIComponent(JSON.stringify(payloadObj))));
-                    var newUrl = BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/invoice/" + UNIQUEUUID + "?payload=" + payload;
-                    $("#invoicePaymentLink").val(newUrl);
-                    $("#invoiceLinkPara").text(newUrl);
+                    if (res.copyLinkAllowed === true) {
+                        var payloadObj = {
+                            withStamp: "",
+                            onlyHtml: "",
+                            payId: res.payId
+                        };
+                        var payload = btoa(unescape(encodeURIComponent(JSON.stringify(payloadObj))));
+                        var newUrl = BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/invoice/" + UNIQUEUUID + "?payload=" + payload;
+                        $("#invoicePaymentLink").val(newUrl);
+                        $("#invoiceLinkPara").text(newUrl);
+                        $("#invoiceCopyBtn").show();
+                    } else {
+                        $("#invoicePaymentLink").val("");
+                        $("#invoiceLinkPara").text("");
+                        $("#invoiceCopyBtn").hide();
+                    }
+                    if (res.payId) {
+                        $("#invoiceSendMailBtn")
+                            .attr("onclick", "showWarningMessageShow('Are you sure you want to send the payment link email to the student?', 'sendPaymentLinkEmail(" + res.payId + ")', '')")
+                            .show();
+                    } else {
+                        $("#invoiceSendMailBtn").hide();
+                    }
                     // setTimeout(() => {
                     //     window.location.href = newUrl;
                     // }, 1000);

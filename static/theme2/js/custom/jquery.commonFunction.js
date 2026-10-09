@@ -6361,7 +6361,8 @@ function hasSequentialChars(password) {
   var numbers = "0123456789";
   var reverseNumbers = numbers.split("").reverse().join("");
   for (var i = 0; i < value.length - 2; i++) {
-    for (var size = 3; size <= 5; size++) {
+    // Up to 4 sequential chars (1234, abcd) are allowed; 5 or more (12345, abcde) are not.
+    for (var size = 5; size <= 5; size++) {
       if (i + size > value.length) {
         continue;
       }
@@ -6560,7 +6561,7 @@ passwodSuggessionHTML =
 '<p class="password-sugession-type password-sequence">' +
 '<span class="ps-valid" style="display:none"><i class="fa fa-check"></i></span>' +
 '<span class="ps-invalid" style="display:none"><i class="fa fa-times"></i></span>' +
-'<span class="ps-dot">.</span> No back-to-back patterns (123, abc, zyx)</p>';
+'<span class="ps-dot">.</span> No back-to-back patterns (12345, abcde, zyxwv)</p>';
 
 // '<p class="password-sugession-type password-keyboard-pattern">' +
 // '<span class="ps-valid" style="display:none"><i class="fa fa-check"></i></span>' +
@@ -7008,6 +7009,47 @@ async function getCommonCustomScript(userId,schoolId){
 		showMessageTheme2(true, e)
 	}
 }
+function isCopyPaymentLinkAllowed() {
+  return window.__COPY_PAYMENT_LINK_ALLOWED === true;
+}
+
+function sendPaymentLinkEmail(userPaymentDetailsId, serialNum) {
+  var hasInline = (serialNum !== undefined && serialNum !== null && serialNum !== '')
+    && $("#send-mail-message-" + serialNum).length > 0;
+  var msgSel = hasInline ? ("#send-mail-message-" + serialNum) : null;
+  var btnSel = hasInline ? ("#send-mail-btn-" + serialNum) : null;
+  function notify(ok, message) {
+    if (msgSel) {
+      $(msgSel).css('color', ok ? 'green' : 'red').text(message);
+    } else {
+      showMessageTheme2(ok ? 1 : 0, message);
+    }
+  }
+  if (!userPaymentDetailsId) {
+    notify(false, 'Invalid payment');
+    return;
+  }
+  if (msgSel) { $(msgSel).css('color', '#555').text('Sending...'); }
+  if (btnSel) { $(btnSel).addClass('disabled').prop('disabled', true); }
+  $.ajax({
+    type: "POST",
+    contentType: APPLICATION_JSON_VALUE,
+    url: getURLForHTML('dashboard', 'send-payment-link-email'),
+    data: JSON.stringify({ userPaymentDetailsId: userPaymentDetailsId }),
+    dataType: 'json',
+    success: function (resp) {
+      var ok = resp && resp.status == '1';
+      notify(ok, (resp && resp.message) ? resp.message : (ok ? 'Mail sent successfully' : 'Unable to send mail'));
+    },
+    error: function () {
+      notify(false, 'Unable to send mail');
+    },
+    complete: function () {
+      if (btnSel) { $(btnSel).removeClass('disabled').prop('disabled', false); }
+    }
+  });
+}
+
 function getSettingsByTypeAndKey(type, key, globalFlag) {
   var responseData = {};
   $.ajax({

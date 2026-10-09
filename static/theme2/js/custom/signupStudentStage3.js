@@ -1660,6 +1660,7 @@ function chooseRecomendedCourse() {
 	$('#selectedSubjects').val(mergedSubjects.join(','));
 	$('#selectedSubjects').val(confirmAndAddRecommendedCourse());
 	$("#recommendedCourseModal").modal("hide");
+	syncModalBodyState();
 	$("#controlType").val('add');
 	getAllCourseDetails('N', '');
 	apCourseSelectionFlag = false;

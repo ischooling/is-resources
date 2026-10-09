@@ -224,7 +224,8 @@ function invoiceItemsTableAndDescription(){
             <input type="text" value="" id="invoicePaymentLink" style="position:absolute; top:0; left:0; opacity:0;" />
             <div class="d-flex flex-column gap-2">
                 <div class="d-flex align-items-center gap-2">
-                    <button class="btn btn-primary" style="width:150px;" onclick="copyURL('invoicePaymentLink', 'copy-msg-invoice');">Copy Payment Link</button>
+                    <button id="invoiceCopyBtn" class="btn btn-primary" style="width:150px;" onclick="copyURL('invoicePaymentLink', 'copy-msg-invoice');">Copy Payment Link</button>
+                    <button id="invoiceSendMailBtn" class="btn btn-success" style="width:150px; display:none;" onclick="">Send Mail</button>
                     <b class="copy-msg-invoice text-success"></b>
                 </div>
                 <a href="javascript:void(0);" onclick="backToMain();isDiscountApplied=false;" class="btn btn-danger rounded mt-2" style="width:150px;">Close</a>

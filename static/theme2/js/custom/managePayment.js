@@ -304,7 +304,7 @@ function addExternalPayment(formId, paymentTitle) {
     $("#studentEmailDiv").removeClass('d-none')
     $("#studentIdDiv").addClass('d-none')
     $("#studentStandardId").val('')
-    $('#copyViewPaymentUrlElement, #viewPaymentUrlElementWrapper').hide();
+    $('#copyViewPaymentUrlElement, #sendPaymentUrlMailElement, #viewPaymentUrlElementWrapper').hide();
     $('#' + formId + ' #studentDetailsForPaymentId').show();
     $('#' + formId + ' #studentId1').prop('disabled', false);
     $('#' + formId + ' #studentId1').val('')
@@ -370,6 +370,7 @@ function addPayment(formId, userNameOrEmail, studentStandardId, paymentType, pay
     $("#addStudentPaymentbtn").show();
     $("#closePaymentModal").show();
     $("#copyViewPaymentUrlElement").hide();
+    $("#sendPaymentUrlMailElement").hide();
     $("#viewPaymentUrlElementWrapper").hide();
     $("#studentEmailDiv").addClass('d-none')
     $("#studentIdDiv").removeClass('d-none')
@@ -591,11 +592,17 @@ function addStudentPayment(formId, moduleId) {
                     showMessageTheme2(0, data['message'], '', true);
                 }
             } else {
-                $("#viewPaymentUrlElementWrapper").show();
-                $("#viewPaymentUrlElement").attr("value",data['message']);
-                $("#closePaymentModal").hide();
                 $("#addStudentPaymentbtn").hide();
-                $("#copyViewPaymentUrlElement").show();
+                if (data['copyLinkAllowed'] === true) {
+                    $("#viewPaymentUrlElementWrapper").show();
+                    $("#viewPaymentUrlElement").attr("value",data['message']);
+                    $("#copyViewPaymentUrlElement").show();
+                }
+                if (data['userPaymentDetailsId']) {
+                    $("#sendPaymentUrlMailElement")
+                        .attr("onclick", "showWarningMessageShow('Are you sure you want to send the payment link email to the student?', 'sendPaymentLinkEmail(" + data['userPaymentDetailsId'] + ")', '')")
+                        .show();
+                }
                 showMessageTheme2(1, "Payment Created");
                 // if(roleAndModule.viewed=='Y'){
                 //     window.setTimeout(function () {

@@ -558,6 +558,13 @@ var CURRENCY_TO_SYMBOL = {
 function getCurrencyDisplaySymbol(currencyCode){
 	return CURRENCY_TO_SYMBOL[currencyCode] || (currencyCode + ' ');
 }
+function getPayNowAmountLabel(details){
+	if(details.payAmount === undefined || details.payAmount === null || details.payAmount === ''){
+		return '';
+	}
+	var baseCurrency = (details.currencyConversion && details.currencyConversion.base) || 'USD';
+	return getCurrencyDisplaySymbol(baseCurrency) + formatMoneyWithCommas(details.payAmount);
+}
 function formatMoneyWithCommas(amount){
 	return Number(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
@@ -883,7 +890,7 @@ async function getPaymentGatewayOptionsModal(details, payerCountryCode){
 												</svg>Back
 											</div>
 												<div id="payButton${k+1}" class="pg-paynow" onclick="invokePaymentGateway('signupStage4','${details.upid}','${details.paidByUserId}','${details.schoolId}','${v.name}','${details.schoolIdOfPaymentGateway}');">
-													<span class="pg-paynow-text">Pay Now</span>
+													<span class="pg-paynow-text">Pay Now ${getPayNowAmountLabel(details)}</span>
 													<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
 												</div>
 											</div>`;
@@ -898,7 +905,7 @@ async function getPaymentGatewayOptionsModal(details, payerCountryCode){
 													</svg>Back
 												</div>
 												<div id="payButton${k+1}" class="pg-paynow">
-													<span class="pg-paynow-text">Pay Now</span>
+													<span class="pg-paynow-text">Pay Now ${getPayNowAmountLabel(details)}</span>
 													<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
 												</div>
 											</div>`;
@@ -912,8 +919,8 @@ async function getPaymentGatewayOptionsModal(details, payerCountryCode){
 														<path d="m12 19-7-7 7-7"></path>
 													</svg>Back
 												</div>
-												<div id="payButton${k+1}" class="pg-paynow" onclick="invokePaymentGateway('signupStage4','${details.upid}','${details.paidByUserId}','${details.schoolId}','${v.name}','${details.schoolIdOfPaymentGateway}');">
-													<span class="pg-paynow-text">Pay Now</span>
+												<div id="payButton${k+1}" class="pg-paynow riya1" onclick="invokePaymentGateway('signupStage4','${details.upid}','${details.paidByUserId}','${details.schoolId}','${v.name}','${details.schoolIdOfPaymentGateway}');">
+													<span class="pg-paynow-text">Pay Now ${getPayNowAmountLabel(details)}</span>
 													<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
 												</div>
 											</div>`;
@@ -929,7 +936,7 @@ async function getPaymentGatewayOptionsModal(details, payerCountryCode){
 				<div class="modal-footer pg-footer">
 					<button type="button" class="pg-back pg-back-mobile" onclick="$('#paymentOptionsModal').modal('hide');">Back</button>
 					<button type="button" class="pg-pay-mobile" onclick="payActivePaymentOption()">
-						<span class="pg-paynow-text">Pay Now</span>
+						<span class="pg-paynow-text">Pay Now ${getPayNowAmountLabel(details)}</span>
 						<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
 					</button>
 				</div>
