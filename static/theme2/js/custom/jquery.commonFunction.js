@@ -8353,6 +8353,10 @@ function goToPageCommon(page, context) {
 			trState.pageNo = page;
 			loadTeacherRatingList(false);
 			break;
+		case 'feedbackReviewRequests':
+			frrState.page = page;
+			loadFeedbackReviewRequests();
+			break;
 		case 'contractManagement':
 			tcmState.currentPage = page;
 			loadTeacherContractList();

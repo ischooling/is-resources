@@ -108,9 +108,36 @@ function getStudentFeedbackReceivedPageContent(title) {
                         <span class="font-weight-bold" id="sfrDetailScore" style="font-size:13px"></span>
                     </div>
                     <div id="sfrDetailItems"></div>
+                    <div id="sfrReviewRequestWrap" class="mt-3"></div>
                     <p class="d-flex align-items-center justify-content-center text-muted mt-2 mb-0" style="gap:6px;font-size:12px">
                         <i class="fa fa-user-circle-o"></i> Identity hidden to protect student privacy
                     </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="sfrReviewRequestModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered shadow-none" role="document">
+            <div class="modal-content shadow-none">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fa fa-flag mr-2"></i>Request feedback review</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"><i class="fa fa-times"></i></span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info py-2" style="font-size:12px">
+                        Admin will review this feedback against class context. If it is excluded, it will stop counting in your ratings.
+                    </div>
+                    <div class="form-group mb-0">
+                        <label class="font-weight-bold">Reason</label>
+                        <textarea class="form-control" id="sfrReviewReason" rows="4" maxlength="1000" placeholder="Explain why you believe this feedback needs admin review."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-light" data-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary" id="sfrSubmitReviewBtn" onclick="submitStudentFeedbackReviewRequest()"><i class="fa fa-paper-plane mr-1"></i>Submit request</button>
                 </div>
             </div>
         </div>

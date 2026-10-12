@@ -21,7 +21,8 @@ var sfrState = {
     totalCount:     0,
     loadedCount:    0,
     loading:        false,
-    activeRange:    'all'
+    activeRange:    'all',
+    activeFeedback: null
 };
 
 // ─── On load ────────────────────────────────────────────────────────────────
@@ -204,6 +205,36 @@ function sfrEscape(s) {
 
 function sfrIsSuccess(response) {
     return response && (response.status === '1' || response.statusCode === 'SUCCESS');
+}
+
+function sfrReviewStatusHtml(f, compact) {
+    if (!f || !f.reviewRequestStatus) return '';
+    var status = f.reviewRequestStatus;
+    if (status === 'Pending') {
+        return '<span class="badge badge-warning" style="font-size:' + (compact ? '10px' : '11px') + '">Review pending</span>';
+    }
+    if (status === 'Genuine') {
+        return '<span class="badge badge-success" style="font-size:' + (compact ? '10px' : '11px') + '">Reviewed genuine</span>';
+    }
+    return '<span class="badge badge-secondary" style="font-size:' + (compact ? '10px' : '11px') + '">' + sfrEscape(status) + '</span>';
+}
+
+function sfrReviewActionHtml(f, compact) {
+    if (!f || f.reviewRequestId) return sfrReviewStatusHtml(f, compact);
+    return '<button type="button" class="btn btn-outline-danger btn-sm" onclick="event.stopPropagation(); openStudentFeedbackReviewRequest(' +
+        f.feedbackResponseId + ')"><i class="fa fa-flag mr-1"></i>Request review</button>';
+}
+
+function sfrReviewListStatusHtml(f) {
+    if (!f || !f.reviewRequestId || !f.reviewRequestStatus) return '';
+    var status = f.reviewRequestStatus;
+    if (status === 'Pending') {
+        return '<span class="badge badge-warning px-2 py-1" style="font-size:10px">Review pending</span>';
+    }
+    if (status === 'Genuine') {
+        return '<span class="badge badge-success px-2 py-1" style="font-size:10px">Reviewed genuine</span>';
+    }
+    return '<span class="badge badge-secondary px-2 py-1" style="font-size:10px">' + sfrEscape(status) + '</span>';
 }
 
 // ─── API: summary (profile + overview + first page) ──────────────────────────
@@ -462,18 +493,20 @@ function studentFeedbackCardHtml(f) {
     var rating = Number(f.overallRating) || 0;
     var score = f.overallRatingLabel || (rating.toFixed(1) + '/5');
     var color = sfrStarColor(rating);
+    var reviewStatus = sfrReviewListStatusHtml(f);
 
     return '' +
     '<div class="col-lg-6 mb-3 d-flex">' +
         '<div class="card w-100 sfr-card" style="border:1px solid #e8eaed;cursor:pointer" onclick="openStudentFeedbackDetail(' + f.feedbackResponseId + ')">' +
-            '<div class="card-body p-3 d-flex align-items-center justify-content-between" style="gap:12px">' +
-                '<div>' +
+            '<div class="card-body p-3 d-flex align-items-center justify-content-between flex-wrap" style="gap:12px">' +
+                '<div style="min-width:200px;flex:1">' +
                     '<div class="font-weight-bold" style="font-size:13px;color:#1a1a2e">' +
                         '<i class="fa fa-calendar-o text-muted mr-1"></i>' + sfrFmtDate(f.submittedDate) +
                     '</div>' +
                     '<div class="mt-1" style="font-size:12px;font-weight:700;color:var(--pc,#007fff)">' +
                         'View feedback details <i class="fa fa-arrow-right" style="font-size:10px"></i>' +
                     '</div>' +
+                    (reviewStatus ? '<div class="mt-2">' + reviewStatus + '</div>' : '') +
                 '</div>' +
                 '<div class="d-inline-flex align-items-center flex-shrink-0" style="gap:8px;background:#f4f6fb;border:1px solid #e8eaed;border-radius:20px;padding:6px 12px">' +
                     sfrStarsHtml(rating, 14) +
@@ -520,6 +553,7 @@ async function openStudentFeedbackDetail(feedbackResponseId) {
     $('#sfrDetailStars').html('');
     $('#sfrDetailScore').text('');
     $('#sfrDetailItems').html('<div class="text-center text-muted py-4"><i class="fa fa-spinner fa-spin fa-2x"></i></div>');
+    $('#sfrReviewRequestWrap').html('');
     $('#sfrDetailModal').modal('show');
 
     try {
@@ -542,6 +576,7 @@ async function openStudentFeedbackDetail(feedbackResponseId) {
 }
 
 function renderStudentFeedbackDetail(detail) {
+    sfrState.activeFeedback = detail;
     var rating = Number(detail.overallRating) || 0;
     var score = detail.overallRatingLabel || (rating.toFixed(1) + '/5');
     $('#sfrDetailStars').html(sfrStarsHtml(rating, 16));
@@ -550,6 +585,7 @@ function renderStudentFeedbackDetail(detail) {
     var items = detail.items || [];
     if (!items.length) {
         $('#sfrDetailItems').html('<div class="text-center text-muted py-4">No questions in this response.</div>');
+        renderStudentFeedbackReviewBlock(detail);
         return;
     }
 
@@ -572,6 +608,90 @@ function renderStudentFeedbackDetail(detail) {
             comment +
         '</div>';
     }).join(''));
+    renderStudentFeedbackReviewBlock(detail);
+}
+
+function renderStudentFeedbackReviewBlock(detail) {
+    if (!detail || !detail.reviewRequestId) {
+        $('#sfrReviewRequestWrap').html(
+            '<div style="border:1px dashed #d9e2ec;border-radius:10px;padding:12px;background:#fbfcff">' +
+                '<div class="d-flex align-items-start justify-content-between flex-wrap" style="gap:10px">' +
+                    '<div>' +
+                        '<div class="font-weight-bold" style="font-size:13px;color:#1a1a2e">Need admin review?</div>' +
+                        '<div class="small text-muted">Use this only if you believe the feedback is incorrect or unfair.</div>' +
+                    '</div>' +
+                    '<div>' + sfrReviewActionHtml(detail, false) + '</div>' +
+                '</div>' +
+            '</div>'
+        );
+        return;
+    }
+
+    var statusHtml = sfrReviewStatusHtml(detail, false);
+    var remark = detail.reviewAdminRemark && String(detail.reviewAdminRemark).trim()
+        ? '<div class="mt-2" style="font-size:12.5px;color:#3c4043;line-height:1.55;background:#fff;border:1px solid #e8eaed;border-radius:8px;padding:10px 12px;white-space:pre-wrap;word-break:break-word;max-height:140px;overflow:auto">' + sfrEscape(detail.reviewAdminRemark) + '</div>'
+        : '<div class="small text-muted mt-1">Admin remark will appear here after review.</div>';
+
+    $('#sfrReviewRequestWrap').html(
+        '<div style="border:1px dashed #d9e2ec;border-radius:10px;padding:12px;background:#fbfcff">' +
+            '<div class="d-flex align-items-start justify-content-between flex-wrap" style="gap:10px">' +
+                '<div>' +
+                    '<div class="font-weight-bold" style="font-size:13px;color:#1a1a2e">Admin review status</div>' +
+                    '<div class="small text-muted">This feedback has already been sent for review.</div>' +
+                '</div>' +
+                '<div>' + statusHtml + '</div>' +
+            '</div>' +
+            remark +
+        '</div>'
+    );
+}
+
+function openStudentFeedbackReviewRequest(feedbackResponseId) {
+    if (!feedbackResponseId) return;
+    sfrState.activeFeedback = { feedbackResponseId: feedbackResponseId };
+    $('#sfrReviewReason').val('');
+    $('#sfrReviewRequestModal').modal('show');
+}
+
+async function submitStudentFeedbackReviewRequest() {
+    var feedback = sfrState.activeFeedback || {};
+    var period = sfrState.selectedPeriod;
+    var reason = $.trim($('#sfrReviewReason').val() || '');
+    if (!feedback.feedbackResponseId) return;
+    if (!reason) {
+        showMessageTheme2(0, 'Please add a reason for admin review.');
+        return;
+    }
+    $('#sfrSubmitReviewBtn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-1"></i>Submitting');
+    try {
+        var response = await callCommonAjax({
+            method: 'POST',
+            url: APP_BASE_URL + API_VERSION + 'teacher-evaluation/rating/student-feedback/review/request',
+            body: {
+                userId: sfrState.userId,
+                requestedBy: sfrState.userId,
+                periodId: period ? period.id : null,
+                feedbackResponseId: feedback.feedbackResponseId,
+                reason: reason
+            },
+            global: false,
+            showMessage: false
+        });
+        if (sfrIsSuccess(response)) {
+            showMessageTheme2(1, response.message || 'Review request submitted.');
+            $('#sfrReviewRequestModal').modal('hide');
+            if ($('#sfrDetailModal').hasClass('show')) {
+                openStudentFeedbackDetail(feedback.feedbackResponseId);
+            }
+            loadStudentFeedbackList(true);
+        } else {
+            showMessageTheme2(0, response && response.message ? response.message : 'Failed to submit review request.');
+        }
+    } catch (e) {
+        showMessageTheme2(0, 'Failed to submit review request.');
+    } finally {
+        $('#sfrSubmitReviewBtn').prop('disabled', false).html('<i class="fa fa-paper-plane mr-1"></i>Submit request');
+    }
 }
 
 // ─── Reset ───────────────────────────────────────────────────────────────────

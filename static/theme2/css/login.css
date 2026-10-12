@@ -1000,8 +1000,9 @@ input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus
 @media only screen and (max-width:480px) {
  .login-redesign .captcha-row{
  grid-template-columns:minmax(0,1fr) auto 116px;
- column-gap:22px;
+ /* column-gap:22px; */
  }
+ .custom-field-scope .login-field-captcha input{font-size:18px !important;}
  .login-redesign .captcha-row .captcha-code-box{width:128px;}
  .login-redesign .graduation-event-side{padding:16px 12px 14px;}
  .login-redesign .graduation-event-side h2{font-size:26px;}

@@ -219,6 +219,7 @@ const contentHandlers = {
     'feedback-form': () => renderFeedbackFormPage(),
     'evaluation-config': () => initEvaluationConfig(),
     'user-rating': () => initTeacherRating(),
+    'feedback-review-requests': () => initFeedbackReviewRequests(),
     'teacher-my-rating': () => initTeacherMyRating(),
     'contract-management': () => initContractManagement(),
     'manage-batch-student': () => renderManageBatchStudentDashboard('Manage Group Students', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
@@ -394,6 +395,11 @@ function initEvaluationConfig() {
 function initTeacherRating() {
     $('#dashboardContentInHTML').html(getTeacherRatingPageContent('Teacher Rating'));
     teacherRatingOnLoad();
+}
+
+function initFeedbackReviewRequests() {
+    $('#dashboardContentInHTML').html(getFeedbackReviewRequestsPageContent('Feedback Review Requests'));
+    feedbackReviewRequestsOnLoad();
 }
 
 function initTeacherMyRating() {
