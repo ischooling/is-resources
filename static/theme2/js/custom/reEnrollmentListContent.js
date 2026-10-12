@@ -164,6 +164,7 @@ function getReEnrollmentListContent(title) {
                     + '<option value="PAYMENT_DATE">Payment Date</option>'
                     + '<option value="ACADEMIC_START">Academic Start Date</option>'
                     + '<option value="ACADEMIC_END">Academic End Date</option>'
+                    + '<option value="FOLLOWUP_DATE">Followup Date</option>'
                 + '</select><label>Date Type</label></div>'
             + '<div class="reel-fld form-group custom-field"><input type="text" id="reelStart" class="form-control" placeholder=" " autocomplete="off" readonly><label>Start Date</label></div>'
             + '<div class="reel-fld form-group custom-field"><input type="text" id="reelEnd" class="form-control" placeholder=" " autocomplete="off" readonly><label>End Date</label></div>'

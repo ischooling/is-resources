@@ -422,11 +422,19 @@ function getRequestForPaymentReport(formId, type, forDownload){
 	PaymentReportRequestDTO['studentName'] = $('#studentName').val()
 	    ? $('#studentName').val().replace(/\s+/g, ' ').trim()
     : '';
-	if($('#startDate').val()!=''){
-		PaymentReportRequestDTO['startDate'] = changeDateFormat(new Date($('#startDate').val()), 'yyyy-mm-ddd')+' 00:00:00';
+	var _startDateVal = $('#startDate').val();
+	if(_startDateVal){
+		var _startDateObj = new Date(_startDateVal);
+		if(!isNaN(_startDateObj.getTime())){
+			PaymentReportRequestDTO['startDate'] = changeDateFormat(_startDateObj, 'yyyy-mm-ddd')+' 00:00:00';
+		}
 	}
-	if($('#endDate').val()!=''){
-		PaymentReportRequestDTO['endDate'] = changeDateFormat(new Date($('#endDate').val()), 'yyyy-mm-ddd')+' 23:59:59';
+	var _endDateVal = $('#endDate').val();
+	if(_endDateVal){
+		var _endDateObj = new Date(_endDateVal);
+		if(!isNaN(_endDateObj.getTime())){
+			PaymentReportRequestDTO['endDate'] = changeDateFormat(_endDateObj, 'yyyy-mm-ddd')+' 23:59:59';
+		}
 	}
 	if($('#gradeId').val()!=''){
 		PaymentReportRequestDTO['gradeId'] = $('#gradeId').select2('val');
@@ -622,6 +630,30 @@ function downloadStudentPaymentReport(formId, forCountOnly, type){
 		}
 	});
 }
+function toggleNextFollowup(studentStandardId) {
+	var val = $('#nextFollowup-' + studentStandardId).val();
+	var $wrap = $('.nextFollowupDateWrap-' + studentStandardId);
+	var $date = $('#nextFollowupDate-' + studentStandardId);
+	if (val == '' || val == 'NO FOLLOWUP') {
+		$wrap.css('display', 'none');
+		$date.val('');
+		return;
+	}
+	if (!$date.data('dpInit')) {
+		$date.datepicker({ format: 'dd-mm-yyyy', autoclose: true, todayHighlight: true });
+		$date.data('dpInit', true);
+	}
+	$wrap.css('display', 'flex');
+	if (val == 'TODAY' || val == 'TOMORROW') {
+		var d = new Date();
+		if (val == 'TOMORROW') { d.setDate(d.getDate() + 1); }
+		var mdy = ('0' + d.getDate()).slice(-2) + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + d.getFullYear();
+		$date.val(mdy);
+		try { $date.datepicker('update', mdy); } catch (e) {}
+	}
+	// CUSTOM (Choose Date): user picks the date
+}
+
 function submitCommunicationLog(studentStandardId, userId) {
 	hideMessageTheme2('');
 	if ($('#leadStatus-'+studentStandardId).val()==undefined || $('#leadStatus-'+studentStandardId).val()=='') {
@@ -637,12 +669,26 @@ function submitCommunicationLog(studentStandardId, userId) {
 	if($('#followupRemarks-'+studentStandardId).val()!=''){
 		remark=escapeCharacters($('#followupRemarks-'+studentStandardId).val());
 	}
+	var nextFollowupSel = $('#nextFollowup-'+studentStandardId).val();
+	var nextFollowupDate = '';
+	if (nextFollowupSel != undefined && nextFollowupSel != '' && nextFollowupSel != 'NO FOLLOWUP') {
+		var nfDate = $('#nextFollowupDate-'+studentStandardId).val();
+		if (nfDate == undefined || nfDate == '') {
+			showMessageTheme2(0, 'Please choose the next followup date','',true);
+			return false;
+		}
+		var nfHH = $('#nextFollowupHH-'+studentStandardId).val();
+		var nfMM = $('#nextFollowupMM-'+studentStandardId).val();
+		var nfAP = $('#nextFollowupAMPM-'+studentStandardId).val();
+		nextFollowupDate = nfDate + ' ' + nfHH + ':' + nfMM + ' ' + nfAP;
+	}
 	var data={};
 	data['leadStatus']=leadStatus;
 	data['comments']=remark;
 	data['entityId']=userId;
 	data['entityName']='STUDENT';
 	data['userId']=USER_ID;
+	data['nextFollowupDate']=nextFollowupDate;
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
@@ -659,6 +705,9 @@ function submitCommunicationLog(studentStandardId, userId) {
 			} else {
 				$('#leadStatus-'+studentStandardId).val('');
 				$('#followupRemarks-'+studentStandardId).val('');
+				$('#nextFollowup-'+studentStandardId).val('');
+				$('.nextFollowupDateWrap-'+studentStandardId).css('display', 'none');
+				$('#nextFollowupDate-'+studentStandardId).val('');
 				showMessageTheme2(1, data['message'],'',false);
 				//getLeadStatusLog(data['leadno'], callFrom, discardPermission);
 				getCommunicationLogList(studentStandardId, userId);
@@ -744,6 +793,10 @@ function getCommunicationLogList(studentStandardId, userId){
 											+'<tr>'
 												+'<th class="p-1 border-0">Follow Date:</th>'
 												+'<td class="p-1 border-0 text-justify" id="callRemark" style="max-width: 250px;">'+(leadCall.createdAt!=''?leadCall.createdAt:'N/A')+'</td>'
+											+'</tr>'
+											+'<tr>'
+												+'<th class="p-1 border-0">Next Followup:</th>'
+												+'<td class="p-1 border-0 text-justify" style="max-width: 250px;">'+((leadCall.nextFollowupDate!=null && leadCall.nextFollowupDate!='')?leadCall.nextFollowupDate:'N/A')+'</td>'
 											+'</tr>'
 										+'</table>'
 									+'</div>'

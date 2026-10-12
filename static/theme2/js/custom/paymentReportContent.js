@@ -848,9 +848,10 @@ function cardDetails(data){
 										<div class="col-xl-8 col-lg-6 col-md-12 col-sm-12 col-12">
 												<div class="row">
 													<div class="col-lg-12 col-md-6 col-sm-12 col-12">
-														<div class="position-relative form-group">
-															<label for="title" class="">Status</label>
-																<select name="leadStatus-${item.studentStandardId}" id="leadStatus-${item.studentStandardId}" class="form-control re-leadstatus" style="width:200px !important;">
+														<div class="d-flex flex-wrap align-items-end" style="gap:8px;">
+															<div style="width:180px;">
+																<label class="">Status</label>
+																<select name="leadStatus-${item.studentStandardId}" id="leadStatus-${item.studentStandardId}" class="form-control form-control-sm re-leadstatus" style="width:100%;">
 																	<option value="">Select Status</option>`;
 																for (let s = 0; s < item.leadStatusList.length; s++) {
 																	const statusL = item.leadStatusList[s];
@@ -862,7 +863,36 @@ function cardDetails(data){
 																if (!hasInactiveStatus) {
 																	html+='<option value="Inactive">Inactive</option>';
 																}
-															html+=`</select>
+																html+=`</select>
+															</div>
+															<div style="width:150px;">
+																<label class="">Next Followup</label>
+																<select class="form-control form-control-sm" id="nextFollowup-${item.studentStandardId}" onchange="toggleNextFollowup('${item.studentStandardId}')">
+																	<option value="">--Select--</option>
+																	<option value="TODAY">Today</option>
+																	<option value="TOMORROW">Tomorrow</option>
+																	<option value="CUSTOM">Choose Date</option>
+																	<option value="NO FOLLOWUP">No Followup</option>
+																</select>
+															</div>
+															<div class="nextFollowupDateWrap-${item.studentStandardId}" style="display:none; gap:8px; flex-wrap:nowrap; align-items:flex-end;">
+																<div style="width:150px;">
+																	<label class="">Date</label>
+																	<input type="text" id="nextFollowupDate-${item.studentStandardId}" class="form-control form-control-sm nextFollowupDatePicker" autocomplete="off" readonly onkeydown="return false" placeholder="Date">
+																</div>
+																<div style="width:60px;">
+																	<label class="">HH</label>
+																	<select class="form-control form-control-sm" id="nextFollowupHH-${item.studentStandardId}">${commLogHourOptions()}</select>
+																</div>
+																<div style="width:60px;">
+																	<label class="">MM</label>
+																	<select class="form-control form-control-sm" id="nextFollowupMM-${item.studentStandardId}">${commLogMinOptions()}</select>
+																</div>
+																<div style="width:72px;">
+																	<label class="">AM/PM</label>
+																	<select class="form-control form-control-sm" id="nextFollowupAMPM-${item.studentStandardId}"><option value="AM">AM</option><option value="PM">PM</option></select>
+																</div>
+															</div>
 														</div>
 														<div class="position-relative form-group">
 															<label for="title" class="">Remark</label>
@@ -3661,4 +3691,16 @@ function viewCallRecording(url) {
 
 function paymentReportEscapeSingleQuote(value){
     return (value || "").toString().replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+}
+
+// Next Followup time option builders for the Communication Log (re-enrolled list)
+function commLogHourOptions() {
+	var h = '<option value="00">00</option>';
+	for (var i = 1; i <= 12; i++) { var v = i < 10 ? '0' + i : '' + i; h += '<option value="' + v + '">' + v + '</option>'; }
+	return h;
+}
+function commLogMinOptions() {
+	var h = '<option value="00">00</option>';
+	for (var i = 1; i <= 59; i++) { var v = i < 10 ? '0' + i : '' + i; h += '<option value="' + v + '">' + v + '</option>'; }
+	return h;
 }

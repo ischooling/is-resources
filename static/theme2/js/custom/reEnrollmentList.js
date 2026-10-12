@@ -441,6 +441,7 @@ function reEnrollRenderCards(s) {
         + card(s.total, 'Total Students', '#eef2ff', '#3730a3', 'total')
         + card(s.fresh, 'Fresh', '#e9f7ee', '#1f9d55', 'fresh', '', 'Fresh', '', reEnrollMixLine(s.frGroup, s.frOneToOne, s.frOther, 'fresh', '', 'Fresh'))
         + card(s.totalReEnroll, 'Re-Enrollment', '#eaf1ff', '#2b62d6', 'reEnrollment', '', 'Re-Enrollment', '', reEnrollMixLine(s.reGroup, s.reOneToOne, s.reOther, 'reEnrollment', '', 'Re-Enrollment'))
+        + card(s.todayFollowup, 'Today Followup', '#fff1f0', '#c0392b', 'todayFollowup', '', 'Today Followup')
         + '</div></div>';
     // ---- Progression row : selected session base -> next session re-enrolled / pending (display-only) ----
     function pcard(num, label, bg, color, sub) {
