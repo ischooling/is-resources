@@ -450,6 +450,7 @@ function withdrawalStatusMeta(status){
         case "REJECTED":     return { label:"Denied",           badge:"wd-b-denied",    group:"denied" };
         case "CHALLENGED":   return { label:"Challenged",       badge:"wd-b-challenge", group:"challenged" };
         case "CANCELLED":    return { label:"Cancelled",        badge:"wd-b-denied",    group:"cancelled" };
+        case "DIRECT_WITHDRAWN": return { label:"Withdrawn",    badge:"wd-b-refund",    group:"refund" };
         default:             return { label:(status||"—"),      badge:"wd-b-review",    group:"review" };
     }
 }

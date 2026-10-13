@@ -398,6 +398,7 @@ function openWithdrawalAddModal() {
     $('#wrAddReason').val('');
     $('#wrAddDescription').val('');
     $('#wrAddSubmitBtn').prop('disabled', true);
+    $('#wrDirectWithdrawBtn').prop('disabled', true);
     
     // Load reasons dropdown via API
     loadWithdrawalReasons();
@@ -433,6 +434,7 @@ function lookupWithdrawalStudent() {
     var sid = $.trim($('#wrAddStudentId').val()).toUpperCase();
     $('#wrAddStudentInfo').removeData('userId');
     $('#wrAddSubmitBtn').prop('disabled', true);
+    $('#wrDirectWithdrawBtn').prop('disabled', true);
 
     if (!sid) {
         $('#wrAddStudentInfo').html('');
@@ -463,8 +465,9 @@ function lookupWithdrawalStudent() {
             $('#wrAddStudentInfo').data('userId', s.userId);
             $('#wrAddStudentInfo').data('cityId', s.cityId || 0);
             validateWithdrawalAddForm();
-        } else {
-            $('#wrAddStudentInfo').html('<div class="alert alert-warning py-2 font-12 mt-2">No student found with ID <strong>' + escapeHtml(sid) + '</strong>.</div>');
+        } else if (res && res.status === '0') {
+            // $('#wrAddStudentInfo').html('<div class="alert alert-warning py-2 font-12 mt-2">No student found with ID <strong>' + escapeHtml(sid) + '</strong>.</div>');
+            $('#wrAddStudentInfo').html('<div class="alert alert-warning py-2 font-12 mt-2">' + (res.message) + '</div>');
         }
     }).catch(function() {
         $('#wrAddStudentInfo').html('<small class="text-danger">Lookup failed. Please try again.</small>');
@@ -476,6 +479,7 @@ function validateWithdrawalAddForm() {
     var reason = $('#wrAddReason').val();
     var desc   = $.trim($('#wrAddDescription').val());
     $('#wrAddSubmitBtn').prop('disabled', !(userId && reason && desc));
+    $('#wrDirectWithdrawBtn').prop('disabled', !(userId && reason && desc));
 }
 
 function submitWithdrawalAdminAdd() {
@@ -514,6 +518,53 @@ function submitWithdrawalAdminAdd() {
         }
     }).catch(function() {
         $('#wrAddSubmitBtn').prop('disabled', false).html('<i class="fa fa-plus mr-1"></i>Add Request');
+        showMessageTheme2(0, 'An error occurred.', '', true);
+    });
+}
+
+function submitWithdrawalDirectWithdraw() {
+    var userId = $('#wrAddStudentInfo').data('userId');
+    var cityId = $('#wrAddStudentInfo').data('cityId') || 0;
+    var reason = $('#wrAddReason').val();
+    var desc   = $.trim($('#wrAddDescription').val());
+
+    if (!userId || !reason || !desc) {
+        showMessageTheme2(0, 'Please fill all required fields.', '', true);
+        return;
+    }
+    // if (!confirm('This will directly withdraw the student. Continue?')) {
+    //     return;
+    // }
+
+    var btnHtml = '<i class="fa fa-user-times mr-1"></i>Direct Withdrawn';
+    $('#wrDirectWithdrawBtn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-1"></i>Saving…');
+    $('#wrAddSubmitBtn').prop('disabled', true);
+
+    callCommonAjax({
+        method: 'POST',
+        url: wrBaseUrl() + 'withdrawal-requests-direct-withdraw',
+        body: {
+            userId: parseInt(userId),
+            cityId: parseInt(cityId),
+            reasonId: parseInt(reason),
+            otherReason: desc
+        },
+        showMessage: false,
+        global: false
+    }).then(function(res) {
+        $('#wrDirectWithdrawBtn').html(btnHtml);
+        if (res && res.status === '1') {
+            showMessageTheme2(1, res.message || 'Student withdrawn successfully.', '', true);
+            $('#wrAddModal').modal('hide');
+            loadWithdrawalRequestsStats();
+            if (withdrawalReqTable) { withdrawalReqTable.ajax.reload(null, false); }
+        } else {
+            validateWithdrawalAddForm();
+            showMessageTheme2(0, res.message || 'Failed to withdraw student.', '', true);
+        }
+    }).catch(function() {
+        $('#wrDirectWithdrawBtn').html(btnHtml);
+        validateWithdrawalAddForm();
         showMessageTheme2(0, 'An error occurred.', '', true);
     });
 }

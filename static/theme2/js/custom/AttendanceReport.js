@@ -129,7 +129,7 @@ function renderRows(rows) {
 		var c = rows[i];
 		html += "<tr>";
 		html += '<td><div class="font-weight-bold">' + esc(formatClassTitle(c.classTitle)) + '</div>' +
-			(c.batchName ? '<div class="font-11 text-dark mt-1">' + esc(c.batchName) + '</div>' : '') +
+			((c.batchName || c.studentName) ? '<div class="font-11 text-dark mt-1">' + esc(c.batchName || c.studentName) + '</div>' : '') +
 			'<div class="font-11 text-muted mt-1">' + esc(c.grade) + '</div></td>';
 		if (ADMIN_VIEW) { html += '<td>' + esc(c.teacherName) + '</td>'; }
 		html += '<td>' + typePill(c.classType) + '</td>';
@@ -459,7 +459,7 @@ function openStudentWise(vendorMeetingId) {
 				'<div class="d-flex flex-wrap">' +
 					subItem("early", "text-primary", "Early", res.earlyCount) +
 					subItem("ontime", "text-success", "On time", res.onTimeCount) +
-					subItem("late", "text-warning", "Late", res.lateCount) +
+					subItem("late", "text-danger", "Late", res.lateCount) +
 				'</div>' +
 			'</div>' +
 			'<div class="card border-0 bg-light-danger rounded-10 text-center p-3 mb-2" data-key="absent" data-stat style="cursor:pointer;flex:1;min-width:110px" onclick="toggleStuFilter(\'absent\')"><div class="font-22 font-weight-bold">' + (res.absentCount || 0) + '</div><div class="font-11 font-weight-bold">Absent</div></div>');
@@ -472,7 +472,7 @@ function subItem(key, colorClass, lbl, val) {
 function miniPill(s) {
 	if (s === "ontime") { return '<span class="badge badge-pill badge-success">On time</span>'; }
 	if (s === "early") { return '<span class="badge badge-pill badge-primary">Early</span>'; }
-	if (s === "late") { return '<span class="badge badge-pill badge-warning">Late</span>'; }
+	if (s === "late") { return '<span class="badge badge-pill badge-danger">Late</span>'; }
 	return '<span class="badge badge-pill badge-danger">Absent</span>';
 }
 function renderStudents() {

@@ -289,6 +289,10 @@ function getWithdrawalAddModalHtml() {
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger btn-sm" id="wrDirectWithdrawBtn" disabled
+          onclick="return showWarningMessage('This action will directly withdraw the student. Do you want to continue?', 'submitWithdrawalDirectWithdraw()')">
+          <i class="fa fa-user-times mr-1"></i>Direct Withdrawn
+        </button>
         <button type="button" class="btn btn-primary btn-sm" id="wrAddSubmitBtn" disabled
           onclick="submitWithdrawalAdminAdd()">
           <i class="fa fa-plus mr-1"></i>Add Request
@@ -759,7 +763,8 @@ function wrStatusBadge(status) {
         'BANKDETAIL' : ['badge-wr-approved',  '#16A34A', 'Approved', 'awaiting bank details'],
         'TRANSFERRED': ['badge-wr-refund',    '#0D9488', 'Refund Initiated', ''],
         'CHALLENGED' : ['badge-wr-challenge', '#7C3AED', 'Challenged', ''],
-        'CANCELLED'  : ['badge-wr-other',     '#94A3B8', 'Cancelled', '']
+        'CANCELLED'  : ['badge-wr-other',     '#94A3B8', 'Cancelled', ''],
+        'DIRECT_WITHDRAWN': ['badge-wr-other', '#64748B', 'Direct Withdrawn', '']
     };
     var m = map[s] || ['badge-wr-other', '#94A3B8', status || '—', ''];
     
