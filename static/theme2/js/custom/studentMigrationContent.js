@@ -267,14 +267,14 @@ function migrationDetailsOptionContent(data) {
 									}
 									if(data.forcefulRepeatOrImprove == "Y"){
 										html+='<div class="d-flex mx-auto flex-column flex-md-row">'
-											+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15 mr-md-3 mr-0 mb-2 mb-md-0" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">1 Continue in '+studentCredit.currentGrade+'</a>'
+											+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15 mr-md-3 mr-0 mb-2 mb-md-0" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">Continue in '+studentCredit.currentGrade+'</a>'
 											+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15 mt-2" href="javascript:void(0);" onclick="submitCourse(\'' + data.enrollmentBy + '\');">';
 											if(data.registrationType!="ONE_TO_ONE_FLEX"){
 												if(studentCredit.currentGradeId != 7 && data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
 													html+='<i class="fa fa-rocket mr-2"></i>';
 												}
 											}
-											html+='2 Continue in '+studentCredit.nextGrade+'</a>'
+											html+='Continue in '+studentCredit.nextGrade+'</a>'
 										+'</div>'
 									}
 									else {
@@ -301,9 +301,9 @@ function migrationDetailsOptionContent(data) {
 																html+='<i class="fa fa-rocket mr-2"></i>';
 															}
 														}
-														html+='4 Continue in '+studentCredit.nextGrade+'</a>';
+														html+='Continue in '+studentCredit.nextGrade+'</a>';
 													}
-													// +'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15" href="javascript:void(0);" onclick="submitCourse(\'' + data.enrollmentBy + '\')"><i class="fa fa-rocket mr-2"></i>5 Continue in '+studentCredit.nextGrade+'</a>'
+													// +'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15" href="javascript:void(0);" onclick="submitCourse(\'' + data.enrollmentBy + '\')"><i class="fa fa-rocket mr-2"></i>Continue in '+studentCredit.nextGrade+'</a>'
 												html+='</div>';
 										// }else if(parseFloat(studentCredit.totalCredit) >= studentCredit.minmumCreditLimit && studentCredit.currentGradeId<=6){
 										}
@@ -370,13 +370,13 @@ function migrationDetailsOptionContent(data) {
 																			html+='<i class="fa fa-rocket mr-2"></i>';
 																		}
 																	}
-																	html+='Continue in '+studentCredit.nextGrade+'</a>'
+																	html+='Continue in '+(migrationOption.currentGradeName || studentCredit.currentGrade)+'</a>'
 																+'</div>';
 															});
 														html+='</div>';
 													}else{
 														html+='<div class="col text-center mt-3">'
-															+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">8 Continue in '+studentCredit.currentGrade+'</a>'
+															+'<a class="design-btn bg-primary font-weight-semi-bold font-size-lg p-2 rounded-15" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">Continue in '+studentCredit.currentGrade+'</a>'
 														+'</div>';
 													}
 											}
@@ -395,17 +395,17 @@ function migrationDetailsOptionContent(data) {
 																html+='<i class="fa fa-rocket mr-2"></i>';
 															}
 														}
-														html+='9 Continue in '+studentCredit.nextGrade+'</a>'
+														html+='Continue in '+studentCredit.nextGrade+'</a>'
 													+'</div>';
 											}
 											}else{
 												html+='<div class="col text-center mt-3">'
-													+'<a class="design-btn bg-primary font-weight-bold" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">10 Continue in '+studentCredit.currentGrade+'</a>'
+													+'<a class="design-btn bg-primary font-weight-bold" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">Continue in '+studentCredit.currentGrade+'</a>'
 												+'</div>';
 											}
 										}else{
 											html+=+'<div class="col text-center mt-3">'
-												+'<a class="design-btn bg-primary font-weight-bold" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">11 Continue in '+studentCredit.currentGrade+'</a>'
+												+'<a class="design-btn bg-primary font-weight-bold" href="javascript:void(0);" onclick="callChoiceForStudentModelRepeaters(\'improve\');">Continue in '+studentCredit.currentGrade+'</a>'
 											+'</div>';
 										}
 									}
@@ -552,7 +552,7 @@ function migrationDetailsOptionContent(data) {
 		+'<div class="modal-dialog modal-dialog-centered modal-md box-shadow-none">'
 			+'<div class="modal-content">'
 				+'<div class="modal-header pt-2 pb-2 bg-primary text-center text-white">'
-					+'<h5 class="modal-title" id="myLargeModalLabel">12 Continue in '+studentCredit.currentGrade+'</h5>'
+					+'<h5 class="modal-title" id="myLargeModalLabel">Continue in '+studentCredit.currentGrade+'</h5>'
 					+'<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
 				+'</div>'
 				+'<div class="modal-body">'
