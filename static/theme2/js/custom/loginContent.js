@@ -8,7 +8,9 @@ function isGraduationLoginDesignVisible(){
 
 async function loginContent(userName, fromSpoof){
     var html =``;
+    
         html+=marqueeContent();
+
         html+=
         `<div class="login-bg login-redesign ${SHOW_GRADUATION_LOGIN_DESIGN ? ' login-graduation-split' : ''}${!IS_INTERNATIONAL_SCHOOLING ? ' login-school-primary-bg' : ''}"${SHOW_GRADUATION_LOGIN_DESIGN ? ` style="background-image:url('${PATH_FOLDER_IMAGE2}Login_grdbg.png');"` : ``}>
             ${IS_INTERNATIONAL_SCHOOLING && !SHOW_GRADUATION_LOGIN_DESIGN ? `
@@ -115,8 +117,7 @@ async function loginContent(userName, fromSpoof){
         html+=serverErrorMessageContent()
         +forgotPasswordContent()
         +commonEmailAllreadyExistContent()
-        +emailLimitContent()
-        +getCookiesConsentContent();
+        +emailLimitContent();
     return html;
 }
 
@@ -445,17 +446,6 @@ function footerContent(){
             </div>
         </div>
     `
-    return html;
-}
-
-function getCookiesConsentContent(){
-    var html=
-    `<div class="cookies cookie-consent" style="display:block;">
-        <p>The website uses 'cookies' to give you the best, most relevant experience.
-        By continuing to visit this site you agree to our use of cookies. 
-        <a href="javascript:void(0);" class="cookie-consent-agree">Accept Cookies</a>
-        </p>
-    </div>`;
     return html;
 }
 

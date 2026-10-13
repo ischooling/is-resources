@@ -8026,6 +8026,15 @@ function getBrowserDetail() {
     shortVersion: majorVersion,
     navAppName: navigator.appName,
     uAgentFull: navigator.userAgent,
+    // Meta Conversions API match keys, stored with the lead in BROWSER_DETAILS (see cookiesLib.js)
+    fbp: typeof getRawCookie === "function" ? getRawCookie("_fbp") : "",
+    fbc: typeof getRawCookie === "function" ? getRawCookie("_fbc") : "",
+    fbi: typeof getRawCookie === "function" ? getRawCookie("_fbi") : "",
+    // consent choice travels with the lead: the server only sends Meta events for "granted"
+    metaConsent: typeof getMarketingConsent === "function" ? getMarketingConsent() || "unset" : "unset",
+    // page the form was submitted on and the page the visitor came from: sent to Meta (cleaned) as event_source_url / referrer_url
+    pageUrl: window.location.href,
+    referrer: document.referrer || "",
   };
 }
 function getUploadInputBtn(inputId, uploadViewElementId, fileType, elem_id, btn_label_name, file_input_show_hide_flag, viewAttachmentModalId, is_attchementPDF, is_attchementUploaded, viewAttachmentFlag){
