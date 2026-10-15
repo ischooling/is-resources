@@ -192,6 +192,7 @@ function getReEnrollmentListContent(title) {
                     + '<option value="100">100%</option>'
                 + '</select><label>Progress</label></div>'
             + '<div class="reel-fld form-group custom-field" style="flex:1 1 200px;"><select id="reelReStatus" class="form-control" multiple="multiple"></select><label>Status</label></div>'
+            + '<div class="reel-fld form-group custom-field" style="flex:1 1 200px;"><select id="reelAddedBy" class="form-control"><option value="">All (Remark By)</option></select><label>Remark By</label></div>'
             + '<div class="reel-fld reel-chkfld"><label class="reel-chk"><input type="checkbox" id="reelExWd"> Exclude Withdrawal</label></div>'
             + '<div class="reel-fld form-group custom-field" style="flex:1 1 220px;"><select id="reelParent" class="form-control"><option></option></select><label>Parent (Name / Email / Contact)</label></div>'
             + '<div class="reel-fld form-group custom-field" style="flex:2 1 240px;"><input type="text" id="reelSearch" class="form-control" placeholder=" "><label>Search (Name / Email / Student ID)</label></div>'

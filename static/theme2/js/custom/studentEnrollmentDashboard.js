@@ -31,6 +31,7 @@ function getRequestForStudentEnrollmentDashboard() {
     data['registrationType'] = $('#sedFilterRegType').val() || '';
     data['country'] = parseInt($('#sedFilterCountry').val(), 10) || 0;
     data['grade'] = parseInt($('#sedFilterGrade').val(), 10) || 0;
+    data['search'] = ($('#sedFilterSearch').val() || '').trim();
     return data;
 }
 
@@ -277,6 +278,10 @@ function bindStudentEnrollmentDashboardEvents() {
     $(document).off('click', '#sedApply').on('click', '#sedApply', function () {
         sedFetchAll();
     });
+    // Enter in the search box applies the filter
+    $(document).off('keydown', '#sedFilterSearch').on('keydown', '#sedFilterSearch', function (e) {
+        if (e.which === 13 || e.keyCode === 13) { e.preventDefault(); sedFetchAll(); }
+    });
     $(document).off('click', '#sedReset').on('click', '#sedReset', function () {
         // back to defaults: current session + all reg-type / country / grade, then reload
         $('#sedFilterSession, #sedFilterRegType, #sedFilterCountry, #sedFilterGrade').each(function () {
@@ -285,6 +290,7 @@ function bindStudentEnrollmentDashboardEvents() {
             $s.val($s.attr('id') === 'sedFilterSession' ? SED_DEFAULT_SESSION : '');
             if ($s.hasClass('select2-hidden-accessible')) { $s.trigger('change.select2'); }
         });
+        $('#sedFilterSearch').val('');
         sedFetchAll();
     });
     $(document).off('click', '[data-sed-kpi]').on('click', '[data-sed-kpi]', function () {
@@ -714,6 +720,16 @@ var SED_ACTION_METRIC = {
     'Re-enroll pending · next grade': 'reEnrollPending'
 };
 
+// Sortable key for a displayed date string like "Aug 01, 2026" -> "2026-08-01" (ISO sorts chronologically).
+// Empty / unparseable -> '' so blanks group together instead of mixing into the date order.
+function sedDateSortKey(s) {
+    if (!s) { return ''; }
+    var t = Date.parse(s);
+    if (isNaN(t)) { return ''; }
+    var d = new Date(t);
+    return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+}
+
 function sedEnrolLabel(t) {
     switch ((t || '').trim()) {
         case 'REGISTRATION_FRESH': return 'Fresh';
@@ -917,9 +933,9 @@ function sedRenderDrawerList(rows, proofHeader, proofDate, proofContact) {
             + '<td>' + sedRegLabel(r.regType) + '</td>'
             + '<td>' + sedEnrolLabel(r.enrolType) + '</td>'
             + '<td>' + (r.country || '-') + '</td>'
-            + '<td style="white-space:nowrap;">' + (r.payDate || '-') + '</td>'
-            + '<td style="white-space:nowrap;">' + (r.acadStart || '-') + '</td>'
-            + '<td style="white-space:nowrap;">' + (r.acadEnd || '-') + '</td>' + proofCells
+            + '<td data-order="' + sedDateSortKey(r.payDate) + '" style="white-space:nowrap;">' + (r.payDate || '-') + '</td>'
+            + '<td data-order="' + sedDateSortKey(r.acadStart) + '" style="white-space:nowrap;">' + (r.acadStart || '-') + '</td>'
+            + '<td data-order="' + sedDateSortKey(r.acadEnd) + '" style="white-space:nowrap;">' + (r.acadEnd || '-') + '</td>' + proofCells
             + '</tr>';
     }
     h += '</tbody></table></div>';

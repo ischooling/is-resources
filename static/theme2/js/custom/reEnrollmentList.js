@@ -13,6 +13,7 @@ var REEL_CARD_LIST_TITLE = '';
 var REEL_CARD_LIST_TOTAL = 0;
 var REEL_COUNTRIES = [];      // popup filter options (from summary)
 var REEL_GRADES = [];
+var REEL_ADDEDBY = [];        // "Remark By" (Added By) reporting filter options (from summary)
 var REEL_CARD_LIST_PREV = '';   // session the page was on, for the "returning / new" drill
 var REEL_CARD_LIST_REG = '';    // learning program forced by a split-line click (GROUP / ONE_TO_ONE / OTHER)
 var REEL_CARD_FILTERS_READY = false;
@@ -111,6 +112,7 @@ function getRequestForReEnrollment(pageNumber) {
         advPayment: $('#reelAdv').val() || '',
         progress: $('#reelProgress').val() || '',
         reStatus: ($('#reelReStatus').val() || []),
+        addedBy: ($('#reelAddedBy').val() || ''),
         grade: ($('#reelGrade').val() || []),
         gradeMode: $('#reelGradeMode').val() || 'in',
         exWithdrawn: $('#reelExWd').is(':checked') ? 1 : 0,
@@ -138,6 +140,26 @@ function reEnrollFillGradeFilter() {
         if ($.fn && $.fn.select2) {
             if (!$sel.hasClass('select2-hidden-accessible')) {
                 $sel.select2({ theme: 'bootstrap4', width: '100%', placeholder: 'All grades', allowClear: true });
+            }
+            $sel.val(keep).trigger('change.select2');
+        } else { $sel.val(keep); }
+    } catch (e) { $sel.val(keep); }
+}
+
+// page-level "Remark By" (Added By) reporting filter — staff users who added remarks (selection preserved)
+function reEnrollFillAddedByFilter() {
+    var $sel = $('#reelAddedBy');
+    if (!$sel.length) { return; }
+    var keep = $sel.val() || '';
+    var h = '<option value="">All (Remark By)</option>';
+    for (var i = 0; i < (REEL_ADDEDBY || []).length; i++) {
+        h += '<option value="' + reEnrollEsc(REEL_ADDEDBY[i].id) + '">' + reEnrollEsc(REEL_ADDEDBY[i].text) + '</option>';
+    }
+    $sel.html(h);
+    try {
+        if ($.fn && $.fn.select2) {
+            if (!$sel.hasClass('select2-hidden-accessible')) {
+                $sel.select2({ theme: 'bootstrap4', width: '100%', placeholder: 'All (Remark By)', allowClear: true });
             }
             $sel.val(keep).trigger('change.select2');
         } else { $sel.val(keep); }
@@ -184,6 +206,7 @@ function bindReEnrollmentEvents() {
         try { if ($.fn && $.fn.datepicker) { $('#reelStart').datepicker('update', ''); $('#reelEnd').datepicker('update', ''); } } catch (e) {}
         $('#reelEnrolType').val(''); $('#reelRegType').val(''); $('#reelAdv').val(''); $('#reelProgress').val('');
         try { $('#reelReStatus').val(null).trigger('change.select2'); } catch (e) { $('#reelReStatus').val([]); }
+        try { $('#reelAddedBy').val('').trigger('change.select2'); } catch (e) { $('#reelAddedBy').val(''); }
         $('#reelGradeMode').val('in'); $('#reelExWd').prop('checked', false);
         try { $('#reelGrade').val(null).trigger('change.select2'); } catch (e) { $('#reelGrade').val([]); }
         $('#reelSearch').val('');
@@ -382,6 +405,7 @@ function reEnrollFetch(pageNumber) {
             if (data.summary && Object.keys(data.summary).length) {
                 if (data.summary.filterCountries) { REEL_COUNTRIES = data.summary.filterCountries; }
                 if (data.summary.filterGrades) { REEL_GRADES = data.summary.filterGrades; reEnrollFillGradeFilter(); }
+                if (data.summary.filterAddedBy) { REEL_ADDEDBY = data.summary.filterAddedBy; reEnrollFillAddedByFilter(); }
                 reEnrollRenderCards(data.summary);
             }
             reEnrollRenderRows(data.data || [], req.pageNumber, req.pageSize);

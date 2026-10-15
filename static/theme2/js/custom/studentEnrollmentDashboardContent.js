@@ -232,6 +232,7 @@ function getStudentEnrollmentDashboardContent(title) {
             + '</select>'
             + '<select id="sedFilterCountry" class="form-control sed-fsel"><option value="">All Country</option></select>'
             + '<select id="sedFilterGrade" class="form-control sed-fsel"><option value="">All Grade</option></select>'
+            + '<input type="text" id="sedFilterSearch" class="form-control sed-fsel" placeholder="Search Name / Email / Phone / Student ID">'
             + '<a href="javascript:void(0)" class="btn btn-primary" id="sedApply"><i class="fa fa-check"></i>&nbsp;Apply</a>'
             + '<a href="javascript:void(0)" class="btn btn-outline-secondary" id="sedReset"><i class="fa fa-refresh"></i>&nbsp;Reset</a>'
         + '</div>'

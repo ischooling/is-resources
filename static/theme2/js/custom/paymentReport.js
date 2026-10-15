@@ -52,6 +52,11 @@ function getPaymentReportDetailRequest(tabKey, studentStandardId){
 		request.paymentReportRequestDTO['pageNumber'] = 0;
 		request.paymentReportRequestDTO['pageSize'] = 1;
 		request.paymentReportRequestDTO['type'] = 2;
+		// One student by id: LEFT JOIN payments (enrollStatus) and drop the counselor/referral + userId filters,
+		// else the hidden form sends refferalCode [undefined] -> REFERRAL_CODE IN('null') -> "Unable to generate reports".
+		request.paymentReportRequestDTO['enrollStatus'] = [0, 1, 2, 3, 4];
+		request.paymentReportRequestDTO['refferalCode'] = [];
+		request.paymentReportRequestDTO['userId'] = [];
 		var _dtoSess = request.paymentReportRequestDTO['sessionId'];
 		if(_dtoSess === null || _dtoSess === undefined || _dtoSess === ''){
 			var _selSess = ($('#sedFilterSession').length ? $('#sedFilterSession').val() : '')
