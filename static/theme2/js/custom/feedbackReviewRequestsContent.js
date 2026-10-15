@@ -37,8 +37,8 @@ function getFeedbackReviewRequestsPageContent(title) {
                     </div>
                     <div class="col-md-4 mb-2">
                         <div class="form-group custom-field mb-0">
-                            <input type="text" class="form-control" id="frrSearch" placeholder="Teacher, student, form, reason" autocomplete="off">
-                            <label class="font-weight-bold mb-1">Search</label>
+                            <input type="text" class="form-control" id="frrSearch" placeholder="Teacher, student, or response id" autocomplete="off">
+                            <label class="font-weight-bold mb-1">Search teacher/student</label>
                         </div>
                     </div>
                     <div class="col-md-auto mb-2">

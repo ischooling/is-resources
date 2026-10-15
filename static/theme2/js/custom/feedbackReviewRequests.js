@@ -8,7 +8,8 @@ var frrState = {
     totalPages: 0,
     activeRow: null,
     pendingAction: null,
-    pendingRemark: ''
+    pendingRemark: '',
+    defaultPeriodApplied: false
 };
 
 function feedbackReviewRequestsOnLoad() {
@@ -91,11 +92,15 @@ async function loadFeedbackReviewRequests() {
         }
         var d = response.details;
         frrState.rows = d.rows || [];
+        frrState.periods = d.periods || frrState.periods || [];
         frrState.totalRecords = d.totalRecords || 0;
         frrState.totalPages = d.totalPages || 0;
-        if (!frrState.periods.length) {
+        if (!frrState.defaultPeriodApplied && !frrState.selectedPeriod && d.selectedPeriod && d.selectedPeriod.id) {
+            frrState.defaultPeriodApplied = true;
+            frrState.selectedPeriod = { id: d.selectedPeriod.id };
             frrBuildPeriodSelect(frrState.rows);
         }
+        frrBuildPeriodSelect(frrState.rows);
         renderFeedbackReviewRequests();
     } catch (e) {
         showMessageTheme2(0, 'Failed to load review requests.');
@@ -105,19 +110,43 @@ async function loadFeedbackReviewRequests() {
 }
 
 function frrBuildPeriodSelect(rows) {
+    var $el = $('#frrPeriodId');
     var periodMap = {};
+    var selectedId = frrState.selectedPeriod ? String(frrState.selectedPeriod.id) : ($el.val() || '');
+    $el.find('option').each(function () {
+        if (this.value) periodMap[this.value] = $(this).text();
+    });
+    (frrState.periods || []).forEach(function (p) {
+        if (p.id) {
+            periodMap[p.id] = (p.periodLabel || ('Period #' + p.id)) +
+                (p.roleUnderReview ? ' &middot; ' + p.roleUnderReview : '');
+        }
+    });
     (rows || []).forEach(function (r) {
         if (r.periodId) {
             periodMap[r.periodId] = (r.periodLabel || ('Period #' + r.periodId)) +
-                (r.roleUnderReview ? ' · ' + r.roleUnderReview : '');
+                (r.roleUnderReview ? ' &middot; ' + r.roleUnderReview : '');
         }
     });
     var html = '<option value="">All periods</option>';
+    if (selectedId && !periodMap[selectedId]) {
+        periodMap[selectedId] = 'Period #' + selectedId;
+    }
     Object.keys(periodMap).forEach(function (pid) {
         html += '<option value="' + pid + '">' + periodMap[pid] + '</option>';
     });
-    $('#frrPeriodId').html(html).trigger('change.select2');
-    $('#frrPeriodId').off('change.frr').on('change.frr', function () {
+    if ($el.hasClass('select2-hidden-accessible')) {
+        $el.select2('destroy');
+    }
+    $el.html(html);
+    if (selectedId) {
+        $el.val(String(selectedId));
+    }
+    $el.select2({ theme: 'bootstrap4', minimumResultsForSearch: Infinity, width: '100%' });
+    if (typeof refreshCustomFieldState === 'function') {
+        refreshCustomFieldState($el.closest('.custom-field'));
+    }
+    $el.off('change.frr').on('change.frr', function () {
         var pid = parseInt($(this).val()) || null;
         frrState.selectedPeriod = pid ? { id: pid } : null;
         frrState.page = 1;
@@ -183,9 +212,10 @@ function applyFeedbackReviewFilter() {
 function resetFeedbackReviewFilter() {
     $('#frrStatus').val('Pending').trigger('change.select2');
     $('#frrSearch').val('');
-    $('#frrPeriodId').val('').trigger('change.select2');
     $('#frrPageSize').val('20').trigger('change.select2');
-    frrState.selectedPeriod = null;
+    if (frrState.selectedPeriod && frrState.selectedPeriod.id) {
+        $('#frrPeriodId').val(String(frrState.selectedPeriod.id)).trigger('change.select2');
+    }
     frrState.size = 20;
     frrState.page = 1;
     loadFeedbackReviewRequests();

@@ -1968,7 +1968,7 @@ function getSchoolSettingAllDataTableRows(details) {
 				<td style="white-space:normal;word-break:break-word;overflow-wrap:anywhere;">
 					<div class="mb-1">
 						<span data-field="metaType">
-							<span class="badge badge-pill badge-success">${value.metaType || ""}</span>
+							<span class="badge badge-pill badge-success" style="white-space:normal;word-break:break-word;overflow-wrap:anywhere;max-width:100%;display:inline-block;">${value.metaType || ""}</span>
 						</span>
 						<input type="hidden" id="metaType${value.id || index}" value="${value.metaType || ""}">
 					</div>

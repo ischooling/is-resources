@@ -221,6 +221,8 @@ function sfrReviewStatusHtml(f, compact) {
 
 function sfrReviewActionHtml(f, compact) {
     if (!f || f.reviewRequestId) return sfrReviewStatusHtml(f, compact);
+    var rating = Number(f.overallRating) || 0;
+    if (rating > 2.5) return '';
     return '<button type="button" class="btn btn-outline-danger btn-sm" onclick="event.stopPropagation(); openStudentFeedbackReviewRequest(' +
         f.feedbackResponseId + ')"><i class="fa fa-flag mr-1"></i>Request review</button>';
 }
@@ -493,7 +495,7 @@ function studentFeedbackCardHtml(f) {
     var rating = Number(f.overallRating) || 0;
     var score = f.overallRatingLabel || (rating.toFixed(1) + '/5');
     var color = sfrStarColor(rating);
-    var reviewStatus = sfrReviewListStatusHtml(f);
+    var reviewAction = sfrReviewActionHtml(f, true);
 
     return '' +
     '<div class="col-lg-6 mb-3 d-flex">' +
@@ -506,7 +508,7 @@ function studentFeedbackCardHtml(f) {
                     '<div class="mt-1" style="font-size:12px;font-weight:700;color:var(--pc,#007fff)">' +
                         'View feedback details <i class="fa fa-arrow-right" style="font-size:10px"></i>' +
                     '</div>' +
-                    (reviewStatus ? '<div class="mt-2">' + reviewStatus + '</div>' : '') +
+                    (reviewAction ? '<div class="mt-2">' + reviewAction + '</div>' : '') +
                 '</div>' +
                 '<div class="d-inline-flex align-items-center flex-shrink-0" style="gap:8px;background:#f4f6fb;border:1px solid #e8eaed;border-radius:20px;padding:6px 12px">' +
                     sfrStarsHtml(rating, 14) +
@@ -613,6 +615,10 @@ function renderStudentFeedbackDetail(detail) {
 
 function renderStudentFeedbackReviewBlock(detail) {
     if (!detail || !detail.reviewRequestId) {
+        if (!detail || Number(detail.overallRating) > 2.5) {
+            $('#sfrReviewRequestWrap').html('');
+            return;
+        }
         $('#sfrReviewRequestWrap').html(
             '<div style="border:1px dashed #d9e2ec;border-radius:10px;padding:12px;background:#fbfcff">' +
                 '<div class="d-flex align-items-start justify-content-between flex-wrap" style="gap:10px">' +
@@ -628,19 +634,24 @@ function renderStudentFeedbackReviewBlock(detail) {
     }
 
     var statusHtml = sfrReviewStatusHtml(detail, false);
+    var reason = detail.reviewRequestReason && String(detail.reviewRequestReason).trim()
+        ? sfrEscape(detail.reviewRequestReason)
+        : '<span class="text-muted">No reason provided</span>';
+    var isPending = detail.reviewRequestStatus === 'Pending';
     var remark = detail.reviewAdminRemark && String(detail.reviewAdminRemark).trim()
         ? '<div class="mt-2" style="font-size:12.5px;color:#3c4043;line-height:1.55;background:#fff;border:1px solid #e8eaed;border-radius:8px;padding:10px 12px;white-space:pre-wrap;word-break:break-word;max-height:140px;overflow:auto">' + sfrEscape(detail.reviewAdminRemark) + '</div>'
-        : '<div class="small text-muted mt-1">Admin remark will appear here after review.</div>';
+        : '<div class="small text-muted mt-2">Admin remarks will appear here after review is completed.</div>';
 
     $('#sfrReviewRequestWrap').html(
         '<div style="border:1px dashed #d9e2ec;border-radius:10px;padding:12px;background:#fbfcff">' +
             '<div class="d-flex align-items-start justify-content-between flex-wrap" style="gap:10px">' +
                 '<div>' +
                     '<div class="font-weight-bold" style="font-size:13px;color:#1a1a2e">Admin review status</div>' +
-                    '<div class="small text-muted">This feedback has already been sent for review.</div>' +
+                    '<div class="small text-muted">' + (isPending ? 'Admin is reviewing your request.' : 'Review completed by admin.') + '</div>' +
                 '</div>' +
                 '<div>' + statusHtml + '</div>' +
             '</div>' +
+            '<div class="small mt-2" style="color:#3c4043;line-height:1.55"><strong>Reason added by you:</strong> ' + reason + '</div>' +
             remark +
         '</div>'
     );
