@@ -3263,6 +3263,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
         openDashboardCalendarEvent: openDashboardCalendarEvent,
         openAssignmentModal: openAssignmentModal,
         eventDetailsOnModal: eventDetailsOnModal,
+        classDetailsOnModal: classDetailsOnModal,
         getRequestForNewSchoolCalendar: getRequestForNewSchoolCalendar,
         callSchoolCalendarNew: callSchoolCalendarNew,
         getLiveClassAttendanceStatus: getLiveClassAttendanceStatus,
