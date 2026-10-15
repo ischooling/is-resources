@@ -47,7 +47,12 @@ function verifyStripePayment(userPaymentDetailsId, serialNum) {
 			try {
 				const details = resp && resp.details ? resp.details : null;
 				const status = details && details.status ? details.status : (resp && resp.statusCode ? resp.statusCode : 'UNKNOWN');
-				if (status === 'PROCESSED') {
+				if (status === 'ALREADY_VERIFIED') {
+					const txnId = resp && resp.details && resp.details.transactionId ? resp.details.transactionId : null;
+					$(msgId).css('color', 'green').text('Success ✓');
+					if (txnId) { $(`#trans-ref-${serialNum}`).text(txnId); }
+					$(btnId).hide();
+				} else if (status === 'PROCESSED') {
 					$(msgId).css('color', 'green').text('Paid ✓ (processed)');
 					$(`#payment-status-${serialNum}`).removeClass().addClass('fa fa-check text-success');
 					$(`#payment-status-message-${serialNum}`).text(' SUCCESS');
@@ -101,7 +106,12 @@ function verifyAirwallexPayment(userPaymentDetailsId, serialNum) {
 			try {
 				const details = resp && resp.details ? resp.details : null;
 				const status = details && details.status ? details.status : (resp && resp.statusCode ? resp.statusCode : 'UNKNOWN');
-				if (status === 'PROCESSED') {
+				if (status === 'ALREADY_VERIFIED') {
+					const txnId = resp && resp.details && resp.details.transactionId ? resp.details.transactionId : null;
+					$(msgId).css('color', 'green').text('Payment already verified.');
+					if (txnId) { $(`#trans-ref-${serialNum}`).text(txnId); }
+					$(btnId).hide();
+				} else if (status === 'PROCESSED') {
 					$(msgId).css('color', 'green').text('Paid ✓ (processed)');
 					$(`#payment-status-${serialNum}`).removeClass().addClass('fa fa-check text-success');
 					$(`#payment-status-message-${serialNum}`).text(' SUCCESS');

@@ -113,11 +113,11 @@ function getAttendanceReportContent() {
 						'<select id="f-grade" class="form-control" onchange="loadDependentOptions()"><option value="all">All Grades</option></select>' +
 						'<label for="f-grade">Grade</label>' +
 					'</div>' +
-					'<div class="custom-field mb-2" style="display:none;flex:1 1 180px;min-width:150px;max-width:260px">' +
-						'<select id="f-batch" class="form-control" disabled><option value="all">All Batches</option></select>' +
+					'<div class="custom-field mb-2" style="flex:1 1 180px;min-width:150px;max-width:260px">' +
+						'<select id="f-batch" class="form-control" onchange="loadDependentOptions()" disabled><option value="all">All Batches</option></select>' +
 						'<label for="f-batch">Assigned Batch</label>' +
 					'</div>' +
-					'<div class="custom-field mb-2" style="display:none;flex:1 1 180px;min-width:150px;max-width:260px">' +
+					'<div class="custom-field mb-2" style="flex:1 1 180px;min-width:150px;max-width:260px">' +
 						'<select id="f-course" class="form-control"><option value="all">All Courses</option></select>' +
 						'<label for="f-course">Course</label>' +
 					'</div>' +
