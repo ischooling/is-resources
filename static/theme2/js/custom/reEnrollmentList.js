@@ -14,6 +14,10 @@ var REEL_CARD_LIST_TOTAL = 0;
 var REEL_COUNTRIES = [];      // popup filter options (from summary)
 var REEL_GRADES = [];
 var REEL_ADDEDBY = [];        // "Remark By" (Added By) reporting filter options (from summary)
+var REEL_CARD_SORT_BY = '';   // drawer column sort: '' | 'name' | 'parent' | 'payDate'
+var REEL_CARD_SORT_DIR = 'asc';
+var REEL_SORT_BY = '';        // main list column sort: '' | 'name' | 'parent' | 'payDate'
+var REEL_SORT_DIR = 'asc';
 var REEL_CARD_LIST_PREV = '';   // session the page was on, for the "returning / new" drill
 var REEL_CARD_LIST_REG = '';    // learning program forced by a split-line click (GROUP / ONE_TO_ONE / OTHER)
 var REEL_CARD_FILTERS_READY = false;
@@ -212,6 +216,7 @@ function bindReEnrollmentEvents() {
         $('#reelSearch').val('');
         try { $('#reelParent').val(null).trigger('change.select2'); } catch (e) { $('#reelParent').val(''); }
         if ($('#reelSession').hasClass('select2-hidden-accessible')) { $('#reelSession').trigger('change.select2'); }
+        REEL_SORT_BY = ''; REEL_SORT_DIR = 'asc'; reelUpdateMainSortIndicators();
         reEnrollFetch(0);
     });
     // pager (delegated)
@@ -219,6 +224,18 @@ function bindReEnrollmentEvents() {
         e.preventDefault();
         var p = parseInt($(this).attr('data-page'), 10);
         if (!isNaN(p)) { reEnrollFetch(p); }
+    });
+    // clickable column headers on the main list (Name / Parent / Pay Date) -> server-side sort, toggles asc/desc
+    $(document).off('click', '#reelMainList .reel-msortable').on('click', '#reelMainList .reel-msortable', function () {
+        var col = $(this).attr('data-sort');
+        if (!col) { return; }
+        if (REEL_SORT_BY === col) {
+            REEL_SORT_DIR = (REEL_SORT_DIR === 'asc') ? 'desc' : 'asc';
+        } else {
+            REEL_SORT_BY = col; REEL_SORT_DIR = 'asc';
+        }
+        reelUpdateMainSortIndicators();
+        reEnrollFetch(0);
     });
     // student id -> payment-report detail drawer
     $(document).off('click', '.reel-stu-link').on('click', '.reel-stu-link', function (e) {
@@ -249,6 +266,19 @@ function bindReEnrollmentEvents() {
         });
     $(document).off('keydown', '#reelCardSearch').on('keydown', '#reelCardSearch', function (e) {
         if (e.which === 13 && REEL_CARD_FILTERS_READY) { reelCardListFetch(0); }
+    });
+    // clickable column headers (Name / Parent / Pay Date) -> server-side sort, toggles asc/desc
+    $(document).off('click', '#reelListDrawer .reel-sortable').on('click', '#reelListDrawer .reel-sortable', function () {
+        if (!REEL_CARD_FILTERS_READY) { return; }
+        var col = $(this).attr('data-sort');
+        if (!col) { return; }
+        if (REEL_CARD_SORT_BY === col) {
+            REEL_CARD_SORT_DIR = (REEL_CARD_SORT_DIR === 'asc') ? 'desc' : 'asc';
+        } else {
+            REEL_CARD_SORT_BY = col; REEL_CARD_SORT_DIR = 'asc';
+        }
+        reelUpdateSortIndicators();
+        reelCardListFetch(0);
     });
     // grade/country breakup number -> open popup filtered to that grade/country + metric
     $(document).off('click', '.reel-bclick').on('click', '.reel-bclick', function () {
@@ -376,6 +406,7 @@ function reEnrollFetch(pageNumber) {
     REEL_PAGE = pageNumber || 0;
     $('#reelBody').html('<tr><td colspan="9" class="reel-empty">Loading…</td></tr>');
     var req = getRequestForReEnrollment(REEL_PAGE);
+    if (REEL_SORT_BY) { req.sortBy = REEL_SORT_BY; req.sortDir = REEL_SORT_DIR; }
     $.ajax({
         type: 'POST',
         contentType: APPLICATION_JSON_VALUE,
@@ -899,6 +930,7 @@ function reelCardListOpen(cm, sess, title, preset, prevSess) {
     REEL_CARD_LIST_REG = (preset && preset.regType) || '';
     REEL_CARD_LIST_TITLE = title || 'Students';
     REEL_CARD_LIST_TOTAL = 0;
+    REEL_CARD_SORT_BY = ''; REEL_CARD_SORT_DIR = 'asc'; reelUpdateSortIndicators();
     $('#reelListTitle').html(reEnrollEsc(REEL_CARD_LIST_TITLE) + '<span id="reelListClock"></span>');
     reelClearCountryClock();
     if (preset && preset.countryName) { reelStartCountryClock(preset.countryName); }
@@ -952,6 +984,30 @@ function reelCardInitFilters(preset) {
     REEL_CARD_FILTERS_READY = true;
 }
 
+// neutral ↕ on every sortable header; the active column shows a bold white ↑ / ↓ (drawer; header bg is blue)
+function reelUpdateSortIndicators() {
+    $('#reelListDrawer .reel-sort-ind').each(function () {
+        var k = $(this).attr('data-k');
+        if (REEL_CARD_SORT_BY === k) {
+            $(this).text(REEL_CARD_SORT_DIR === 'asc' ? '↑' : '↓').css({ color: '#ffffff', 'font-weight': '700', 'font-size': '14px' });
+        } else {
+            $(this).text('↕').css({ color: 'rgba(255,255,255,0.6)', 'font-weight': '400', 'font-size': '11px' });
+        }
+    });
+}
+
+// same, for the main Re-Enrollment List page table
+function reelUpdateMainSortIndicators() {
+    $('#reelMainList .reel-msort-ind').each(function () {
+        var k = $(this).attr('data-k');
+        if (REEL_SORT_BY === k) {
+            $(this).text(REEL_SORT_DIR === 'asc' ? '↑' : '↓').css({ color: '#ffffff', 'font-weight': '700', 'font-size': '14px' });
+        } else {
+            $(this).text('↕').css({ color: 'rgba(255,255,255,0.6)', 'font-weight': '400', 'font-size': '11px' });
+        }
+    });
+}
+
 function reelCardListFetch(pageNumber) {
     var page = pageNumber || 0;
     var req = getRequestForReEnrollment(page);
@@ -969,6 +1025,7 @@ function reelCardListFetch(pageNumber) {
     req.advPayment = ($('#reelCardAdv').val() || '');
     req.search = (($('#reelCardSearch').val() || '').trim());
     req.reStatus = ($('#reelCardReStatus').val() || []);
+    if (REEL_CARD_SORT_BY) { req.sortBy = REEL_CARD_SORT_BY; req.sortDir = REEL_CARD_SORT_DIR; }
     if (page > 0) { req.knownTotal = REEL_CARD_LIST_TOTAL; } else { delete req.knownTotal; }
     $('#reelCardBody').html('<tr><td colspan="9" class="reel-empty">Loading…</td></tr>');
     $.ajax({
