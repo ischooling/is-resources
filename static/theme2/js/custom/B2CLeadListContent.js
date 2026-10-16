@@ -2016,7 +2016,15 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                                 if(fbdata.request!=null && fbdata.request!=''){
                                 
                                   const fbrequest = JSON.parse(fbdata.request);
-                                const fbextra = fbdata.extra=='No FB Event'?'': JSON.parse(fbdata.extra);
+                                let fbextra = {};
+                                try{
+                                  const parsedExtra = JSON.parse(fbdata.extra);
+                                  if(parsedExtra!=null && typeof parsedExtra=='object'){
+                                    fbextra = parsedExtra;
+                                  }
+                                }catch(e){
+                                  // fbdata.extra is not JSON (e.g. "No FB Event", a skip reason, or absent): skip it
+                                }
                                 const timestamp = fbdata.createdDate;
                                 const date = new Date(timestamp);
                                 const options = {
