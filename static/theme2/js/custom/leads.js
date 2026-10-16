@@ -9693,8 +9693,24 @@ function populateZiwoRecords(data, meetingTitle, totalPages, totalCount) {
 	}, 50);
 }
 
+var __ziwoAccessToken = null;
+function getZiwoAccessToken() {
+	if (__ziwoAccessToken !== null) {
+		return __ziwoAccessToken;
+	}
+	var token = '';
+	try {
+		token = getSettingMetaValue(getSettingsByTypeAndKey('CONFIGURATION', 'ZIWO_ACCESS_TOKEN')) || '';
+	} catch (e) {
+		token = '';
+	}
+	__ziwoAccessToken = String(token).trim();
+	return __ziwoAccessToken;
+}
+
 function renderZiwoTable(data) {
 	var modalContent = '';
+	var ziwoAccessToken = getZiwoAccessToken();
 	if (!data || !data.length) {
 		modalContent = '<tr><td colspan="8" class="text-center text-muted">No Ziwo logs found.</td></tr>';
 	} else {
@@ -9702,7 +9718,7 @@ function renderZiwoTable(data) {
 			var log = data[i];
 			var recordingHtml = '';
 			if (log.recordingUrl && log.recordingUrl !== '') {
-				var ziwoRecordingUrl = 'https://internationalschooling-api.aswat.co/callHistory/' + log.callId + '/recording?access_token=748d0f04-3eb5-498e-baa6-5157baf56166';
+				var ziwoRecordingUrl = 'https://internationalschooling-api.aswat.co/callHistory/' + log.callId + '/recording?access_token=' + encodeURIComponent(ziwoAccessToken);
 				recordingHtml = '<button onClick="viewCallRecording(\'' + ziwoRecordingUrl + '\')" class="bg-primary text-white text-center" style="cursor:pointer; border:none; border-radius:4px; padding:4px 8px;">Play Recording</button>';
 			} else {
 				recordingHtml = '<span class="text-muted">N/A</span>';
@@ -11182,6 +11198,17 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 	  customLoader(true);
 	  checkTextBox(formId);
 
+	  // Sort selection is kept as a single source of truth on objRights. Adopt the live
+	  // dropdown value when it is in the DOM (pagination / sort change); otherwise keep the
+	  // last known value (Advance Search empties #b2c-lead-list before this runs, which removes
+	  // the sort dropdowns). This keeps the re-rendered dropdown and the server sort in sync.
+	  if (objRights) {
+		var curShortBy = $("#leadsShortBy").val();
+		var curShortType = $("#leadsShortType").val();
+		if (curShortBy != undefined && curShortBy != '') { objRights.shortBy = curShortBy; }
+		if (curShortType != undefined && curShortType != '') { objRights.shortType = curShortType; }
+	  }
+
 	  if ($("#" + formId + " #leadStartDateSearch").val() !== '' && $("#" + formId + " #leadEndDateSearch").val() !== '') {
 		if ($("#" + formId + " #searchDateType option:selected").val() === '') {
 		  showMessageTheme2(0, 'Please select type for date');
@@ -11206,6 +11233,13 @@ async function getLeadDataList(formId, leadFrom, clickFrom, currentPage, typeThe
 	  }
 	  
 	  const payload = getCallRequestForAdvanceLeadSearchStudent(formId, objRights.moduleId, leadFrom, clickFrom, currentPage, typeTheme, newTheme, callbadge, objRights.leadType, 'Y');
+
+	  // The payload builder reads sort from the DOM dropdowns, which Advance Search has already
+	  // cleared. Fall back to objRights so the chosen sort still reaches the server in that case.
+	  if (objRights && payload && payload.leadCommonDTO && payload.leadCommonDTO.leadModifyDTO) {
+		if (objRights.shortBy) { payload.leadCommonDTO.leadModifyDTO.shortBy = objRights.shortBy; }
+		if (objRights.shortType) { payload.leadCommonDTO.leadModifyDTO.shortType = objRights.shortType; }
+	  }
 
 	  const data = await fetchLeadDataListChunked(payload);
   

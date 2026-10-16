@@ -118,6 +118,10 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 	});
 
 	$("#btnNewClickLeadSearch").unbind().bind('click',function() {
+		// Capture the current sort BEFORE emptying the list, otherwise the sort dropdowns are
+		// removed from the DOM and the selected sort is lost on Advance Search.
+		if($("#leadsShortBy").val()!=undefined){ objRights.shortBy = $("#leadsShortBy").val(); }
+		if($("#leadsShortType").val()!=undefined){ objRights.shortType = $("#leadsShortType").val(); }
 		$("#b2c-lead-list").html("");
 		//localStorage.setItem("needToPaging", false);
 		$("#b2c-lead-list").html('');
@@ -643,6 +647,10 @@ async function renderAdminLeadListDashboardSchool(title, roleAndModule, schoolId
 		});
 
 		$("#btnNewClickLeadSearch").unbind().bind('click',function() {
+			// Capture the current sort BEFORE emptying the list, otherwise the sort dropdowns are
+			// removed from the DOM and the selected sort is lost on Advance Search.
+			if($("#leadsShortBy").val()!=undefined){ objRights.shortBy = $("#leadsShortBy").val(); }
+			if($("#leadsShortType").val()!=undefined){ objRights.shortType = $("#leadsShortType").val(); }
 			$("#b2c-lead-list").html("");
 			//localStorage.setItem("needToPaging", false);
 			getLeadDataList('advanceLeadNewSearchForm', 'advance-search', 'list', '0', 'new', true,'', objRights, roleAndModule);
