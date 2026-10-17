@@ -17,12 +17,12 @@ var __la = {
 	view: 'ENROLLED', offset: 0, hasMore: false, loading: false, openGroupId: null,
 	summary: null, pollTimer: null, observer: null, insightsLoaded: false
 };
-var LA_PAGE_SIZE = 25;
+var LA_PAGE_SIZE = 500;
 
 /** Presets = the report's cases (queue order). Exact email/phone repeats are in the lead list's "Multiple time apply". */
 var LA_CASES = [
 	{ key: 'ENROLLED', label: 'Already enrolled', hint: 'Lead matches an active student / parent account' },
-	{ key: 'MENTIONED', label: 'Linked in conversation', hint: "A counselor remark / meeting / WhatsApp of one lead names the other" },
+	{ key: 'MENTIONED', label: 'Linked in conversation', hint: "A counselor remark / meeting / WhatsApp / Zoho chat of one lead names the other" },
 	{ key: 'SAME_STUDENT', label: 'Same student', hint: 'Same child applied again with a different mobile / email' },
 	{ key: 'SWAPPED', label: 'Name swapped', hint: "Parent's name on one lead is the student's name on the other" },
 	{ key: 'SIBLINGS_IP', label: 'Siblings (same IP)', hint: 'Same IP within 7 days, different children' },
@@ -31,7 +31,7 @@ var LA_CASES = [
 	{ key: 'DOUBLE_ENTRY', label: 'Double entry', hint: 'Two rows with one lead number (saved twice)' }
 ];
 
-/** The conversation text that linked two leads (counselor remark / meeting / WhatsApp), shown under the pair. */
+/** The conversation text that linked two leads (counselor remark / meeting / WhatsApp / Zoho chat), shown under the pair. */
 function laSnippets(reasonsJson) {
 	var h = '';
 	try {
