@@ -1868,7 +1868,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 
 		// Border colour comes from the lead's status via the map above; empty -> CSS fallback.
 		var statusBorder = (leadStatusColorMap && leadStatusColorMap[leads.leadStatus]) ? leadStatusColorMap[leads.leadStatus] : '';
-		var trStyle = statusBorder ? ('border-color:'+statusBorder+' !important;') : '';
+		var trStyle = statusBorder ? ('border:5px solid '+statusBorder+' !important;') : '';
 
     lScoreColor='';
     if(leads.leadScore>=80){

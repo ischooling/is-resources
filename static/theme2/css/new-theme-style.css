@@ -33107,7 +33107,7 @@ input[type=radio]:checked~.white-bg-checked, input[type=checkbox]:checked~.white
 	.follow-up-accordian li:last-child .follow-up-no {border-bottom:1px solid}
 	.follow-up-accordian li .follow-up-content{display:none}
 	
-	.border-radius-table{border-collapse:separate;border-spacing:0;border:none}
+	.border-radius-table{border-collapse:collapse;border-spacing:0;border:none}
 	.border-radius-table th:first-child{border-left:1px;border-top-left-radius:10px !important }
 	.border-radius-table:not(.not-th-middle) > thead > tr > th{font-weight:400 !important;border-bottom:0 !important;vertical-align:middle !important;}
 	
