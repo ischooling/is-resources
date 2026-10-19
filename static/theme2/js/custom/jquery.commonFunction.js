@@ -5546,6 +5546,12 @@ function toSentenceCase(strSentense) {
 }
 //mm dd, yyyy to desiredFormat
 function changeDateFormat(date, dateFormat) {
+  // Guard against an Invalid Date (e.g. built from an empty/garbage input like a datepicker
+  // field that hasn't been set yet) — without this, every getXXX() call below returns NaN and
+  // the formatted string comes out as literal "NaN-0NaN-0NaN", which breaks server-side parsing.
+  if (!(date instanceof Date) || isNaN(date.getTime())) {
+    date = new Date();
+  }
   if ("mm-dd-yyyy" == dateFormat) {
     return (
       (date.getMonth() > 8

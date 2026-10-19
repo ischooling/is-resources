@@ -190,7 +190,7 @@ function getFilteredNumbers(isAboutNumber, numberOnly) {
             return `
               <tr>
                 <td>${index + 1}</td>
-                <td>${item.name || "N/A"}</td>
+                <td>${item.name || "N/A"} <br> <small>(${item.userEmail || "N/A"})</small></td>
                 <td>${item.number}</td>
                 ${/*<td style="font-size: 14px;">
                   ${item.status === "A" 
@@ -461,7 +461,7 @@ function addWatiUser(number){
     success: function(response) {
       if (response && response.data.length > 0) {
         response.data.forEach(user => {
-          var displayText = `${user.name} (${user.role})`;
+          var displayText = `${user.name} (${user.role}) (${user.email})`;
           $("#addUsers").append(new Option(displayText, user.id));
         });
       }
