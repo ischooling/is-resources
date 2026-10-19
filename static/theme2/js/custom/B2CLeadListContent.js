@@ -1868,7 +1868,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 
 		// Border colour comes from the lead's status via the map above; empty -> CSS fallback.
 		var statusBorder = (leadStatusColorMap && leadStatusColorMap[leads.leadStatus]) ? leadStatusColorMap[leads.leadStatus] : '';
-		var trStyle = statusBorder ? ('--lead-border:'+statusBorder+';') : '';
+		var trStyle = statusBorder ? ('border-color:'+statusBorder+' !important;') : '';
 
     lScoreColor='';
     if(leads.leadScore>=80){
@@ -1989,8 +1989,8 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 			+'<tbody class="lead-table-css" style="font-size:11px">'
 			+'<input type="hidden" id="demoMovedTrue" />'
 			+'<input type="hidden" id="blankDemo" />'
-				+(leads.leadStatus === 'Red Flag' ? '<tr class="td-border-design red-flag-lead" style="pointer-events:none;'+trStyle+'">' : '<tr class="td-border-design" style="'+trStyle+'">')
-					+'<td style="max-width:320px;min-width: 320px;vertical-align:top;" class="rounded-bottom-left-10 lead-row-'+leads.leadId+' lead-card-border'+'">'
+				+(leads.leadStatus === 'Red Flag' ? '<tr class="td-border-design red-flag-lead" style="pointer-events:none;">' : '<tr class="td-border-design" style="'+trStyle+'">')
+					+'<td style="max-width:320px;min-width: 320px;vertical-align:top;'+trStyle+'" class="rounded-bottom-left-10 lead-row-'+leads.leadId+' lead-card-border'+'">'
 						+'<table class="w-100">'
 							+'<tbody>'
 
@@ -2363,7 +2363,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 					//style="max-width: 696px;min-width: 696px;"
           
          
-					html+='<td class="p-0 lead-row-'+leads.leadId+' lead-card-border'+'" style="vertical-align:top">'
+					html+='<td class="p-0 lead-row-'+leads.leadId+' lead-card-border'+'" style="vertical-align:top;'+trStyle+'">'
 						+'<table class="w-100">'
 							+'<tbody>'
 								+'<tr>'
@@ -2518,7 +2518,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 							+'</tbody>'
 						+'</table>'
 					+'</td>'
-					+'<td class="p-0 lead-row-'+leads.leadId+' lead-card-border'+'" style="width: 350px;vertical-align:top;">'
+					+'<td class="p-0 lead-row-'+leads.leadId+' lead-card-border'+'" style="width: 350px;vertical-align:top;'+trStyle+'">'
 					
 						+'<table class="w-100 demotable" style="border: solid #027ffe 1px;background-color: #D5E3FC;">'
 							+'<tbody>';
@@ -2760,7 +2760,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 						html+='</tbody>'
 						+'</table>'
 					+'</td>'//margin-top:-40px !important
-					+'<td class="p-0 lead-row-'+leads.leadId+' lead-card-border'+'" style="vertical-align:top;">'
+					+'<td class="p-0 lead-row-'+leads.leadId+' lead-card-border'+'" style="vertical-align:top;'+trStyle+'">'
 						if((leads.leadLastCallList!='' && leads.leadLastCallList.length>0)){
 							html+='<ul class="follow-up-accordian m-0 p-0 overflow-auto followup-remark-'+leads.leadNo+'" style="max-height: 325px;">';
 						}else{
@@ -2770,7 +2770,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 							+'</li>';
 						}
 
-					//Follow Up-'+(leadCall.srno)+'
+					  //Follow Up-'+(leadCall.srno)+'
 							for(var l=0; l<leads.leadLastCallList.length>0;l++){
 								leadCall=leads.leadLastCallList[l];
 								console.log(leadCall.leadFollowStatus);
@@ -2817,94 +2817,94 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 							}	
 						html+='</ul>'
 					+'</td>'
-						+'<td class="rounded-bottom-right-10 text-center pt-3 lead-row-'+leads.leadId+' lead-card-border'+'" style="vertical-align:top;color:#027FFF;'+(leads.leadStatus === 'Red Flag' ? 'pointer-events:auto;opacity:1;' : '')+'">';
-					if(objRights.discardPermission || USER_ID == leads.assignTo || USER_ID == leads.demoAssignTo){
-						if(leads.leadStatus=='Unassigned'){
-							html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Update" onclick="callGetOpenFollowup(\'followupSaveForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'edit\',\''+ objRights.currentPage +'\',\'leadFollowupForm\',\'B2C\',\'Y\','+leaddata.remarkMendatory+','+leaddata.minRemarkCount+');" ><i class="fa fa-edit" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
-							if(objRights.discardPermission && objRights.leadFrom=='ARCHIVEDLEAD' && roleModule.updated=='Y'){
-								var disFun = "discardLeadsData('"+leads.leadId+"','"+objRights.moduleId+"', '"+objRights.leadFrom+"','"+leads.LeadSourceName+"','"+USER_ID+"',true,'"+leaddata.currentPage+"','B2C','new-leads')";
-								var discardFun ="return showNewDiscardLeadModelFunction('"+disFun+"','"+leads.LeadSourceName+"','"+leads.fname+"','"+leads.email+"', '"+leads.phone+"','"+leads.addedDateTime+"','"+leads.leadNo+"')";
-								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Discard" onclick="'+discardFun+'"><i class="fa fa-trash" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
-							}
-						}else{
-							if(roleModule.updated=='Y' ){
-								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Update" onclick="callGetOpenFollowup(\'followupSaveForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'edit\',\''+ objRights.currentPage +'\',\'leadFollowupForm\',\'B2C\',\'Y\','+leaddata.remarkMendatory+','+leaddata.minRemarkCount+');" >'
-									+'<i class="fa fa-edit" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
-							}
-							if(roleModule.updated=='Y' ){
-								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Clone" onclick="callLeadsByLeadId(\'leadDataPopupForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'addLeadClone\',\'leadPopupForm\',\'B2C\','+objRights.discardPermission+');" >'
-									+'<i class="fa fa-clone" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
-							}
-							if(roleModule.updated=='Y' ){
+          +'<td class="rounded-bottom-right-10 text-center pt-3 lead-row-'+leads.leadId+' lead-card-border'+'" style="vertical-align:top;color:#027FFF;'+(leads.leadStatus === 'Red Flag' ? 'pointer-events:auto;opacity:1;' : '')+' '+trStyle+'">';
+            if(objRights.discardPermission || USER_ID == leads.assignTo || USER_ID == leads.demoAssignTo){
+              if(leads.leadStatus=='Unassigned'){
+                html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Update" onclick="callGetOpenFollowup(\'followupSaveForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'edit\',\''+ objRights.currentPage +'\',\'leadFollowupForm\',\'B2C\',\'Y\','+leaddata.remarkMendatory+','+leaddata.minRemarkCount+');" ><i class="fa fa-edit" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
+                if(objRights.discardPermission && objRights.leadFrom=='ARCHIVEDLEAD' && roleModule.updated=='Y'){
+                  var disFun = "discardLeadsData('"+leads.leadId+"','"+objRights.moduleId+"', '"+objRights.leadFrom+"','"+leads.LeadSourceName+"','"+USER_ID+"',true,'"+leaddata.currentPage+"','B2C','new-leads')";
+                  var discardFun ="return showNewDiscardLeadModelFunction('"+disFun+"','"+leads.LeadSourceName+"','"+leads.fname+"','"+leads.email+"', '"+leads.phone+"','"+leads.addedDateTime+"','"+leads.leadNo+"')";
+                  html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Discard" onclick="'+discardFun+'"><i class="fa fa-trash" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
+                }
+              }else{
+                if(roleModule.updated=='Y' ){
+                  html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Update" onclick="callGetOpenFollowup(\'followupSaveForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'edit\',\''+ objRights.currentPage +'\',\'leadFollowupForm\',\'B2C\',\'Y\','+leaddata.remarkMendatory+','+leaddata.minRemarkCount+');" >'
+                    +'<i class="fa fa-edit" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
+                }
+                if(roleModule.updated=='Y' ){
+                  html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Clone" onclick="callLeadsByLeadId(\'leadDataPopupForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'addLeadClone\',\'leadPopupForm\',\'B2C\','+objRights.discardPermission+');" >'
+                    +'<i class="fa fa-clone" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
+                }
+                if(roleModule.updated=='Y' ){
+                  if(USER_ROLE != "B2B_PARTNER"){
+                    html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Partner with B2B" onclick="callLeadsByLeadId(\'leadDataPopupB2BForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'addLeadClone\',\'leadPopupB2BForm\',\'B2C-B2B\','+objRights.discardPermission+');" >'
+                      +'<i class="fa fa-handshake" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
+                  }
+                }
+                html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Activity logs" onclick="getAsPost(\'/dashboard/lead-data-logs?moduleId=moduleId='+objRights.moduleId+'&leadNo='+leads.leadNo+'&leadType=B2C\')">'
+                    +'<i class="fa fa-tasks" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
+                html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Update chat support" onclick="renderChatContent(\''+objRights.discardPermission+'\',\''+USER_ID+'\',\''+leads.leadId+'\')">'
+                    +'<i class="fa fa-comment" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';	
+                html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Set Reminder" onclick="openLeadReminderPopup(\''+leads.leadId+'\',\''+leads.leadNo+'\')">'
+                    +'<i class="fa fa-bell" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
+                if(objRights.discardPermission && objRights.leadFrom=='ARCHIVEDLEAD' && roleAndModule.updated=='Y'){
+                  //var disFun = "discardLeadsData('"+leads.leadId+"','"+objRights.moduleId+"', '"+objRights.leadFrom+"','"+leads.LeadSourceName+"','"+USER_ID+"',true,'"+leaddata.currentPage+"','B2C','new-leads')";
+                  var disFun = 'discardLeadsData(\\\''+leads.leadId+'\\\',\\\''+objRights.moduleId+'\\\',\\\''+objRights.leadFrom+'\\\',\\\''+leads.LeadSourceName+'\\\',\\\''+USER_ID+'\\\', \\\'true\\\', \\\''+leaddata.currentPage+'\\\',\\\'B2C\\\',\\\'new-leads\\\')';
+                  var discardFun ="return showNewDiscardLeadModelFunction(\'"+disFun+"\','"+leads.LeadSourceName+"','"+leads.fname+"','"+leads.email+"', '"+leads.phone+"','"+leads.addedDateTime+"','"+leads.leadNo+"')";
+                  html+='<a href="javascript:void(0);" onclick="'+discardFun+'"><i class="fa fa-trash text-danger"></i>&nbsp;Discard</a><br/>';
+                }	
+                if(leads.leadStatus!='Converted'){
+                  if(objRights.discardPermission){
+                    var disFun = 'discardLeadsData(\\\''+leads.leadId+'\\\',\\\''+objRights.moduleId+'\\\',\\\''+objRights.leadFrom+'\\\',\\\''+leads.LeadSourceName+'\\\',\\\''+USER_ID+'\\\', \\\'true\\\', \\\''+leaddata.currentPage+'\\\',\\\'B2C\\\',\\\'new-leads\\\')';
+                    var discardFun ="return showNewDiscardLeadModelFunction(\'"+disFun+"\','"+leads.LeadSourceName+"','"+leads.fname+"','"+leads.email+"', '"+leads.phone+"','"+leads.addedDateTime+"','"+leads.leadNo+"')";
+                    var disPingPup = "openPopupAssignToCounselor('"+leads.leadId+"', '"+leads.assignTo+"','"+USER_ID+"','1','true','B2C')";
+                    html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Discard" onclick="'+discardFun+'"><i class="fa fa-trash" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
+                    html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Ping to counselor" onclick="'+disPingPup+'"><i class="fa fa-map-pin" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
+                  }
+                }
+                html+='<a href="'+leads.demoSendUrl+'" data-toggle="tooltip" data-placement="top" data-original-title="Book School Demo with '+(leads.demoAssignName!=''?leads.demoAssignName:leads.assignName)+'" target="_blank"><i class="fa fa-bookmark" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
+                
                 if(USER_ROLE != "B2B_PARTNER"){
-                  html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Partner with B2B" onclick="callLeadsByLeadId(\'leadDataPopupB2BForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'addLeadClone\',\'leadPopupB2BForm\',\'B2C-B2B\','+objRights.discardPermission+');" >'
-                    +'<i class="fa fa-handshake" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
-							  }
-							}
-							html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Activity logs" onclick="getAsPost(\'/dashboard/lead-data-logs?moduleId=moduleId='+objRights.moduleId+'&leadNo='+leads.leadNo+'&leadType=B2C\')">'
-									+'<i class="fa fa-tasks" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
-							html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Update chat support" onclick="renderChatContent(\''+objRights.discardPermission+'\',\''+USER_ID+'\',\''+leads.leadId+'\')">'
-									+'<i class="fa fa-comment" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';	
-							html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Set Reminder" onclick="openLeadReminderPopup(\''+leads.leadId+'\',\''+leads.leadNo+'\')">'
-									+'<i class="fa fa-bell" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
-							if(objRights.discardPermission && objRights.leadFrom=='ARCHIVEDLEAD' && roleAndModule.updated=='Y'){
-								//var disFun = "discardLeadsData('"+leads.leadId+"','"+objRights.moduleId+"', '"+objRights.leadFrom+"','"+leads.LeadSourceName+"','"+USER_ID+"',true,'"+leaddata.currentPage+"','B2C','new-leads')";
-								var disFun = 'discardLeadsData(\\\''+leads.leadId+'\\\',\\\''+objRights.moduleId+'\\\',\\\''+objRights.leadFrom+'\\\',\\\''+leads.LeadSourceName+'\\\',\\\''+USER_ID+'\\\', \\\'true\\\', \\\''+leaddata.currentPage+'\\\',\\\'B2C\\\',\\\'new-leads\\\')';
-								var discardFun ="return showNewDiscardLeadModelFunction(\'"+disFun+"\','"+leads.LeadSourceName+"','"+leads.fname+"','"+leads.email+"', '"+leads.phone+"','"+leads.addedDateTime+"','"+leads.leadNo+"')";
-								html+='<a href="javascript:void(0);" onclick="'+discardFun+'"><i class="fa fa-trash text-danger"></i>&nbsp;Discard</a><br/>';
-							}	
-							if(leads.leadStatus!='Converted'){
-								if(objRights.discardPermission){
-									var disFun = 'discardLeadsData(\\\''+leads.leadId+'\\\',\\\''+objRights.moduleId+'\\\',\\\''+objRights.leadFrom+'\\\',\\\''+leads.LeadSourceName+'\\\',\\\''+USER_ID+'\\\', \\\'true\\\', \\\''+leaddata.currentPage+'\\\',\\\'B2C\\\',\\\'new-leads\\\')';
-									var discardFun ="return showNewDiscardLeadModelFunction(\'"+disFun+"\','"+leads.LeadSourceName+"','"+leads.fname+"','"+leads.email+"', '"+leads.phone+"','"+leads.addedDateTime+"','"+leads.leadNo+"')";
-                  var disPingPup = "openPopupAssignToCounselor('"+leads.leadId+"', '"+leads.assignTo+"','"+USER_ID+"','1','true','B2C')";
-									html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Discard" onclick="'+discardFun+'"><i class="fa fa-trash" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
-									html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Ping to counselor" onclick="'+disPingPup+'"><i class="fa fa-map-pin" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
-								}
-							}
-							html+='<a href="'+leads.demoSendUrl+'" data-toggle="tooltip" data-placement="top" data-original-title="Book School Demo with '+(leads.demoAssignName!=''?leads.demoAssignName:leads.assignName)+'" target="_blank"><i class="fa fa-bookmark" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
-							
-							if(USER_ROLE != "B2B_PARTNER"){
-                html+='<a href="'+leads.demoSendUrlForAll+'" data-toggle="tooltip" data-placement="top" data-original-title="Book School Demo for other counselor" target="_blank"><i class="fa fa-bookmark" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
-                html+='<a href="'+leads.followupSendUrl+'" data-toggle="tooltip" data-placement="top" data-original-title="Follow-up Meeting with '+(leads.demoAssignName!=''?leads.demoAssignName:leads.assignName)+'" target="_blank"><i class="fa fa-users" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
-                html+='<a href="'+leads.followupSendUrlForAll+'" data-toggle="tooltip" data-placement="top" data-original-title="Follow-up Meeting for other counselor" target="_blank"><i class="fa fa-users" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
-                html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="WhatsApp chat log" onclick="callOpenWatsAppMessage(\'watsAppMsgModal\',\''+leads.leadId+'\');"><img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/WhatsApp.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
-              }
+                  html+='<a href="'+leads.demoSendUrlForAll+'" data-toggle="tooltip" data-placement="top" data-original-title="Book School Demo for other counselor" target="_blank"><i class="fa fa-bookmark" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
+                  html+='<a href="'+leads.followupSendUrl+'" data-toggle="tooltip" data-placement="top" data-original-title="Follow-up Meeting with '+(leads.demoAssignName!=''?leads.demoAssignName:leads.assignName)+'" target="_blank"><i class="fa fa-users" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
+                  html+='<a href="'+leads.followupSendUrlForAll+'" data-toggle="tooltip" data-placement="top" data-original-title="Follow-up Meeting for other counselor" target="_blank"><i class="fa fa-users" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
+                  html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="WhatsApp chat log" onclick="callOpenWatsAppMessage(\'watsAppMsgModal\',\''+leads.leadId+'\');"><img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/WhatsApp.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
+                }
 
-							if(leads.whatsAppVerifiedStatus == 'NA'){
-							}else{
-								var displayCss='none';
-								if(leads.watiLogsCount>0){
-									displayCss='block';
-								}
-								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Wati Logs" style="display:'+displayCss+';" id="wati_logs_link_'+leads.leadId+'" onclick="getWatiLogs(\''+leads.leadId+'\')">'
-										+'<img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/Wati.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a>';
-							}
-							if(leads.zadarmaCount>0){
-								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Zadarma Logs" onclick="getZadarmaLogs(\''+leads.phone+'\')"><img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/Zadarma.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
-							}
-              if(leads.callHippoCount>0){
-								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Call Hippo Logs" onclick="getCallHippoLogs(\''+leads.phone+'\')"><img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/CallHippo.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
-							}
-							if(leads.emailBroadcastCount>0){
-								html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Email Broadcast Logs" onclick="getEmailBroadcastLogs(\''+leads.email+'\',\''+(leads.fname!=''?leads.fname:'N/A') +' '+  leads.mname +' '+ leads.lname +'\',\''+leads.leadId+'\')"><i class="fa fa-envelope" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
-							}
-              // Hold Enrollment button
-							var _hld = {
-								leadId: leads.leadId, leadNo: leads.leadNo,
-								fname: leads.fname, mname: leads.mname, lname: leads.lname,
-								standard: leads.standard,
-								email: leads.email, emailAlt: leads.emailAlternet,
-								isdCode: leads.isdCode, isdCodeIso: (leads.isdCodeIso||''), phone: leads.phone,
-								isdCodeAlter: leads.isdCodeAlter, isdCodeAlterIso: (leads.isdCodeAlterIso||''), phoneNoAlter: leads.phoneNoAlter
-							};
-							html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Hold Enrollment" onclick="openLeadEnrollmentHoldPopup('+JSON.stringify(_hld).replace(/"/g,'&quot;')+')">'
-									+'<i class="fa fa-lock" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;color:#764ba2;"></i></a><br/>';
-						}
-						
-					}else{
-						html+='N/A';
-					}
+                if(leads.whatsAppVerifiedStatus == 'NA'){
+                }else{
+                  var displayCss='none';
+                  if(leads.watiLogsCount>0){
+                    displayCss='block';
+                  }
+                  html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Wati Logs" style="display:'+displayCss+';" id="wati_logs_link_'+leads.leadId+'" onclick="getWatiLogs(\''+leads.leadId+'\')">'
+                      +'<img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/Wati.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a>';
+                }
+                if(leads.zadarmaCount>0){
+                  html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Zadarma Logs" onclick="getZadarmaLogs(\''+leads.phone+'\')"><img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/Zadarma.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
+                }
+                if(leads.callHippoCount>0){
+                  html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Call Hippo Logs" onclick="getCallHippoLogs(\''+leads.phone+'\')"><img src="'+PATH_FOLDER_IMAGE2+'leadlist_icons/CallHippo.svg'+SCRIPT_VERSION+'" style="width:26px; margin-bottom: 4px;padding:4px;" /></a><br/>';
+                }
+                if(leads.emailBroadcastCount>0){
+                  html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Email Broadcast Logs" onclick="getEmailBroadcastLogs(\''+leads.email+'\',\''+(leads.fname!=''?leads.fname:'N/A') +' '+  leads.mname +' '+ leads.lname +'\',\''+leads.leadId+'\')"><i class="fa fa-envelope" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';
+                }
+                // Hold Enrollment button
+                var _hld = {
+                  leadId: leads.leadId, leadNo: leads.leadNo,
+                  fname: leads.fname, mname: leads.mname, lname: leads.lname,
+                  standard: leads.standard,
+                  email: leads.email, emailAlt: leads.emailAlternet,
+                  isdCode: leads.isdCode, isdCodeIso: (leads.isdCodeIso||''), phone: leads.phone,
+                  isdCodeAlter: leads.isdCodeAlter, isdCodeAlterIso: (leads.isdCodeAlterIso||''), phoneNoAlter: leads.phoneNoAlter
+                };
+                html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Hold Enrollment" onclick="openLeadEnrollmentHoldPopup('+JSON.stringify(_hld).replace(/"/g,'&quot;')+')">'
+                    +'<i class="fa fa-lock" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;color:#764ba2;"></i></a><br/>';
+              }
+              
+            }else{
+              html+='N/A';
+            }
 					html+='</td>'
 				+'</tr>'
 			+'</tbody>'
