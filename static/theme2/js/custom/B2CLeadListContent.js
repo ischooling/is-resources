@@ -1858,9 +1858,18 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 	+'<div>'
 
 	+'</div>';
+	// Status-driven card border colour map (lead_status -> hex) from the LEAD_STATUS master.
+	// Stashed globally so the follow-up save path can recolour a card without a full reload.
+	var leadStatusColorMap = (leaddata && leaddata.objectRights && leaddata.objectRights.statusColorMap) ? leaddata.objectRights.statusColorMap : (window.__leadStatusColors || {});
+	try { window.__leadStatusColors = leadStatusColorMap; } catch(e){}
+
 	for(var i=0;i<data.length;i++){
 		var leads = data[i];
-		
+
+		// Border colour comes from the lead's status via the map above; empty -> CSS fallback.
+		var statusBorder = (leadStatusColorMap && leadStatusColorMap[leads.leadStatus]) ? leadStatusColorMap[leads.leadStatus] : '';
+		var trStyle = statusBorder ? ('--lead-border:'+statusBorder+';') : '';
+
     lScoreColor='';
     if(leads.leadScore>=80){
       lScoreColor='bg-success';
@@ -1980,8 +1989,8 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 			+'<tbody class="lead-table-css" style="font-size:11px">'
 			+'<input type="hidden" id="demoMovedTrue" />'
 			+'<input type="hidden" id="blankDemo" />'
-				+(leads.leadStatus === 'Red Flag' ? '<tr class="td-border-design red-flag-lead" style="pointer-events:none;">' : '<tr class="td-border-design">')
-					+'<td style="max-width:320px;min-width: 320px;vertical-align:top;" class="rounded-bottom-left-10 lead-row-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-bg':'')+'">'
+				+(leads.leadStatus === 'Red Flag' ? '<tr class="td-border-design red-flag-lead" style="pointer-events:none;'+trStyle+'">' : '<tr class="td-border-design" style="'+trStyle+'">')
+					+'<td style="max-width:320px;min-width: 320px;vertical-align:top;" class="rounded-bottom-left-10 lead-row-'+leads.leadId+' lead-card-border'+'">'
 						+'<table class="w-100">'
 							+'<tbody>'
 
@@ -2354,7 +2363,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 					//style="max-width: 696px;min-width: 696px;"
           
          
-					html+='<td class="p-0 lead-row-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-bg':'')+'" style="vertical-align:top">'
+					html+='<td class="p-0 lead-row-'+leads.leadId+' lead-card-border'+'" style="vertical-align:top">'
 						+'<table class="w-100">'
 							+'<tbody>'
 								+'<tr>'
@@ -2509,7 +2518,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 							+'</tbody>'
 						+'</table>'
 					+'</td>'
-					+'<td class="p-0 lead-row-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-bg':'')+'" style="width: 350px;vertical-align:top;">'
+					+'<td class="p-0 lead-row-'+leads.leadId+' lead-card-border'+'" style="width: 350px;vertical-align:top;">'
 					
 						+'<table class="w-100 demotable" style="border: solid #027ffe 1px;background-color: #D5E3FC;">'
 							+'<tbody>';
@@ -2751,7 +2760,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 						html+='</tbody>'
 						+'</table>'
 					+'</td>'//margin-top:-40px !important
-					+'<td class="p-0 lead-row-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-bg':'')+'" style="vertical-align:top;">'
+					+'<td class="p-0 lead-row-'+leads.leadId+' lead-card-border'+'" style="vertical-align:top;">'
 						if((leads.leadLastCallList!='' && leads.leadLastCallList.length>0)){
 							html+='<ul class="follow-up-accordian m-0 p-0 overflow-auto followup-remark-'+leads.leadNo+'" style="max-height: 325px;">';
 						}else{
@@ -2808,7 +2817,7 @@ function getB2cLeadList(leaddata, objRights, roleModule){
 							}	
 						html+='</ul>'
 					+'</td>'
-						+'<td class="rounded-bottom-right-10 text-center pt-3 lead-row-'+leads.leadId+' '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-bg':'')+'" style="vertical-align:top;color:#027FFF;'+(leads.leadStatus === 'Red Flag' ? 'pointer-events:auto;opacity:1;' : '')+'">';
+						+'<td class="rounded-bottom-right-10 text-center pt-3 lead-row-'+leads.leadId+' lead-card-border'+'" style="vertical-align:top;color:#027FFF;'+(leads.leadStatus === 'Red Flag' ? 'pointer-events:auto;opacity:1;' : '')+'">';
 					if(objRights.discardPermission || USER_ID == leads.assignTo || USER_ID == leads.demoAssignTo){
 						if(leads.leadStatus=='Unassigned'){
 							html+='<a href="javascript:void(0);" data-toggle="tooltip" data-placement="top" data-original-title="Update" onclick="callGetOpenFollowup(\'followupSaveForm\',\''+leads.leadId+'\',\''+USER_ID+'\',\'edit\',\''+ objRights.currentPage +'\',\'leadFollowupForm\',\'B2C\',\'Y\','+leaddata.remarkMendatory+','+leaddata.minRemarkCount+');" ><i class="fa fa-edit" style="font-size:16px;margin-bottom:4px;padding:4px;"></i></a><br/>';

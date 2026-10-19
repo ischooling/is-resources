@@ -5569,11 +5569,10 @@ function submitFollowupSaveFromLeadList(formId, leadId,  leadType, roleModuleId,
 				$(".nextFollow-"+leadId).addClass(""+lType+"-"+data['extra2']+"-leadno-bg");
 				$(".leadlist-remark-"+leadId).addClass(""+lType+"-"+data['extra2']+"-leadno-bg");
 				
-				var clsLead=$(".lead-row-"+leadId).attr('class');
-				var arrCss = clsLead.split(" ");
-				var lastCssRow = arrCss[arrCss.length - 1];
-				var lastCssNew = clsLead.replace(lastCssRow, ""+lType+"-"+data['extra2']+"-bg");
-				$(".lead-row-"+leadId).attr('class',lastCssNew)//addClass(""+lType+"-"+data['extra2']+"-bg");
+				// Card border is status-driven now: recolour it from the LEAD_STATUS map for the new status
+				// (keeps the card in sync without a full reload). Unknown status -> leave existing colour.
+				var newBorderColor = (window.__leadStatusColors && window.__leadStatusColors[leadStatus]) ? window.__leadStatusColors[leadStatus] : '';
+				if(newBorderColor){ $(".lead-row-"+leadId).closest('tr').css('--lead-border', newBorderColor); }
 
 				var clsLeadTd=$(".lead-row-td-"+leadId).attr('class');
 				var arrCssTd = clsLeadTd.split(" ");

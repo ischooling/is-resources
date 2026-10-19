@@ -33951,6 +33951,9 @@ select#allSchoolId option {color: black;}
     .b2c-text-gray{color:5px solid #afabab !important;}
     .b2c-border-gray{border:5px solid #afabab !important;}
     .b2c-reattempt-bg{border:5px solid #dfdf3a2e !important;}
+    /* Status-driven lead-card border: colour comes from --lead-border (set per row from the
+       LEAD_STATUS table map); falls back to a neutral grey when the status has no colour. */
+    .lead-card-border{border:5px solid var(--lead-border,#cfd3da) !important;}
 
 	.b2c-green-leadno-bg{background-color:#c4d38a !important;}
     .b2c-darkgreen-leadno-bg{background-color:#b0e9c9 !important;}

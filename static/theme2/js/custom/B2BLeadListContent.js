@@ -877,8 +877,16 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 	+'		</select>'
 	+'	</div>'
 
+	// Status-driven card border colour map (lead_status -> hex) from the LEAD_STATUS master.
+	// Stashed globally so the follow-up save path can recolour a card without a full reload.
+	var leadStatusColorMap = (objectRights && objectRights.statusColorMap) ? objectRights.statusColorMap : (window.__leadStatusColors || {});
+	try { window.__leadStatusColors = leadStatusColorMap; } catch(e){}
+
 	for(var i=0;i<data.length;i++){
 		var leads = data[i];
+		// Border colour comes from the lead's status via the map above; empty -> CSS fallback.
+		var statusBorder = (leadStatusColorMap && leadStatusColorMap[leads.leadStatus]) ? leadStatusColorMap[leads.leadStatus] : '';
+		var trStyle = statusBorder ? ('--lead-border:'+statusBorder+';') : '';
 		html+='<div class="lead-table-wrapper">'
 		+'<table class="table table-bordered font-12 border-radius-table leadDataList" style="min-width:1450px;width:100%" id="leadDataList">'
 			+'<thead class="bg-primary">'
@@ -905,8 +913,8 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 			+'<tbody class="lead-table-css">'
 			+'<input type="hidden" id="demoMovedTrue" />'
 			+'<input type="hidden" id="blankDemo" />'
-				+'<tr class="td-border-design">'
-					+'<td style="max-width:320px;min-width: 320px;vertical-align:top;" class="rounded-bottom-left-10 '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-bg':'')+'">'
+				+'<tr class="td-border-design" style="'+trStyle+'">'
+					+'<td style="max-width:320px;min-width: 320px;vertical-align:top;" class="rounded-bottom-left-10 lead-card-border">'
 						+'<table class="w-100">'
 							+'<tbody>'
 								+'<tr>'
@@ -1004,7 +1012,7 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 							+'</tbody>'
 						+'</table>'
 					+'</td>'
-					+'<td class="p-0 '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-bg':'')+'" style="max-width: 696px;min-width: 696px;">'
+					+'<td class="p-0 lead-card-border" style="max-width: 696px;min-width: 696px;">'
 						+'<table class="w-100">'
 							+'<tbody>'
 								+'<tr>'
@@ -1125,7 +1133,7 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 							+'</tbody>'
 						+'</table>'
 					+'</td>'
-					+'<td class="p-0 '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-bg':'')+'" style="vertical-align:top;width: 230px; '+((leads.leadLastCallList!='' && leads.leadLastCallList.length>0)?'border-top:5px solid var(--pc) !important':'border-top:5px solid var(--pc) !important')+'">'
+					+'<td class="p-0 lead-card-border" style="vertical-align:top;width: 230px; '+((leads.leadLastCallList!='' && leads.leadLastCallList.length>0)?'border-top:5px solid var(--pc) !important':'border-top:5px solid var(--pc) !important')+'">'
 						if((leads.leadLastCallList!='' && leads.leadLastCallList.length>0)){
 							html+='<ul class="follow-up-accordian m-0 p-0 overflow-auto" style="max-height: 228px;margin-top:-40px !important">';
 						}else{
@@ -1176,7 +1184,7 @@ function getB2bLeadList(leaddata, objRights, roleModule){
 							}	
 						html+='</ul>'
 					+'</td>'
-					+'<td class="rounded-bottom-right-10 '+ltype+'-'+(leads.callBadge!=''?leads.callBadge+'-bg':'')+'">'
+					+'<td class="rounded-bottom-right-10 lead-card-border">'
 						+'<table class="w-100">'
 							+'<tbody>';
 							if(leads.leadStatus!='Converted & On Boarding | Hot'
