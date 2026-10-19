@@ -2630,9 +2630,9 @@ function getB2cLeadList(leaddata, objRights, roleModule){
                   +'<th class="border-0 p-1">Callback Time:</th>'
                   +'<td class="border-0 p-1" >'+leads.callbackConvertedDate+' ('+USER_TIMEZONE+')'+'</td>'
                 +'</tr>';
-                if (leads.callBackRemark!==""){
+                if (leads.callBackRemark && leads.callBackRemark!=="" && leads.callBackRemark!=="undefined"){
                   html += '<tr class="bg-primary p-1 text-white">'
-                    +'<th class="border-0 p-1">Callback Time:</th>'
+                    +'<th class="border-0 p-1">Callback Remark:</th>'
                     +'<td class="border-0 p-1" >'+leads.callBackRemark+'</td>'
                   +'</tr>';
                 }

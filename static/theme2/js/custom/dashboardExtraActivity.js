@@ -177,6 +177,10 @@ function validateExtraActivityDetails(formId){
 	// 	showMessageTheme2(0, " Duration minute is required if duration hours are not selected.");
 	// 	return false;
 	// }
+	if(($("#" + formId + " #duration").val()=='0' || $("#" + formId + " #duration").val()=='') && $("#" + formId + " #durationMin").val()=='0'){
+		showMessageTheme2(0, " Duration cannot be 0. Please select duration hours or minutes.");
+		return false;
+	}
 	if($("#" + formId + " #activityTitle").val()=='' || $("#" + formId + " #activityTitle").val()==undefined){
 		showMessageTheme2(0, "Activity Title is required.");
 		return false;
@@ -473,10 +477,10 @@ function resetExtraActivityForm(formId){
 	$('#'+formId+' #startDate').val('');
 	$('#'+formId+' #endDate').val('');
 	$("#"+formId+" #recurringDates").val('');
-	$('#'+formId+' #timeHrsFrom').val('');
-	$('#'+formId+' #timeMinFrom').val('');
-	$('#'+formId+' #duration').val('0');
-	$('#'+formId+' #durationMin').val('0');
+	$('#'+formId+' #timeHrsFrom').val('').trigger('change');
+	$('#'+formId+' #timeMinFrom').val('').trigger('change');
+	$('#'+formId+' #duration').val('0').trigger('change');
+	$('#'+formId+' #durationMin').val('0').trigger('change');
 	$("#"+formId+" #fileupload1Span").text('');
 	$('#'+formId+' #activityMeetingType').val('ODM').trigger('change');
 	$('#'+formId+' #joiningLink').val('');
@@ -635,13 +639,13 @@ function copyExtraActivityDetails(activityTypeId,activityFor,activityMeetingType
 			$("#extraActivityForm #userIds option[value='" + e + "']").prop("selected", true);
 		});
 	}
-	$('#extraActivityForm #timeHrsFrom').val(startTimeHours);
-	$('#extraActivityForm #timeMinFrom').val(startTimeMin);
-	$('#extraActivityForm #duration').val(duration);
+	$('#extraActivityForm #timeHrsFrom').val(startTimeHours).trigger('change');
+	$('#extraActivityForm #timeMinFrom').val(startTimeMin).trigger('change');
+	$('#extraActivityForm #duration').val(duration).trigger('change');
 	if(durationMin<60){
-		$('#extraActivityForm #durationMin').val(durationMin);
+		$('#extraActivityForm #durationMin').val(durationMin).trigger('change');
 	}else{
-		$('#extraActivityForm #durationMin').val('0');
+		$('#extraActivityForm #durationMin').val('0').trigger('change');
 	}
 	$("#extraActivityForm #fileupload1Span").text(uploadFlie);
 	if(activityMeetingType=='One Day Meeting'){

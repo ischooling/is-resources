@@ -26,7 +26,7 @@ async function rendereTeacherHomeContent(){
         if(responseData.teacherAgreementDTO!=undefined){
             var teacherAgreementDetails = JSON.parse(responseData.teacherAgreementDTO);
             if(teacherAgreementDetails.agreementExpiryAck != 'Y'){
-                $('body').append(teacherAgreementContent(commonProfileDTO, teacherAgreementDetails));
+                $('body').append(teacherAgreementContent(commonProfileDTO, teacherAgreementDetails, responseData.agreementAcceptanceFrom));
                 clearRecipientSignatureAndDate();
                 $("#teacherAgreementModal").modal('show');
                 $("#preferenceTimeavailabilityFlag").val(true);
@@ -145,7 +145,7 @@ function teacherClassModal(){
     return html;
 }
 
-function teacherAgreementContent(data, responseData){
+function teacherAgreementContent(data, responseData, agreementAcceptanceFrom){
     var html=
         `<div class="modal fade " id="teacherAgreementModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1" data-backdrop="false" data-keyboard="false" style="z-index:1070;background:rgba(0,0,0,0.5);">
             <input type="hidden" id="userId" value="${data.userId}">
@@ -179,7 +179,7 @@ function teacherAgreementContent(data, responseData){
                         html+=`
                         <div class="d-flex align-items-center justify-content-end w-100 w-md-auto mt-2 mt-md-0" style="gap:10px;">
                             ${responseData.canSkipAgreement === 'Y' ? `<button type="button" id="teacherAgreementSkipBtn" onclick="skipTeacherAgreementPopup();" class="btn btn-outline-secondary">Skip for now</button>` : ''}
-                            <button type="submit" id="teacherAgreementConfirmBtn" onclick="callForSignupTeacherAgreement('teacherAgreementModal','${data.userId}','${responseData.agreementLogId}','${data.agreementAcceptanceFrom}');" class="btn btn-info">Confirm</button>
+                            <button type="submit" id="teacherAgreementConfirmBtn" onclick="callForSignupTeacherAgreement('teacherAgreementModal','${data.userId}','${responseData.agreementLogId}','${agreementAcceptanceFrom}');" class="btn btn-info">Confirm</button>
                         </div>
                     </div>`
                     if(responseData.validityEnd){
