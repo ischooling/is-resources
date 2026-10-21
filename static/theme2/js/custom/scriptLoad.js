@@ -68,28 +68,44 @@ function loadScriptCall(role, src) {
         return _scriptPromiseCache[id];
     }
 
+    var promise = attemptLoadScript(role, src, id, 1);
+    _scriptPromiseCache[id] = promise;
+    return promise;
+}
+
+function attemptLoadScript(role, src, id, attempt) {
     var cacheBustedSrc = role === "js"
         ? RESOURCE_PATH + src + "?t=" + Date.now()
         : RESOURCE_PATH + "custom/" + src + "?t=" + Date.now();
 
-    _scriptPromiseCache[id] = new Promise((resolve, reject) => {
-        var script = document.createElement("script");
-        script.type = "text/javascript";
-        script.src = cacheBustedSrc;
-        script.id = id;
-        script.onload = () => {
-            console.log(`Script loaded: ${src}`);
-            resolve();
-        };
-        script.onerror = () => {
-            console.error(`Failed to load script: ${src}`);
-            delete _scriptPromiseCache[id]; // allow retry on error
-            reject(`Failed to load script: ${src}`);
-        };
-        document.head.appendChild(script);
-    });
+    var cacheBustedSrcPart2 = role === "js"
+        ? BASE_URL + "/static/theme2/js/" + src + "?t=" + Date.now()
+        : BASE_URL + "/static/theme2/js/custom/" + src + "?t=" + Date.now();
 
-    return _scriptPromiseCache[id];
+    return new Promise((resolve, reject) => {
+        function appendScript(url, onError) {
+            var script = document.createElement("script");
+            script.type = "text/javascript";
+            script.src = url;
+            script.id = id;
+            script.onload = () => {
+                console.log(`Script loaded: ${src}`);
+                resolve();
+            };
+            script.onerror = onError;
+            document.head.appendChild(script);
+        }
+
+        appendScript(cacheBustedSrc, () => {
+            console.error(`Failed to load script: ${src}, retrying with fallback URL`);
+            document.getElementById(id)?.remove();
+            appendScript(cacheBustedSrcPart2, () => {
+                console.error(`Failed to load script from fallback URL: ${src}`);
+                delete _scriptPromiseCache[id]; // allow retry on error
+                reject(`Failed to load script: ${src}`);
+            });
+        });
+    });
 }
 
 

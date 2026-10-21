@@ -1,6 +1,8 @@
 var PAGE_REQUEST;
 var MODULE_ID;
 async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam, extraParam1) {
+  var isOnline = navigator.onLine;
+  if(isOnline){
     PAGE_REQUEST = pageNo;
     MODULE_ID = moduleId;
     showAndHideDashboardAndAdditionalContent("main");
@@ -327,7 +329,9 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
     }
     
     // console.timeEnd();
-    
+  }else{
+    showMessageTheme2(0,"Your device is offline, please check your internet connection.","",true);
+  }
 }
 
 function openParentDashboardPreviewFromQuery() {
