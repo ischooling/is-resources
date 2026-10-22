@@ -260,6 +260,10 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
         "teacher-my-rating":{url:"",file:[{role:"",fileName:["teacherMyRatingContent.js","teacherMyRating.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "contract-management":{url:"",file:[{role:"",fileName:["contractManagementContent.js","contractManagement.js","manageTeacherProfileContent.js","manageTeacherProfile.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "student-feedback-received":{url:"",file:[{role:"",fileName:["studentFeedbackReceivedContent.js","studentFeedbackReceived.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        // Video Library (admin side: upload/manage videos tagged by subject)
+        "video-library-management":{url:"",file:[{role:"",fileName:["videoLibraryManagementContent.js","videoLibraryManagement.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        // Video Library (student side: videos filtered by the student's subjects)
+        "student-video-library":{url:"",file:[{role:"",fileName:["studentVideoLibraryContent.js","studentVideoLibrary.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
     };
     
     var pageMapJSPWithFun = {

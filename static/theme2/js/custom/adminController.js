@@ -226,6 +226,8 @@ const contentHandlers = {
     'enrollment-tracker': () => renderEnrollmentTracker('Enrollment Tracker', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'zoho-conversation': () => renderZohoConversationList('Zoho Conversations', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'student-feedback-received': () => initStudentFeedbackReceived(),
+    'video-library-management': () => initVideoLibraryManagement(),
+    'student-video-library': () => initStudentVideoLibrary(),
 };
 
 const getLeadCategory = () => {
@@ -410,6 +412,16 @@ function initTeacherMyRating() {
 function initStudentFeedbackReceived() {
     $('#dashboardContentInHTML').html(getStudentFeedbackReceivedPageContent('Student Feedback'));
     studentFeedbackReceivedOnLoad();
+}
+
+function initVideoLibraryManagement() {
+    $('#dashboardContentInHTML').html(getVideoLibraryManagementPageContent('Videos Management'));
+    videoLibraryManagementOnLoad();
+}
+
+function initStudentVideoLibrary() {
+    $('#dashboardContentInHTML').html(getStudentVideoLibraryPageContent('Videos'));
+    studentVideoLibraryOnLoad();
 }
 
 function initContractManagement() {
