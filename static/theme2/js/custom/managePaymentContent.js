@@ -624,7 +624,7 @@ function getAddPaymentModal(schoolId, moduleId) {
                                     </div>
                                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12">
                                         <div class="form-group mb-3 custom-field">
-                                            <input id="studentName1" name="studentName1" type="text" class="form-control" placeholder=" ">
+                                            <input id="studentName1" name="studentName1" type="text" class="form-control" onkeydown="return M.isNameWithNoSpecialCharacter(event);" placeholder=" ">
                                             <label class="mb-0">Student Name<sup class="text-danger">*</sup></label>
                                         </div>
                                     </div>

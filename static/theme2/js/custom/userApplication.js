@@ -65,6 +65,11 @@ async function userApplicationProfileOnloadFunction(){
         placeholder: "Select Status",
         theme:"bootstrap4"
     })
+    $("#userScreeningFilterForm #filterEmployeeType").select2({
+        placeholder: "Select Employment Type",
+        theme: "bootstrap4",
+        minimumResultsForSearch: Infinity
+    });
     $("#userScreeningFilterForm #filterGrades").val("").trigger("change");
     $("#userScreeningFilterForm #filterCourses").val("").trigger("change");
     USER_APPLICATION_SORT_STATE.sortBy = "";
@@ -135,7 +140,7 @@ function bindUserApplicationData(responseData) {
                     </td>
                     <td>${user.country} | ${user.state} | ${user.city}</td>
                     <td>${user.lastSalary ? user.currency + ' ' + user.lastSalary : ''}<br>${user.lastOrgName || ''}</td>
-                    <td>${user.appliedUserRole || ''}</td>
+                    <td>${user.appliedUserRole || ''}${user.employeeType ? ` | ${user.employeeType}` : ''}</td>
                     <td>
                         ${user?.attachments?.uploadDocumentUserResumeURL ? 
                             `<a href="javascript:void(0)"  class="btn btn-sm btn-outline-primary" onclick="viewResumeAndPhoto(\'${user?.attachments?.uploadDocumentUserResumeURL}\','viewApplicantsAttachementModal')">View Resume</a>`
@@ -383,6 +388,7 @@ async function loadUserApplicationData(isToday, callFrom, isTeaching) {
         payload['assignTo'] = USER_APPLICATION_FILTER_STATE.filterValues.assignTo || "";
         payload['country'] = USER_APPLICATION_FILTER_STATE.filterValues.country || "";
         payload['status'] = USER_APPLICATION_FILTER_STATE.filterValues.status || "";
+        payload['employeeType'] = USER_APPLICATION_FILTER_STATE.filterValues.employeeType || "";
         // Sorting filter se alag chalti hai — S.No. header icons se control hoti hai.
         var sortBy = USER_APPLICATION_SORT_STATE.sortBy;
         if (sortBy === "id") {
@@ -448,6 +454,7 @@ function resetUserApplication() {
     $('#userScreeningFilterForm')[0].reset();
     $('#userScreeningFilterForm #filterCountryId').val('0').trigger('change');
     $("#filterAppliedUserRole").val("").trigger("change");
+    $("#filterEmployeeType").val("").trigger("change");
     $("#applicantsStatus").val("").trigger("change");
     CURRENT_PAGE_USER_APPLICATION = 1;
     $('#userScreeningFilterForm #pageSize').val('10');
@@ -463,6 +470,7 @@ function updateFormState() {
         phoneNumber: $("#userScreeningFilterForm #filterPhone").val().trim(),
         email: $("#userScreeningFilterForm #filterEmail").val().trim(),
         appliedUserRole: $("#userScreeningFilterForm #filterAppliedUserRole").val().trim(),
+        employeeType: $("#userScreeningFilterForm #filterEmployeeType").val(),
         country: $("#userScreeningFilterForm #filterCountryId").val(),
         status: $("#userScreeningFilterForm #applicantsStatus").val().trim(),
         startDate: $("#userScreeningFilterForm #filterStartDate").val(),

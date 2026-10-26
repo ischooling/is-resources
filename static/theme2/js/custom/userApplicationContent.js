@@ -144,6 +144,7 @@ function initUserApplicationSelect2Fields(context){
         filterCountryId: { placeholder: "Select Country", theme: "bootstrap4" },
         filterAssignedTo: { placeholder: "Select Assign To", theme: "bootstrap4" },
         filterAppliedUserRole: { placeholder: "Select Applied User Role", theme: "bootstrap4" },
+        filterEmployeeType: { placeholder: "Select Employment Type", theme: "bootstrap4", minimumResultsForSearch: Infinity },
         applicantsStatus: { placeholder: "Select Status", theme: "bootstrap4" },
         filterDateDuration: { placeholder: "Select Duration", theme: "bootstrap4", minimumResultsForSearch: Infinity },
         eventStatus: { placeholder: "Select Interview Status", theme: "bootstrap4" },
@@ -208,6 +209,14 @@ function userScreeningFilter(){
                         +getAllHiringRoles('GET-ALL-HIRING-ROLES')
                     html+=`</select>
                     <label>Applied User Role</label>
+                </div>
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 custom-field">
+                    <select name="filterEmployeeType" id="filterEmployeeType" class="form-control">
+                        <option value=""></option>
+                        <option value="Part-Time">Part-Time</option>
+                        <option value="Full-Time">Full-Time</option>
+                    </select>
+                    <label>Employment Type</label>
                 </div>
                 ${/*<div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
                     <label>No. of records</label>
@@ -315,7 +324,7 @@ function userApplicationTableContent(){
                         </th>
                         <th>Country | Province | City</th>
                         <th>Last/Current Salary (per annum)<br>Last/Current Organization Name</th>
-                        <th>Applied User Role</th>
+                        <th>Applied User Role | Employment Type</th>
                         <th>Resume/CV</th>
                         <th>Recent Photograph</th>
                         <th>Linkedin Profile</th>

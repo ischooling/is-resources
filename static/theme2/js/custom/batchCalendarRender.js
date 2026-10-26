@@ -300,6 +300,7 @@ function initBatchCalendar(data) {
 	$('#endTime, #startTime').attr({ type: 'time', lang: 'en-US' });
 	$('#endTime').off('click.batchCalendar').on('click.batchCalendar', function () {
 		if ($("#startTime").val() != '') {
+			if (this.showPicker) { this.showPicker(); }
 		} else {
 			showMessageTheme2(2, "Please Select Start Time First");
 			return false;
@@ -310,6 +311,7 @@ function initBatchCalendar(data) {
 			showMessageTheme2(2, "Please Select Reschedule Date First");
 			return false;
 		}
+		if (this.showPicker) { this.showPicker(); }
 	});
 	$("#teacherId").select2({ theme: "bootstrap4", dropdownParent: "#moduleFormModal" });
 

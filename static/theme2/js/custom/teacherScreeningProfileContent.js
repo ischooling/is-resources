@@ -83,6 +83,16 @@ function teacherScreeningFilter(){
                 </div>
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
                     <div class="custom-field">
+                        <select id="filterEmployeeType" class="form-control">
+                            <option value=""></option>
+                            <option value="Part-Time">Part-Time</option>
+                            <option value="Full-Time">Full-Time</option>
+                        </select>
+                        <label>Employment Type</label>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
+                    <div class="custom-field">
                         <select id="filterGrades" multiple="" class="form-control">
                             ${getStandardContentByCourseProviderId(SCHOOL_ID)}
                         </select>
@@ -119,7 +129,7 @@ function teacherScreenTableContent(status){
                 <thead class="bg-primary text-white">
                     <tr>
                         <th>S.No.</th>
-                        <th style="min-width: 130px;">Applied Date | Name | Phone Number | Email | Source</th>
+                        <th style="min-width: 130px;">Applied Date | Name | Role | Employment Type | Phone Number | Email | Source</th>
                         <th>Country | Province | City</th>
                         <th>Last/Current Salary (per annum)</th>
                         <th>Last/Current Organization Name</th>

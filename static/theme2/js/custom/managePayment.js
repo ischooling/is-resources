@@ -400,8 +400,13 @@ function addPayment(formId, userNameOrEmail, studentStandardId, paymentType, pay
     $('#' + formId + ' #paymentType1').html(getPaymentTitle(formId, 'A',$('#allSchoolId').val(),'', paymentType, marksPublished), '');
 }
 function getStudentDetailsForPayment(formId, needToShowMessage) {
-    hideMessageTheme2('');
     var userNameOrEmail = $('#' + formId + ' #studentEmail').val().trim();
+    if(!validateEmail(userNameOrEmail)){
+        showMessageTheme2(0, 'Email is either empty or invalid', '', true);
+        $('#addStudentPaymentbtn').hide();
+        return;
+    }
+    hideMessageTheme2('');
     if (userNameOrEmail == '') {
         return false;
     }

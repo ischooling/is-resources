@@ -13,6 +13,11 @@ async function teacherScreeningProfileOnloadFunction(){
         placeholder: "Select Assign To",
         theme:"bootstrap4"
     });
+    $("#teacherScreeningFilterForm #filterEmployeeType").select2({
+        placeholder: "Select Employment Type",
+        theme: "bootstrap4",
+        minimumResultsForSearch: Infinity
+    });
     $("#teacherScreeningFilterForm #filterGrades").select2({
         placeholder: "Select Grades",
         theme:"bootstrap4",
@@ -56,6 +61,8 @@ function bindTeacherScreeningData(responseData) {
                         ${changeDateFormat(new Date(teacher.createdAt), "MMM-dd-yyyy")}
                         &nbsp;|&nbsp; 
                         ${teacher.userName} 
+                        &nbsp;|&nbsp;
+                        ${teacher.appliedUserRole || 'Teacher'}${teacher.employeeType ? ` | ${teacher.employeeType}` : ''}
                         &nbsp;|&nbsp;
                         ${
                             teacher.isWhatsappAvailable == "Y"
@@ -170,6 +177,7 @@ async function loadTeacherScreeningData() {
         payload['country'] = $("#teacherScreeningFilterForm #filterCountryId").val();
         payload['assignTo'] = $("#teacherScreeningFilterForm #filterAssignedTo").val();
         payload['status'] = $("#teacherScreeningFilterForm #filterStatus").val();
+        payload['employeeType'] = $("#teacherScreeningFilterForm #filterEmployeeType").val();
         payload['standards'] = $("#teacherScreeningFilterForm #filterGrades").val();
         payload['subjects'] = $("#teacherScreeningFilterForm #filterCourses").val();
         payload['pageNo'] = CURRENT_PAGE_TEACHER_SCREENING;
@@ -178,7 +186,7 @@ async function loadTeacherScreeningData() {
         bindTeacherScreeningData(responseData);
     } catch (error) {
         console.error('Error loading teacher screening data:', error);
-        $('#teacherScreeningTable tbody').html('<tr><td colspan="13" class="text-center text-muted">No Data Available</td></tr>');
+        $('#teacherScreeningTable tbody').html('<tr><td colspan="12" class="text-center text-muted">No Data Available</td></tr>');
     }
 }
 
@@ -192,6 +200,7 @@ function resetTeacherScreening() {
     $('#teacherScreeningFilterForm #filterCountryId').val('0').trigger('change');
     $('#teacherScreeningFilterForm #filterAssignedTo').val('').trigger('change');
     $('#teacherScreeningFilterForm #filterStatus').val('');
+    $('#teacherScreeningFilterForm #filterEmployeeType').val('').trigger('change');
     $('#teacherScreeningFilterForm #filterGrades').val('').trigger('change');
     $('#teacherScreeningFilterForm #filterCourses').val('').trigger('change');
     CURRENT_PAGE_TEACHER_SCREENING = 1;
