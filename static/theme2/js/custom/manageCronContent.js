@@ -49,10 +49,10 @@ function getManageCronContent(title) {
 
     <!-- Metric cards -->
     <div class="row mb-1" id="cronStatsRow">
-        ${statCard('cronStatTotal', 'Total crons', 'fa-list', 'var(--pc)')}
-        ${statCard('cronStatRanToday', 'Ran today', 'fa-check-circle', 'var(--success)')}
-        ${statCard('cronStatFailed', 'Failed (24h)', 'fa-exclamation-triangle', 'var(--danger)')}
-        ${statCard('cronStatManual', 'Manual runs today', 'fa-hand-pointer-o', 'var(--sc)')}
+        ${cronStatCard('cronStatTotal', 'Total crons', 'fa-list', 'var(--pc)')}
+        ${cronStatCard('cronStatRanToday', 'Ran today', 'fa-check-circle', 'var(--success)')}
+        ${cronStatCard('cronStatFailed', 'Failed (24h)', 'fa-exclamation-triangle', 'var(--danger)')}
+        ${cronStatCard('cronStatManual', 'Manual runs today', 'fa-hand-pointer-o', 'var(--sc)')}
     </div>
 
     <!-- Filters -->
@@ -117,7 +117,7 @@ function getManageCronContent(title) {
     `;
 }
 
-function statCard(id, label, icon, color) {
+function cronStatCard(id, label, icon, color) {
     return `
     <div class="col-md-3 col-sm-6">
         <div class="card mb-3 widget-content">

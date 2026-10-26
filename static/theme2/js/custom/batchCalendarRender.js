@@ -297,7 +297,7 @@ function initBatchCalendar(data) {
 	$("body").append(calendarMeetingLinkValidate());
 	$('.batchCourses:contains("Recess")').addClass('recess').find('br').remove();
 	generateTinyUrls();
-	$('#endTime').timepicker({ format: 'HH:mm' });
+	$('#endTime, #startTime').attr({ type: 'time', lang: 'en-US' });
 	$('#endTime').off('click.batchCalendar').on('click.batchCalendar', function () {
 		if ($("#startTime").val() != '') {
 		} else {
@@ -777,12 +777,10 @@ function batchCalendarModalsHtml() {
 			startDate = convertUTCtoLocal(new Date())
 			var selectedDate = e.date;
 			var todayDate = startDate;
-			if(selectedDate.toDateString() === today.toDateString()){ 
+			if(selectedDate.toDateString() === today.toDateString()){
 				disablePastTimes("startTime", "endTime", startDate);
 			}else{
-				$('#startTime').timepicker({
-					format:'HH:mm',
-				});
+				$('#startTime').removeAttr('min');
 			}
 		});
 		$('#moduleFormModal').modal('show');	

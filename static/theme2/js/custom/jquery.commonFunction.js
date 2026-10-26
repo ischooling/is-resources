@@ -6873,11 +6873,9 @@ function decode2(encoded) {
 function disablePastTimes(startTimeID, endTime, currentDate) {
   var currentHour = currentDate.getHours();
   var currentMinute = currentDate.getMinutes();
+  var minTimeStr = (currentHour < 10 ? "0" + currentHour : currentHour) + ":" + (currentMinute < 10 ? "0" + currentMinute : currentMinute);
 
-  $("#" + startTimeID).timepicker({
-    format: "HH:mm",
-    minTime: currentHour + ":" + currentMinute,
-  });
+  $("#" + startTimeID).attr({ type: "time", lang: "en-US", min: minTimeStr });
   // $("#"+endTime).trigger('click');
 }
 

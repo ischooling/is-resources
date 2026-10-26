@@ -194,6 +194,9 @@ function meetingResultModal(meetingId, userId,meetingresult, meetingCurStatus, r
 	var isPTM = (classType == 'PTM' || classType == 'Parent Teacher Meeting');
 	if (isPTM) {
 		html += '<option value="Completed">Completed</option>';
+		if (showClassCancelOption == 'Y' && 'TEACHER' != role) {
+			html += '<option value="Cancelled">Cancel Meeting</option>';
+		}
 	} else {
 		html+='<option value="Reschedule Session">Reschedule Class</option>';
 		html+='<option value="Missed by Student">Missed by Student</option>';
