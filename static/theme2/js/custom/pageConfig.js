@@ -355,9 +355,24 @@ function openParentDashboardPreviewFromQuery() {
     }
 }
 
+/* ?openPage=<page link> opens that dashboard page on load (e.g. back from a Video Library payment). Only the pages
+   listed here may be opened this way. */
+var OPEN_PAGE_FROM_QUERY = ["student-video-library"];
+function openPageFromQuery() {
+    try {
+        var page = new URLSearchParams(window.location.search || "").get("openPage");
+        if (page && OPEN_PAGE_FROM_QUERY.indexOf(page) !== -1) {
+            callDashboardPageSchool(0, page);
+        }
+    } catch (e) {
+        console.warn("Unable to open the page from the address", e);
+    }
+}
+
 $(function () {
     if (typeof callDashboardPageSchool === "function") {
         openParentDashboardPreviewFromQuery();
+        openPageFromQuery();
     }
 });
 
