@@ -96,6 +96,10 @@ function getProfilePageContent(data, callFrom, arg0){
                     <div class="profile-head bg-primary p-4 rounded-top">`;
                         if(callFrom=='callFrom=admin'){
                             html+= `<a href="javascript:void(0)" onClick="backToMain(\'manageProfileParentContent\');" class="btn btn-pill btn-outline-white pull-right"><i class="fa fa-arrow-left"></i>&nbsp;Back</a>`;
+                        }else if(typeof USER_ROLE !== "undefined" && USER_ROLE == "PARENT"){
+                            // Parent Dashboard's picker/child-dashboard content is still sitting underneath
+                            // (hidden, not destroyed) in #dashboardContentInHTML — just reveal it again.
+                            html+= `<a href="javascript:void(0)" onClick="showAndHideDashboardAndAdditionalContent('main');" class="btn btn-pill btn-outline-white pull-right"><i class="fa fa-arrow-left"></i>&nbsp;Back</a>`;
                         }
                    html+= `</div>
                     <form class="full admin-profile-wrapper px-4 position-relative custom-field-scope" id="profilePageFromTag" style="margin-top:-95px">

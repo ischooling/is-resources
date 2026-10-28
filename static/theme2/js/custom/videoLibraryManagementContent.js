@@ -28,6 +28,12 @@ function getVideoLibraryManagementPageContent(title) {
                 <button type="button" class="vlm-view-btn" data-view="videos" onclick="vlmSwitchView('videos')">
                     <i class="fa fa-th-large"></i> All videos
                 </button>
+                <button type="button" class="vlm-view-btn" data-view="plans" onclick="vlmSwitchView('plans')">
+                    <i class="fa fa-credit-card"></i> Plans &amp; Fees
+                </button>
+                <button type="button" class="vlm-view-btn" data-view="subscribers" onclick="vlmSwitchView('subscribers')">
+                    <i class="fa fa-users"></i> Subscribers
+                </button>
             </div>
             <div class="vlm-sort-box vlm-grade-box">
                 <i class="fa fa-graduation-cap"></i>
@@ -68,6 +74,9 @@ function getVideoLibraryManagementPageContent(title) {
             </div>
             <div id="vlmPlDetail" class="vlm-hidden"></div>
         </div>
+
+        <div id="vlmPlansView" class="vlm-hidden"></div>
+        <div id="vlmSubsView" class="vlm-hidden"></div>
     </div>
 
     ${getVideoLibraryStyles()}
@@ -445,7 +454,7 @@ function renderPlaylistDetail(d) {
         <div class="vlm-empty">
             <div class="vlm-empty-icon"><i class="fa fa-list-ol"></i></div>
             <div class="vlm-empty-title">No lessons yet</div>
-            <div class="vlm-empty-text">Click <strong>Add lesson</strong> to build this course's playlist.</div>
+            <div class="vlm-empty-text">${vlmState.readOnly ? 'This AP course has no videos.' : "Click <strong>Add lesson</strong> to build this course's playlist."}</div>
         </div>`;
     }
 
@@ -459,9 +468,10 @@ function renderPlaylistDetail(d) {
                 ${p.lessonCount || 0} lessons · ${p.videoCount || 0} videos
             </div>
         </div>
-        <button type="button" class="btn vlm-ghost-btn" onclick="vlmOpenLessonModal(0)"><i class="fa fa-plus mr-1"></i> Add lesson</button>
+        ${vlmState.readOnly ? '' : '<button type="button" class="btn vlm-ghost-btn" onclick="vlmOpenLessonModal(0)"><i class="fa fa-plus mr-1"></i> Add lesson</button>'}
     </div>
-    <div class="vlm-pd-hint"><i class="fa fa-arrows"></i> Drag <i class="fa fa-bars"></i> to rearrange. The first video of a lesson (<i class="fa fa-star"></i>) is the one students get first.</div>
+    ${vlmState.readOnly ? '<div class="vlm-pd-readonly"><i class="fa fa-eye"></i> AP courses are view-only. Videos cannot be added to them.</div>'
+        : '<div class="vlm-pd-hint"><i class="fa fa-arrows"></i> Drag <i class="fa fa-bars"></i> to rearrange. The first video of a lesson (<i class="fa fa-star"></i>) is the one students get first.</div>'}
     ${tray}
     <div class="vlm-pd-lessons">${body}</div>`;
 }
@@ -507,6 +517,376 @@ function renderPlaylistVideoRow(v, lessonId, isFirst, lessons) {
             ${moves ? '<optgroup label="Move to">' + moves + '</optgroup>' : ''}
             <option value="delete">Delete video</option>
         </select>
+    </div>`;
+}
+
+/* ---------- subscription: Plans & Fees ---------- */
+
+/* priced plans in table order: code, column title, unit */
+var VLM_PLAN_COLUMNS = [
+    { code: 'THREE_COURSES', title: '3 courses', unit: 'per month', setting: 'planThreeCourses' },
+    { code: 'CUSTOM', title: 'Custom', unit: 'per course / month', setting: 'planCustom' },
+    { code: 'ALL', title: 'All courses', unit: 'per month', setting: 'planAll' },
+    { code: 'LIFETIME', title: 'Full course', unit: 'one-time, till course end', setting: 'planLifetime' }
+];
+
+/* p = { settings (form values), fees {"grade|PLAN": "12.00"}, grades [{gradeId, gradeName}], dirtySettings, dirtyFees, anyFee } */
+function renderPlansView(p) {
+    var s = p.settings || {};
+    var toggle = function (key, label, sub) {
+        return `<label class="vlm-switch">
+            <input type="checkbox" data-setting="${key}" ${s[key] ? 'checked' : ''} onchange="vlmPlanSettingChanged(this)"/>
+            <span class="vlm-switch-track"><span class="vlm-switch-knob"></span></span>
+            <span class="vlm-switch-text"><b>${label}</b>${sub ? '<small>' + sub + '</small>' : ''}</span>
+        </label>`;
+    };
+    var plans = VLM_PLAN_COLUMNS.map(function (c) {
+        return toggle(c.setting, c.title, c.code === 'THREE_COURSES' ? 'Shown when enrolled in more than 3 courses'
+            : c.code === 'CUSTOM' ? 'Sold as 1 course or 2 courses · per-course fee × N' : c.code === 'ALL' ? 'Every enrolled course' : 'All enrolled courses until each course ends, one payment');
+    }).join('');
+
+    var head = '<div class="vlm-fee-row vlm-fee-head"><div class="vlm-fee-grade">Grade</div>' + VLM_PLAN_COLUMNS.map(function (c) {
+        return `<div class="vlm-fee-cell ${s[c.setting] ? '' : 'is-off'}"><b>${c.title}</b><small>${c.unit}</small></div>`;
+    }).join('') + '</div>';
+    var rows = (p.grades || []).map(function (g) {
+        return `<div class="vlm-fee-row" data-grade="${g.gradeId}"><div class="vlm-fee-grade">${vlmEsc(g.gradeName)}</div>`
+            + VLM_PLAN_COLUMNS.map(function (c) {
+                var key = g.gradeId + '|' + c.code;
+                var val = p.fees[key] !== undefined ? p.fees[key] : '';
+                return `<div class="vlm-fee-cell ${s[c.setting] ? '' : 'is-off'}">
+                    <span class="vlm-fee-label">${c.title} <small>${c.unit}</small></span>
+                    <span class="vlm-money"><i>$</i><input type="number" min="0" max="99999.99" step="0.01" inputmode="decimal"
+                        placeholder="0" value="${vlmEsc(val)}" data-fee="${key}" oninput="vlmPlanFeeChanged(this)"
+                        title="${vlmEsc(c.title + ' — ' + g.gradeName)}"/></span>
+                </div>`;
+            }).join('') + '</div>';
+    }).join('');
+    if (!rows) {
+        rows = '<div class="vlm-loading">No grades with courses found.</div>';
+    }
+    var warn = s.enabled && !p.anyFee
+        ? `<div class="vlm-plans-warn"><i class="fa fa-exclamation-triangle"></i> The paywall is on but no plan has a fee yet — students can only start the free trial${s.trialDays > 0 ? '' : ' (and the trial is off)'}.</div>` : '';
+
+    return `
+    <div class="vlm-plans">
+        <div class="vlm-box">
+            <div class="vlm-box-head">
+                <div>
+                    <div class="vlm-box-title">Subscription settings</div>
+                    <div class="vlm-box-sub">Saved in Settings (VIDEO_SUBSCRIPTION) and used straight away.</div>
+                </div>
+                <button type="button" class="btn vlm-add-btn" id="vlmSaveSettingsBtn" onclick="vlmSaveSubscriptionSettings()" ${p.dirtySettings ? '' : 'disabled'}>
+                    <i class="fa fa-check mr-1"></i> Save settings
+                </button>
+            </div>
+            <div class="vlm-paywall">${toggle('enabled', 'Videos need a subscription', 'Off = every enrolled student watches for free, as before')}</div>
+            <div class="vlm-set-grid">
+                <label class="vlm-set">
+                    <span>Free trial</span>
+                    <span class="vlm-set-input"><input type="number" min="0" max="365" step="1" data-setting="trialDays" value="${vlmEsc(s.trialDays)}" oninput="vlmPlanSettingChanged(this)"/><i>days</i></span>
+                    <small>Once per student · 0 = no trial</small>
+                </label>
+                <label class="vlm-set">
+                    <span>Renewal opens</span>
+                    <span class="vlm-set-input"><input type="number" min="0" max="28" step="1" data-setting="renewBeforeDays" value="${vlmEsc(s.renewBeforeDays)}" oninput="vlmPlanSettingChanged(this)"/><i>days before the end</i></span>
+                    <small>The new month starts when the current one ends</small>
+                </label>
+                <label class="vlm-set">
+                    <span>Reminder emails</span>
+                    <span class="vlm-set-input"><input type="text" data-setting="reminderDays" value="${vlmEsc(s.reminderDaysText)}" placeholder="3,1" oninput="vlmPlanSettingChanged(this)"/><i>days before the end</i></span>
+                    <small>Comma separated, e.g. 3,1 · empty = no reminders</small>
+                </label>
+            </div>
+            <div class="vlm-set-label">Plans offered</div>
+            <div class="vlm-plan-toggles">${plans}</div>
+        </div>
+
+        <div class="vlm-box">
+            <div class="vlm-box-head">
+                <div>
+                    <div class="vlm-box-title">Fees by grade <span class="vlm-box-cur">USD</span></div>
+                    <div class="vlm-box-sub">A plan with no fee (0) is not shown to that grade's students.</div>
+                </div>
+                <button type="button" class="btn vlm-add-btn" id="vlmSaveFeesBtn" onclick="vlmSavePlanFees()" ${p.dirtyFees ? '' : 'disabled'}>
+                    <i class="fa fa-check mr-1"></i> Save fees
+                </button>
+            </div>
+            ${warn}
+            <div class="vlm-fees">${head}${rows}</div>
+        </div>
+    </div>`;
+}
+
+/* Subscribers tab frame: header + numbers + filters + list (S = vlmState.subs) */
+function renderSubscribersView(S, loading) {
+    var opt = function (v, label, cur) { return `<option value="${v}" ${cur === v ? 'selected' : ''}>${label}</option>`; };
+    return `
+    <div class="vlm-box">
+        <div class="vlm-box-head">
+            <div>
+                <div class="vlm-box-title">Subscribers</div>
+                <div class="vlm-box-sub">Who can watch, on which plan, until when. The grade filter above applies here too.</div>
+            </div>
+            <button type="button" class="btn vlm-add-btn" onclick="vlmOpenGrant()"><i class="fa fa-gift mr-1"></i> Grant free access</button>
+        </div>
+        <div class="vlm-stats" id="vlmSubsStats">${renderSubscriberStats(loading ? null : S.summary)}</div>
+        <div class="vlm-subs-filters">
+            <div class="vlm-search-box">
+                <i class="fa fa-search"></i>
+                <input type="text" placeholder="Search name or email..." value="${vlmEsc(S.search)}" data-filter="search" oninput="vlmSubsFilterChanged(this)"/>
+            </div>
+            <div class="vlm-sort-box">
+                <select data-filter="status" onchange="vlmSubsFilterChanged(this)" title="Status">
+                    ${opt('', 'All statuses', S.status)}${opt('ACTIVE_NOW', 'Active now', S.status)}${opt('UPCOMING', 'Starts later', S.status)}
+                    ${opt('EXPIRED', 'Expired', S.status)}${opt('PENDING', 'Payment pending', S.status)}${opt('REVOKED', 'Revoked', S.status)}
+                    ${opt('CANCELLED', 'Cancelled', S.status)}
+                </select>
+            </div>
+            <div class="vlm-sort-box">
+                <select data-filter="plan" onchange="vlmSubsFilterChanged(this)" title="Plan">
+                    ${opt('', 'All plans', S.plan)}${opt('TRIAL', 'Free trial', S.plan)}${opt('THREE_COURSES', '3 courses', S.plan)}
+                    ${opt('CUSTOM', 'Custom', S.plan)}${opt('ALL', 'All courses', S.plan)}${opt('LIFETIME', 'Full course', S.plan)}
+                </select>
+            </div>
+            <div class="vlm-sort-box">
+                <select data-filter="source" onchange="vlmSubsFilterChanged(this)" title="How they got it">
+                    ${opt('', 'Paid, free &amp; trial', S.source)}${opt('PAID', 'Paid', S.source)}${opt('ADMIN', 'Free (granted)', S.source)}
+                    ${opt('TRIAL', 'Trial', S.source)}
+                </select>
+            </div>
+        </div>
+        <div id="vlmSubsList">${loading ? '<div class="vlm-loading">Loading subscribers…</div>' : renderSubscriberRows(S.rows, S.total)}</div>
+    </div>`;
+}
+
+function renderSubscriberStats(d) {
+    var stat = function (n, label, cls) { return `<div class="vlm-stat ${cls || ''}"><b>${d ? n : '–'}</b><span>${label}</span></div>`; };
+    return stat(d && d.activeNow, 'Active now') + stat(d && d.paying, 'Paying', 'is-paid') + stat(d && d.free, 'Free (granted)', 'is-free')
+        + stat(d && d.onTrial, 'On trial', 'is-trial') + stat(d ? vlmMoney(d.collected, 'USD') : 0, 'Collected (all time)');
+}
+
+var VLM_STATE_LABELS = { ACTIVE: 'Active', UPCOMING: 'Starts later', EXPIRED: 'Expired', PENDING: 'Payment pending', REVOKED: 'Revoked', CANCELLED: 'Cancelled' };
+var VLM_SOURCE_LABELS = { PAID: 'Paid', ADMIN: 'Free', TRIAL: 'Trial' };
+
+function renderSubscriberRows(rows, total) {
+    if (!rows || !rows.length) {
+        return '<div class="vlm-loading">No subscriptions match these filters.</div>';
+    }
+    var head = `<div class="vlm-sub-row vlm-sub-head"><div>Student</div><div>Plan</div><div>Status</div><div>Period</div><div>Amount</div><div></div></div>`;
+    var body = rows.map(function (r) {
+        var plan = VLM_PLAN_NAMES[r.planCode] || r.planCode;
+        var courses = r.planCode === 'TRIAL' ? 'All enrolled courses'
+            : (r.planCode === 'ALL' || r.planCode === 'LIFETIME') ? 'All enrolled courses of ' + vlmEsc(r.standardName || 'the grade')
+            : (r.courses || []).map(vlmEsc).join(', ');
+        var period = r.startDate ? vlmFmtDate(r.startDate) + ' → ' + (r.endDate ? vlmFmtDate(r.endDate) : r.planCode === 'LIFETIME' ? 'course end' : 'no end') : 'Not started';
+        var amount = r.source === 'PAID' ? vlmMoney(r.amount, r.currency) : '<span class="vlm-muted">Free</span>';
+        var by = r.source === 'ADMIN' ? '<div class="vlm-sub-by"><i class="fa fa-gift"></i> Granted by ' + vlmEsc(r.grantedByName || ('#' + r.grantedBy)) + '</div>' : '';
+        var note = r.note ? '<div class="vlm-sub-note" title="' + vlmEsc(r.note) + '">' + vlmEsc(r.note) + '</div>' : '';
+        var canRevoke = r.source === 'ADMIN' && r.status === 'ACTIVE' && r.state !== 'EXPIRED';
+        return `<div class="vlm-sub-row" data-sub="${r.id}">
+            <div class="vlm-sub-student"><b>${vlmEsc(r.studentName || 'Student #' + r.userId)}</b><small>${vlmEsc(r.email || '')}</small>
+                ${r.standardName ? '<span class="vlm-sub-grade">' + vlmEsc(r.standardName) + '</span>' : ''}</div>
+            <div class="vlm-sub-plan"><b>${vlmEsc(plan)}</b> <span class="vlm-src vlm-src-${vlmEsc(String(r.source).toLowerCase())}">${VLM_SOURCE_LABELS[r.source] || vlmEsc(r.source)}</span>
+                <small>${courses}</small>${by}${note}</div>
+            <div><span class="vlm-state vlm-state-${vlmEsc(String(r.state).toLowerCase())}">${VLM_STATE_LABELS[r.state] || vlmEsc(r.state)}</span></div>
+            <div class="vlm-sub-period"><span class="vlm-sub-label">Period</span>${period}</div>
+            <div class="vlm-sub-amount"><span class="vlm-sub-label">Amount</span>${amount}</div>
+            <div class="vlm-sub-actions">${canRevoke ? `<button type="button" class="vlm-revoke-btn" onclick="vlmAskRevoke(${r.id})"><i class="fa fa-ban"></i> Revoke</button>` : ''}</div>
+        </div>`;
+    }).join('');
+    var more = rows.length < total
+        ? `<div class="vlm-subs-more"><span>Showing ${rows.length} of ${total}</span><button type="button" class="vlm-ghost-btn" onclick="vlmSubsLoadMore(this)">Load more</button></div>`
+        : `<div class="vlm-subs-more"><span>${total} ${total === 1 ? 'subscription' : 'subscriptions'}</span></div>`;
+    return `<div class="vlm-subs">${head}${body}</div>${more}`;
+}
+
+/* grant modal body once a student is found: G = vlmState.grant, plan = chosen plan option */
+function renderGrantForm(G, plan) {
+    var p = G.preview;
+    var current = (p.current || []).map(function (c) {
+        return '<li>' + vlmEsc(VLM_PLAN_NAMES[c.planCode] || c.planCode) + ' (' + (VLM_SOURCE_LABELS[c.source] || c.source) + ') · '
+            + (c.endDate ? 'until ' + vlmFmtDate(c.endDate) : c.planCode === 'LIFETIME' ? 'until the course ends' : 'no end') + (c.startDate > Date.now() ? ' · starts ' + vlmFmtDate(c.startDate) : '') + '</li>';
+    }).join('');
+    var n = (p.courses || []).length;
+    if (!n) {
+        return `<div class="vlm-grant-student">${vlmGrantStudentCard(p)}</div>
+            <div class="vlm-plans-warn"><i class="fa fa-exclamation-triangle"></i> This student has no enrolled course in ${vlmEsc(p.standardName || 'their grade')}, so there is nothing to grant.</div>`;
+    }
+    var plans = (p.plans || []).map(function (o) {
+        var all = n === 1 ? 'The 1 course' : 'All ' + n + ' courses';
+        var hint = o.lifetime ? all + ' · until the course ends' + (o.untilDate ? ' (' + vlmFmtDate(o.untilDate) + ')' : '')
+            : o.minCourses === 0 ? all
+            : o.minCourses === o.maxCourses ? 'Choose ' + o.minCourses + ' courses' : 'Choose ' + o.minCourses + '–' + o.maxCourses + ' courses';
+        return `<label class="vlm-grant-plan ${G.plan === o.planCode ? 'active' : ''}">
+            <input type="radio" name="vlmGrantPlan" value="${o.planCode}" ${G.plan === o.planCode ? 'checked' : ''} onchange="vlmGrantPickPlan(this.value)"/>
+            <b>${vlmEsc(o.name)}</b><small>${hint}</small></label>`;
+    }).join('');
+    var choose = plan && plan.minCourses > 0;
+    var courses = (p.courses || []).map(function (c) {
+        var on = choose ? !!G.picked[c.subjectId] : true;
+        return `<label class="vlm-pick ${on ? 'is-picked' : ''} ${choose ? '' : 'is-fixed'}">
+            <input type="checkbox" value="${c.subjectId}" ${on ? 'checked' : ''} ${choose ? '' : 'disabled'} onchange="vlmGrantPickCourse(this); $(this).closest('.vlm-pick').toggleClass('is-picked', this.checked)"/>
+            <span>${vlmEsc(c.courseTitle)}</span></label>`;
+    }).join('');
+    var count = choose ? Object.keys(G.picked).length + ' of ' + (plan.minCourses === plan.maxCourses ? plan.maxCourses : plan.minCourses + '–' + plan.maxCourses) + ' chosen' : 'all included';
+    return `
+        <div class="vlm-grant-student">${vlmGrantStudentCard(p)}</div>
+        ${current ? '<div class="vlm-grant-current"><b>Already has</b><ul>' + current + '</ul><small>A new grant runs alongside; the student gets whichever lasts longer.</small></div>' : ''}
+        <div class="vlm-label">Plan</div>
+        <div class="vlm-grant-plans">${plans}</div>
+        <div class="vlm-label">Courses <span class="vlm-label-note" id="vlmGrantPickCount">${count}</span></div>
+        <div class="vlm-grant-courses">${courses}</div>
+        <div class="vlm-grant-meta ${plan && plan.lifetime ? 'is-lifetime' : ''}">
+            ${renderGrantDuration('one', G.durValue, G.durUnit, plan && plan.lifetime)}
+            <div class="form-group">
+                <label class="vlm-label" for="vlmGrantNote">Note <span class="vlm-label-note">(optional, admins only)</span></label>
+                <input type="text" id="vlmGrantNote" class="form-control" maxlength="500" placeholder="e.g. Scholarship, sibling offer" value="${vlmEsc(G.note)}" data-field="note" oninput="vlmGrantField(this)"/>
+            </div>
+        </div>`;
+}
+
+function vlmGrantStudentCard(p) {
+    var initials = String(p.studentName || p.email || '?').split(/\s+/).map(function (w) { return w.charAt(0); }).join('').substring(0, 2).toUpperCase();
+    return `<div class="vlm-context"><div class="vlm-context-icon">${vlmEsc(initials)}</div>
+        <div class="vlm-context-text"><b>${vlmEsc(p.studentName || 'Student')}</b><small>${vlmEsc(p.email || '')} · ${vlmEsc(p.standardName || 'No grade')}</small></div></div>`;
+}
+
+/* how long a grant runs: N days / months with quick picks and the end date (scope 'one' | 'many') */
+function renderGrantDuration(scope, value, unit, hidden) {
+    var presets = VLM_DUR_PRESETS.map(function (p) {
+        var label = p[1] === 'DAY' ? p[0] + ' days' : p[0] === 1 ? '1 month' : p[0] + ' months';
+        var on = String(value) === String(p[0]) && unit === p[1];
+        return `<button type="button" class="vlm-dur-preset ${on ? 'active' : ''}" data-value="${p[0]}" data-unit="${p[1]}"
+            onclick="vlmDurPreset('${scope}', ${p[0]}, '${p[1]}')">${label}</button>`;
+    }).join('');
+    return `
+    <div class="form-group vlm-dur ${hidden ? 'vlm-hidden' : ''}" id="vlmDur-${scope}">
+        <label class="vlm-label">How long</label>
+        <div class="vlm-dur-row">
+            <input type="number" class="form-control vlm-dur-value" min="1" step="1" value="${vlmEsc(value)}" data-scope="${scope}" data-dur="durValue"
+                oninput="vlmDurChanged(this)" aria-label="Number of days or months"/>
+            <select class="form-control vlm-dur-unit" data-scope="${scope}" data-dur="durUnit" onchange="vlmDurChanged(this)" aria-label="Days or months">
+                <option value="DAY" ${unit === 'DAY' ? 'selected' : ''}>Days</option>
+                <option value="MONTH" ${unit === 'MONTH' ? 'selected' : ''}>Months</option>
+            </select>
+        </div>
+        <div class="vlm-dur-presets">${presets}</div>
+        <small class="vlm-dur-end"></small>
+    </div>`;
+}
+
+/* many students: grade, name filter, the list, plan, length, note (B = vlmState.bulk) */
+function renderBulkPanel(B, grades) {
+    var gradeOpts = '<option value="0">Choose a grade</option>' + (grades || []).map(function (g) {
+        return `<option value="${g.gradeId}" ${parseInt(g.gradeId, 10) === B.standardId ? 'selected' : ''}>${vlmEsc(g.gradeName)}</option>`;
+    }).join('');
+    var plan = function (code, name, hint) {
+        return `<label class="vlm-grant-plan ${B.plan === code ? 'active' : ''}">
+            <input type="radio" name="vlmBulkPlan" value="${code}" ${B.plan === code ? 'checked' : ''} data-bulk="plan" onchange="vlmBulkField(this)"/>
+            <b>${name}</b><small>${hint}</small></label>`;
+    };
+    return `
+    <div class="vlm-bulk-filters">
+        <div class="vlm-sort-box"><i class="fa fa-graduation-cap"></i>
+            <select data-bulk="standardId" onchange="vlmBulkField(this)" title="Grade">${gradeOpts}</select></div>
+        <div class="vlm-search-box"><i class="fa fa-search"></i>
+            <input type="text" placeholder="Filter by name or email..." value="${vlmEsc(B.search)}" data-bulk="search" oninput="vlmBulkField(this)"/></div>
+    </div>
+    <div id="vlmBulkList"></div>
+    <div class="vlm-label">Plan</div>
+    <div class="vlm-grant-plans">
+        ${plan('ALL', 'All courses', "Each student's own courses")}
+        ${plan('LIFETIME', 'Full course', 'Until each course ends')}
+    </div>
+    ${renderGrantDuration('many', B.durValue, B.durUnit, B.plan === 'LIFETIME')}
+    <div class="form-group">
+        <label class="vlm-label">Note <span class="vlm-label-note">(optional, admins only)</span></label>
+        <input type="text" class="form-control" maxlength="500" placeholder="e.g. Scholarship batch" value="${vlmEsc(B.note)}" data-bulk="note" oninput="vlmBulkField(this)"/>
+    </div>`;
+}
+
+function renderBulkList(B) {
+    if (!B.standardId) {
+        return '<div class="vlm-bulk-empty">Choose a grade to list its active students.</div>';
+    }
+    if (!B.loaded) {
+        return '<div class="vlm-bulk-empty">Loading students…</div>';
+    }
+    if (!B.rows.length) {
+        return '<div class="vlm-bulk-empty">' + (B.search ? 'No student matches this filter.' : 'No active students in this grade.') + '</div>';
+    }
+    var free = B.rows.filter(function (r) { return !r.hasPlan; });
+    var all = free.length > 0 && free.every(function (r) { return B.selected[r.userId]; });
+    var n = Object.keys(B.selected).length;
+    var rows = B.rows.map(function (r) {
+        var on = !!B.selected[r.userId];
+        return `<label class="vlm-bulk-row ${on ? 'is-picked' : ''} ${r.hasPlan ? 'is-off' : ''}">
+            <input type="checkbox" value="${r.userId}" ${on ? 'checked' : ''} ${r.hasPlan ? 'disabled' : ''} onchange="vlmBulkToggle(this)"/>
+            <span class="vlm-bulk-who"><b>${vlmEsc(r.studentName || r.email || ('Student #' + r.userId))}</b><small>${vlmEsc(r.email || '')}</small></span>
+            ${r.hasPlan ? '<span class="vlm-state vlm-state-active">Has a plan</span>' : ''}
+        </label>`;
+    }).join('');
+    var more = B.total > B.rows.length ? `<div class="vlm-bulk-more">Showing ${B.rows.length} of ${B.total}. Use the filter to find the others.</div>` : '';
+    return `
+    <div class="vlm-bulk-head">
+        <label class="vlm-bulk-all"><input type="checkbox" id="vlmBulkAll" ${all ? 'checked' : ''} ${free.length ? '' : 'disabled'} onchange="vlmBulkToggleAll(this)"/>
+            Select all ${free.length}</label>
+        <span class="vlm-label-note" id="vlmBulkCount">${n} selected</span>
+    </div>
+    <div class="vlm-bulk-list">${rows}</div>${more}`;
+}
+
+/* what a bulk grant did */
+function renderBulkResult(d) {
+    var rest = (d.items || []).filter(function (i) { return i.result !== 'GRANTED'; }).map(function (i) {
+        return `<li><b>${vlmEsc(i.studentName || ('Student #' + i.userId))}</b> <span class="vlm-state ${i.result === 'FAILED' ? 'vlm-state-revoked' : 'vlm-state-pending'}">${i.result === 'FAILED' ? 'Failed' : 'Skipped'}</span>
+            <small>${vlmEsc(i.message || '')}</small></li>`;
+    }).join('');
+    return `
+    <div class="vlm-stats">
+        <div class="vlm-stat is-paid"><b>${d.granted || 0}</b><span>Got access</span></div>
+        <div class="vlm-stat is-free"><b>${d.skipped || 0}</b><span>Skipped</span></div>
+        <div class="vlm-stat"><b>${d.failed || 0}</b><span>Failed</span></div>
+    </div>
+    ${rest ? '<div class="vlm-label">Not granted</div><ul class="vlm-bulk-result">' + rest + '</ul>' : '<div class="vlm-bulk-empty">Every chosen student got access.</div>'}`;
+}
+
+/* Grant free access modal */
+function getVideoLibraryGrantModalHtml() {
+    return `
+    <div class="modal fade vlm-modal" id="vlmGrantModal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content vlm-modal-content">
+          <div class="modal-header vlm-modal-header">
+            <h5 class="modal-title"><i class="fa fa-gift mr-1"></i> Grant free access</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span>&times;</span></button>
+          </div>
+          <div class="modal-body">
+            <div class="vlm-views vlm-grant-mode" role="tablist">
+                <button type="button" class="vlm-view-btn active" data-mode="one" onclick="vlmGrantSetMode('one')"><i class="fa fa-user"></i> One student</button>
+                <button type="button" class="vlm-view-btn" data-mode="many" onclick="vlmGrantSetMode('many')"><i class="fa fa-users"></i> Many students</button>
+            </div>
+            <small class="text-muted d-block mb-3">No payment is created. The access is recorded as granted by you and can be revoked.</small>
+            <div id="vlmGrantOne">
+                <label class="vlm-label" for="vlmGrantEmail">Student email <span class="text-danger">*</span></label>
+                <div class="vlm-grant-find">
+                    <input type="email" id="vlmGrantEmail" class="form-control" placeholder="student@example.com" autocomplete="off"
+                        onkeydown="if (event.key === 'Enter') { event.preventDefault(); vlmGrantFind(); }"/>
+                    <button type="button" class="vlm-ghost-btn" onclick="vlmGrantFind()"><i class="fa fa-search mr-1"></i> Find</button>
+                </div>
+                <div id="vlmGrantBody"></div>
+            </div>
+            <div id="vlmGrantMany" class="vlm-hidden"><div id="vlmBulkBody"></div></div>
+          </div>
+          <div class="modal-footer vlm-modal-footer">
+            <span class="vlm-grant-problem" id="vlmGrantProblem"></span>
+            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-success vlm-save-btn" id="vlmGrantSaveBtn" onclick="vlmGrantSave()" disabled>
+                <i class="fa fa-check mr-1"></i> Grant access
+            </button>
+          </div>
+        </div>
+      </div>
     </div>`;
 }
 
@@ -731,7 +1111,143 @@ function getVideoLibraryStyles() {
     .vlm-context-change{border:none;background:none;color:var(--pc,#16aaff);font-weight:700;font-size:12.5px;cursor:pointer;flex-shrink:0;}
     /* courses list */
     .vlm-pl-search{flex:1;max-width:360px;}
+    /* plans & fees */
+    .vlm-plans{display:flex;flex-direction:column;gap:16px;}
+    .vlm-box{background:#fff;border:1px solid #eef1f6;border-radius:16px;padding:18px;box-shadow:0 2px 10px rgba(16,42,67,.04);}
+    .vlm-box-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+    .vlm-box-title{font-size:16px;font-weight:800;color:#1f2733;}
+    .vlm-box-sub{font-size:12.5px;color:#8a94a2;margin-top:2px;}
+    .vlm-box-cur{background:#eef1f6;color:#5a6472;font-size:11px;font-weight:700;border-radius:20px;padding:2px 8px;margin-left:4px;vertical-align:middle;}
+    .vlm-box .vlm-add-btn:disabled{opacity:.45;box-shadow:none;transform:none;cursor:default;}
+    .vlm-paywall{background:#f7f9fc;border-radius:12px;padding:12px 14px;margin-bottom:14px;}
+    .vlm-switch{display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin:0;font-weight:400;}
+    .vlm-switch input{position:absolute;opacity:0;width:0;height:0;}
+    .vlm-switch-track{position:relative;width:38px;height:22px;border-radius:20px;background:#d5dae2;flex-shrink:0;transition:background .15s ease;margin-top:1px;}
+    .vlm-switch-knob{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .15s ease;}
+    .vlm-switch input:checked + .vlm-switch-track{background:#16d39a;}
+    .vlm-switch input:checked + .vlm-switch-track .vlm-switch-knob{left:19px;}
+    .vlm-switch input:focus-visible + .vlm-switch-track{outline:2px solid var(--pc,#16aaff);outline-offset:2px;}
+    .vlm-switch-text{display:flex;flex-direction:column;font-size:13px;color:#2a2f3a;min-width:0;}
+    .vlm-switch-text small{font-size:11.5px;color:#8a94a2;}
+    .vlm-set-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:14px;}
+    .vlm-set{display:flex;flex-direction:column;gap:5px;margin:0;font-weight:400;}
+    .vlm-set > span:first-child{font-size:12px;font-weight:700;color:#555;}
+    .vlm-set small{font-size:11.5px;color:#9aa0a6;}
+    .vlm-set-input{display:flex;align-items:center;gap:8px;}
+    .vlm-set-input input{width:90px;border:1.5px solid #e4e7ec;border-radius:10px;padding:7px 10px;font-size:13.5px;outline:none;}
+    .vlm-set-input input:focus{border-color:var(--pc,#16aaff);}
+    .vlm-set-input i{font-style:normal;font-size:12.5px;color:#6b7583;}
+    .vlm-set-label{font-size:12px;font-weight:700;color:#555;margin-bottom:8px;}
+    .vlm-plan-toggles{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+    .vlm-plans-warn{background:#fff6e7;color:#8a6200;border-radius:10px;padding:10px 12px;font-size:12.5px;font-weight:600;margin-bottom:12px;}
+    .vlm-plans-warn i{color:#f7b924;margin-right:4px;}
+    .vlm-fees{border:1px solid #eef1f6;border-radius:12px;overflow:hidden;}
+    .vlm-fee-row{display:grid;grid-template-columns:minmax(120px,1.2fr) repeat(4,minmax(110px,1fr));gap:10px;align-items:center;padding:8px 12px;border-top:1px solid #f1f3f6;}
+    .vlm-fee-row:first-child{border-top:none;}
+    .vlm-fee-head{background:#f7f9fc;font-size:12px;color:#5a6472;}
+    .vlm-fee-head small{display:block;font-size:10.5px;color:#9aa0a6;font-weight:600;}
+    .vlm-fee-grade{font-size:13px;font-weight:700;color:#1f2733;}
+    .vlm-fee-head .vlm-fee-grade{font-size:12px;color:#5a6472;}
+    .vlm-fee-cell.is-off{opacity:.4;}
+    .vlm-fee-label{display:none;}
+    .vlm-money{display:flex;align-items:center;border:1.5px solid #e4e7ec;border-radius:10px;padding:0 8px;background:#fff;}
+    .vlm-money:focus-within{border-color:var(--pc,#16aaff);}
+    .vlm-money i{font-style:normal;color:#9aa0a6;font-size:13px;}
+    .vlm-money input{border:none;outline:none;width:100%;min-width:0;padding:7px 4px;font-size:13.5px;background:transparent;}
+    .vlm-money.is-bad{border-color:#d92550;}
     .vlm-viewbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+    /* subscribers */
+    .vlm-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:14px;}
+    .vlm-stat{background:#f7f9fc;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;}
+    .vlm-stat b{font-size:19px;color:#1f2733;line-height:1.2;}
+    .vlm-stat span{font-size:11.5px;color:#7a8492;font-weight:600;}
+    .vlm-stat.is-paid b{color:#16a87a;}
+    .vlm-stat.is-free b{color:#c48a00;}
+    .vlm-stat.is-trial b{color:var(--pc,#16aaff);}
+    .vlm-subs-filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+    .vlm-subs-filters .vlm-search-box{flex:1;min-width:200px;}
+    .vlm-subs{border:1px solid #eef1f6;border-radius:12px;overflow:hidden;}
+    .vlm-sub-row{display:grid;grid-template-columns:minmax(170px,1.5fr) minmax(170px,1.6fr) 110px minmax(150px,1.2fr) 80px 88px;gap:10px;align-items:center;padding:10px 12px;border-top:1px solid #f1f3f6;font-size:12.5px;color:#3a4250;}
+    .vlm-sub-row:first-child{border-top:none;}
+    .vlm-sub-head{background:#f7f9fc;font-size:12px;font-weight:700;color:#5a6472;}
+    .vlm-sub-student,.vlm-sub-plan{min-width:0;}
+    .vlm-sub-student b,.vlm-sub-plan b{color:#1f2733;font-size:13px;}
+    .vlm-sub-student small,.vlm-sub-plan small{display:block;color:#8a94a2;font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .vlm-sub-grade{display:inline-block;background:#eef1f6;color:#5a6472;border-radius:20px;padding:1px 8px;font-size:10.5px;font-weight:700;margin-top:3px;}
+    .vlm-sub-by{font-size:11px;color:#a77700;margin-top:2px;}
+    .vlm-sub-note{font-size:11px;color:#8a94a2;font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .vlm-sub-label{display:none;}
+    .vlm-sub-amount{font-weight:700;color:#1f2733;}
+    .vlm-muted{color:#9aa0a6;font-weight:600;}
+    .vlm-src{font-size:10.5px;font-weight:700;border-radius:20px;padding:1px 8px;vertical-align:1px;}
+    .vlm-src-paid{background:#e3f8f0;color:#128a63;}
+    .vlm-src-admin{background:#fff3d6;color:#9a6b00;}
+    .vlm-src-trial{background:color-mix(in srgb, var(--pc,#16aaff) 12%, white);color:var(--pc,#16aaff);}
+    .vlm-state{display:inline-block;font-size:11px;font-weight:700;border-radius:20px;padding:2px 9px;background:#eef1f6;color:#5a6472;white-space:nowrap;}
+    .vlm-state-active{background:#e3f8f0;color:#128a63;}
+    .vlm-state-upcoming{background:color-mix(in srgb, var(--pc,#16aaff) 12%, white);color:var(--pc,#16aaff);}
+    .vlm-state-pending{background:#fff3d6;color:#9a6b00;}
+    .vlm-state-revoked{background:#fde8ee;color:#c21f48;}
+    .vlm-sub-actions{text-align:right;}
+    .vlm-revoke-btn{border:1.5px solid #f3c2cf;background:#fff;color:#d92550;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
+    .vlm-revoke-btn:hover{background:#d92550;border-color:#d92550;color:#fff;}
+    .vlm-subs-more{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;font-size:12.5px;color:#7a8492;}
+    .vlm-grant-find{display:flex;gap:8px;margin-bottom:4px;}
+    .vlm-grant-find input{flex:1;min-width:0;}
+    .vlm-grant-student .vlm-context{margin-bottom:12px;}
+    .vlm-context-text{display:flex;flex-direction:column;min-width:0;}
+    .vlm-context-text b{color:#1f2733;}
+    .vlm-context-text small{color:#7a8492;overflow:hidden;text-overflow:ellipsis;}
+    .vlm-grant-current{background:#fff6e7;border-radius:10px;padding:10px 12px;font-size:12.5px;color:#7a5a00;margin-bottom:12px;}
+    .vlm-grant-current ul{margin:4px 0;padding-left:18px;}
+    .vlm-grant-current small{color:#a8925c;}
+    .vlm-grant-plans{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:14px;}
+    .vlm-grant-plan{border:1.5px solid #e4e7ec;border-radius:10px;padding:9px 11px;cursor:pointer;margin:0;display:flex;flex-direction:column;font-weight:400;}
+    .vlm-grant-plan input{position:absolute;opacity:0;width:0;height:0;}
+    .vlm-grant-plan b{font-size:13px;color:#1f2733;}
+    .vlm-grant-plan small{font-size:11.5px;color:#8a94a2;}
+    .vlm-grant-plan.active{border-color:var(--pc,#16aaff);background:color-mix(in srgb, var(--pc,#16aaff) 7%, white);}
+    .vlm-grant-plan.active b{color:var(--pc,#16aaff);}
+    .vlm-grant-plan:focus-within{outline:2px solid var(--pc,#16aaff);outline-offset:1px;}
+    .vlm-grant-courses{border:1px solid #eef1f6;border-radius:10px;max-height:220px;overflow:auto;margin-bottom:14px;}
+    .vlm-grant-courses .vlm-pick{display:flex;align-items:center;gap:10px;padding:8px 12px;margin:0;border-top:1px solid #f1f3f6;font-weight:600;font-size:13px;cursor:pointer;}
+    .vlm-grant-courses .vlm-pick:first-child{border-top:none;}
+    .vlm-grant-courses .vlm-pick.is-fixed{cursor:default;color:#5a6472;}
+    #vlmGrantPickCount.is-bad{color:#d92550;}
+    .vlm-grant-problem{flex:1;font-size:12px;color:#8a94a2;}
+    .vlm-grant-mode{display:inline-flex;margin-bottom:6px;}
+    .vlm-dur-row{display:flex;gap:8px;max-width:280px;}
+    .vlm-dur-row .vlm-dur-value{width:96px;flex-shrink:0;}
+    .vlm-dur-presets{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+    .vlm-dur-preset{border:1.5px solid #e4e7ec;background:#fff;color:#5a6472;border-radius:20px;padding:3px 11px;font-size:12px;font-weight:700;cursor:pointer;}
+    .vlm-dur-preset:hover{border-color:var(--pc,#16aaff);color:var(--pc,#16aaff);}
+    .vlm-dur-preset.active{background:var(--pc,#16aaff);border-color:var(--pc,#16aaff);color:#fff;}
+    .vlm-dur-end{display:block;margin-top:6px;font-size:12px;font-weight:600;color:#16a87a;}
+    .vlm-dur-end.is-bad{color:#d92550;}
+    .vlm-bulk-filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+    .vlm-bulk-filters .vlm-search-box{flex:1;min-width:200px;}
+    .vlm-bulk-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;background:#f7f9fc;border:1px solid #eef1f6;border-bottom:none;border-radius:10px 10px 0 0;}
+    .vlm-bulk-all{display:flex;align-items:center;gap:8px;margin:0;font-size:12.5px;font-weight:700;color:#3a4250;cursor:pointer;}
+    .vlm-bulk-all input,.vlm-bulk-row input{width:16px;height:16px;accent-color:var(--pc,#16aaff);flex-shrink:0;}
+    .vlm-bulk-list{border:1px solid #eef1f6;border-radius:0 0 10px 10px;max-height:260px;overflow:auto;margin-bottom:12px;}
+    .vlm-bulk-row{display:flex;align-items:center;gap:10px;padding:8px 12px;margin:0;border-top:1px solid #f1f3f6;cursor:pointer;font-weight:400;}
+    .vlm-bulk-row:first-child{border-top:none;}
+    .vlm-bulk-row.is-picked{background:color-mix(in srgb, var(--pc,#16aaff) 7%, white);}
+    .vlm-bulk-row.is-off{cursor:default;opacity:.75;}
+    .vlm-bulk-who{display:flex;flex-direction:column;min-width:0;flex:1;}
+    .vlm-bulk-who b{font-size:13px;color:#1f2733;}
+    .vlm-bulk-who small{font-size:11.5px;color:#8a94a2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .vlm-bulk-empty{font-size:13px;color:#8a94a2;padding:16px 4px;}
+    .vlm-bulk-more{font-size:12px;color:#8a94a2;margin:-6px 0 12px;}
+    .vlm-bulk-result{list-style:none;padding:0;margin:0 0 6px;max-height:240px;overflow:auto;}
+    .vlm-bulk-result li{padding:7px 0;border-top:1px solid #f1f3f6;font-size:13px;}
+    .vlm-bulk-result small{display:block;color:#8a94a2;}
+    .vlm-pd-readonly{background:#f1f5fb;color:#4a5462;border-radius:10px;padding:9px 12px;font-size:12.5px;font-weight:600;margin:-4px 0 14px;}
+    .vlm-pd-readonly i{color:var(--pc,#16aaff);margin-right:4px;}
+    .vlm-readonly .vlm-handle,.vlm-readonly .vlm-more,.vlm-readonly .vlm-ls-actions,.vlm-readonly .vlm-link-btn,
+    .vlm-readonly .vlm-add-video-btn,.vlm-readonly .vlm-tray-hint{display:none !important;}
+    .vlm-grant-meta{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:0 14px;}
+    .vlm-grant-meta.is-lifetime{grid-template-columns:1fr;}
     .vlm-viewbar .vlm-views{margin-bottom:0;}
     .vlm-pl-group{font-size:12px;font-weight:800;color:#5a6472;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 10px;}
     .vlm-pl-group:first-child{margin-top:0;}
@@ -743,6 +1259,7 @@ function getVideoLibraryStyles() {
     .vlm-pl-card.is-empty .vlm-pl-title{color:#5a6472;}
     .vlm-pl-tip{font-size:12.5px;color:#8a94a2;margin:-6px 0 14px;}
     .vlm-pl-tip i{color:var(--pc,#16aaff);margin-right:4px;}
+    .vlm-pl-found{font-size:13px;font-weight:600;color:#495057;margin:-6px 0 12px;}
     .vlm-pl-loose{background:#fff6e7;color:#c48a00;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;}
     .vlm-pl-title{font-size:15px;font-weight:700;color:#1f2733;margin:9px 0 6px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:39px;}
     .vlm-pl-meta{display:flex;align-items:center;font-size:12px;color:#7a8492;font-weight:600;}
@@ -800,11 +1317,40 @@ function getVideoLibraryStyles() {
         .vlm-view-btn{flex:1;justify-content:center;}
         .vlm-pl-search{max-width:none;}
         .vlm-viewbar{flex-direction:column;align-items:stretch;}
+        .vlm-view-btn{padding:8px 4px;font-size:12px;gap:5px;white-space:nowrap;}
+        .vlm-box{padding:14px;}
+        .vlm-box-head .vlm-add-btn{width:100%;}
+        .vlm-fee-head{display:none;}
+        .vlm-fee-row{grid-template-columns:1fr 1fr;gap:8px 10px;padding:12px;}
+        .vlm-fee-grade{grid-column:1/-1;}
+        .vlm-fee-label{display:block;font-size:11px;font-weight:700;color:#5a6472;margin-bottom:3px;}
+        .vlm-fee-label small{font-weight:600;color:#9aa0a6;}
         .vlm-grade-box select{width:100%;}
         .vlm-pd-head{gap:10px;}
         .vlm-pd-head .vlm-ghost-btn{width:100%;}
         .vlm-add-video-btn span{display:none;}
         .vlm-vr-thumb{width:64px;}
+        .vlm-views{flex-wrap:wrap;}
+        .vlm-view-btn{flex:1 1 45%;}
+        .vlm-stats{grid-template-columns:1fr 1fr;}
+        .vlm-stat:last-child{grid-column:1/-1;}
+        .vlm-subs-filters .vlm-search-box,.vlm-subs-filters .vlm-sort-box{flex:1 1 100%;min-width:0;}
+        .vlm-sub-head{display:none;}
+        .vlm-sub-row{grid-template-columns:1fr auto;gap:6px 10px;padding:12px;}
+        .vlm-sub-student,.vlm-sub-plan{grid-column:1/-1;}
+        .vlm-sub-student{order:-2;}
+        .vlm-sub-row > div:nth-child(3){order:-1;grid-column:1/-1;}
+        .vlm-sub-label{display:block;font-size:10.5px;font-weight:700;color:#9aa0a6;}
+        .vlm-sub-amount{text-align:right;}
+        .vlm-sub-actions{grid-column:1/-1;text-align:left;}
+        .vlm-sub-actions:empty{display:none;}
+        .vlm-subs-more{flex-direction:column;align-items:stretch;text-align:center;}
+        .vlm-grant-plans{grid-template-columns:1fr 1fr;}
+        .vlm-grant-meta{grid-template-columns:1fr;}
+        .vlm-grant-mode{display:flex;}
+        .vlm-bulk-filters .vlm-search-box,.vlm-bulk-filters .vlm-sort-box{flex:1 1 100%;min-width:0;}
+        .vlm-bulk-filters .vlm-sort-box select{width:100%;}
+        .vlm-dur-row{max-width:none;}
         .vlm-ls-head{gap:6px;padding:8px;}
         .vlm-ls-videos{padding:4px 8px;}
     }

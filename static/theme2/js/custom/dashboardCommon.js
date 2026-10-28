@@ -258,12 +258,18 @@ function validateChangePassword(formId) {
 		showMessageTheme2(0, " New password and confirm password mismatch.", '', false);
 		return false;
 	}
+	var isSiblingFirstLogin = $('#' + formId).hasClass('sibling-first-login');
+	if (isSiblingFirstLogin && $('#' + formId + ' #newpassword').val().trim() == $('#' + formId + ' #oldpassword').val().trim()) {
+		showMessageTheme2(0, " New password must be different from your temporary password.", '', false);
+		return false;
+	}
 	if (!checkPasswordStrength(
 		$('#' + formId + ' #newpassword').get(0),
 		formId,
 		'newpassword',
 		'P'
 	)) {
+		if (isSiblingFirstLogin) { $('#' + formId + ' .password-sugession').hide(); }
 		showMessageTheme2(0, " New password must match all requirements", '', false);
 		return false;
 	}
@@ -276,6 +282,10 @@ function validateChangePassword(formId) {
 	)) {
 		showMessageTheme2(0, " Confirm password must match all requirements", '', false);
 		return false;
+	}
+	if (isSiblingFirstLogin) {
+		// the requirements are already shown inline in this layout, so drop the floating suggestion boxes
+		$('#' + formId + ' .password-sugession').hide();
 	}
 	return true;
 }
@@ -298,6 +308,173 @@ function openLeadAutomationDashboardInNewTab() {
 	var popup = window.open(url, "_blank");
 	if (!popup) {
 		return false;
+	}
+	return false;
+}
+function getAddChildButtonLabel(defaultLabel) {
+	var profile = (typeof commonProfileDTO !== "undefined" && commonProfileDTO) ? commonProfileDTO : {};
+	var firstName = String(profile.partialChildName || "").trim().split(/\s+/)[0];
+	if (profile.hasPartialChild !== "Y" || !firstName) {
+		return defaultLabel;
+	}
+	return $("<div>").text("Resume " + firstName + "'s Enrollment").html();
+}
+
+function getAddChildButtonHtml(defaultLabel, displayClass) {
+	startPartialChildPolling();
+	return '<button type="button" class="btn btn-primary btn-sm add-child-btn ' + (displayClass || 'd-inline-flex') + ' align-items-center flex-shrink-0 px-3 py-1 ml-2" data-default-label="' + $("<div>").text(defaultLabel).html() + '" style="font-size:14px;line-height:1.5;max-width:260px;" onclick="return enrollOnBehalfOf(this);">'
+		+ '<i class="fa fa-plus-circle mr-2"></i>'
+		+ '<span class="text-truncate add-child-btn-label" style="margin-bottom:1px;">' + getAddChildButtonLabel(defaultLabel) + '</span></button>';
+}
+
+// The partial (resume) child can change while the dashboard stays open, e.g. after the
+// parent finishes the Add Another Student enrollment. get-user-short-profile runs only once
+// at load, so poll the lighter get-partial-child-name every minute and relabel the buttons.
+var PARTIAL_CHILD_POLL_MS = 1 * 60 * 1000;
+var partialChildPollTimer = null;
+
+function startPartialChildPolling() {
+	if (partialChildPollTimer || typeof USER_ID === "undefined" || !USER_ID) {
+		return;
+	}
+	partialChildPollTimer = setInterval(refreshPartialChild, PARTIAL_CHILD_POLL_MS);
+}
+
+async function refreshPartialChild() {
+	if (document.hidden || typeof commonProfileDTO === "undefined" || !commonProfileDTO) {
+		return;
+	}
+	try {
+		var data = await callCommonAjax({
+			method: "POST",
+			url: getURLFor("get-partial-child-name", ""),
+			body: { userId: USER_ID },
+			global: false,
+			showMessage: false
+		});
+		if (!data || data.status != 1) {
+			return;
+		}
+		commonProfileDTO.hasPartialChild = data.hasPartialChild;
+		commonProfileDTO.partialChildName = data.partialChildName;
+		commonProfileDTO.partialChildUserId = data.partialChildUserId;
+		$(".add-child-btn").each(function () {
+			$(this).find(".add-child-btn-label").html(getAddChildButtonLabel($(this).data("default-label")));
+		});
+	} catch (e) {
+		// transient failure: try again on the next poll
+	}
+}
+
+function getSelectAnotherChildButtonHtml(displayClass) {
+	return '<button type="button" class="btn btn-primary btn-sm ' + (displayClass || 'd-inline-flex') + ' align-items-center flex-shrink-0 px-3 py-1 ml-2 my-2" style="font-size:14px;line-height:1.5;" onclick="renderParentChildSelectionScreen();">Select Another Child</button>';
+}
+
+// Step slugs for the Add Another Student wizard, mirroring
+// utils/addEnrollmentSteps.js on the Next.js side. signupPage comes back on the
+// backend's 4-step numbering (1 student, 2 parent, 3 course, 4 review); this
+// wizard has no parent step, so 4 is its own step 3. Anything out of range
+// falls back to step 1.
+var ADD_ENROLLMENT_STEP_SLUGS = { 1: "student-details", 2: "course-selection", 3: "review-and-payment" };
+function addEnrollmentStepSlug(signupPage) {
+	var page = Number(signupPage);
+	if (page === 4) {
+		page = 3;
+	}
+	if (!(page >= 1 && page <= 3)) {
+		page = 1;
+	}
+	return ADD_ENROLLMENT_STEP_SLUGS[page];
+}
+
+function enrollOnBehalfOf(btn) {
+	var $btn = $(btn);
+	if ($btn.data("loading")) {
+		return false;
+	}
+	// This button can sit on an open dashboard tab for a long time (e.g. while the
+	// parent is away doing the enrollment itself in the is-sms wizard, where logging
+	// out there invalidates this same HttpSession server-side — see
+	// ClientCommonController#logoutSchool). Re-check the session on click, same
+	// pattern as callWithSession() above, so a stale click surfaces the existing
+	// "session has been logged out" modal instead of silently hitting a dead session.
+	if (!getSession()) {
+		redirectLoginPage();
+		return false;
+	}
+	var parentId = commonProfileDTO && commonProfileDTO.parentId;
+	if (!parentId) {
+		showMessageTheme2(0, "Parent not found", "", true);
+		return false;
+	}
+	// open the tab on click itself so the popup blocker allows it; its location is set after the API succeeds
+	var newTab = window.open("", "_blank");
+	$btn.data("loading", true).prop("disabled", true);
+	// location captured same as callLocationDetails() in locationFinder.js: bypass -> DEFAULT_LOCATION, else IP location API
+	var enrollAnotherChild = function (locationData) {
+		$.ajax({
+			type: "POST",
+			url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/api/v1/enroll/another/child",
+			contentType: APPLICATION_JSON_VALUE,
+			data: JSON.stringify({
+				parentId: parentId,
+				sessionUserId: UNIQUEUUID,
+				rollNo: (commonProfileDTO.hasPartialChild === "Y" && commonProfileDTO.partialChildRollNo) || "",
+				location: (locationData != undefined && locationData != '') ? JSON.stringify(locationData) : ""
+			}),
+			dataType: "json",
+			cache: false,
+			success: function (res) {
+				if (res && (res.status === "success" || res.status === 1 || res.status === "1")) {
+					// Land on the resumed step itself rather than the wizard's base path:
+					// /api/sso forwards `next` verbatim, so without the /step/ segment the
+					// browser has to load the base page and bounce again from there. The
+					// step is a hint — useAddWizardResume re-checks it against the child's
+					// real progress and corrects it if this guess is stale.
+					var addEnrollStep = addEnrollmentStepSlug(res.data && res.data.signupPage);
+					var addEnrollPath = "/" + SCHOOL_UUID + "/add-enrollment/" + parentId + "/" + UNIQUEUUID
+						+ "/step/" + addEnrollStep;
+					var enrollUrl;
+					if (res.ssoToken) {
+						enrollUrl = NEXTJS_APP_URL + "api/sso?token=" + encodeURIComponent(res.ssoToken)
+							+ "&school=" + encodeURIComponent(SCHOOL_UUID)
+							+ "&schoolName=" + encodeURIComponent(res.schoolName || "")
+							+ "&next=" + encodeURIComponent(addEnrollPath)
+							+ "&ae=Y";
+					} else {
+						enrollUrl = NEXTJS_APP_URL + SCHOOL_UUID + "/add-enrollment/" + parentId + "/" + UNIQUEUUID
+							+ "/step/" + addEnrollStep;
+					}
+					if (newTab) {
+						newTab.location.href = enrollUrl;
+					} else {
+						window.open(enrollUrl, "_blank");
+					}
+					$btn.data("loading", false).prop("disabled", false);
+					return;
+				}
+				if (newTab) { newTab.close(); }
+				showMessageTheme2(0, (res && res.message) || "Unable to process", "", true);
+				$btn.data("loading", false).prop("disabled", false);
+			},
+			error: function () {
+				if (newTab) { newTab.close(); }
+				showMessageTheme2(0, "Something went wrong. Please try again.", "", true);
+				$btn.data("loading", false).prop("disabled", false);
+			}
+		});
+	};
+	if (LOCATION_SERVICE_BYPASS == 'true') {
+		enrollAnotherChild(JSON.parse(DEFAULT_LOCATION));
+	} else {
+		$.ajax({
+			global: false,
+			type: "GET",
+			url: PRO_IP_API_URL,
+			timeout: 5000,
+			success: function (data) { enrollAnotherChild(data); },
+			error: function () { enrollAnotherChild(""); }
+		});
 	}
 	return false;
 }
@@ -332,6 +509,8 @@ function changePassword(dashboardFor) {
 				}
 			} else {
 				$('#changePasswordModal').modal('hide');
+				// the temporary password is replaced, so the sibling first-login layout is no longer needed
+				window.ADD_SIBLING_FIRST_LOGIN = false;
 				// var local = JSON.parse(localStorage.getItem("profile"+USER_ID));
 				// local.lastPassUpdatedDate = false;
 				// localStorage.setItem("profile"+USER_ID, JSON.stringify(local));
@@ -889,11 +1068,6 @@ function validateRequestForSendEmail(formId, moduleId) {
 // 	signupDTO['confirmEmail'] = $("#" + formId + " #emailId").val().trim();
 // 	signupDTO['password'] = '1234567';
 // 	signupDTO['confirmPassword'] = '1234567';
-
-// 	if ($("#" + formId + " #captcha").val().trim() != null) {
-
-// 		signupDTO['captcha'] = $("#" + formId + " #captcha").val().trim();
-// 	}
 // 	signupDTO['signupType'] = 'Offline';
 // 	signupDTO['isAdminCreateUser'] = 'AdminCreateUser';
 // 	signupDTO['userType'] = moduleId;

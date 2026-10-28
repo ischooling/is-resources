@@ -36,6 +36,16 @@ var vlmState = {
     picked: {},             // {videoId: true}
     pickSearch: '',
     sortableLoading: null,  // promise of the SortableJS script
+    // "Plans & Fees" tab: what the server has (saved) and what the form shows (form)
+    plans: { loaded: false, saved: null, form: null, dirtySettings: false, dirtyFees: false },
+    // "Subscribers" tab: one list page at a time (newest first), filters, and the grant modal's student
+    subs: { loaded: false, rows: [], total: 0, summary: null, search: '', status: '', plan: '', source: '', req: 0 },
+    grant: null,            // {preview, plan, picked {subjectId: true}, durValue, durUnit, note} of the student found in the grant modal
+    grantMode: 'one',       // grant modal tab: 'one' student by email | 'many' students of a grade
+    bulk: null,             // {standardId, search, rows, total, selected {userId: true}, plan, durValue, durUnit, note, result, req}
+    ap: false,              // the grade filter is on "AP Courses" (view-only)
+    apCourses: [],          // the AP courses (/subjects/ap), one per grade + title
+    readOnly: false,        // the open course page is view-only (opened from "AP Courses")
     confirmAction: null
 };
 
@@ -98,6 +108,7 @@ function videoLibraryManagementOnLoad() {
         $('body').append(getVideoLibraryPlayerModalHtml());
         $('body').append(getVideoLibraryConfirmModalHtml());
         $('body').append(getVideoLibraryLessonModalHtml());
+        $('body').append(getVideoLibraryGrantModalHtml());
         $('#vlmConfirmDeleteBtn').on('click', function () {
             var action = vlmState.confirmAction;
             vlmState.confirmAction = null;
@@ -117,6 +128,7 @@ function videoLibraryManagementOnLoad() {
     }
     vlmState.activeSubject = '';
     vlmState.grade = 0;
+    vlmState.ap = false;
     vlmState.search = '';
     vlmState.sortBy = 'playlist';
     vlmState.openPlaylistId = 0;
@@ -128,6 +140,7 @@ function videoLibraryManagementOnLoad() {
     vlmLoadSubjects().then(function () {
         vlmLoadVideos();
     });
+    vlmLoadApCourses();
     $('#vlmSearch').off('input').on('input', function () {
         vlmState.search = (this.value || '').trim().toLowerCase();
         vlmRender();
@@ -137,11 +150,14 @@ function videoLibraryManagementOnLoad() {
         vlmRender();
     });
     $('#vlmGradeFilter').off('change').on('change', function () {
-        vlmState.grade = parseInt(this.value, 10) || 0;
+        vlmState.ap = this.value === 'AP';
+        vlmState.grade = vlmState.ap ? 0 : (parseInt(this.value, 10) || 0);
         vlmState.activeSubject = '';
         vlmRenderChips();
         vlmRender();
         vlmRenderPlaylists();
+        if (vlmState.view === 'plans') { vlmRenderPlans(); }
+        if (vlmState.view === 'subscribers') { vlmLoadSubscribers(false); } else { vlmState.subs.loaded = false; }
     });
     $('#vlmPlSearch').off('input').on('input', function () {
         vlmState.plSearch = (this.value || '').trim().toLowerCase();
@@ -208,6 +224,7 @@ function vlmLoadGrades() {
             vlmState.grades = response.details || [];
             vlmFillGradeSelect();
             vlmFillGradeFilter();
+            if (vlmState.view === 'plans') { vlmRenderPlans(); }   // the fee table lists these grades
             vlmRender();   // playlist order sorts by grade order
         }
     }).catch(function () { /* handled globally */ });
@@ -504,6 +521,7 @@ function vlmCourseKey(v) {
 }
 
 function vlmInGrade(v) {
+    if (vlmState.ap) { return vlmIsApKey(vlmCourseKey(v)); }
     var g = vlmState.grade;
     if (!g) { return true; }
     return parseInt(v.standardId, 10) === g || (v.gradeIds || []).some(function (x) { return parseInt(x, 10) === g; });
@@ -540,7 +558,25 @@ function vlmFillGradeFilter() {
     }).map(function (g) {
         return '<option value="' + g.gradeId + '">' + vlmEsc(g.gradeName) + '</option>';
     }).join('');
-    $('#vlmGradeFilter').html(opts).val(String(vlmState.grade));
+    var apTab = vlmState.view === 'playlists' || vlmState.view === 'videos';
+    if (apTab && vlmState.apCourses.length) {
+        opts += '<option value="AP">AP Courses</option>';
+    }
+    $('#vlmGradeFilter').html(opts).val(vlmState.ap ? 'AP' : String(vlmState.grade));
+}
+
+/* the AP courses for the view-only "AP Courses" filter (nothing can be added to them) */
+function vlmLoadApCourses() {
+    return vlmPost('subjects/ap', {}, false).then(function (response) {
+        if (vlmIsSuccess(response)) {
+            vlmState.apCourses = response.details || [];
+            vlmFillGradeFilter();
+        }
+    }, function () { /* the filter just has no AP option */ });
+}
+
+function vlmIsApKey(key) {
+    return vlmState.apCourses.some(function (s) { return vlmCourseKey(s) === key; });
 }
 
 function vlmAnimateCards() {
@@ -1075,10 +1111,26 @@ function vlmStopPlayer() {
 
 function vlmSwitchView(view) {
     vlmState.view = view;
+    if (vlmState.ap && (view === 'plans' || view === 'subscribers')) {
+        vlmState.ap = false;   // AP courses have no plans or subscribers: back to all grades
+        vlmRenderChips();
+        vlmRender();
+        vlmRenderPlaylists();
+    }
+    vlmFillGradeFilter();
     $('.vlm-view-btn').removeClass('active');
     $('.vlm-view-btn[data-view="' + view + '"]').addClass('active');
     $('#vlmVideosView').toggleClass('vlm-hidden', view !== 'videos');
     $('#vlmPlaylistsView').toggleClass('vlm-hidden', view !== 'playlists');
+    $('#vlmPlansView').toggleClass('vlm-hidden', view !== 'plans');
+    $('#vlmSubsView').toggleClass('vlm-hidden', view !== 'subscribers');
+    if (view === 'subscribers' && !vlmState.subs.loaded) {
+        vlmLoadSubscribers(false);
+    }
+    if (view === 'plans') {
+        // unsaved edits survive a trip to another tab
+        if (vlmState.plans.loaded) { vlmRenderPlans(); } else { vlmLoadPlanSetup(); }
+    }
     if (view === 'playlists') {
         // coming back to the tab reopens the playlist that was open (it was kept in sync meanwhile)
         if (vlmState.openPlaylistId && vlmState.playlist) {
@@ -1117,7 +1169,11 @@ function vlmRenderPlaylists() {
     var list = vlmCourseList().filter(function (p) {
         return !q || (p.title || '').toLowerCase().indexOf(q) !== -1 || (p.standardName || '').toLowerCase().indexOf(q) !== -1;
     });
-    $('#vlmPlGrid').html((vlmState.grade ? '' : '<div class="vlm-pl-tip"><i class="fa fa-info-circle"></i> Showing courses that have videos. Pick a grade to see all of its courses.</div>')
+    var tip = vlmState.ap ? '<div class="vlm-pl-tip"><i class="fa fa-eye"></i> AP courses are view-only. Videos cannot be added to them.</div>'
+        : vlmState.grade ? '' : '<div class="vlm-pl-tip"><i class="fa fa-info-circle"></i> Showing courses that have videos. Pick a grade to see all of its courses.</div>';
+    var found = (vlmState.grade || vlmState.ap) && list.length > 0
+        ? '<div class="vlm-pl-found">' + list.length + (list.length === 1 ? ' Course' : ' Courses') + ' Found</div>' : '';
+    $('#vlmPlGrid').html(found + tip
         + renderPlaylistCards(list, vlmUnplacedByPlaylist()));
     if (vlmState.gsapReady && window.gsap) {
         window.gsap.from('#vlmPlGrid .vlm-pl-card', { y: 14, opacity: 0, duration: 0.4, stagger: 0.03, ease: 'power2.out' });
@@ -1129,6 +1185,14 @@ function vlmRenderPlaylists() {
 function vlmCourseList() {
     var key = function (standardId, title) { return (standardId || '') + '|' + (title || '').trim().toLowerCase(); };
     var playlists = vlmState.playlists.slice().sort(function (a, b) { return vlmGradeRank(a) - vlmGradeRank(b); });
+    if (vlmState.ap) {
+        var pk = {};
+        playlists.forEach(function (p) { pk[key(p.standardId, p.courseTitle || p.title)] = p; });
+        return vlmState.apCourses.map(function (s) {
+            return pk[key(s.standardId, s.subjectName)] || { id: 0, subjectId: s.subjectId, standardId: s.standardId, standardName: s.standardName,
+                title: s.subjectName, courseTitle: s.subjectName, lessonCount: 0, videoCount: 0, empty: true };
+        });
+    }
     if (!vlmState.grade) { return playlists; }
     var g = vlmState.grade;
     var byKey = {};
@@ -1152,7 +1216,9 @@ function vlmCourseList() {
 
 /* open a course that has no playlist yet: an empty course page; the first lesson / video creates its playlist */
 function vlmOpenEmptyCourse(subjectId) {
-    var s = vlmFindSubject(subjectId);
+    vlmState.readOnly = vlmState.ap;
+    var s = vlmState.ap ? vlmState.apCourses.filter(function (x) { return parseInt(x.subjectId, 10) === parseInt(subjectId, 10); })[0]
+        : vlmFindSubject(subjectId);
     if (!s) { return; }
     vlmState.openPlaylistId = 0;
     vlmState.playlist = {
@@ -1189,6 +1255,7 @@ function vlmUnplacedByPlaylist() {
 }
 
 function vlmOpenPlaylist(id) {
+    vlmState.readOnly = vlmState.ap;
     vlmState.openPlaylistId = id;
     vlmLoadPlaylistDetail(false);
 }
@@ -1317,6 +1384,581 @@ function vlmAskDeleteLesson(lessonId) {
         });
 }
 
+/* ---- subscription: Plans & Fees ---- */
+
+function vlmLoadPlanSetup() {
+    $('#vlmPlansView').html('<div class="vlm-loading">Loading plans…</div>');
+    vlmPost('subscription/plan-setup', {}, true).then(function (response) {
+        if (vlmIsSuccess(response) && response.details) {
+            vlmApplyPlanSetup(response.details, false, false);
+        } else {
+            $('#vlmPlansView').html('<div class="vlm-loading">Could not load the plans.</div>');
+            showMessageTheme2(0, (response && response.message) ? response.message : 'Failed to load the plans.');
+        }
+    }, function () {
+        $('#vlmPlansView').html('<div class="vlm-loading">Could not load the plans.</div>');
+        showMessageTheme2(0, 'Failed to load the plans.');
+    });
+}
+
+/* take the server's setup; keepSettings / keepFees = leave the form's unsaved edits of that part alone */
+function vlmApplyPlanSetup(d, keepSettings, keepFees) {
+    var P = vlmState.plans;
+    var saved = { settings: vlmPlanSettingsForm(d.settings || (P.saved && P.saved.settings ? P.saved.settings : {})), fees: {} };
+    if (d.fees) {
+        d.fees.forEach(function (f) {
+            var n = Number(f.fee) || 0;
+            saved.fees[f.standardId + '|' + f.planCode] = n > 0 ? n.toFixed(2) : '';
+        });
+    } else if (P.saved) {
+        saved.fees = P.saved.fees;
+    }
+    var form = {
+        settings: keepSettings && P.form ? P.form.settings : $.extend({}, saved.settings),
+        fees: keepFees && P.form ? P.form.fees : $.extend({}, saved.fees)
+    };
+    vlmState.plans = { loaded: true, saved: saved, form: form, dirtySettings: false, dirtyFees: false };
+    vlmPlansDirty();
+    vlmRenderPlans();
+}
+
+/* server settings -> form values (numbers as text, reminders as "3,1") */
+function vlmPlanSettingsForm(s) {
+    return {
+        enabled: !!s.enabled,
+        trialDays: s.trialDays !== undefined && s.trialDays !== null ? String(s.trialDays) : '0',
+        renewBeforeDays: s.renewBeforeDays !== undefined && s.renewBeforeDays !== null ? String(s.renewBeforeDays) : '3',
+        reminderDaysText: (s.reminderDays || []).join(','),
+        planThreeCourses: !!s.planThreeCourses,
+        planCustom: !!s.planCustom,
+        planAll: !!s.planAll,
+        planLifetime: !!s.planLifetime
+    };
+}
+
+function vlmPlanGrades() {
+    return vlmState.grades.filter(function (g) { return !vlmState.grade || parseInt(g.gradeId, 10) === vlmState.grade; });
+}
+
+function vlmRenderPlans() {
+    var P = vlmState.plans;
+    if (!P.loaded) { return; }
+    var anyFee = Object.keys(P.saved.fees).some(function (k) { return Number(P.saved.fees[k]) > 0; });
+    $('#vlmPlansView').html(renderPlansView({
+        settings: P.form.settings, fees: P.form.fees, grades: vlmPlanGrades(),
+        dirtySettings: P.dirtySettings, dirtyFees: P.dirtyFees, anyFee: anyFee
+    }));
+    $('#vlmPlansView input[data-fee]').each(function () { vlmMarkFeeInput(this); });
+}
+
+function vlmPlanSettingChanged(el) {
+    var key = el.getAttribute('data-setting');
+    var P = vlmState.plans;
+    if (key === 'reminderDays') {
+        P.form.settings.reminderDaysText = el.value;
+    } else if (el.type === 'checkbox') {
+        P.form.settings[key] = el.checked;
+    } else {
+        P.form.settings[key] = el.value;
+    }
+    vlmPlansDirty();
+    if (el.type === 'checkbox') {
+        vlmRenderPlans();   // plan switches grey out their fee column; the paywall switch shows / hides the warning
+    }
+}
+
+function vlmPlanFeeChanged(el) {
+    vlmState.plans.form.fees[el.getAttribute('data-fee')] = el.value;
+    vlmMarkFeeInput(el);
+    vlmPlansDirty();
+}
+
+/* '' / 0 .. 99999.99 with at most 2 decimals; null = invalid */
+function vlmParseFee(v) {
+    var t = String(v === undefined || v === null ? '' : v).trim();
+    if (t === '') { return 0; }
+    if (!/^\d{1,5}(\.\d{0,2})?$/.test(t)) { return null; }
+    var n = Number(t);
+    return n >= 0 && n <= 99999.99 ? n : null;
+}
+
+function vlmMarkFeeInput(el) {
+    $(el).closest('.vlm-money').toggleClass('is-bad', vlmParseFee(el.value) === null);
+}
+
+/* which fees differ from what is saved: [{standardId, planCode, fee}] (invalid ones too, as fee null) */
+function vlmChangedFees() {
+    var P = vlmState.plans;
+    var out = [];
+    Object.keys(P.form.fees).forEach(function (k) {
+        var now = vlmParseFee(P.form.fees[k]);
+        var was = vlmParseFee(P.saved.fees[k]);
+        if (now === null || Math.round(now * 100) !== Math.round((was || 0) * 100)) {
+            var parts = k.split('|');
+            out.push({ standardId: parseInt(parts[0], 10), planCode: parts[1], fee: now });
+        }
+    });
+    return out;
+}
+
+function vlmPlansDirty() {
+    var P = vlmState.plans;
+    var a = P.form.settings, b = P.saved.settings;
+    P.dirtySettings = Object.keys(a).some(function (k) { return String(a[k]).replace(/\s+/g, '') !== String(b[k]).replace(/\s+/g, ''); });
+    P.dirtyFees = vlmChangedFees().length > 0;
+    $('#vlmSaveSettingsBtn').prop('disabled', !P.dirtySettings);
+    $('#vlmSaveFeesBtn').prop('disabled', !P.dirtyFees);
+}
+
+function vlmSavePlanFees() {
+    var changed = vlmChangedFees();
+    if (!changed.length) { return; }
+    if (changed.some(function (f) { return f.fee === null; })) {
+        showMessageTheme2(0, 'Please enter fees between 0 and 99999.99 (up to 2 decimals).');
+        return;
+    }
+    vlmMutate('subscription/plan-fees/save', { fees: changed }, 'Fees saved.').then(function (response) {
+        if (response && response.details) {
+            vlmApplyPlanSetup(response.details, vlmState.plans.dirtySettings, false);
+        }
+    });
+}
+
+function vlmSaveSubscriptionSettings() {
+    var f = vlmState.plans.form.settings;
+    var whole = function (v, min, max) {
+        var t = String(v).trim();
+        if (!/^\d+$/.test(t)) { return null; }
+        var n = parseInt(t, 10);
+        return n >= min && n <= max ? n : null;
+    };
+    var trial = whole(f.trialDays, 0, 365);
+    if (trial === null) { showMessageTheme2(0, 'Free trial must be 0 to 365 days (0 = no trial).'); return; }
+    var renew = whole(f.renewBeforeDays, 0, 28);
+    if (renew === null) { showMessageTheme2(0, 'Renewal can open 0 to 28 days before the end.'); return; }
+    var reminders = [];
+    var parts = String(f.reminderDaysText || '').split(/[\s,;]+/).filter(function (x) { return x !== ''; });
+    for (var i = 0; i < parts.length; i++) {
+        var d = whole(parts[i], 1, 60);
+        if (d === null) { showMessageTheme2(0, 'Reminder days must be numbers from 1 to 60, e.g. 3,1.'); return; }
+        if (reminders.indexOf(d) < 0) { reminders.push(d); }
+    }
+    if (reminders.length > 5) { showMessageTheme2(0, 'At most 5 reminder days.'); return; }
+    var settings = {
+        enabled: !!f.enabled, trialDays: trial, renewBeforeDays: renew, reminderDays: reminders,
+        planThreeCourses: !!f.planThreeCourses, planCustom: !!f.planCustom, planAll: !!f.planAll, planLifetime: !!f.planLifetime
+    };
+    vlmMutate('subscription/settings/save', { settings: settings }, 'Settings saved.').then(function (response) {
+        if (response && response.details) {
+            vlmApplyPlanSetup({ settings: response.details }, false, true);
+        }
+    });
+}
+
+/* ---- subscription: Subscribers, free grants, revoke ---- */
+
+var VLM_SUBS_PAGE = 50;
+var VLM_PLAN_NAMES = { TRIAL: 'Free trial', THREE_COURSES: '3 courses', CUSTOM: 'Custom', ALL: 'All courses', LIFETIME: 'Full course' };
+
+/* load the first page (more = append the next page); a newer request wins */
+function vlmLoadSubscribers(more) {
+    var S = vlmState.subs;
+    var req = ++S.req;
+    if (!more) {
+        if ($('#vlmSubsList').length) {
+            $('#vlmSubsList').addClass('vlm-saving');   // keep the filters (and the search box focus); dim the old rows
+        } else {
+            $('#vlmSubsView').html(renderSubscribersView(S, true));
+        }
+    }
+    return vlmPost('subscription/subscribers', {
+        search: S.search, status: S.status, planCode: S.plan, source: S.source, standardId: vlmState.grade || 0,
+        offset: more ? S.rows.length : 0, limit: VLM_SUBS_PAGE
+    }, false).then(function (response) {
+        if (req !== S.req) { return; }
+        if (vlmIsSuccess(response) && response.details) {
+            var d = response.details;
+            S.rows = more ? S.rows.concat(d.rows || []) : (d.rows || []);
+            S.total = d.total || 0;
+            S.summary = d;
+            S.loaded = true;
+            vlmRenderSubscribers();
+        } else {
+            $('#vlmSubsList').removeClass('vlm-saving').html('<div class="vlm-loading">Could not load the subscribers.</div>');
+            showMessageTheme2(0, (response && response.message) ? response.message : 'Failed to load the subscribers.');
+        }
+    }, function () {
+        if (req !== S.req) { return; }
+        $('#vlmSubsList').removeClass('vlm-saving').html('<div class="vlm-loading">Could not load the subscribers.</div>');
+        showMessageTheme2(0, 'Failed to load the subscribers.');
+    });
+}
+
+/* re-render the list part only, so the search box keeps its focus while typing */
+function vlmRenderSubscribers() {
+    var S = vlmState.subs;
+    if (!$('#vlmSubsList').length) {
+        $('#vlmSubsView').html(renderSubscribersView(S, false));
+    }
+    $('#vlmSubsStats').html(renderSubscriberStats(S.summary));
+    $('#vlmSubsList').removeClass('vlm-saving').html(renderSubscriberRows(S.rows, S.total));
+}
+
+var vlmSubsSearchTimer = null;
+function vlmSubsFilterChanged(el) {
+    var S = vlmState.subs;
+    var key = el.getAttribute('data-filter');
+    S[key] = key === 'search' ? (el.value || '').trim() : (el.value || '');
+    clearTimeout(vlmSubsSearchTimer);
+    if (key === 'search') {
+        vlmSubsSearchTimer = setTimeout(function () { vlmLoadSubscribers(false); }, 300);
+    } else {
+        vlmLoadSubscribers(false);
+    }
+}
+
+function vlmSubsLoadMore(btn) {
+    $(btn).prop('disabled', true).text('Loading…');
+    vlmLoadSubscribers(true);
+}
+
+function vlmAskRevoke(id) {
+    var row = vlmState.subs.rows.filter(function (r) { return r.id === id; })[0];
+    if (!row) { return; }
+    vlmConfirm('Revoke free access?', (row.studentName || 'The student') + ' loses this ' + (VLM_PLAN_NAMES[row.planCode] || row.planCode)
+        + ' access now. This cannot be undone; you can grant again later.', 'Yes, revoke', function () {
+        vlmMutate('subscription/revoke', { subscriptionId: id }, 'Access revoked.').then(function (response) {
+            if (response) { vlmLoadSubscribers(false); }
+        });
+    });
+}
+
+/* grant modal */
+
+function vlmOpenGrant() {
+    vlmState.grant = null;
+    vlmState.bulk = null;
+    $('#vlmGrantEmail').val('');
+    $('#vlmGrantBody').html('');
+    vlmGrantSetMode('one');
+    $('#vlmGrantModal').modal('show');
+    setTimeout(function () { $('#vlmGrantEmail').trigger('focus'); }, 300);
+}
+
+/* the grant modal's tabs: one student (email) / many students of a grade */
+function vlmGrantSetMode(mode) {
+    vlmState.grantMode = mode;
+    $('#vlmGrantModal .vlm-grant-mode .vlm-view-btn').removeClass('active').filter('[data-mode="' + mode + '"]').addClass('active');
+    $('#vlmGrantOne').toggleClass('vlm-hidden', mode !== 'one');
+    $('#vlmGrantMany').toggleClass('vlm-hidden', mode !== 'many');
+    if (mode === 'many' && !vlmState.bulk) {
+        var grade = vlmState.ap ? 0 : vlmState.grade;
+        vlmState.bulk = { standardId: grade || 0, search: '', rows: [], total: 0, selected: {}, plan: 'ALL', durValue: '1', durUnit: 'MONTH',
+            note: '', result: null, req: 0, loaded: false };
+        vlmRenderBulk();
+        if (grade) { vlmBulkLoad(); }
+    }
+    vlmGrantValid();
+}
+
+/* ---- grant length: N days / months ---- */
+
+var VLM_DUR_PRESETS = [[7, 'DAY'], [15, 'DAY'], [1, 'MONTH'], [3, 'MONTH'], [6, 'MONTH'], [12, 'MONTH']];
+
+/* '' = fine, else what is wrong (1..1095 days, 1..36 months, like the server) */
+function vlmDurationProblem(value, unit) {
+    var t = String(value === undefined || value === null ? '' : value).trim();
+    var max = unit === 'DAY' ? 1095 : 36;
+    if (!/^\d+$/.test(t) || parseInt(t, 10) < 1 || parseInt(t, 10) > max) {
+        return unit === 'DAY' ? 'Give 1 to 1095 days.' : 'Give 1 to 36 months.';
+    }
+    return '';
+}
+
+function vlmAddMonths(d, n) {
+    var x = new Date(d.getTime());
+    var day = x.getDate();
+    x.setMonth(x.getMonth() + n);
+    if (x.getDate() !== day) { x.setDate(0); }   // 31 Jan + 1 -> 28/29 Feb, like Calendar.add(MONTH, n)
+    return x;
+}
+
+/* when a grant of value / unit given now would end, or null */
+function vlmDurationEnd(value, unit) {
+    if (vlmDurationProblem(value, unit)) { return null; }
+    var n = parseInt(value, 10);
+    return unit === 'DAY' ? new Date(Date.now() + n * 86400000) : vlmAddMonths(new Date(), n);
+}
+
+function vlmDurState(scope) {
+    return scope === 'many' ? vlmState.bulk : vlmState.grant;
+}
+
+function vlmDurChanged(el) {
+    var S = vlmDurState(el.getAttribute('data-scope'));
+    if (!S) { return; }
+    S[el.getAttribute('data-dur')] = el.value;
+    vlmDurRefresh(el.getAttribute('data-scope'));
+}
+
+function vlmDurPreset(scope, value, unit) {
+    var S = vlmDurState(scope);
+    if (!S) { return; }
+    S.durValue = String(value);
+    S.durUnit = unit;
+    $('#vlmDur-' + scope + ' input[data-dur]').val(S.durValue);
+    $('#vlmDur-' + scope + ' select[data-dur]').val(unit);
+    vlmDurRefresh(scope);
+}
+
+/* the "ends on" line, the active preset and the save button after a length change */
+function vlmDurRefresh(scope) {
+    var S = vlmDurState(scope);
+    var end = vlmDurationEnd(S.durValue, S.durUnit);
+    $('#vlmDur-' + scope + ' .vlm-dur-end').text(end ? 'Ends on ' + vlmFmtDate(end.getTime()) : vlmDurationProblem(S.durValue, S.durUnit))
+        .toggleClass('is-bad', !end);
+    $('#vlmDur-' + scope + ' .vlm-dur-preset').each(function () {
+        $(this).toggleClass('active', this.getAttribute('data-value') === String(S.durValue).trim() && this.getAttribute('data-unit') === S.durUnit);
+    });
+    vlmGrantValid();
+}
+
+/* ---- many students of a grade ---- */
+
+function vlmRenderBulk() {
+    var B = vlmState.bulk;
+    $('#vlmBulkBody').html(B.result ? renderBulkResult(B.result) : renderBulkPanel(B, vlmState.grades));
+    if (!B.result) { $('#vlmBulkList').html(renderBulkList(B)); }
+    vlmGrantValid();
+}
+
+var vlmBulkTimer = null;
+function vlmBulkField(el) {
+    var B = vlmState.bulk;
+    var key = el.getAttribute('data-bulk');
+    if (key === 'standardId') {
+        B.standardId = parseInt(el.value, 10) || 0;
+        B.selected = {};
+        B.rows = [];
+        B.loaded = false;
+        $('#vlmBulkList').html(renderBulkList(B));
+        if (B.standardId) { vlmBulkLoad(); }
+    } else if (key === 'search') {
+        B.search = (el.value || '').trim();
+        clearTimeout(vlmBulkTimer);
+        vlmBulkTimer = setTimeout(vlmBulkLoad, 300);
+    } else if (key === 'plan') {
+        B.plan = el.value;
+        $('#vlmBulkBody .vlm-grant-plan').removeClass('active');
+        $(el).closest('.vlm-grant-plan').addClass('active');
+        $('#vlmDur-many').toggleClass('vlm-hidden', B.plan === 'LIFETIME');
+    } else {
+        B[key] = el.value;
+    }
+    vlmGrantValid();
+}
+
+/* the grade's active students for the filter (the latest request wins); the choice is kept for students still listed */
+function vlmBulkLoad() {
+    var B = vlmState.bulk;
+    if (!B || !B.standardId) { return; }
+    var req = ++B.req;
+    $('#vlmBulkList').addClass('vlm-saving');
+    vlmPost('subscription/grant/students', { standardId: B.standardId, search: B.search, offset: 0, limit: 200 }, false).then(function (response) {
+        if (req !== B.req || B !== vlmState.bulk) { return; }
+        $('#vlmBulkList').removeClass('vlm-saving');
+        if (vlmIsSuccess(response) && response.details) {
+            B.rows = response.details.rows || [];
+            B.total = response.details.total || 0;
+            B.loaded = true;
+        } else {
+            showMessageTheme2(0, (response && response.message) ? response.message : 'Students could not be loaded.');
+        }
+        $('#vlmBulkList').html(renderBulkList(B));
+        vlmGrantValid();
+    }, function () {
+        $('#vlmBulkList').removeClass('vlm-saving');
+        showMessageTheme2(0, 'Students could not be loaded.');
+    });
+}
+
+function vlmBulkToggle(el) {
+    var B = vlmState.bulk;
+    var id = parseInt(el.value, 10);
+    if (el.checked) { B.selected[id] = true; } else { delete B.selected[id]; }
+    $(el).closest('.vlm-bulk-row').toggleClass('is-picked', el.checked);
+    vlmBulkCount();
+}
+
+/* tick / untick every listed student who can get it (not the ones that already have a plan) */
+function vlmBulkToggleAll(el) {
+    var B = vlmState.bulk;
+    B.rows.forEach(function (r) {
+        if (r.hasPlan) { return; }
+        if (el.checked) { B.selected[r.userId] = true; } else { delete B.selected[r.userId]; }
+    });
+    $('#vlmBulkList').html(renderBulkList(B));
+    vlmGrantValid();
+}
+
+function vlmBulkSelectedIds() {
+    return Object.keys(vlmState.bulk.selected).map(function (k) { return parseInt(k, 10); });
+}
+
+function vlmBulkCount() {
+    var B = vlmState.bulk;
+    var n = vlmBulkSelectedIds().length;
+    var free = B.rows.filter(function (r) { return !r.hasPlan; });
+    $('#vlmBulkCount').text(n + ' selected');
+    $('#vlmBulkAll').prop('checked', free.length > 0 && free.every(function (r) { return B.selected[r.userId]; }));
+    vlmGrantValid();
+}
+
+function vlmBulkProblem() {
+    var B = vlmState.bulk;
+    if (!B || !B.standardId) { return 'Choose a grade.'; }
+    var n = vlmBulkSelectedIds().length;
+    if (!n) { return 'Choose the students.'; }
+    if (n > 200) { return 'At most 200 students at a time.'; }
+    return B.plan === 'LIFETIME' ? '' : vlmDurationProblem(B.durValue, B.durUnit);
+}
+
+function vlmBulkSave() {
+    var B = vlmState.bulk;
+    if (B.result) {   // "Done"
+        $('#vlmGrantModal').modal('hide');
+        vlmState.bulk = null;
+        vlmLoadSubscribers(false);
+        return;
+    }
+    var problem = vlmBulkProblem();
+    if (problem) { showMessageTheme2(0, problem); return; }
+    vlmMutate('subscription/grant/bulk', {
+        standardId: B.standardId, studentUserIds: vlmBulkSelectedIds(), planCode: B.plan, note: (B.note || '').trim(),
+        durationValue: B.plan === 'LIFETIME' ? null : parseInt(B.durValue, 10), durationUnit: B.plan === 'LIFETIME' ? null : B.durUnit
+    }, null).then(function (response) {
+        if (!response || !response.details) { return; }
+        B.result = response.details;
+        showMessageTheme2(1, B.result.granted + ' student' + (B.result.granted === 1 ? '' : 's') + ' got access.');
+        vlmRenderBulk();
+        vlmState.subs.loaded = false;
+    });
+}
+
+function vlmGrantFind() {
+    var email = ($('#vlmGrantEmail').val() || '').trim();
+    if (!email || email.indexOf('@') < 0) {
+        showMessageTheme2(0, "Please enter the student's email.");
+        return;
+    }
+    vlmState.grant = null;
+    vlmGrantValid();
+    vlmMutate('subscription/grant/find', { email: email }, null).then(function (response) {
+        if (!response || !response.details) {
+            $('#vlmGrantBody').html('');
+            return;
+        }
+        var p = response.details;
+        var first = (p.plans || []).filter(function (x) { return x.planCode === 'ALL'; })[0] || (p.plans || [])[0];
+        vlmState.grant = { preview: p, plan: first ? first.planCode : '', picked: {}, durValue: '1', durUnit: 'MONTH', note: '' };
+        vlmRenderGrant();
+    });
+}
+
+function vlmRenderGrant() {
+    var G = vlmState.grant;
+    $('#vlmGrantBody').html(G ? renderGrantForm(G, vlmGrantPlan()) : '');
+    if (G) { vlmDurRefresh('one'); }
+    vlmGrantValid();
+}
+
+function vlmGrantPlan() {
+    var G = vlmState.grant;
+    return G ? (G.preview.plans || []).filter(function (p) { return p.planCode === G.plan; })[0] || null : null;
+}
+
+function vlmGrantPickPlan(code) {
+    vlmState.grant.plan = code;
+    vlmState.grant.picked = {};
+    vlmRenderGrant();
+}
+
+function vlmGrantPickCourse(el) {
+    var id = parseInt(el.value, 10);
+    if (el.checked) { vlmState.grant.picked[id] = true; } else { delete vlmState.grant.picked[id]; }
+    var plan = vlmGrantPlan();
+    var n = Object.keys(vlmState.grant.picked).length;
+    $('#vlmGrantPickCount').text(n + ' of ' + (plan.minCourses === plan.maxCourses ? plan.maxCourses : plan.minCourses + '–' + plan.maxCourses) + ' chosen')
+        .toggleClass('is-bad', n < plan.minCourses || n > plan.maxCourses);
+    vlmGrantValid();
+}
+
+function vlmGrantField(el) {
+    vlmState.grant[el.getAttribute('data-field')] = el.value;
+    vlmGrantValid();
+}
+
+/* what is wrong with the form ('' = can grant) */
+function vlmGrantProblem() {
+    var G = vlmState.grant;
+    var plan = vlmGrantPlan();
+    if (!G || !plan) { return 'Find the student and choose a plan.'; }
+    if (plan.minCourses > 0) {
+        var n = Object.keys(G.picked).length;
+        if (n < plan.minCourses || n > plan.maxCourses) {
+            return plan.minCourses === plan.maxCourses ? 'Choose exactly ' + plan.minCourses + ' courses.'
+                : 'Choose ' + plan.minCourses + ' to ' + plan.maxCourses + ' courses.';
+        }
+    }
+    return plan.lifetime ? '' : vlmDurationProblem(G.durValue, G.durUnit);
+}
+
+/* the footer of the grant modal for the open tab */
+function vlmGrantValid() {
+    var btn = $('#vlmGrantSaveBtn');
+    if (vlmState.grantMode === 'many') {
+        var B = vlmState.bulk;
+        var problem = B && B.result ? '' : vlmBulkProblem();
+        var n = B ? vlmBulkSelectedIds().length : 0;
+        btn.prop('disabled', !!problem).html(B && B.result ? '<i class="fa fa-check mr-1"></i> Done'
+            : '<i class="fa fa-check mr-1"></i> Grant to ' + n + ' student' + (n === 1 ? '' : 's'));
+        $('#vlmGrantProblem').text(B && B.standardId ? problem : '');
+        return;
+    }
+    var p1 = vlmGrantProblem();
+    btn.prop('disabled', !!p1).html('<i class="fa fa-check mr-1"></i> Grant access');
+    $('#vlmGrantProblem').text(vlmState.grant ? p1 : '');
+}
+
+function vlmGrantSave() {
+    if (vlmState.grantMode === 'many') { vlmBulkSave(); return; }
+    var problem = vlmGrantProblem();
+    if (problem) { showMessageTheme2(0, problem); return; }
+    var G = vlmState.grant;
+    var plan = vlmGrantPlan();
+    vlmMutate('subscription/grant/save', {
+        studentUserId: G.preview.userId, planCode: plan.planCode, note: (G.note || '').trim(),
+        durationValue: plan.lifetime ? null : parseInt(G.durValue, 10), durationUnit: plan.lifetime ? null : G.durUnit,
+        subjectIds: plan.minCourses > 0 ? Object.keys(G.picked).map(function (k) { return parseInt(k, 10); }) : []
+    }, 'Access granted to ' + (G.preview.studentName || G.preview.email) + '.').then(function (response) {
+        if (!response) { return; }
+        $('#vlmGrantModal').modal('hide');
+        vlmState.grant = null;
+        vlmLoadSubscribers(false);
+    });
+}
+
+function vlmFmtDate(ms) {
+    if (ms === null || ms === undefined) { return ''; }
+    var d = new Date(ms);
+    return d.getDate() + ' ' + ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()] + ' ' + d.getFullYear();
+}
+
+function vlmMoney(n, cur) {
+    var v = Number(n) || 0;
+    return (String(cur || 'USD').toUpperCase() === 'USD' ? '$' : String(cur).toUpperCase() + ' ') + v.toFixed(2);
+}
+
 /* ---- drag & drop (SortableJS, loaded on demand like GSAP) ---- */
 function vlmLoadSortable() {
     if (window.Sortable) { return Promise.resolve(); }
@@ -1341,6 +1983,11 @@ function vlmDestroySortables() {
 function vlmInitSortables() {
     vlmDestroySortables();
     var $detail = $('#vlmPlDetail');
+    $detail.toggleClass('vlm-readonly', !!vlmState.readOnly);
+    if (vlmState.readOnly) {   // AP course: nothing to drag, add or change
+        $detail.addClass('vlm-no-drag');
+        return;
+    }
     if (!window.Sortable) {
         $detail.addClass('vlm-no-drag');   // handles appear once the script is in
         vlmLoadSortable().then(function () { if (vlmState.playlist) { vlmInitSortables(); } }, function () { /* menu only */ });

@@ -68,6 +68,7 @@ function getAdminUserListHtml(userList){
 		for (let iu = 0; iu < userList.length; iu++) {
 			const adminUsr = userList[iu];
 			var actionHtml = appendResetActionForAdminUser(adminUsr.action, adminUsr.userId);
+			actionHtml = appendResendInvitationForAdminUser(actionHtml, adminUsr.userId);
 			html+=`<tr>	
              <td>${(adminUsr.sno)}</td>
              <td>${adminUsr.name}</td>
@@ -99,6 +100,56 @@ function appendResetActionForAdminUser(actionHtml, userId){
 		return actionHtml;
 	}
 	return actionHtml.substring(0, actionCloseIdx) + resetAction + actionHtml.substring(actionCloseIdx);
+}
+
+function appendResendInvitationForAdminUser(actionHtml, userId){
+	if(!actionHtml || !userId){
+		return actionHtml;
+	}
+	if(actionHtml.indexOf("dropdown-menu") === -1 || actionHtml.indexOf("showResendUserInvitationConfirm") > -1){
+		return actionHtml;
+	}
+	var resendAction = `<a href="javascript:void(0);" class="dropdown-item" onclick="return showResendUserInvitationConfirm('${userId}');"><i class="fa fa-envelope"></i>&nbsp;Resend Invitation Mail</a>`;
+	var closingTags = "</div></div>";
+	var actionCloseIdx = actionHtml.lastIndexOf(closingTags);
+	if(actionCloseIdx === -1){
+		return actionHtml;
+	}
+	return actionHtml.substring(0, actionCloseIdx) + resendAction + actionHtml.substring(actionCloseIdx);
+}
+
+function showResendUserInvitationConfirm(userId){
+	if(!userId){
+		showMessageTheme2(0, "Invalid user id");
+		return false;
+	}
+	return showWarningMessageShow(
+		'Are you sure you want to resend the invitation mail to this user?',
+		'resendUserInvitationMail('+ userId +')'
+	);
+}
+
+async function resendUserInvitationMail(userId){
+	if(!userId){
+		showMessageTheme2(0, "Invalid user id");
+		return false;
+	}
+	var ajaxReqDetails = {
+		method: "POST",
+		url: APP_BASE_URL + SCHOOL_UUID + "/dashboard/resend-user-invitation",
+		body: { userId: userId },
+		global: true,
+		showMessage: false,
+		onFaildResolved: true,
+		onSuccessResolved: true
+	};
+	var responseData = await callCommonAjax(ajaxReqDetails);
+	if(responseData && responseData.status == 1){
+		showMessageTheme2(1, responseData.message || "Invitation mail sent successfully.");
+	}else{
+		showMessageTheme2(0, responseData && responseData.message ? responseData.message : "Unable to resend invitation mail.");
+	}
+	return false;
 }
 
 function showAdminResetAzurePasswordConfirm(userId){
@@ -219,7 +270,6 @@ function callForNewUser(formId, moduleId) {
 	return;
   }
   if (!validateRequestForNewUser(formId)) {
-    //refreshCaptcha('captchaImage');
     return false;
   }
   $.ajax({

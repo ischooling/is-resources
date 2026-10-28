@@ -807,6 +807,7 @@ function meetingStatusUpdateModalBodyContent(data){
                     <select class="form-control status" name="meetingResult${i}" id="meetingResult${i}" required="">
                         <option value="" selected="">Select Status</option>
                         ${v.meetingType == 'PTM' ? `
+                        <option value="Missed by Student">Missed by Student</option>
                         <option value="Completed">Completed</option>
                         ` : `
                         <option value="Reschedule Session">Reschedule Class</option>

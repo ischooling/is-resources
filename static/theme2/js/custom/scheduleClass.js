@@ -193,8 +193,10 @@ function meetingResultModal(meetingId, userId,meetingresult, meetingCurStatus, r
 	html='<option value="" selected>Select Status</option>';
 	var isPTM = (classType == 'PTM' || classType == 'Parent Teacher Meeting');
 	if (isPTM) {
+		html += '<option value="Missed by Student">Missed by Student</option>';
 		html += '<option value="Completed">Completed</option>';
-		if (showClassCancelOption == 'Y' && 'TEACHER' != role) {
+		// PTM only: every teacher can cancel; for the others the existing cancel-rights flag applies
+		if (showClassCancelOption == 'Y' || 'TEACHER' == role) {
 			html += '<option value="Cancelled">Cancel Meeting</option>';
 		}
 	} else {

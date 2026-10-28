@@ -11,15 +11,37 @@ function urlParam(name) {
   return decodeURI(results[1]) || null;
 }
 
-// Registrable domain of the current host (e.g. sms-is.ischoolusa.com -> ischoolusa.com)
-// so cookies are shared across subdomains; empty for localhost/IPs (host-only cookie).
+// Registrable domain of the current host (e.g. sms-is.ischoolusa.com -> ischoolusa.com) so cookies are
+// shared across subdomains; empty for localhost/IPs (host-only cookie).
+//
+// "Last two labels" is only a guess: on a customer domain whose public suffix is itself two labels
+// (foo.co.in, foo.co.uk, foo.com.au, ...) that guess IS the public suffix, and every browser silently
+// refuses to store a cookie scoped to it — nothing gets saved and e.g. the consent cookie never sticks.
+// Probe instead: try the broadest candidate first and keep the first the browser actually accepts,
+// falling back to the host itself (always accepted). Resolved once per page.
+var __iscCookieDomainProbe = "__isc_cd_probe2";
+var __iscResolvedCookieDomain;
+function __iscCandidateDomains(host) {
+  if (!host || host.indexOf(".") === -1 || /^[0-9.]+$/.test(host)) return [];
+  var labels = host.split(".");
+  var candidates = [];
+  for (var take = 2; take <= labels.length; take++) candidates.push(labels.slice(-take).join("."));
+  return candidates;
+}
+function __iscDomainAccepted(domain) {
+  document.cookie = __iscCookieDomainProbe + "=1; path=/; max-age=60" + (domain ? "; domain=" + domain : "");
+  var stored = document.cookie.indexOf(__iscCookieDomainProbe + "=1") !== -1;
+  document.cookie = __iscCookieDomainProbe + "=; path=/; max-age=0" + (domain ? "; domain=" + domain : "");
+  return stored;
+}
 function getCookieDomain() {
-  var host = window.location.hostname;
-  if (!host || host.indexOf(".") === -1 || /^[0-9.]+$/.test(host)) {
-    return "";
+  if (__iscResolvedCookieDomain !== undefined) return __iscResolvedCookieDomain;
+  var candidates = __iscCandidateDomains(window.location.hostname);
+  __iscResolvedCookieDomain = "";
+  for (var i = 0; i < candidates.length; i++) {
+    if (__iscDomainAccepted(candidates[i])) { __iscResolvedCookieDomain = candidates[i]; break; }
   }
-  var parts = host.split(".");
-  return parts.slice(-2).join(".");
+  return __iscResolvedCookieDomain;
 }
 
 function setCookie(key, value) {

@@ -13,8 +13,19 @@ function ensureStudentDashboardWelcomePopup(){
     }
 }
 
+// True while the sibling first-login "Change Your Password" modal is open, or is about to open (it opens ~1s after
+// the dashboard loads and has not been shown yet). The training popup must not open on top of it.
+function isChangePasswordModalPending(){
+    var $modal = $("#changePasswordModal");
+    return $modal.hasClass("show") || (window.ADD_SIBLING_FIRST_LOGIN === true && !$modal.data("bs.modal"));
+}
+
 function openStudentSystemTrainingPopup(){
     if(window.__studentWelcomePopupFlowActive || $("#studentDashboardWelcomePopup").hasClass("show")){
+        return;
+    }
+    if(isChangePasswordModalPending()){
+        window.setTimeout(openStudentSystemTrainingPopup, 300);
         return;
     }
     $("#timePreferencePopup").removeClass("d-none");

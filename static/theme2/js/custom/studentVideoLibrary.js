@@ -9,7 +9,9 @@
  * ===================================================================== */
 
 var svlState = {
-    playlists: [],      // VideoPlaylistDetailDTO[] for the student's courses
+    playlists: [],      // VideoPlaylistDetailDTO[] for the student's courses (locked ones carry titles only)
+    access: null,       // VideoAccessDTO: paywall, trial, the student's plans (null = paywall off)
+    sub: { options: null, pick: { planCode: '', subjectIds: [] }, busy: false },   // the Subscribe modal
     active: 0,          // selected course index
     steps: [],          // steps of the selected course
     stepIndex: 0,
@@ -50,6 +52,7 @@ function studentVideoLibraryOnLoad() {
     var saved = svlReadStore();
     svlStopTracking();
     svlState.playlists = [];
+    svlState.access = null;
     svlState.active = 0;
     svlState.steps = [];
     svlState.stepIndex = 0;
@@ -104,7 +107,11 @@ function svlLoadPlaylists() {
     }).then(function (response) {
         customLoader(false);
         if (svlIsSuccess(response)) {
-            svlState.playlists = (response.details || []).filter(function (d) { return svlBuildSteps(d).length > 0; });
+            // {access, playlists}; a plain list (older server) = no paywall
+            var details = response.details || [];
+            var list = Array.isArray(details) ? details : (details.playlists || []);
+            svlState.access = Array.isArray(details) ? null : (details.access || null);
+            svlState.playlists = list.filter(function (d) { return svlBuildSteps(d).length > 0; });
             svlRestoreLastPosition();
             svlRenderMain();
         } else {
@@ -139,14 +146,23 @@ function svlStepPercent(step) {
     return step ? step.videos.reduce(function (m, v) { return Math.max(m, v.watchedPercent || 0); }, 0) : 0;
 }
 
-/* "Continue where you left off": the video watched last (server), else the last one in this browser */
+function svlIsLocked(d) {
+    return !!(d && d.playlist && d.playlist.locked);
+}
+
+/* "Continue where you left off": the video watched last (server), else the last one in this browser.
+   Locked courses are skipped; with nothing to continue the first open course is shown. */
 function svlRestoreLastPosition() {
     svlState.active = 0;
+    for (var o = 0; o < svlState.playlists.length; o++) {
+        if (!svlIsLocked(svlState.playlists[o])) { svlState.active = o; break; }
+    }
     svlState.stepIndex = 0;
     svlState.videoIndex = 0;
     svlState.resumeAt = null;
     var best = null;
     svlState.playlists.forEach(function (d, p) {
+        if (svlIsLocked(d)) { return; }
         svlBuildSteps(d).forEach(function (step, s) {
             step.videos.forEach(function (v, i) {
                 var at = parseInt(v.lastWatchedAt || '0', 10);
@@ -171,7 +187,7 @@ function svlRestoreLastPosition() {
     var saved = svlReadStore();
     if (!saved.course) { return; }
     for (var p = 0; p < svlState.playlists.length; p++) {
-        if (svlCourseKey(svlState.playlists[p]) !== saved.course) { continue; }
+        if (svlCourseKey(svlState.playlists[p]) !== saved.course || svlIsLocked(svlState.playlists[p])) { continue; }
         svlState.active = p;
         var st = svlBuildSteps(svlState.playlists[p]);
         for (var s = 0; s < st.length; s++) {
@@ -186,8 +202,9 @@ function svlCourseKey(d) {
     return p.id ? 'p' + p.id : 'c' + (p.standardName || '') + '|' + (p.title || '');
 }
 
-/* chips + (player | search results | empty state) */
+/* access bar + chips + (player | locked course | search results | empty state) */
 function svlRenderMain() {
+    $('#svlAccess').html(renderStudentAccessBar(svlState.access, svlState.playlists));
     if (!svlState.playlists.length) {
         $('#svlChips').html('');
         $('#svlMain').html(renderStudentEmpty('No videos yet', 'Videos for your courses will appear here once your teachers add them.'));
@@ -197,6 +214,13 @@ function svlRenderMain() {
     if (svlState.search) {
         svlStopPlayer();
         $('#svlMain').html(renderStudentSearchResults(svlSearchHits(svlState.search), svlState.search));
+        return;
+    }
+    var current = svlState.playlists[svlState.active];
+    if (svlIsLocked(current)) {
+        svlStopPlayer();          // also keeps the resume point of an open course being left
+        svlState.steps = [];
+        $('#svlMain').html(renderStudentLockedCourse(current, svlState.access));
         return;
     }
     if (!$('#svlMain .svl-layout').length) {
@@ -224,7 +248,7 @@ function svlSelectCourse(index) {
 /* play explanation videoIndex of step stepIndex. byUser = the student pressed something. */
 function svlPlayStep(stepIndex, videoIndex, byUser) {
     var step = svlState.steps[stepIndex];
-    if (!step) { return; }
+    if (!step || svlIsLocked(svlState.playlists[svlState.active])) { return; }
     if (byUser) {
         svlState.started = true;
         svlState.resumeAt = null;
@@ -328,7 +352,7 @@ function svlSearchHits(q) {
             step.videos.forEach(function (v, i) {
                 var hay = [v.title, v.description, step.lesson ? step.lesson.title : ''].join(' ').toLowerCase();
                 if (hay.indexOf(q) !== -1) {
-                    hits.push({ p: p, s: s, v: i, video: v, course: course,
+                    hits.push({ p: p, s: s, v: i, video: v, course: course, locked: svlIsLocked(d),
                         lessonLabel: step.lesson ? 'M' + step.lesson.moduleNo + ' · L' + step.lesson.lessonNo : '' });
                 }
             });
@@ -348,6 +372,225 @@ function svlOpenHit(p, s, v) {
     svlRenderMain();
     var stage = document.querySelector('#svlMain .svl-stage');
     if (stage && stage.scrollIntoView) { stage.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+}
+
+/* ---- subscription: trial / subscribe ---- */
+
+/* one click: the trial opens every enrolled course for the trial days, once per student */
+function svlStartTrial(btn) {
+    $('.svl-btn').prop('disabled', true);
+    customLoader(true);
+    callCommonAjax({
+        method: 'POST',
+        url: svlApiBase() + 'student/trial/start',
+        body: { schoolId: SCHOOL_ID, userId: USER_ID },
+        global: true,
+        showMessage: false
+    }).then(function (response) {
+        customLoader(false);
+        if (svlIsSuccess(response)) {
+            showMessageTheme2(1, 'Your free trial has started — enjoy all your course videos!');
+            svlLoadPlaylists();
+        } else {
+            $('.svl-btn').prop('disabled', false);
+            showMessageTheme2(0, (response && response.message) ? response.message : 'The trial could not be started.');
+        }
+    }).catch(function () {
+        customLoader(false);
+        $('.svl-btn').prop('disabled', false);
+        showMessageTheme2(0, 'The trial could not be started.');
+    });
+}
+
+/* a monthly plan (paid / granted) ends within the renewal window and nothing follows it yet */
+function svlRenewDue(access) {
+    if (!access || !access.paywall) { return false; }
+    var days = access.renewBeforeDays || 0;
+    var subs = access.subscriptions || [];
+    var monthly = subs.filter(function (s) { return s.planCode !== 'TRIAL' && s.planCode !== 'LIFETIME' && s.endDate; });
+    if (!monthly.length || subs.some(function (s) { return s.planCode === 'LIFETIME'; })) { return false; }
+    var lastEnd = Math.max.apply(null, monthly.map(function (s) { return parseInt(s.endDate, 10); }));
+    return lastEnd - Date.now() <= days * 86400000;
+}
+
+/* only a trial is running: offer to subscribe before it ends */
+function svlTrialOnly(access) {
+    var subs = (access && access.paywall && access.subscriptions) || [];
+    return subs.length > 0 && subs.every(function (s) { return s.planCode === 'TRIAL'; });
+}
+
+/* a Full course plan is running (it is listed only while one of its courses runs): nothing can be bought meanwhile */
+function svlFullCourseRunning(access) {
+    return !!(access && access.paywall && (access.subscriptions || []).some(function (s) { return s.planCode === 'LIFETIME'; }));
+}
+
+/* the access entry of a playlist's course (grade + title), or null */
+function svlCourseAccess(access, p) {
+    var key = String(p.title || '').trim().toLowerCase();
+    return ((access && access.courses) || []).filter(function (c) {
+        return c.standardId === p.standardId && String(c.courseTitle || '').trim().toLowerCase() === key;
+    })[0] || null;
+}
+
+/* ---- subscribe: plans -> courses -> checkout (the server prices it) -> the shared payment modal ---- */
+function svlOpenSubscribe() {
+    if ($('#svlSubModal').length === 0) {
+        $('body').append(getStudentSubscribeModalHtml());
+    }
+    svlState.sub = { options: null, pick: { planCode: '', count: 0, subjectIds: [] }, busy: false };
+    $('#svlSubBody').html('<div class="svl-sub-loading">Loading plans…</div>');
+    $('#svlSubFooter').html('');
+    $('#svlSubModal').modal('show');
+    callCommonAjax({
+        method: 'POST',
+        url: svlApiBase() + 'student/subscription/options',
+        body: { schoolId: SCHOOL_ID, userId: USER_ID },
+        global: false,
+        showMessage: false
+    }).then(function (response) {
+        if (svlIsSuccess(response) && response.details) {
+            var o = response.details;
+            svlState.sub.options = o;
+            // one card only -> pick it
+            var cards = o.canBuy ? svlPlanCards(o) : [];
+            if (cards.length === 1) { svlPickCard(cards[0].key, true); }
+            svlRenderSubscribe();
+        } else {
+            $('#svlSubBody').html('<div class="svl-sub-blocked">' + svlEsc((response && response.message) || 'Plans could not be loaded.') + '</div>');
+            $('#svlSubFooter').html(renderStudentSubscribeFooter(null));
+        }
+    }).catch(function () {
+        $('#svlSubBody').html('<div class="svl-sub-blocked">Plans could not be loaded. Please try again.</div>');
+        $('#svlSubFooter').html(renderStudentSubscribeFooter(null));
+    });
+}
+
+function svlRenderSubscribe() {
+    var o = svlState.sub.options;
+    $('#svlSubBody').html(renderStudentSubscribeBody(o, svlState.sub.pick));
+    $('#svlSubFooter').html(renderStudentSubscribeFooter(o, svlState.sub.pick));
+}
+
+/* the cards of the modal: the custom plan becomes one card per course count ("1 course", "2 courses"), first */
+function svlPlanCards(o) {
+    var custom = [], rest = [];
+    (o.plans || []).forEach(function (p) {
+        if (p.planCode === 'CUSTOM') {
+            for (var n = Math.max(p.minCourses, 1); n <= p.maxCourses; n++) { custom.push({ key: 'CUSTOM:' + n, plan: p, count: n }); }
+        } else {
+            rest.push({ key: p.planCode, plan: p, count: p.minCourses });
+        }
+    });
+    return custom.concat(rest);
+}
+
+function svlPickKey(pick) {
+    return pick.planCode === 'CUSTOM' ? 'CUSTOM:' + pick.count : pick.planCode;
+}
+
+function svlPickCard(key, quiet) {
+    var parts = String(key).split(':');
+    svlPickPlan(parts[0], parts[1] ? parseInt(parts[1], 10) : 0, quiet);
+}
+
+/* choose a plan (custom: with its course count); the courses already ticked are kept up to the new count */
+function svlPickPlan(code, count, quiet) {
+    var o = svlState.sub.options;
+    var pick = svlState.sub.pick;
+    pick.planCode = code;
+    var plan = svlPickedPlan(o, pick);
+    pick.count = plan ? (code === 'CUSTOM' ? Math.min(Math.max(count || plan.minCourses, plan.minCourses), plan.maxCourses) : plan.minCourses) : 0;
+    var need = svlPickNeed(o, pick);
+    if (need > 0 && o.courses && need === o.courses.length) {
+        pick.subjectIds = o.courses.map(function (c) { return c.subjectId; });   // nothing to choose: every course is in it
+    } else if (pick.subjectIds.length > need) {
+        pick.subjectIds = pick.subjectIds.slice(0, need);
+    }
+    if (!quiet) { svlRenderSubscribe(); }
+}
+
+/* how many courses the chosen card needs (0 = all of them, nothing to choose) */
+function svlPickNeed(o, pick) {
+    var plan = svlPickedPlan(o, pick);
+    if (!plan || plan.minCourses === 0) { return 0; }
+    return plan.planCode === 'CUSTOM' ? pick.count : plan.minCourses;
+}
+
+function svlPickCourse(subjectId, on) {
+    var ids = svlState.sub.pick.subjectIds;
+    var i = ids.indexOf(subjectId);
+    if (on && i === -1) { ids.push(subjectId); }
+    if (!on && i !== -1) { ids.splice(i, 1); }
+    svlRenderSubscribe();
+}
+
+function svlPickedPlan(o, pick) {
+    if (!o || !o.plans) { return null; }
+    for (var i = 0; i < o.plans.length; i++) {
+        if (o.plans[i].planCode === pick.planCode) { return o.plans[i]; }
+    }
+    return null;
+}
+
+function svlPickValid(o, pick) {
+    if (!svlPickedPlan(o, pick)) { return false; }
+    var need = svlPickNeed(o, pick);
+    return need === 0 || pick.subjectIds.length === need;
+}
+
+/* shown to the student only; the server prices the checkout itself */
+function svlPickTotal(o, pick) {
+    var plan = svlPickedPlan(o, pick);
+    if (!plan) { return 0; }
+    var fee = Number(plan.fee) || 0;
+    return plan.perCourse ? fee * svlPickNeed(o, pick) : fee;
+}
+
+function svlMoney(n) {
+    return (Number(n) || 0).toFixed(2);
+}
+
+function svlStartCheckout() {
+    var o = svlState.sub.options;
+    var pick = svlState.sub.pick;
+    if (svlState.sub.busy || !svlPickValid(o, pick)) { return; }
+    svlState.sub.busy = true;
+    $('#svlSubPay').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Preparing payment…');
+    callCommonAjax({
+        method: 'POST',
+        url: svlApiBase() + 'student/subscription/checkout',
+        body: { schoolId: SCHOOL_ID, userId: USER_ID, planCode: pick.planCode, subjectIds: pick.subjectIds },
+        global: false,
+        showMessage: false
+    }).then(function (response) {
+        svlState.sub.busy = false;
+        if (svlIsSuccess(response) && response.details && response.details.userPaymentDetailsId) {
+            var d = response.details;
+            $('#svlSubModal').modal('hide');
+            if (typeof checkPayment === 'function') {
+                checkPayment('svlSubModal', d.userPaymentDetailsId, SCHOOL_ID);   // the dashboard's gateway chooser (Stripe / Airwallex)
+            } else if (d.paymentLink) {
+                window.location.href = d.paymentLink;
+            }
+        } else {
+            showMessageTheme2(0, (response && response.message) ? response.message : 'The payment could not be started.');
+            svlRenderSubscribe();
+        }
+    }).catch(function () {
+        svlState.sub.busy = false;
+        showMessageTheme2(0, 'The payment could not be started. Please try again.');
+        svlRenderSubscribe();
+    });
+}
+
+function svlFmtDate(ms) {
+    var d = new Date(parseInt(ms, 10));
+    return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function svlDaysLeft(ms) {
+    var days = Math.ceil((parseInt(ms, 10) - Date.now()) / 86400000);
+    return days <= 0 ? 'ends today' : (days === 1 ? '1 day left' : days + ' days left');
 }
 
 /* ---- player: YouTube IFrame API (so the next lesson can follow), else a plain embed ---- */
@@ -558,6 +801,8 @@ function svlThumbUrl(v) {
     if (v.thumbnailUrl) { return v.thumbnailUrl; }
     var ytId = v.youtubeId || svlParseYoutubeId(v.videoUrl);
     if (ytId) { return 'https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg'; }
+    // a locked course: the server hides the YouTube id and serves the thumbnail itself
+    if (v.youtubeThumb && v.id) { return svlApiBase() + 'student/thumbnail/' + encodeURIComponent(v.id); }
     return svlFallbackThumb();
 }
 

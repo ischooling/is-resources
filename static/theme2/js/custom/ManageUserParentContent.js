@@ -32,12 +32,21 @@ function getManageUserParentTabContent(meta) {
 								'<label>Parent Name</label>' +
 							'</div>' +
 							'<div class="col-md-3 col-sm-6 col-12 custom-field">' +
-								'<input type="text" name="emailId" id="emailId" class="form-control" value="" placeholder="Email" maxlength="60" onkeydown="return M.isEmail(event);" />' +
+								'<input type="text" name="emailId" id="emailId" class="form-control" value="" placeholder="Email" maxlength="150" onkeydown="return M.isEmail(event);" />' +
 								'<label>Email</label>' +
 							'</div>' +
 							'<div class="col-md-3 col-sm-6 col-12 custom-field">' +
 								'<input type="text" name="mobileNo" id="mobileNo" class="form-control" value="" placeholder="Contact no" />' +
 								'<label>Contact no</label>' +
+							'</div>' +
+							'<div class="col-md-3 col-sm-6 col-12 custom-field">' +
+								'<select name="profileStatus" id="profileStatus" class="form-control">'+
+									'<option value="">Select Profile Status</option>'+
+									'<option value="created">Created</option>'+
+									'<option value="withdrawn">Withdrawn</option>'+
+									'<option value="not_created">Not Created</option>'+
+								'</select>' +
+								'<label>Profile Status</label>' +
 							'</div>' +
 							'<div class="col-md-3 col-sm-6 col-12 custom-field">' +
 								'<select name="parentCountryId" id="parentCountryId" class="form-control">' + muCountryOptions(meta.countryList) + '</select>' +
@@ -127,9 +136,11 @@ function getCallRequestForAdvanceParentSearch(formId, moduleId) {
 	var countryId = $("#" + formId + " #parentCountryId").val();
 	var stateId = $("#" + formId + " #parentFilterStateId").val();
 	var cityId = $("#" + formId + " #parentFilterCityId").val();
+	var profileStatus = $("#" + formId + " #profileStatus").val();
 	if (countryId) { dto.countryId = countryId; }
 	if (stateId) { dto.stateId = stateId; }
 	if (cityId) { dto.cityId = cityId; }
+	if (profileStatus) { dto.profileStatus = profileStatus; }
 
 	return {
 		moduleId: moduleId,

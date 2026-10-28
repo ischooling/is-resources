@@ -468,6 +468,9 @@ function advanceTeacherSearch(formId, moduleId) {
 							: '<a href="javascript:void(0);" class="dropdown-item" onclick="showWarningMessageShow(\'Are you sure you want to re-attempt recordings?\', \'enableReattemptRecording(' + value.userId + ')\');">'
 							+ '<i class="fa fa-cogs"></i>&nbsp;&nbsp;Flush Recording'
 							+ '</a>')
+						+ '<a href="javascript:void(0);" class="dropdown-item" onclick="return resendInvitationMail(\'' + value.userId + '\');">'
+						+ '<i class="fa fa-paper-plane"></i>&nbsp;&nbsp;Resend Invitation'
+						+ '</a>'
 						+ '</div>'
 						+ '</div>'
 						+ '</td>'
@@ -940,8 +943,13 @@ function manageUserStudentPerformanceInitDataTable() {
 	});
 }
 
+var _manageUserExcuseLmsUserId = "";
+var _manageUserExcuseEntityId = "";
+
 function manageUserStudentPerformanceOpenProgressDetail(studentUserId, lmsEnrollmentId, lmsCourseId) {
 	if (!studentUserId || !lmsEnrollmentId || !lmsCourseId) { return; }
+	_manageUserExcuseLmsUserId = lmsEnrollmentId;
+	_manageUserExcuseEntityId = lmsCourseId;
 	$("#manageUserStudentPerformanceBody").html(getManageUserStudentPerformanceDetailContent(studentUserId));
 	manageUserStudentPerformanceAttachGradeHistoryModal();
 	manageUserStudentPerformanceLoadProgressDetail(studentUserId, lmsEnrollmentId, lmsCourseId);
@@ -1083,12 +1091,21 @@ function manageUserStudentPerformanceBindProgressDetailData(data){
     var html = "";
     $.each(items, function(_, item){
         var submitStatus = item.submissionStatus ? (item.submissionStatus + (item.lateTime ? (" (" + item.lateTime + ")") : "")) : "";
-        var status = (item.status || item.status || "").toUpperCase();
+        var status = (item.status || item.submissionStatus || "").toUpperCase();
         var statusIcon = "";
+        var excuseBtn = "";
+        var isAdminRole = (USER_ROLE !== "STUDENT" && USER_ROLE !== "PARENT" && USER_ROLE !== "TEACHER");
         if(status === "SUBMITTED"){
             statusIcon = `<i class="fa fa-check text-success"></i>`;
         }else if(status === "EXCUSED"){
-            statusIcon = `<i class="fa fa-times"></i>`;
+            statusIcon = `<span class="badge badge-warning">Excused</span>`;
+            if(isAdminRole){
+                excuseBtn = `<button class="btn btn-sm btn-outline-danger manage-user-excuse-btn" data-itemid="${item.itemid || ''}" data-action="UN_EXCUSE" title="Un-Excuse">Un-Excuse</button>`;
+            }
+        }else{
+            if(isAdminRole){
+                excuseBtn = `<button class="btn btn-sm btn-outline-primary manage-user-excuse-btn" data-itemid="${item.itemid || ''}" data-action="EXCUSE" title="Excuse">Excuse</button>`;
+            }
         }
         html += `<tr>
             <td class="text-left">${manageUserStudentPerformanceEscapeHtml(item.title || "N/A")}</td>
@@ -1099,10 +1116,52 @@ function manageUserStudentPerformanceBindProgressDetailData(data){
             <td class="${item.colorScoreText || ''}">${item.unitPercent ? (item.unitPercent + "%") : ""}</td>
             <td>${item.letter || ""}</td>
             <td>${submitStatus ? `<a href="javascript:void(0);" onclick="manageUserStudentPerformanceOpenGradeHistoryPopup('${enrollment.id || ""}','${item.itemid || ""}')"><i class="fa fa-eye"></i>&nbsp;View</a>` : ""}</td>
-            <td class="text-center">${statusIcon}</td>
+            <td class="text-center">${statusIcon} ${excuseBtn}</td>
         </tr>`;
 	});
 	$("#manageUserStudentLmsProgress").html(html);
+	manageUserStudentPerformanceBindExcuseButtons();
+}
+
+function manageUserStudentPerformanceBindExcuseButtons(){
+    $(".manage-user-excuse-btn").off("click").on("click", function(){
+        var btn = $(this);
+        var itemId = btn.data("itemid");
+        var action = btn.data("action");
+        if(!itemId || !action || !_manageUserExcuseLmsUserId || !_manageUserExcuseEntityId){
+            showMessageTheme2(0, "Missing required data to perform this action.");
+            return;
+        }
+        btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i>');
+        var payload = { lmsUserId: _manageUserExcuseLmsUserId, entityId: _manageUserExcuseEntityId, itemId: itemId, action: action };
+        $.ajax({
+            type: "POST",
+            contentType: "application/json",
+            url: getURLForHTML("dashboard", "excuse-activity"),
+            data: JSON.stringify(payload),
+            dataType: "json",
+            timeout: 60000,
+            success: function(data){
+                if(data && data.code === "SUCCESS"){
+                    showMessageTheme2(1, data.message || "Done");
+                    var td = btn.closest("td");
+                    if(action === "EXCUSE"){
+                        td.html('<span class="badge badge-warning">Excused</span> <button class="btn btn-sm btn-outline-danger manage-user-excuse-btn" data-itemid="' + itemId + '" data-action="UN_EXCUSE" title="Un-Excuse">Un-Excuse</button>');
+                    }else{
+                        td.html('<button class="btn btn-sm btn-outline-primary manage-user-excuse-btn" data-itemid="' + itemId + '" data-action="EXCUSE" title="Excuse">Excuse</button>');
+                    }
+                    manageUserStudentPerformanceBindExcuseButtons();
+                }else{
+                    showMessageTheme2(0, data && data.message ? data.message : "Failed to update activity.");
+                    btn.prop("disabled", false).html(action === "EXCUSE" ? "Excuse" : "Un-Excuse");
+                }
+            },
+            error: function(){
+                showMessageTheme2(0, "Something went wrong. Please try again.");
+                btn.prop("disabled", false).html(action === "EXCUSE" ? "Excuse" : "Un-Excuse");
+            }
+        });
+    });
 }
 
 function manageUserStudentPerformanceOpenGradeHistoryPopup(enrollId, itemId) {
@@ -1276,6 +1335,39 @@ function getManageEmailModalHtml() {
 		'<button type="button" class="btn btn-primary" id="saveManageEmailBtn">Save</button>' +
 		'</div>' +
 		'</div></div></div>';
+}
+
+// Manage User List: resend the account-activation ("invitation") email to a user.
+// Reuses the existing {schoolId}/resend-invitation-mail endpoint (entityType=USER).
+function resendInvitationMail(userId) {
+	if (!userId) {
+		showMessageTheme2(0, "Invalid user.");
+		return false;
+	}
+	showWarningMessageShow("Resend the invitation email to this user?", "doResendInvitationMail('" + userId + "')");
+	return false;
+}
+
+async function doResendInvitationMail(userId) {
+	var payload = {};
+	payload["entityId"] = userId;
+	payload["entityType"] = "USER";
+	var ajaxReqDetails = {
+		method: "POST",
+		url: APP_BASE_URL + SCHOOL_UUID + "/resend-invitation-mail",
+		body: payload,
+		global: true,
+		showMessage: false,
+		onFaildResolved: true,
+		onSuccessResolved: true
+	};
+	var responseData = await callCommonAjax(ajaxReqDetails);
+	if (responseData && responseData.status == 1) {
+		showMessageTheme2(1, responseData.message || "Invitation email resent successfully.");
+	} else {
+		showMessageTheme2(0, (responseData && responseData.message) ? responseData.message : "Failed to resend invitation.");
+	}
+	return false;
 }
 
 function openManageEmailModal(userId, studentName) {

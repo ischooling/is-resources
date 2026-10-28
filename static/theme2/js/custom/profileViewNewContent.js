@@ -3528,6 +3528,7 @@ function studentEmailInformation(data) {
     }
 
     var azureUserStatus = data && data.azureUserStatus ? data.azureUserStatus : "N";
+    var passwordCreatedDate = data.passwordCreatedDate;
     var email = "";
     var password = "";
     var actionButtonHtml = "";
@@ -3535,7 +3536,11 @@ function studentEmailInformation(data) {
     if (azureUserStatus === "Y") {
         email = data && data.email ? data.email : "";
         password = data && data.password ? data.password : "";
-        actionButtonHtml = `<button type="button" class="btn btn-sm btn-warning" onclick="resetStudentSchoolEmailPassword(this)" ${email ? "" : "disabled"}>Password Reset</button>`;
+        if(passwordCreatedDate != undefined && passwordCreatedDate != null && passwordCreatedDate != ""){
+            actionButtonHtml = `<button type="button" class="btn btn-sm btn-warning" onclick="resetStudentSchoolEmailPassword(this)" ${email ? "" : "disabled"}>Password Reset</button>`;
+        }else {
+        actionButtonHtml = `<button type="button" class="btn btn-sm btn-primary" onclick="window.open('http://outlook.office.com', '_blank');">Open Outlook</button>`;
+        }
     } else {
         actionButtonHtml = `<button type="button" class="btn btn-sm btn-primary" onclick="showWarningMessageShow('Are you sure you want to activate your school User ID?', 'confirmActivateSchoolUserId()');">Activate your school user ID</button>`;
     }
@@ -3549,7 +3554,9 @@ function studentEmailInformation(data) {
                             <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px">
                                 <i class="fa fa-envelope font-12"></i>
                             </span>
-                            <span>${USER_ROLE == "STUDENT" ? '6' : (SHOW_RESERVE_SEAT_SECTION ? '8' : '7')}. Student School Email Account</span>
+                            <div>
+                            <span>${USER_ROLE == "STUDENT" ? '6' : (SHOW_RESERVE_SEAT_SECTION ? '8' : '7')}. Student School Email Account</span><span>${azureUserStatus == "Y" ? '<i class="fa fa-check-circle text-success ml-1" title="Created"></i>' : ''}</span>
+                            </div>
                         </h5>
                         <div class="d-flex align-items-center ml-auto">
                             ${actionButtonHtml}

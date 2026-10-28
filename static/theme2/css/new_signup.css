@@ -141,7 +141,7 @@ body{font-family:opensans-regular !important}
 .right-section .form ul li:nth-child(5) .valid-field:after{right: 130px !important;}
 .right-section .form ul li:nth-child(5) .valid-field:before{right: 130px !important;}
 .right-section .form ul li .true.valid-field:after{content:"\f00c";color: green;visibility: visible;opacity: 1;transform: scale(1);}
-.right-section .form ul li .false.valid-field:not(.captchaWrapper):after{content:"\f00d";color: red;visibility: visible;opacity: 1;transform: scale(1);}
+.right-section .form ul li .false.valid-field:after{content:"\f00d";color: red;visibility: visible;opacity: 1;transform: scale(1);}
 .right-section .form ul li .true.valid-field input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]){padding-right: 50px;border-color:green}
 .right-section .form ul li .false.valid-field input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]){border-color:red}
 .right-section .form ul li:last-child{margin-bottom: 0}
@@ -150,9 +150,6 @@ body{font-family:opensans-regular !important}
 .right-section .form ul li .field-icon{content: '';position: absolute;left: 0;top:0;width: 45px;height: 52px;border-top-left-radius: 50px;border-bottom-left-radius: 50px;font-size: 18px;display: flex;align-items: center;justify-content: center;}
 .right-section .form ul li input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]), .right-section .form ul li textarea, .right-section .form ul li select{width: 100%;float: left;font-size: 16px;padding: 5px 16px 5px !important;height: 44px; border-radius: 50px;color:#737373;}
 .right-section .form ul li input[type="submit"], input[type="submit"], .right-section .form ul li button[type="submit"], button[type="submit"]{display: inline-block;padding: 10px 25px;border:0;border-radius: 16px;font-size: 14px; margin: 5px auto;display: block;}
-.right-section .form ul li .captcha-img{content: '';position: absolute;right: 0;top:0;display: flex;align-items: center;height: 100%;overflow: hidden; background: var(--pc);border-top-right-radius: 50px;border-bottom-right-radius: 50px;}
-.right-section .form ul li .captcha-img .refresh-link{display: inline-block;line-height: 14px;padding-right: 15px;color:#fff;}
-.right-section .form ul li .captcha-img img{display: inline-block;margin-left: 4px; margin-right: 2px;}
 .right-section .form ul li .terms-policy{width: 100%;float: left;line-height: 20px; font-size:14px;text-align: center;}
 .right-section .form ul li .terms-policy a{display: inline-block;line-height: 22px;font-size:14px;}
 .copywritediv{width: 100%;padding: 6px 10px;font-size: 12px;text-align: center;border-top: 1px solid #ededed;position: fixed;bottom:0;background-color: #fff; }

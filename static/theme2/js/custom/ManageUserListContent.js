@@ -300,6 +300,7 @@ async function renderManageUserTab(tab, meta) {
 	pane.data("mu-rendered", true);
 	// Filter show/hide toggle is per-pane markup — (re)bind after each render.
 	$('.show-filter').off('click').on('click', function () {
+		$('#studentFilterHint').hide();
 		$(this).closest('.filter-wrapper').find('.filter-fields').stop().slideToggle();
 	});
 }

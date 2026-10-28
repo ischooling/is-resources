@@ -1,5 +1,31 @@
+// The picker screen has no sidebar content to show, so collapse the space
+// that `.closed-sidebar.fixed-sidebar .app-main__outer` normally reserves for
+// the icon rail (new-theme-style.css), and hide the sidebar-toggle hamburger
+// in the header since there's nothing left for it to toggle.
+function hideParentChildPickerChrome(){
+    $('.app-sidebar').hide();
+    $('.app-header .close-sidebar-btn').hide();
+    $('.app-main__outer').css('padding-left', '0');
+}
+
+function restoreParentDashboardChrome(){
+    $('.app-sidebar').show();
+    $('.app-header .close-sidebar-btn').show();
+    $('.app-main__outer').css('padding-left', '');
+}
+
 async function renderParentDashboardContent(){
-    $('#dashboardContentInHTML').html(getParentDashboardPageSkeleton());
+    // Show the right skeleton shape up front — a child already selected this
+    // session means we're about to land straight on their dashboard, not the
+    // picker, so don't flash the card-grid skeleton first.
+    var alreadySelectedIdForSkeleton = (typeof ACTIVE_STUDENT_ID !== "undefined" && ACTIVE_STUDENT_ID) ? ACTIVE_STUDENT_ID : null;
+    if(alreadySelectedIdForSkeleton){
+        restoreParentDashboardChrome();
+        $('#dashboardContentInHTML').html(getParentChildDashboardSkeleton());
+    }else{
+        hideParentChildPickerChrome();
+        $('#dashboardContentInHTML').html(getParentDashboardPageSkeleton());
+    }
     var payload = {userId:USER_ID}
     var ajaxReqDetails = {
         method: "POST",
@@ -11,108 +37,218 @@ async function renderParentDashboardContent(){
         onSuccessResolved: true
     }
     var getStudentList = await dummyGetParentStudentList(ajaxReqDetails);
-    // console.log(getStudentList);
-    $('#dashboardContentInHTML').html(getParentDashboardContent(getStudentList,'getStudentDetailsByStudentID'));
-    if(STUDENT_LIST.studentBasicDetails.length>0){
-        await getStudentDetailsByStudentID(STUDENT_LIST.studentBasicDetails[0].userId);
+    if(!commonProfileDTO){
+        commonProfileDTO = await getUserShortProfile(USER_ID);
     }
+    STUDENT_LIST = getStudentList;
+    // console.log(getStudentList);
+    var students = (STUDENT_LIST && STUDENT_LIST.studentBasicDetails) || [];
+    if(students.length === 0){
+        $('#dashboardContentInHTML').html(getParentDashboardContent(getStudentList,'getStudentDetailsByStudentID'));
+        return;
+    }
+    // A child already picked this session (either earlier via this same flow,
+    // or restored below) stays picked — re-opening the Parent Dashboard module
+    // from the sidebar must not bounce the parent back to the picker; only
+    // "Select Another Child" should do that.
+    var alreadySelectedId = (typeof ACTIVE_STUDENT_ID !== "undefined" && ACTIVE_STUDENT_ID) ? ACTIVE_STUDENT_ID : null;
+    // Nothing picked yet: land on the "which dashboard would you like to
+    // open" picker first — even for a single-child account, so the flow is
+    // consistent — unless a specific child was deep-linked in via the demo
+    // panel's ?demoStudentName= param.
+    var isDemoStudentDeepLink = /[?&]demoStudentName=/.test(window.location.search || "");
+    if(!alreadySelectedId && !isDemoStudentDeepLink){
+        renderParentChildSelectionScreen();
+        return;
+    }
+    await openParentChildDashboard(alreadySelectedId || students[0].userId);
+}
+
+function renderParentChildSelectionScreen(){
+    hideParentChildPickerChrome();
+    $('#dashboardContentInHTML').html(getParentChildSelectionContent(STUDENT_LIST));
+}
+
+async function openParentChildDashboard(studentUserId){
+    if(!studentUserId){
+        return;
+    }
+    restoreParentDashboardChrome();
+    $('#dashboardContentInHTML').html(getParentDashboardContent(STUDENT_LIST,'getStudentDetailsByStudentID'));
+    await getStudentDetailsByStudentID(studentUserId);
     parentDashbaordOnLoadEvent();
 }
 
-function getParentDashboardContent(studentList, funName){
-    var html= 
-    `<div class="main-card mb-3 pr-4 parent-dashboard">
-        ${getStudentTabSliderContent(studentList, funName)+getStudentDetailsByIDWrapper()+getAnnouncementAndNewsContent()+getMobileBottomControlViewContent()}
-    </div>`;
-    
-    return html;
-}
+function getParentChildSelectionContent(studentList){
+    var students = (studentList && studentList.studentBasicDetails) || [];
+    var parentFirstName = (typeof USER_FULL_NAME !== "undefined" && USER_FULL_NAME) ? getStudentFirstfName(USER_FULL_NAME) : "";
+    var addAnotherChildSetting = getSettingsByTypeAndKey('CONFIGURATION', 'ADD_ANOTHER_CHILD_BTN', false);
+    var showAddAnotherChildButton = String(getSettingMetaValue(addAnotherChildSetting) || '').trim().toLowerCase() === 'true';
+    var html =
+    `<div class="parent-child-selection text-center py-4">
+        <h4 class="text-dark font-weight-bold mb-1">Hi ${parentFirstName ? parentFirstName : 'there'}, which dashboard would you like to open?</h4>
+        <p class="text-gray mb-3">You have <b>${students.length}</b> ${students.length === 1 ? 'child' : 'children'} linked to this account. Pick one to continue.</p>
+        <div class="form-row justify-content-center">`;
 
-function getParentDashboardPageSkeleton(){
-    var html=
-    `<div class="parent-tab-slider-wrapper">
-        <span id="currentTimeForUser" class="d-none"></span>
-        <ul class="nav nav-tabs user-slider justify-content-center">
-            <li class="nav-item">
-                <a href="javascript:void(0)" class="nav-link p-1 pr-3 bg-white gap-5 student-thumb active-student">
-                    <div class="skeleton" style="width:25px;height:25px;border-radius:50%;"></div>
-                    <div class="skeleton" style="width:130px;height:16px;"></div>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="javascript:void(0)" class="nav-link p-1 pr-3 bg-white gap-5 student-thumb">
-                    <div class="skeleton" style="width:25px;height:25px;border-radius:50%;"></div>
-                    <div class="skeleton" style="width:130px;height:16px;"></div>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="javascript:void(0)" class="nav-link p-1 pr-3 bg-white gap-5 student-thumb">
-                    <div class="skeleton" style="width:25px;height:25px;border-radius:50%;"></div>
-                    <div class="skeleton" style="width:130px;height:16px;"></div>
-                </a>
-            </li>
-        </ul>
-    </div>
-    <div class="form-row">
-        <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12" id="studentPerformanceDetails">
-            ${getParentPerformanceOverviewSkeletonCard()}
-        </div>
-        <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
-            <div class="row">
-                <div class="col-xl-12 col-lg-12 col-md-6 col-sm-12 col-12 mt-3 mt-lg-0">
-                    <div class="card rounded-10">
-                        <div class="card-header rounded-top-left-10 rounded-top-right-10">
-                            <div class=""> 
-                                <h4 class="text-dark font-weight-semi-bold font-20 text-transform-none m-0" class="upcommingClassesActivites">Upcoming ${ACTIVITIES_WITH_CLASS?'Classes & ':''}Activities</h4>
+    $.each(students, function(i, v){
+        var studentName = v.studentName || v.fullName || v.userFullName || "";
+        var hasProfilePic = v.profilePic != null && v.profilePic != undefined && $.trim(v.profilePic) != "";
+        html +=
+        `<div class="col-xl-3 col-lg-4 col-md-6 col-12 mb-3">
+            <div class="card rounded-10 h-100 cursor" onclick="openParentChildDashboard('${v.userId}')">
+                <!-- Mobile (<768px): compact, image left / name+grade+link right. A fixed-width inner
+                     wrapper is centered in the card (instead of centering the row itself) so the avatar
+                     lands at the same x position on every card regardless of how long each name/grade is. -->
+                <div class="card-body d-flex d-md-none p-2">
+                    <div class="d-flex align-items-center" style="width:100%;max-width:260px;">
+                        <div class="avatar-icon-wrapper mr-2 flex-shrink-0" style="width:40px;height:40px;">
+                            <div class="avatar-icon rounded-circle d-flex align-items-center justify-content-center ${hasProfilePic ? '' : 'bg-light-primary'}" style="width:40px;height:40px;">
+                                ${hasProfilePic ? `<img src="${v.profilePic}" alt="Profile Image">` : `<span class="font-weight-bold text-primary font-12">${getUserInitialsCommon(studentName, '?')}</span>`}
                             </div>
                         </div>
-                        <div class="card-body py-3 overflow-y-auto" style="max-height:250px">
-                            ${getParentRightCardSkeletonRows(4)}
+                        <div class="text-left" style="min-width:0;flex:1;">
+                            <h6 class="text-dark font-weight-bold mb-0 text-break" style="line-height:1.3;">${studentName}</h6>
+                            ${v.standardName ? `<div class="text-gray font-11 mb-1 text-truncate"><i class="fa fa-graduation-cap mr-1 text-primary"></i>${v.standardName}</div>` : ''}
+                            <a href="javascript:void(0)" class="text-primary font-weight-semi-bold font-11" onclick="event.stopPropagation(); openParentChildDashboard('${v.userId}')">View Dashboard</a>
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-12 col-lg-12 col-md-6 col-sm-12 col-12 mt-3">
-                    <div class="card rounded-10">
-                        <div class="card-header rounded-top-left-10 rounded-top-right-10">
-                            <div class=""> 
-                                <h4 class="text-dark font-weight-semi-bold font-20 text-transform-none m-0">Due & Upcoming Payment</h4>
+                <!-- Tablet/desktop (>=768px): centered, avatar above name -->
+                <div class="card-body text-center d-none d-md-block">
+                    <div class="avatar-icon-wrapper avatar-icon-xl mx-auto mb-2">
+                        <div class="avatar-icon rounded-circle d-flex align-items-center justify-content-center ${hasProfilePic ? '' : 'bg-light-primary'}">
+                            ${hasProfilePic ? `<img src="${v.profilePic}" alt="Profile Image">` : `<span class="font-weight-bold text-primary font-20">${getUserInitialsCommon(studentName, '?')}</span>`}
+                        </div>
+                    </div>
+                    <h5 class="text-dark font-weight-bold mb-1">${studentName}</h5>
+                    ${v.standardName ? `<div class="text-gray mb-2"><i class="fa fa-graduation-cap mr-1 text-primary"></i>${v.standardName}</div>` : ''}
+                    <a href="javascript:void(0)" class="text-primary font-weight-semi-bold" onclick="event.stopPropagation(); openParentChildDashboard('${v.userId}')">View Dashboard</a>
+                </div>
+            </div>
+        </div>`;
+    });
+
+    html += `</div>${showAddAnotherChildButton ? `<div class="mt-2 mb-2">${getAddChildButtonHtml('Add Another Child')}</div>` : ''}</div>`;
+    return html;
+}
+
+function getParentDashboardContent(studentList, funName){
+    var html=
+    `<div class="main-card mb-3 pr-4 parent-dashboard">
+        ${getParentDashboardSelectedChildHeader()+getStudentDetailsByIDWrapper()+getAnnouncementAndNewsContent()+getMobileBottomControlViewContent()}
+    </div>`;
+
+    return html;
+}
+
+function getParentDashboardSelectedChildHeader(){
+    return `<div class="parent-tab-slider-wrapper">
+        <span id="currentTimeForUser" class="d-none"></span>
+        <div class="d-flex justify-content-end">
+            ${getSelectAnotherChildButtonHtml()}
+        </div>
+    </div>`;
+}
+
+function getParentChildDashboardSkeleton(){
+    return `<div class="main-card mb-3 pr-4 parent-dashboard">
+        ${getParentDashboardSelectedChildHeader()}
+        <div class="form-row">
+            <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
+                ${getParentPerformanceOverviewSkeletonCard()}
+            </div>
+            <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12">
+                <div class="row">
+                    <div class="col-xl-12 col-lg-12 col-md-6 col-sm-12 col-12 mt-3 mt-lg-0">
+                        <div class="card rounded-10">
+                            <div class="card-header rounded-top-left-10 rounded-top-right-10">
+                                <div class="">
+                                    <h4 class="text-dark font-weight-semi-bold font-20 text-transform-none m-0">Upcoming ${ACTIVITIES_WITH_CLASS?'Classes & ':''}Activities</h4>
+                                </div>
+                            </div>
+                            <div class="card-body py-3 overflow-y-auto" style="max-height:250px">
+                                ${getParentRightCardSkeletonRows(4)}
                             </div>
                         </div>
-                        <div class="card-body py-3 overflow-y-auto" style="max-height:250px">
-                            ${getParentRightCardSkeletonRows(3)}
+                    </div>
+                    <div class="col-xl-12 col-lg-12 col-md-6 col-sm-12 col-12 mt-3">
+                        <div class="card rounded-10">
+                            <div class="card-header rounded-top-left-10 rounded-top-right-10">
+                                <div class="">
+                                    <h4 class="text-dark font-weight-semi-bold font-20 text-transform-none m-0">Due & Upcoming Payment</h4>
+                                </div>
+                            </div>
+                            <div class="card-body py-3 overflow-y-auto" style="max-height:250px">
+                                ${getParentRightCardSkeletonRows(3)}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>`;
+}
+
+function getParentDashboardPageSkeleton(){
+    var html=
+    `<div class="parent-child-selection text-center py-4">
+        <div class="skeleton mx-auto mb-2" style="height:26px;max-width:380px;"></div>
+        <div class="skeleton mx-auto mb-3" style="height:16px;max-width:300px;"></div>
+        <div class="skeleton mx-auto mb-4" style="height:34px;width:200px;border-radius:20px;"></div>
+        <div class="form-row justify-content-center">`;
+
+    for(var i = 0; i < 4; i++){
+        html +=
+        `<div class="col-xl-3 col-lg-4 col-md-6 col-12 mb-3">
+            <div class="card rounded-10 h-100">
+                <div class="card-body d-flex d-md-none align-items-center justify-content-center p-2">
+                    <div class="skeleton mr-2 flex-shrink-0" style="width:40px;height:40px;border-radius:50%;"></div>
+                    <div>
+                        <div class="skeleton mb-1" style="height:13px;width:110px;"></div>
+                        <div class="skeleton mb-1" style="height:10px;width:75px;"></div>
+                        <div class="skeleton" style="height:10px;width:65px;"></div>
+                    </div>
+                </div>
+                <div class="card-body text-center d-none d-md-block">
+                    <div class="skeleton mx-auto mb-2" style="width:64px;height:64px;border-radius:50%;"></div>
+                    <div class="skeleton mx-auto mb-2" style="height:16px;max-width:140px;"></div>
+                    <div class="skeleton mx-auto mb-2" style="height:12px;max-width:90px;"></div>
+                    <div class="skeleton mx-auto" style="height:12px;max-width:80px;"></div>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    html += `</div></div>`;
     return html;
 }
 
-function getStudentTabSliderContent(data, clickFunctionName){
+// Every other parent module (Class Schedule, Fee Details, Attendance, ...)
+// used to show a clickable strip of every child's tab here, letting the
+// parent silently switch the active child mid-report. That switching now
+// only happens through "Select Another Child" on the Parent Dashboard, so
+// this is a read-only label of whichever child is currently selected
+// (ACTIVE_STUDENT_ID) — no tabs, nothing to click.
+function getStudentTabSliderContent(data, clickFunctionName, showAddChildBtn){
+    STUDENT_LIST = data;
+    var students = data.studentBasicDetails || [];
+    var activeStudent = students.find(function(s){ return String(s.userId) === String(ACTIVE_STUDENT_ID); }) || students[0];
+    var studentName = activeStudent ? (activeStudent.studentName || activeStudent.fullName || activeStudent.userFullName || "") : "";
+
     var html =
     `<div class="parent-tab-slider-wrapper">
         <span id="currentTimeForUser" class="d-none"></span>
-        <h4 class="parent-dashboard-header-title text-primary font-weight-bold m-0 d-lg-none text-center py-2">
-            Parent Dashboard
-        </h4>
-        <ul class="nav nav-tabs user-slider justify-content-center">`;
+        <div class="d-flex align-items-center">`;
 
-    STUDENT_LIST = data;
-
-    $.each(data.studentBasicDetails, function(i, v){
-        var studentName = v.studentName || v.fullName || v.userFullName || "";
-        var studentLabel = getStudentFirstfName(studentName) || "Student";
+    if(activeStudent){
         html +=
-        `<li class="nav-item">
-            <a href="javascript:void(0)" class="nav-link p-1 pr-3 bg-white gap-5 student-thumb student-${v.userId} ${i == 0 ? 'active-student':''}"  onclick="${clickFunctionName}('${v.userId}')" style="${i == 0 ? 'padding-left:30px !important':''}"> 
-                <img src="${v.profilePic}" class="circle" style="width:25px;height:25px">
-                <span>Child ${i+1}: ${studentLabel}${v.standardName ? ` <span class="font-12">. ${v.standardName}</span>` : ''}</span>
-            </a>
-        </li>`;
-    });
+        `<div class="nav-link p-1 pr-3 bg-white gap-5 d-flex align-items-center active-student" style="padding-left:30px !important">
+            <img src="${activeStudent.profilePic}" class="circle" style="width:25px;height:25px">
+            <span>${studentName}${activeStudent.standardName ? ` <span class="font-12">. ${activeStudent.standardName}</span>` : ''}</span>
+        </div>`;
+    }
 
-    html += `</ul></div>`;
+    html += `</div></div>`;
 
     return html;
 }
@@ -245,9 +381,6 @@ function getStudentPerformanceDetailsCard(data){
         </div>
         ` : ""}
         <div class="card-body pt-3">
-            <div class="position-absolute text-gray font-12 last-active" style="right:1.25rem">
-                <span class="bg-gray d-inline-block rounded-circle" style="width:10px;height:10px;"></span>&nbsp; Last active: ${data.student.lastActive}
-            </div>
             <div class="d-flex">
                 <div class="avatar-icon-wrapper mr-2 avatar-icon-xl">
                     <div class="avatar-icon">
@@ -257,12 +390,15 @@ function getStudentPerformanceDetailsCard(data){
                 <div>
                     <h5 class="text-dark font-weight-bold mb-1">${data.student.studentName}</h5>
                     <div>
-                        <span class="text-gray">
+                        <span class="text-gray d-block d-md-inline">
                             <i class="fa fa-graduation-cap mr-1 text-primary"></i>${data.student.grade}
                         </span>
-                        <span class="text-gray">
+                        <span class="text-gray d-block d-md-inline">
                             <i class="fa fa-users mr-1 text-primary"></i>${getLearningProgramLabel(data.student.learningProgram)}
                         </span>
+                         <div class="position-absolute text-gray font-12 last-active" style="right:1.25rem">
+                             <span class="bg-gray d-inline-block rounded-circle" style="width:10px;height:10px;"></span>&nbsp; Last active: ${data.student.lastActive}
+                         </div>
                     </div>
                 </div>    
             </div>
@@ -333,11 +469,11 @@ function getStudentPerformanceDetailsCard(data){
                 
             </div>
             <div class="mt-4 mb-3">
-                <h4 class="text-dark font-weight-semi-bold font-20">Performance Overview</h4>
+                <h4 class="text-dark font-weight-semi-bold font-20 text-center text-md-left">Performance Overview</h4>
             </div>
             <div class="card p-4">
                 <!-- Tabs -->
-                <ul class="nav nav-pills mb-2">
+                <ul class="nav nav-pills mb-2 justify-content-center justify-content-md-start">
                     <li class="nav-item btn-group-sm">
                         <a href="#attendanceChartTab" class="nav-link btn active attendance-tab" data-toggle="tab" role="tab" aria-controls="attendanceChartTab" aria-selected="true">Attendance</a>
                     </li>
@@ -560,11 +696,11 @@ function getMobileBottomControlViewContent(){
     var html=
     `<div class="mobileBottomNav justify-content-around">
         <a href="javascript:void(0)" class="position-relative" onclick="slideUp(\'upcoming-classess-mobile-view\')">
-            <img src="${PATH_FOLDER_IMAGE2}icon/sidebar/Examination_Schedule_icon.png" style="width:30px"/>
+            <img src="${PATH_FOLDER_IMAGE2}Icon/sidebar/Examination_Schedule_icon.png" style="width:30px"/>
             <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2 upcomingClasessBadge" id="">0</span>
         </a>
         <a href="javascript:void(0)" class="position-relative" onclick="slideUp(\'payment-mobile-view\')">
-            <img src="${PATH_FOLDER_IMAGE2}icon/sidebar/Fee_Details.webp" style="width:30px"/>
+            <img src="${PATH_FOLDER_IMAGE2}Icon/sidebar/Fee_Details.webp" style="width:30px"/>
             <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2 feeBadge" id="">0</span>
         </a>
         <a href="javascript:void(0)" class="position-relative" onclick="openRightSideBar('announcement_side_wrapper')">
@@ -585,7 +721,7 @@ function getMobileBottomControlViewContent(){
                 const chatPayload = btoa(unescape(encodeURIComponent(jsonString)));
                 const chatUrl = `${CHAT_URL}/sign-in?uuid=${UNIQUEUUID}+&p=` + chatPayload;
                 html += `<a href="${chatUrl}" type="button" target="_blank" class="position-relative">
-                            <img src="${PATH_FOLDER_IMAGE2}icon/sidebar/Wati.png" style="width:30px"/>
+                            <img src="${PATH_FOLDER_IMAGE2}Icon/sidebar/Wati.png" style="width:30px"/>
                         </a>`;
             }
         

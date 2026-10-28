@@ -168,9 +168,7 @@ function redirectLoginPage() {
     if ($("#continueSessionForm").length > 0) {
       callLocationAndSelectCountryNew("continueSessionForm");
       $("#password").val("");
-      $("#captcha").val("");
       $("#sessionOutPermission").modal({ backdrop: "static", keyboard: false });
-      refreshCaptcha("captchaImage");
       $("#continueSession").click(function (event) {
         event.preventDefault();
         callUserLogin("continueSessionForm", "", "CONTINUE");
@@ -181,18 +179,6 @@ function redirectLoginPage() {
           BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/common/login";
       }, 1000);
     }
-  }
-}
-function refreshCaptcha(id) {
-  var primaryColor = ROOTCSS.split(":#")[1].split(";")[0];
-  if (id != undefined && id != "" && $("#" + id).length > 0) {
-    document.images[id].src =
-      BASE_URL +
-      API_VERSION +
-      "common/captcha.jpg?payload=" +
-      primaryColor +
-      "&v=" +
-      new Date().getTime();
   }
 }
 function getURLForHTML(apiType, suffixUrl) {
@@ -2399,16 +2385,6 @@ function validateRequestForContact(formId) {
     return false;
   }
 
-  if (
-    !validateCaptcha(
-      $("#" + formId + " #captcha")
-        .val()
-        .trim()
-    )
-  ) {
-    showMessageTheme2(0, "Either captcha is empty or invalid");
-    return false;
-  }
   return true;
 }
 
@@ -2441,9 +2417,6 @@ function getRequestForContact(formId, moduleId) {
   contactUsDTO["contactDescription"] = $("#" + formId + " #contactDescription")
     .val()
     .trim();
-  contactUsDTO["captcha"] = $("#" + formId + " #captcha")
-    .val()
-    .trim();
   requestData["contactUsDTO"] = contactUsDTO;
   authentication["hash"] = getHash();
   authentication["schoolId"] = SCHOOL_ID;
@@ -2471,7 +2444,6 @@ function callUserContact(formId, moduleId) {
     timeout: 600000,
     success: function (data) {
       if (data["status"] == "0" || data["status"] == "2") {
-        refreshCaptcha("captchaImage");
         showMessageTheme2(1, data["message"]);
       } else {
         //customLoader(true);
@@ -6330,9 +6302,6 @@ function getSystemTimezone() {
 }
 
 $(document).ready(function () {
-  $("#captcha").keyup(function () {
-    $(this).val($(this).val().toUpperCase());
-  });
   $("#marqueeDiv").css({ color: "red" });
 });
 function hidePassWordSuggession(src) {

@@ -76,25 +76,25 @@ input[type="radio"], input[type="checkbox"] {accent-color: var(--pc);}
 /* server message css end  */
 .extra-course-price-ul{margin-bottom: 0 !important;}
 
-.btn-light{border-color:#dcdcdc;color: #212529 !important;background-color: #b1b0b0 !important;}
-.m-0{margin: 0px !important;}
-.ml-1{margin-left:0.25rem}
-.ml-2{margin-left:0.50rem}
-.ml-3{margin-left:0.75rem}
-.ml-4{margin-left:1rem}
-.mr-1{margin-right:0.25rem}
-.mr-2{margin-right:0.50rem}
-.mr-3{margin-right:0.75rem}
-.mr-4{margin-right:1rem}
-.mb-1{margin-bottom:0.25rem !important}
-.mb-2{margin-bottom:0.50rem !important}
-.mb-3{margin-bottom:0.75rem !important}
-.mb-4{margin-bottom:1rem !important}
-.mt-1{margin-top:0.25rem !important}
-.mt-2{margin-top:0.50rem !important}
-.mt-3{margin-top:0.75rem !important}
-.mt-4{margin-top:1rem !important}
-.max-size-modal .modal-lg{max-width: 100%;}
+.wrapper-style .btn-light{border-color:#dcdcdc;color: #212529 !important;background-color: #b1b0b0 !important;}
+.wrapper-style .m-0{margin: 0px !important;}
+.wrapper-style .ml-1{margin-left:0.25rem}
+.wrapper-style .ml-2{margin-left:0.50rem}
+.wrapper-style .ml-3{margin-left:0.75rem}
+.wrapper-style .ml-4{margin-left:1rem}
+.wrapper-style .mr-1{margin-right:0.25rem}
+.wrapper-style .mr-2{margin-right:0.50rem}
+.wrapper-style .mr-3{margin-right:0.75rem}
+.wrapper-style .mr-4{margin-right:1rem}
+.wrapper-style .mb-1{margin-bottom:0.25rem !important}
+.wrapper-style .mb-2{margin-bottom:0.50rem !important}
+.wrapper-style .mb-3{margin-bottom:0.75rem !important}
+.wrapper-style .mb-4{margin-bottom:1rem !important}
+.wrapper-style .mt-1{margin-top:0.25rem !important}
+.wrapper-style .mt-2{margin-top:0.50rem !important}
+.wrapper-style .mt-3{margin-top:0.75rem !important}
+.wrapper-style .mt-4{margin-top:1rem !important}
+.wrapper-style .max-size-modal .modal-lg{max-width: 100%;}
 .valid-field:after{font-family: FontAwesome;font:normal normal normal 14px/1 FontAwesome; position: absolute;right: 30px;top: 12px;transform: scale(0); visibility: hidden;opacity: 1;font-size: 16px;transition: all 0.5s ease-in-out;-moz-transition: all 0.5s ease-in-out;-webkit-transition: all 0.5s ease-in-out;-ms-transition: all 0.5s ease-in-out;}
 .valid-field.true:after{content:"\f00c";color: green;}
 .valid-field.false:after{content:"\f00d";color: red;}
@@ -162,59 +162,59 @@ body {
 	outline: none;
 }
 
-textarea {
+.wrapper-style textarea {
 	resize: none;
 }
 
-input,
-textarea,
-select,
-button {
+.wrapper-style input,
+.wrapper-style textarea,
+.wrapper-style select,
+.wrapper-style button {
 	font-size: 14px;
 }
 
-select {
+.wrapper-style select {
 	-moz-appearance: none;
 	-webkit-appearance: none;
 	cursor: pointer;
 }
 
-select option[value=""][disabled] {
+.wrapper-style select option[value=""][disabled] {
 	display: none;
 }
 
-p,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-ul {
+.wrapper-style p,
+.wrapper-style h1,
+.wrapper-style h2,
+.wrapper-style h3,
+.wrapper-style h4,
+.wrapper-style h5,
+.wrapper-style h6,
+.wrapper-style ul {
 	margin: 0;
 }
 
-ul {
+.wrapper-style ul {
 	padding: 0;
 	margin: 0;
 	list-style: none;
 }
 
-a {
+.wrapper-style a {
 	text-decoration: none;
 	color: #5117a5
 }
 
-textarea {
+.wrapper-style textarea {
 	resize: none;
 }
 
-img {
+.wrapper-style img {
 	max-width: 100%;
 	vertical-align: middle;
 }
 
-button:focus {
+.wrapper-style button:focus {
 	border: 0 !important;
 	outline: none !important
 }
@@ -264,7 +264,7 @@ button:focus {
 	/* box-shadow: 0 0.46875rem 2.1875rem rgba(4, 9, 20, 0.03), 0 0.9375rem 1.40625rem rgba(4, 9, 20, 0.03), 0 0.25rem 0.53125rem rgba(4, 9, 20, 0.05), 0 0.125rem 0.1875rem rgba(4, 9, 20, 0.03); */
 }
 
-.fixed-header{position: fixed;top: 0;width: 100%;background: #fff;z-index: 99;padding: 20px 16px 0px;}
+.signup-fixed-header{position: fixed;top: 0;width: 100%;background: #fff;z-index: 99;padding: 20px 16px 0px;}
 #formSteps{padding: 0 25px;}
 .wizard {
 	position: relative;
@@ -373,17 +373,17 @@ h3 {
 	font-weight: 600;
 }
 
-.form-row {
+.wrapper-style .form-row {
 	display: flex;
 	margin-bottom: 1px;
 	flex-wrap: inherit !important;
 }
 
-.form-row .form-holder {
+.wrapper-style .form-row .form-holder {
 	width: 50%;
 	margin-right: 20px;
 }
-.form-row .form-holder.selected-course-view{margin-right:20px;overflow-x: hidden;}
+.wrapper-style .form-row .form-holder.selected-course-view{margin-right:20px;overflow-x: hidden;}
 /* .swap-wrapper{display:flex;padding: 75px 15px 0 15px;}
 .swap-wrapper .swap-btn{font-size:28px;color:#5117a5;cursor:pointer;}
 .swap-course{  margin: 0 !important; position: relative;top: 3px;margin-right: 5px !important;}
@@ -431,25 +431,25 @@ h3 {
 
 
 .review-td-editing{display: flex;}
-.form-row .review-td-editing .form-holder{width: 33%;}
-.form-row .form-holder:last-child {
+.wrapper-style .form-row .review-td-editing .form-holder{width: 33%;}
+.wrapper-style .form-row .form-holder:last-child {
 	margin-right: 0;
 }
 
-.form-row .form-holder.w-100 {
+.wrapper-style .form-row .form-holder.w-100 {
 	width: 100%;
 	margin-right: 0;
 }
 
-.form-row .form-group {
+.wrapper-style .form-row .form-group {
 	display: flex;
 }
 
-.form-row .form-group .form-holder {
+.wrapper-style .form-row .form-group .form-holder {
 	margin-right: 21px;
 }
 
-.form-row .form-group .form-holder:last-child {
+.wrapper-style .form-row .form-group .form-holder:last-child {
 	margin-right: 0;
 }
 
@@ -708,11 +708,43 @@ input::placeholder {
 	width: 234px;
 }
 
+/* Partner student enrollment is rendered inside the dashboard's additional
+   content area. Keep its header in document flow and its step controls clear
+   of the dashboard footer. */
+.partner-enrollment-embedded {
+	width: 100%;
+	padding-top: 0;
+	padding-bottom: 110px;
+}
+.partner-enrollment-embedded .signup-fixed-header {
+	position: relative;
+	top: auto;
+	width: 100%;
+	padding: 0 16px 12px;
+	z-index: auto;
+}
+.partner-enrollment-embedded .actions {
+	position: fixed;
+	left: 100px;
+	right: 0;
+	bottom: 9px;
+	z-index: 100;
+	margin: 0;
+	padding: 10px 25px;
+	background: #fff;
+	border-top: 1px solid #dedede;
+}
+@media (max-width: 991.98px) {
+	.partner-enrollment-embedded .actions {
+		left: 0;
+	}
+}
+
 .copyRights{text-align: center;width: 100%;padding: 5px;bottom: 0;background-color: #fff;font-size: 12px;padding: 5px;border-top:1px solid #dedede}
-.fixed-footer:not(.app-container){z-index: 99;position: fixed;left: 0;right: 0;bottom: 0;background: #fff;padding-bottom: calc(env(safe-area-inset-bottom) + 8px);}
-.fixed-footer .whatsapp_button{width: 100%;display: inline-flex;background: #25D366;text-align: center;justify-content: center;font-size: 20px;font-weight: 600;}
-.fixed-footer .whatsapp_button{display: none;}
-.fixed-footer:not(.app-container) .whatsapp_button_wrappers.d-flex .whatsapp_button{display: none !important;}
+.signup-fixed-footer:not(.app-container){z-index: 99;position: fixed;left: 0;right: 0;bottom: 0;background: #fff;padding-bottom: calc(env(safe-area-inset-bottom) + 8px);}
+.signup-fixed-footer .whatsapp_button{width: 100%;display: inline-flex;background: #25D366;text-align: center;justify-content: center;font-size: 20px;font-weight: 600;}
+.signup-fixed-footer .whatsapp_button{display: none;}
+.signup-fixed-footer:not(.app-container) .whatsapp_button_wrappers.d-flex .whatsapp_button{display: none !important;}
 .desktop_whatsapp_button_wrapper{z-index: 999;position: fixed;right:20px;bottom: 50px;}
 .preferred-communication{font-size: 24px;margin-bottom: 15px;display: block;}
 .communication-label{font-size: 18px;font-weight: 700;}
@@ -752,16 +784,16 @@ input::placeholder {
 	.actions ul li {
 		margin-bottom: 20px;
 	}
-	.form-row {
+	.wrapper-style .form-row {
 		/* display: block; */
 	}
-	.form-row .form-holder {
+	.wrapper-style .form-row .form-holder {
 		width: 50%;
 		margin-right: 15px;
 		margin-bottom: 25px;
 	}
 	
-	.form-row .form-group {
+	.wrapper-style .form-row .form-group {
 		width: 100%;
 		display: block;
 	}
@@ -785,8 +817,8 @@ input::placeholder {
 		padding: 40px 5px 6px;
 	}
 	
-	.form-row{display:block;}
-	.form-row .form-holder{width:100%;}
+	.wrapper-style .form-row{display:block;}
+	.wrapper-style .form-row .form-holder{width:100%;}
 	/*.actions ul {
 		flex-direction: column;
     align-items: flex-end;
@@ -1280,7 +1312,7 @@ input::placeholder {
 
 /* modal css */
 
-.modal .close {
+.wrapper-style .modal .close {
 	color: #fff;
 	opacity: 1;
 	position: relative;
@@ -1288,8 +1320,8 @@ input::placeholder {
 	padding: 2px 7px 5px;
 	margin-right: 2px;
 }
-.modal .close:not(.close-with-red-color):after{content: '';position: absolute;inset: 0;background-color: red;z-index: -1;}
-.modal .close-with-red-color {
+.wrapper-style .modal .close:not(.close-with-red-color):after{content: '';position: absolute;inset: 0;background-color: red;z-index: -1;}
+.wrapper-style .modal .close-with-red-color {
 	opacity: 1;
     width: 12px;
     height: 27px;
@@ -1305,23 +1337,23 @@ input::placeholder {
 	background-color: red !important;
 }
 
-.modal p,
-.modal ul {
+.wrapper-style .modal p,
+.wrapper-style  .modal ul {
 	margin-bottom: 15px;
 }
 
-.modal-header {
+.wrapper-style  .modal-header {
 	padding: 8px 15px !important;
 }
 
-.modal-content {
+.wrapper-style .modal-content {
 	margin-top: 70px !important;
 }
-.max-size-modal .modal-content {
+.wrapper-style  .max-size-modal .modal-content {
 	margin-top: 20px !important;
 }
 
-.modal-sub-title {
+.wrapper-style  .modal-sub-title {
 	font-size: 24px;
 	color: #5117a5;
 	font-weight: 600
@@ -1675,6 +1707,42 @@ input::placeholder {
 }
 .review-btn {
 	margin-right: 10px;
+}
+
+/* Keep the review card title and its Edit / Review controls on one row. */
+.form-review-partner .accordion .a-title {
+	display: flex;
+	align-items: center;
+	flex-wrap: nowrap;
+	gap: 8px;
+	padding-right: 12px;
+}
+.form-review-partner .accordion .a-title .edit-btn,
+.form-review-partner .accordion .a-title .review-btn {
+	float: none;
+	width: auto;
+	flex: 0 0 auto;
+	margin-top: 0;
+	margin-right: 0;
+	text-align: right;
+}
+.form-review-partner .accordion .a-title .review-btn {
+	margin-left: auto;
+}
+.form-review-partner .accordion .a-title .edit-btn button,
+.form-review-partner .accordion .a-title .review-btn button {
+	white-space: nowrap;
+}
+@media (max-width: 575.98px) {
+	.form-review-partner .accordion .a-title {
+		gap: 5px;
+		padding-right: 8px;
+	}
+	.form-review-partner .accordion .a-title .edit-btn button,
+	.form-review-partner .accordion .a-title .review-btn button {
+		padding: 0.1rem 0.4rem;
+		font-size: 12px;
+	}
 }
 
 .edit-btn button, .edit-btn a, .review-btn button, .review-btn a, .review-edit-actions button, .review-edit-actions a {
@@ -2820,8 +2888,8 @@ label.error {
 	.course-item .course-name-wrapper .additional-payment{width:100%;}
 	.course-item .add-course-btn .remove-icon i{font-size:18px;}
 	.desktop_whatsapp_button_wrapper{display: none;}
-	.fixed-footer{display: block;}
-	.fixed-footer .whatsapp_button{display: inline-flex;}
+	.signup-fixed-footer{display: block;}
+	.signup-fixed-footer .whatsapp_button{display: inline-flex;}
 }
 
 
@@ -2976,7 +3044,7 @@ label.error {
 	right: inherit;
 }
 
-.form-row.otp-process{display:none}
+.wrapper-style .form-row.otp-process{display:none}
 
 /* Safari */
 
@@ -3017,7 +3085,7 @@ label.error {
 	.removeAllCourses{display: inline-flex;margin-left: auto;}
 	#step-4 .table-responsive .form-holder{margin-right: 0 !important;}
 	#step-4 .review-td-field{max-width: 100%;}
-	.form-row .review-td-editing .form-holder{width: 100%;}
+	.wrapper-style .form-row .review-td-editing .form-holder{width: 100%;}
 	
 	#courseSubjectDetails .course-selection-wrapper .selected-course-view i.fa-trash{top:0px}
 	.desktop-nationality-id-hint{display: none;}
@@ -3085,7 +3153,7 @@ label.error {
 	.communication-mode{padding:6px 0 !important;margin: 0 !important;}
 	
 	#step-4 .communication-mode.true.valid-field:after, .communication-mode.false.valid-field:after{left: -14px !important;right: inherit !important;top: 8px !important;}
-	.fixed-header{padding: 10px 16px 4px;border-bottom: 1px solid #dfdfdf;}
+	.signup-fixed-header{padding: 10px 16px 4px;border-bottom: 1px solid #dfdfdf;}
 	.mobile-view-logout{font-size: 12px;}
 	.wrapper-style{padding-top: 71px;}
 	.nationality-id-hint, .student-current-location{right: 5px !important;text-align: center;font-size: 13px;}
@@ -3114,7 +3182,7 @@ label.error {
 		line-height:20px;
 	}
 	.radio.radio-payment-option .checked-font-style[style]{font-size: 13px !important;}
-	.fixed-footer .whatsapp_button{font-size: 14px !important;}
+	.signup-fixed-footer .whatsapp_button{font-size: 14px !important;}
 	.tab-and-mobile-logout-btn svg{display: block;}
 	.mobile-view-logout{display: none;}
 }
@@ -3151,9 +3219,9 @@ label.error {
 	}
 	.table-responsive{overflow-x: auto;}
 	.table-responsive .table{min-width: 500px;}
-	.form-row{display:block;}
+	.wrapper-style .form-row{display:block;}
 	[for="sameAsStudentLocation"]{justify-content: center;}
-	.form-row .form-holder{width:100%;}
+	.wrapper-style .form-row .form-holder{width:100%;}
 	.steps ul li a img{width: 50px;}
 	.steps ul li .step-arrow{top:28%;height: 6px;}
 }

@@ -92,7 +92,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
         "lead-list":{url:"",file:[{role:"",fileName:["LeadListContent.js","B2CLeadListContent.js","B2CLead.js","B2BLeadListContent.js","leads.js","leadsContent.js","leadsPartnerContent.js","leadsPartner.js","schoolSetupContent.js","cropperImageChatSupportDocument.js","cropperImageLeadDocument.js", "schoolSetup.js", "CounselorData.js", "forceLeadsUpdate.js","commonRecordings.js","DownloadReportsContent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-assign-form":{url:"",file:[{role:"",fileName:["leadAssignFormContent.js","leadAssignForm.js","leads.js","scheduledEventRecordingAccess.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-calculation-chart":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/lead-calculation-chart?moduleId="+moduleId+"&euid="+ENCRYPTED_USER_ID},
-        "admin-partner-enrollment-list":{url:"",file:[{role:"",fileName:["b2bPartnerContent.js","b2bPartner.js","signupStudentContent.js","signupStudentStage1.js","signupStudentStage2.js","signupStudentStage3.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "admin-partner-enrollment-list":{url:"",file:[{role:"",fileName:["b2bPartnerContent.js","b2bPartner.js","signupStudentContent.js","signupStudentStage1.js","signupStudentStage2.js","signupStudentStage3.js","signupCommon.js","cookiesLib.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-demo-list":{url:"",file:[{role:"",fileName:["leadDemoContent.js","leads.js","LeadSettingListContent.js","LeadSettings.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-demo-report":{url:"",file:[{role:"",fileName:["leadDemoReportContent.js","leadDemoReport.js","leads.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "lead-demo-report-country":{url:"",file:[{role:"",fileName:["leadDemoReportCountryContent.js","leadDemoReportCountry.js","leads.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
@@ -207,11 +207,11 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
         
         // PARTNER //
         "time-availability":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/timeavailability/time-availability?moduleId="+moduleId+"&schoolId="+SCHOOL_ID+"&euid="+USER_ID},
-        "partner-enrollment-list":{url:"",file:[{role:"",fileName:["b2bPartnerContent.js","b2bPartner.js","signupStudentContent.js","signupStudentStage1.js","signupStudentStage2.js","signupStudentStage3.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "partner-enrollment-list":{url:"",file:[{role:"",fileName:["b2bPartnerContent.js","b2bPartner.js","signupStudentContent.js","signupStudentStage1.js","signupStudentStage2.js","signupStudentStage3.js", "signupCommon.js","cookiesLib.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "counselor-enrollment-list":{url:"",file:[{role:"",fileName:["CounselorDashboardContent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "add-student-enrollment":{url:"",file:[{role:"",fileName:["b2bPartnerContent.js","b2bPartner.js","signupStudentContent.js","signupStudentStage1.js","signupStudentStage2.js","signupStudentStage3.js","signupCommon.js","cookiesLib.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
-        "dashboard":{url:"",file:[{role:"",fileName:["b2bPartnerContent.js","b2bPartner.js","signupStudentContent.js","signupStudentStage1.js","signupStudentStage2.js","signupStudentStage3.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
-        "partner-enrollment-students-wlp":{url:"",file:[{role:"",fileName:["partnerEnrollmentStudentsContent.js","partnerEnrollmentStudents.js","signupStudentContent.js","signupStudentStage1.js","signupStudentStage2.js","signupStudentStage3.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "dashboard":{url:"",file:[{role:"",fileName:["b2bPartnerContent.js","b2bPartner.js","signupStudentContent.js","signupStudentStage1.js","signupStudentStage2.js","signupStudentStage3.js","signupCommon.js","cookiesLib.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "partner-enrollment-students-wlp":{url:"",file:[{role:"",fileName:["partnerEnrollmentStudentsContent.js","partnerEnrollmentStudents.js","signupStudentContent.js","signupStudentStage1.js","signupStudentStage2.js","signupStudentStage3.js","signupCommon.js","cookiesLib.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "counselor-dashboard":{url:"",file:[{role:"",fileName:["CounselorDashboardContent.js","leadCalenderDashboard.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "add-sub-partner":{url:"",file:[{role:"",fileName:["b2bSubPartnerContent.js","b2bSubPartner.js", "leadsPartnerContent.js", "leadsPartner.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "partner-fee-structure":{url:"",file:[{role:"",fileName:["b2bPartnerFeeStructureContent.js","b2bPartnerFeeStructure.js", "leadsPartnerContent.js", "leadsPartner.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
@@ -293,7 +293,6 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
         "email-recovery":"email-recovery",
         "extra-activity": "add-extra-activity?moduleId="+moduleId,
     };
-
     var requestType = pageRequest[pageNo];
     if(requestType != undefined){
       if (requestType.type == "JSP") {
@@ -311,6 +310,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
             console.error("Error fetching data:", error);
         }
       } else if(requestType.type == "JS") {
+        try{
           if(requestType.file.length>0){
               await loadScript(requestType.file);
           }
@@ -324,6 +324,14 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
           if(typeof requestType.funName == "function"){
               requestType.funName();
           }
+        }catch(error){
+            console.error("Error loading page scripts:", error);
+            if(!getSession()){
+                // redirectLoginPage();
+            }else{
+                showMessageTheme2(0, "Something went wrong while loading this page. Please try again.");
+            }
+        }
       } else {
           console.warn("Invalid pageNo: " + pageNo);
       }

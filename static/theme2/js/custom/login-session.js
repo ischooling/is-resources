@@ -7,17 +7,33 @@ function validateRequestForLogin(formId) {
 		showMessage(false, 'Either password is empty or invalid');
 		return false
 	}
-	if (!validateCaptcha($("#" + formId + " #captcha").val().trim())) {
-		showMessage(false, 'Either captcha is empty or invalid');
-		return false
-	}
 	return true;
 }
-function getRequestForLogin(formId, moduleId, loginType) {
+function getRecaptchaToken(action) {
+	return new Promise(function (resolve) {
+		if (typeof RECAPTCHA_ENABLED === "undefined" || !RECAPTCHA_ENABLED || typeof grecaptcha === "undefined") {
+			resolve("");
+			return;
+		}
+		try {
+			grecaptcha.ready(function () {
+				grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: action }).then(function (token) {
+					resolve(token || "");
+				}).catch(function () {
+					resolve("");
+				});
+			});
+		} catch (e) {
+			resolve("");
+		}
+	});
+}
+
+async function getRequestForLogin(formId, moduleId, loginType) {
 	var request = {};
 	var authentication = {};
 	var loginDTO = {};
-	
+
 	var timezone=getSystemTimezone();
 	if(timezone=='Asia/Calcutta'){
 		timezone='Asia/Kolkata';
@@ -25,9 +41,9 @@ function getRequestForLogin(formId, moduleId, loginType) {
 	loginDTO['timezone'] = timezone;
 	loginDTO['userName'] = $("#" + formId + " #email").val().trim();
 	loginDTO['password'] = encode($("#" + formId + " #password").val().trim());
-	loginDTO['captcha'] = $("#" + formId + " #captcha").val().toUpperCase().trim();
 	loginDTO['location'] = $("#" + formId + " #location").val().trim();
 	loginDTO['fromSpoof'] = $("#" + formId + " #fromSpoof").val().trim();
+	loginDTO['recaptchaToken'] = await getRecaptchaToken('session_continue');
 	authentication['hash'] = getHash();authentication['schoolId'] = SCHOOL_ID;authentication['schoolUUID'] = SCHOOL_UUID;
 	authentication['userType'] = moduleId;
 	request['authentication'] = authentication;
@@ -93,28 +109,28 @@ var debouncing = function (mainFun, delay) {
 	};
 };
 const callUserLogin = debouncing(callUserLoginFun, 300);
-function callUserLoginFun(formId, moduleId, loginType) {
+async function callUserLoginFun(formId, moduleId, loginType) {
 	if($("#modalMessage.in").length>0){
         hideMessage('');
 		return false;
 	}
-	
+
 	if (!validateRequestForLogin(formId)) {
 		return false;
 	}
 	$("#"+formId+" #login").prop("disabled", true);
+	var loginRequest = await getRequestForLogin(formId, moduleId, loginType);
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('login'),
-		data : JSON.stringify(getRequestForLogin(formId, moduleId, loginType)),
+		data : JSON.stringify(loginRequest),
 		dataType : 'json',
 		cache : false,
 		timeout : 600000,
 		success : function(data) {
 			localStorage.setItem('welcome',false);
 			if (data.status == '0' || data.status == '2') {
-				//refreshCaptcha('captchaImage');
 				if(data.statusCode == '0043') {
 					$('#allReadyEmail #emailNotVerify').show();
 					$('#allReadyEmailFooter').show();
@@ -134,12 +150,10 @@ function callUserLoginFun(formId, moduleId, loginType) {
 						showMessage(false, data.message,'',true);
 						validEndInvalidField(false, "email");
 						validEndInvalidField(false, "password");
-						validEndInvalidField(false, "captcha");
 					}else{
 						showMessage(false, data.message);
 						validEndInvalidField(false, "email");
 						validEndInvalidField(false, "password");
-						validEndInvalidField(false, "captcha");
 					}
 				}
 				customLoader(false)
@@ -169,7 +183,6 @@ function callUserLoginFun(formId, moduleId, loginType) {
 				}
 				validEndInvalidField(true, "email");
 				validEndInvalidField(true, "password");
-				validEndInvalidField(true, "captcha");
 			}
 			$("#"+formId+" #login").prop("disabled", false);
 			return false;

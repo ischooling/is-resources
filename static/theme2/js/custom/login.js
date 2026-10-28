@@ -109,22 +109,6 @@ function getPrimaryColor(){
 	return primaryColor;
 }
 
-function getCaptchaUrlCandidates(primaryColor) {
-	var v = new Date().getTime();
-	var payload = "payload=" + primaryColor + "&v=" + v;
-	var urls = [];
-	if (typeof BASE_URL !== "undefined" && typeof API_VERSION !== "undefined") {
-		urls.push(BASE_URL + API_VERSION + "common/captcha.jpg?" + payload);
-	}
-	if (typeof CONTEXT_PATH !== "undefined" && typeof SCHOOL_UUID !== "undefined") {
-		urls.push(CONTEXT_PATH + SCHOOL_UUID + "/api/v1/common/captcha.jpg?" + payload);
-	}
-	if (typeof SCHOOL_UUID !== "undefined") {
-		urls.push("/" + SCHOOL_UUID + "/api/v1/common/captcha.jpg?" + payload);
-	}
-	return urls;
-}
-
 function checkAndReturn(type, resolve) {
 	var scriptVersionType = 'SCRIPT_VERSION';
 	var svObject = JSON.parse(localStorage.getItem(scriptVersionType));
@@ -291,10 +275,9 @@ async function initiateSetting(){
 	schoolSettings = JSON.parse(onetimedetails.schoolSettings);
 }
 async function loginPageOnLoadEvent(){
-	callLocationAndSelectCountryNew('loginForm');		
+	callLocationAndSelectCountryNew('loginForm');
     $("form").attr('autocomplete', 'off');
-	refreshCaptcha('captchaImage');
-	  
+
 	//   /* DON'T REMOVE BELOW SCRIPT THIS IS USE FOR EID MUBARAK LOGIN PAGE */
 	  
 	//   $("body").sparkle({
@@ -369,18 +352,34 @@ function validateRequestForLogin(formId) {
 		showMessage(false, 'Either password is empty or invalid');
 		return false
 	}
-	if (!validateCaptcha($("#" + formId + " #captcha").val().trim())) {
-		showMessage(false, 'Either captcha is empty or invalid');
-		return false
-	}
 	return true;
 }
 
-function getRequestForLogin(formId, moduleId, loginType) {
+function getRecaptchaToken(action) {
+	return new Promise(function (resolve) {
+		if (typeof RECAPTCHA_ENABLED === "undefined" || !RECAPTCHA_ENABLED || typeof grecaptcha === "undefined") {
+			resolve("");
+			return;
+		}
+		try {
+			grecaptcha.ready(function () {
+				grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: action }).then(function (token) {
+					resolve(token || "");
+				}).catch(function () {
+					resolve("");
+				});
+			});
+		} catch (e) {
+			resolve("");
+		}
+	});
+}
+
+async function getRequestForLogin(formId, moduleId, loginType) {
 	var request = {};
 	var authentication = {};
 	var loginDTO = {};
-	
+
 	var timezone=getSystemTimezone();
 	if(timezone=='Asia/Calcutta'){
 		timezone='Asia/Kolkata';
@@ -388,9 +387,9 @@ function getRequestForLogin(formId, moduleId, loginType) {
 	loginDTO['timezone'] = timezone;
 	loginDTO['userName'] = $("#" + formId + " #email").val().trim();
 	loginDTO['password'] = encode($("#" + formId + " #password").val().trim());
-	loginDTO['captcha'] = $("#" + formId + " #captcha").val().toUpperCase().trim();
 	loginDTO['location'] = $("#" + formId + " #location").val().trim();
 	loginDTO['fromSpoof'] = $("#" + formId + " #fromSpoof").val().trim();
+	loginDTO['recaptchaToken'] = await getRecaptchaToken('login');
 	authentication['hash'] = getHash();authentication['schoolId'] = SCHOOL_ID;authentication['schoolUUID'] = SCHOOL_UUID;
 	authentication['userType'] = moduleId;
 	request['authentication'] = authentication;
@@ -447,21 +446,22 @@ function proceedWithUserChangedTimezone(currentTimezoneId, userId){
 }
 
 const callUserLogin = debouncing(callUserLoginFun, 300);
-function callUserLoginFun(formId, moduleId, loginType) {
+async function callUserLoginFun(formId, moduleId, loginType) {
 	if($("#modalMessage.in").length>0){
         hideMessage('');
 		return false;
 	}
-	
+
 	if (!validateRequestForLogin(formId)) {
 		return false;
 	}
 	$("#"+formId+" #login").prop("disabled", true);
+	var loginRequest = await getRequestForLogin(formId, moduleId, loginType);
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('login'),
-		data : JSON.stringify(getRequestForLogin(formId, moduleId, loginType)),
+		data : JSON.stringify(loginRequest),
 		dataType : 'json',
 		cache : false,
 		timeout : 600000,
@@ -469,7 +469,6 @@ function callUserLoginFun(formId, moduleId, loginType) {
 			//console.log(data)
 			localStorage.setItem('welcome',false);
 			if (data.status == '0' || data.status == '2') {
-				//refreshCaptcha('captchaImage');
 				if(data.statusCode == '0043') {
 					$('#allReadyEmail #emailNotVerify').show();
 					$('#allReadyEmailFooter').show();
@@ -493,12 +492,10 @@ function callUserLoginFun(formId, moduleId, loginType) {
 						showMessage(false, data.message,'',true);
 						validEndInvalidField(false, "email");
 						validEndInvalidField(false, "password");
-						validEndInvalidField(false, "captcha");
 					}else{
 						showMessage(false, data.message);
 						validEndInvalidField(false, "email");
 						validEndInvalidField(false, "password");
-						validEndInvalidField(false, "captcha");
 					}
 				}
 				customLoader(false)
@@ -527,7 +524,6 @@ function callUserLoginFun(formId, moduleId, loginType) {
 				}
 				validEndInvalidField(true, "email");
 				validEndInvalidField(true, "password");
-				validEndInvalidField(true, "captcha");
 			}
 			$("#"+formId+" #login").prop("disabled", false);
 			return false;
@@ -622,33 +618,6 @@ function getRequestForForgot(formId, moduleId) {
   request["authentication"] = authentication;
   request["data"] = data;
   return request;
-}
-function refreshCaptcha(id) {
-	var primaryColor=USER_COLOR_THEME.split(':#')[1].split(';')[0];
-	if (id != undefined && id != '' && $('#' + id).length > 0) {
-		var imageEl = document.images[id];
-		var urlCandidates = getCaptchaUrlCandidates(primaryColor);
-		if (!urlCandidates.length) {
-			return;
-		}
-		imageEl.src = urlCandidates[0];
-		if (urlCandidates.length > 1) {
-			setTimeout(function () {
-				if (!imageEl || (imageEl.complete && imageEl.naturalWidth > 0)) {
-					return;
-				}
-				imageEl.src = urlCandidates[1];
-				if (urlCandidates.length > 2) {
-					setTimeout(function () {
-						if (!imageEl || (imageEl.complete && imageEl.naturalWidth > 0)) {
-							return;
-						}
-						imageEl.src = urlCandidates[2];
-					}, 300);
-				}
-			}, 300);
-		}
-	}
 }
 function getURLForCommon(suffixUrl) {
   return BASE_URL + API_VERSION + "common" + "/" + suffixUrl;
@@ -877,4 +846,4 @@ function checkonlineOfflineStatus() {
     return true;
   }
   return false;
-}
+} 

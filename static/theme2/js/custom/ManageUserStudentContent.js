@@ -61,6 +61,100 @@ function muProfileFieldOptions(labels, useCommonName) {
 	return html;
 }
 
+function muYesNoOptions(placeholder) {
+	return '<option value="">' + placeholder + '</option>' +
+		'<option value="Y">Yes</option>' +
+		'<option value="N">No</option>';
+}
+
+// Parent filters — matched server-side against the student's STUDENT_RELATIONSHIP
+// rows (all selected values must hold for the same parent/guardian).
+function muStudentParentFilterFields(meta) {
+	return '' +
+		'<div class="col-md-3 col-sm-6 col-12 custom-field">' +
+			'<input type="text" name="parentNameFilter" id="parentNameFilter" class="form-control" value="" placeholder="Parent Name" maxlength="60" />' +
+			'<label>Parent Name</label>' +
+		'</div>' +
+		'<div class="col-md-3 col-sm-6 col-12 custom-field">' +
+			'<input type="text" name="parentEmailId" id="parentEmailId" class="form-control" value="" placeholder="Parent Email" maxlength="100" />' +
+			'<label>Parent Email</label>' +
+		'</div>' +
+		'<div class="col-md-3 col-sm-6 col-12 custom-field">' +
+			'<input type="text" name="parentMobileNo" id="parentMobileNo" class="form-control" value="" placeholder="Parent Contact" maxlength="20" />' +
+			'<label>Parent Contact</label>' +
+		'</div>' +
+		'<div class="col-md-3 col-sm-3 col-12 custom-field">' +
+			'<select name="parentCountryId" id="parentCountryId" class="form-control">' + muCountryOptions(meta.countryList) + '</select>' +
+			'<label>Parent Country</label>' +
+		'</div>' +
+		'<div class="col-md-3 col-sm-3 col-12 custom-field">' +
+			'<select name="parentStateId" id="parentStateId" class="form-control"><option value="">Select State</option></select>' +
+			'<label>Parent State</label>' +
+		'</div>' +
+		'<div class="col-md-3 col-sm-3 col-12 custom-field">' +
+			'<select name="parentCityId" id="parentCityId" class="form-control"><option value="">Select City</option></select>' +
+			'<label>Parent City</label>' +
+		'</div>' +
+		'<div class="col-md-3 col-sm-3 col-12 custom-field">' +
+			'<select name="parentAccountCreated" id="parentAccountCreated" class="form-control">' + muYesNoOptions('Select Parent Account Created') + '</select>' +
+			'<label>Parent Account Created</label>' +
+		'</div>' +
+		'<div class="col-md-3 col-sm-3 col-12 custom-field" style="display:none;">' +
+			'<select name="isPrimaryParent" id="isPrimaryParent" class="form-control">' + muYesNoOptions('Select Is Primary Parent') + '</select>' +
+			'<label>Is Primary Parent</label>' +
+		'</div>' +
+		'<div class="col-md-3 col-sm-3 col-12 custom-field">' +
+			'<select name="parentPreferredComm" id="parentPreferredComm" class="form-control" multiple="multiple">' +
+				'<option value="WHATSAPP">WhatsApp</option>' +
+				'<option value="EMAIL">Email</option>' +
+				'<option value="CALL">Call</option>' +
+			'</select>' +
+			'<label>Preferred Communication</label>' +
+		'</div>' +
+		'<div class="col-md-3 col-sm-3 col-12 custom-field">' +
+			'<select name="parentRelation" id="parentRelation" class="form-control">' +
+				'<option value="">Select Relation to Student</option>' +
+				'<option value="Mother">Mother</option>' +
+				'<option value="Father">Father</option>' +
+				'<option value="Guardian">Guardian</option>' +
+			'</select>' +
+			'<label>Relation to Student</label>' +
+		'</div>';
+}
+
+// Country/state loaders reset dependent selects to 0 — treat that as "not selected".
+function muPositiveIdOrNull(value) {
+	var id = parseInt(value, 10);
+	return id > 0 ? id : null;
+}
+
+function muAddStudentParentFilters(formId, studentDetailDTO) {
+	var form = "#" + formId + " ";
+	studentDetailDTO["globalSearch"] = $.trim($(form + "#globalSearch").val() || "");
+	studentDetailDTO["parentName"] = $.trim($(form + "#parentNameFilter").val() || "");
+	studentDetailDTO["parentEmail"] = $.trim($(form + "#parentEmailId").val() || "");
+	studentDetailDTO["parentContactNo"] = $.trim($(form + "#parentMobileNo").val() || "");
+	studentDetailDTO["parentCountryId"] = muPositiveIdOrNull($(form + "#parentCountryId").val());
+	studentDetailDTO["parentStateId"] = muPositiveIdOrNull($(form + "#parentStateId").val());
+	studentDetailDTO["parentCityId"] = muPositiveIdOrNull($(form + "#parentCityId").val());
+	studentDetailDTO["parentAccountCreated"] = $(form + "#parentAccountCreated").val() || "";
+	studentDetailDTO["isPrimaryParent"] = $(form + "#isPrimaryParent").val() || "";
+	// Multi-select → comma list; backend matches a parent with ANY of the selected modes.
+	studentDetailDTO["parentPreferredComm"] = ($(form + "#parentPreferredComm").val() || []).join(",");
+	studentDetailDTO["parentRelation"] = $(form + "#parentRelation").val() || "";
+}
+
+function muStudentFilterReset(formId) {
+	advanceStudentSearchReset(formId);
+	var form = "#" + formId + " ";
+	$(form + "#globalSearch, " + form + "#parentNameFilter, " + form + "#parentEmailId, " + form + "#parentMobileNo").val("");
+	$(form + "#parentCountryId, " + form + "#parentAccountCreated, " + form + "#isPrimaryParent, " +
+		form + "#parentRelation").val("").trigger("change");
+	$(form + "#parentPreferredComm").val([]).trigger("change");
+	$(form + "#parentStateId").html('<option value="">Select State</option>').val("").trigger("change");
+	$(form + "#parentCityId").html('<option value="">Select City</option>').val("").trigger("change");
+}
+
 function getManageUserStudentTabContent(meta) {
 	var isSchool5 = String(meta.schoolId) === '5';
 	var lmsOptions = '<option value="">Select LMS Platform</option>';
@@ -92,12 +186,17 @@ function getManageUserStudentTabContent(meta) {
 		'<div class="col-md-12">' +
 			'<div class="filter-wrapper">' +
 				'<div class="full text-right">' +
-					'<button class="btn btn-sm btn-primary float-right show-filter"><i class="fa fa-filter"></i>&nbsp;Filter</button>' +
+					'<button class="btn btn-primary float-right show-filter" style="font-size:18px;"><i class="fa fa-filter"></i>&nbsp;Advanced Filter</button>' +
 				'</div>' +
 				'<form name="studentFilter" id="studentFilter" class="custom-field-scope mu-filter" action="javascript:void(0)">' +
 					'<input type="hidden" name="userClickFrom" id="userClickFrom" value="list" />' +
 					'<div class="filter-fields rounded">' +
 						'<div class="row px-3">' +
+							'<div class="col-md-6 offset-md-3 col-12 custom-field">' +
+								'<input type="text" name="globalSearch" id="globalSearch" class="form-control" value="" placeholder="Search Student / Parent by Name, Email, Contact no or Student Id" maxlength="100" />' +
+								'<label>Search Student / Parent</label>' +
+							'</div>' +
+							'<div class="w-100"></div>' +
 							'<div class="col-md-3 col-sm-3 col-12 custom-field">' +
 								'<select name="activeSession" id="activeSession" class="form-control">' + muStudentSessionOptions(meta.sessions) + '</select>' +
 								'<label>Academic Year</label>' +
@@ -123,6 +222,7 @@ function getManageUserStudentTabContent(meta) {
 								'<select name="filterEnrollStatus" id="filterEnrollStatus" class="form-control" multiple="multiple">' +
 									'<option value="4">Completed-New-Enrollment</option>' +
 									'<option value="5">Completed-Re-Enrollment</option>' +
+									'<option value="6">Completed-Migrate</option>' +
 									'<option value="1">Withdrawn</option>' +
 									'<option value="2">Partial entry - New enrollment</option>' +
 									'<option value="3">Partial entry - Re-enrollment</option>' +
@@ -135,7 +235,7 @@ function getManageUserStudentTabContent(meta) {
 								'<label>Grade</label>' +
 							'</div>' +
 							'<div class="col-md-3 col-sm-6 col-12 custom-field">' +
-								'<input type="text" name="emailId" id="emailId" class="form-control" value="" placeholder="Email" maxlength="40" onkeydown="return M.isEmail(event);" />' +
+								'<input type="text" name="emailId" id="emailId" class="form-control" value="" placeholder="Email" maxlength="150" onkeydown="return M.isEmail(event);" />' +
 								'<label>Email</label>' +
 							'</div>' +
 							'<div class="col-md-3 col-sm-6 col-12 custom-field">' +
@@ -162,6 +262,7 @@ function getManageUserStudentTabContent(meta) {
 								'<select name="filterCityId" id="filterCityId" class="form-control"><option value="">Select City</option></select>' +
 								'<label>City</label>' +
 							'</div>' +
+							muStudentParentFilterFields(meta) +
 							'<div class="col-md-6 col-sm-12 col-12 custom-field">' +
 								'<select id="filterProfileFieldId" class="form-control" multiple="multiple">' + muProfileFieldOptions(meta.moduleFilterLabels, false) + '</select>' +
 								'<label>Profile Field</label>' +
@@ -178,7 +279,7 @@ function getManageUserStudentTabContent(meta) {
 								'<button class="btn btn-primary" onclick="profileSetting();"><i class="fa fa-cog"></i>&nbsp;Collect Student Info</button>' +
 							'</div>' +
 							'<div class="col-md-6 col-sm-12 col-12 mt-2 text-right">' +
-								'<button class="btn btn-danger  mr-2" onclick="advanceStudentSearchReset(\'studentFilter\')"><i class="fa fa-undo"></i>&nbsp;Reset</button>' +
+								'<button class="btn btn-danger  mr-2" onclick="muStudentFilterReset(\'studentFilter\')"><i class="fa fa-undo"></i>&nbsp;Reset</button>' +
 								'<button class="btn btn-success " onclick="advanceStudentSearchJson(\'studentFilter\',\'' + meta.moduleId + '\');"><i class="fa fa-search"></i>&nbsp;Search</button>' +
 							'</div>' +
 						'</div>' +
@@ -229,7 +330,6 @@ function buildStudentSearchTableHead(schoolId) {
 		'<th>LMS Platform/Learning Program</th>' +
 		'<th>Payment Mode</th>' +
 		'<th>SMS/LMS Profile status</th>' +
-		'<th>Last profile update</th>' +
 		'<th>Counselor Name/ Referral Code</th>' +
 		'<th>Action</th>' +
 	'</tr></thead>';
@@ -256,11 +356,10 @@ function buildStudentSearchRowCells(student, rowIndex, schoolId) {
 		muNv(student.countryCode) + ' ' + muNv(student.mobileNumber) + '<br/>' +
 		muNv(student.cityName) + '/ ' + muNv(student.stateName) + '/ ' + muNv(student.countryName) + '<br/>' +
 		muNv(student.timeZone) + ' ' + muNv(student.timeOffSet) + ' <b title="Manual" class="text-success">' + muNv(student.timeZoneSavedStatus) + '</b><br/>');
-	cells.push('Parent Name: ' + muNv(student.parentName) + '<br/>Email: ' + muNv(student.parentEmail) + '<br/>Contact Number: ' + muNv(student.parentContactNumber) + '<br/>Preferred Communication: ' + muNv(student.parentPreferredCommunications));
+	cells.push('Parent Name: ' + muNv(student.parentName) + '<br/>Relation to Student: ' + muNv(student.parentRelation) + '<br/>Email: ' + muNv(student.parentEmail) + '<br/>Contact Number: ' + muNv(student.parentContactNumber) + '<br/>Preferred Communication: ' + muNv(student.parentPreferredCommunications));
 	cells.push('LMS Platform: ' + muNv(student.courseProviderName) + '<br/>' + muNv(student.registrationType));
 	cells.push(muNv(student.paymentMode));
 	cells.push(muNv(student.profileStatus) + '<br>LMS Status: ' + muNv(student.lmsStatus) + '<br/>Admission Status: ' + (muNv(student.admissionStatus) === '' ? 'N/A' : student.admissionStatus));
-	cells.push(muNv(student.createDate));
 	cells.push(muNv(student.referralCode));
 	cells.push(muNv(student.action));
 	return cells;
@@ -286,10 +385,12 @@ function advStudentSearchDataAjax(requestObj) {
 function advanceStudentSearchJson(formId, moduleId) {
 	checkTextBox(formId);
 	var baseRequest = getCallRequestForadvanceStudentSearch(formId, moduleId, 'theme2');
+	muAddStudentParentFilters(formId, baseRequest.studentDetailDTO);
 	if ((baseRequest.studentDetailDTO.enrollType || '') === 'BATCH') {
 		return advanceStudentSearch(formId, moduleId, 'theme2');
 	}
 	hideMessage("");
+	$('#studentFilterHint').hide();
 	var schoolId = SCHOOL_ID;
 
 	function buildChunkRequest(offset, size) {
@@ -327,15 +428,22 @@ function advanceStudentSearchJson(formId, moduleId) {
 }
 
 function initManageUserStudentTab(meta) {
-	$('#studentFilter select').not('#filterEnrollStatus, #filterProfileFieldId').select2({ theme: "bootstrap4" });
+	// width: 100% — the filter renders collapsed, so select2 can't measure hidden selects.
+	$('#studentFilter select').not('#filterEnrollStatus, #filterProfileFieldId, #parentPreferredComm').select2({ theme: "bootstrap4", width: "100%" });
 	$('#studentFilter #filterEnrollStatus').select2({
 		theme: "bootstrap4",
 		placeholder: "Enroll Status",
 		width: "100%",
 	});
+	$('#studentFilter #parentPreferredComm').select2({
+		theme: "bootstrap4",
+		placeholder: "Preferred Communication",
+		width: "100%",
+	});
 	$('#studentFilter #filterProfileFieldId').select2({
 		theme: "bootstrap4",
 		placeholder: "Select Profile Field",
+		width: "100%",
 	});
 	if (typeof refreshCustomFieldState === "function") {
 		refreshCustomFieldState($("#studentFilter"));
@@ -351,5 +459,11 @@ function initManageUserStudentTab(meta) {
 	$("#studentFilter #filterStateId").on("change", function () {
 		$('#studentFilter #filterStateId').valid();
 		callCitiesNew('studentFilter', this.value, 'filterStateId', 'filterCityId');
+	});
+	$('#studentFilter #parentCountryId').on('change', function () {
+		callStatesNew("studentFilter", this.value, 'parentCountryId', "parentStateId");
+	});
+	$("#studentFilter #parentStateId").on("change", function () {
+		callCitiesNew('studentFilter', this.value, 'parentStateId', 'parentCityId');
 	});
 }

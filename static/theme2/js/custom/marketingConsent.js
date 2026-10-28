@@ -15,12 +15,36 @@
 
   var CONSENT_COOKIE = "is_marketing_consent";
   var META_COOKIES = ["_fbp", "_fbc", "_fbi"];
+  var PROBE_COOKIE = "__isc_cd_probe";
 
-  // registrable domain (last two labels) so the choice is shared with the website and the enrollment app; none on localhost / IPs
+  // Registrable domain so the choice is shared with the website and the enrollment app; none on localhost / IPs.
+  // "Last two labels" is only a guess: on a customer domain whose public suffix is itself two labels
+  // (foo.co.in, foo.co.uk, foo.com.au, ...) that guess IS the public suffix, and every browser silently
+  // refuses to store a cookie scoped to it — the consent is then never actually saved, so the banner
+  // reopens on every page. Probe instead: try the broadest candidate first and keep the first the
+  // browser actually accepts, falling back to the host itself (always accepted). Resolved once per page.
+  var resolvedDomain;
+  function candidateDomains(host) {
+    if (!host || host.indexOf(".") === -1 || /^[0-9.]+$/.test(host)) return [];
+    var labels = host.split(".");
+    var candidates = [];
+    for (var take = 2; take <= labels.length; take++) candidates.push(labels.slice(-take).join("."));
+    return candidates;
+  }
+  function domainAccepted(domain) {
+    document.cookie = PROBE_COOKIE + "=1; path=/; max-age=60" + (domain ? "; domain=" + domain : "");
+    var stored = document.cookie.indexOf(PROBE_COOKIE + "=1") !== -1;
+    document.cookie = PROBE_COOKIE + "=; path=/; max-age=0" + (domain ? "; domain=" + domain : "");
+    return stored;
+  }
   function cookieDomain() {
-    var host = window.location.hostname;
-    if (!host || host.indexOf(".") === -1 || /^[0-9.]+$/.test(host)) return "";
-    return host.split(".").slice(-2).join(".");
+    if (resolvedDomain !== undefined) return resolvedDomain;
+    var candidates = candidateDomains(window.location.hostname);
+    resolvedDomain = "";
+    for (var i = 0; i < candidates.length; i++) {
+      if (domainAccepted(candidates[i])) { resolvedDomain = candidates[i]; break; }
+    }
+    return resolvedDomain;
   }
 
   function readConsent() {

@@ -195,34 +195,11 @@ function isAzureUserAvailable(details){
     </div>`;
     return html;
 }
-function showAzureCenterPopup(message) {
-    if (!$("#azureCenterPopupModal").length) {
-        $("body").append(`
-            <div class="modal fade" id="azureCenterPopupModal" tabindex="-1" role="dialog" aria-hidden="true">
-               <div class="modal-dialog" role="document" style="margin: 35vh auto 0; padding: 0 20px;">
-                    <div class="modal-content rounded-0 bg-white text-success text-center font-weight-semi-bold p-3 border border-success">
-                        <p class="mb-0 font-18 msg success" id="azureCenterPopupMessage"></p>
-                    </div>
-                </div>
-            </div>
-        `);
-    }
-
-    $("#azureCenterPopupMessage").html('<i class="fa fa-check"></i>&nbsp;' + message);
-    $("#azureCenterPopupModal").modal("show");
-
-    setTimeout(function () {
-        $("#azureCenterPopupModal").modal("hide");
-    }, 1200);
-}
-
 function copyAzureValue(elementId, showElement, buttonRef) {
     var valueToCopy = $("#" + elementId).val() || "";
     var $button = $(buttonRef);
     var $message = $("#" + showElement);
     var copySuccess = function () {
-        showAzureCenterPopup("Copied!");
-
         if ($message.length) {
             var existingTimeout = $message.data("copiedHideTimeout");
             if (existingTimeout) {
@@ -478,4 +455,62 @@ function paymentOverDueCard(details){
         </div>
     </div>`;
     return html;
+}
+
+
+function outlookUserCreatedModal(details) {
+    var azure = details && details.azureDetails ? details.azureDetails : {};
+    var email = (details && details.email) || azure.email || "";
+    var password = (details && details.password) || azure.password || "";
+    var copyBtn = function (inputId, msgId) {
+        return `<span id="${msgId}" class="font-11 text-success mr-2 d-none text-nowrap"></span>
+            <button type="button" class="btn btn-link text-primary p-2" aria-label="Copy" onclick="copyAzureValue('${inputId}','${msgId}',this)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"></rect><path d="M16 5V4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h1"></path></svg></button>`;
+    };
+    return `
+    <div class="modal fade" id="outlookUserCreatedModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered shadow-none" role="document">
+            <div class="col-12 col-md-8 mx-auto p-0">
+            <div class="modal-content border-0 rounded-15 shadow-none">
+                <div class="modal-body text-center p-4">
+                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light-primary text-primary p-4 mb-3" aria-hidden="true"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m4 7 8 6 8-6"></path></svg></span>
+                    <h3 class="font-weight-bold mb-3">Activate your school email</h3>
+                    <p class="text-muted mb-4">This is your official school email on Outlook. We will send class schedules, payment updates and announcements to this email. Log in and activate it immediately.</p>
+                    <div class="border rounded-10 text-left mb-3">
+                        <div class="d-flex align-items-center px-3 py-2">
+                            <div class="flex-grow-1 text-break">
+                                <div class="font-weight-bold">${USER_FULL_NAME}</div>
+                                <div>School Email: <span id="outlookOfficialEmail">${email}</span></div>
+                                <input type="text" id="outlookOfficialEmailCopy" value="${email}" class="d-none">
+                            </div>
+                            ${copyBtn("outlookOfficialEmailCopy", "outlookOfficialEmailCopied")}
+                        </div>
+                        <div class="d-flex align-items-center px-3 py-2 border-top">
+                            <div class="flex-grow-1 text-break">
+                                <div class="small">Temporary Password</div>
+                                <div id="outlookTemporaryPassword">${"\u2022".repeat(15)}</div>
+                                <input type="text" id="outlookTemporaryPasswordCopy" value="${password}" class="d-none">
+                            </div>
+                            <button type="button" class="btn btn-link text-primary p-2" onclick="toggleOutlookPassword(this)">Show</button>
+                            ${copyBtn("outlookTemporaryPasswordCopy", "outlookTemporaryPasswordCopied")}
+                        </div>
+                    </div>
+                    <p class="text-muted mb-4">Log in once with these details, then choose your own password.</p>
+                    <a class="btn btn-primary rounded-10 px-4 py-2 mb-2 d-inline-flex align-items-center" href="https://outlook.office.com" target="_blank" rel="noopener">Activate my email <svg class="ml-2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"></path><path d="m20 4-9 9"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5"></path></svg></a>
+                    ${details && details.skipAction ? `<div><button type="button" class="btn btn-outline-primary rounded-10 px-4 py-2" onclick="${details.skipAction}">${details.skipLabel || 'Do it later'}</button></div>` : ''}                   
+                    <div class="border-top mt-4 pt-3">
+                        <span class="text-muted">Need help?</span>
+                        <img class="mx-1" src="${PATH_FOLDER_IMAGE2}watsapp-icon.png" width="20" height="20" alt="WhatsApp"><a class="font-weight-bold text-primary" href="https://wa.me/15854990662" target="_blank" rel="noopener">Chat with us on WhatsApp: +1 (585) 499-0662</a>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>`;
+}
+
+function toggleOutlookPassword(buttonRef) {
+    var $text = $("#outlookTemporaryPassword");
+    var show = $text.data("visible") !== true;
+    $text.data("visible", show).text(show ? $("#outlookTemporaryPasswordCopy").val() : "\u2022".repeat(15));
+    $(buttonRef).text(show ? "Hide" : "Show");
 }

@@ -8864,7 +8864,7 @@ function stopProfileDataInterval(modalID) {
 
 
 function closeProfileModal() {
-    $("#profileFielddModal, #classAndActivityStartWarningModal").modal("hide");
+    $("#profileFielddModal, #outlookUserCreatedModal, #classAndActivityStartWarningModal").modal("hide");
 }
 
 

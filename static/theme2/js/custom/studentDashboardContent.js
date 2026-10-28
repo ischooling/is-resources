@@ -11,6 +11,9 @@ async function rendereDashboardContent(isParent){
     $("body").append(cropperImageModalContent());
     customLoader(true);
     $("body").append(batchImpAnnouncementModal()+newsAllListWithDetailsModalCotent());
+    if(!commonProfileDTO){
+        commonProfileDTO = await getUserShortProfile(USER_ID);
+    }
     var data = getStudentDashboardOrMigrationSection();
     var isDummyDashboard = typeof isDummyStudentMode === "function" && isDummyStudentMode();
     // console.log(data)
@@ -95,6 +98,9 @@ async function rendereDashboardContent(isParent){
         if(!isDummyDashboard && (ORIENTSTATUS == "PENDING" || CAN_SHOW_ENROLL_RESERVE_MODAL)) {
             renderProfileDataInModal(dashboardData);
         }
+        if(!isDummyDashboard) {
+            renderOutlookModalOnDashboard();
+        }
 	}else if(data.studentGraduate == 'Y'){
         $('head').append(`<script src="${PATH_FOLDER_JS2}${RESOURCES_FROM_MIN_LOCATION}custom/nextSessionStudentStage.js${SCRIPT_VERSION}">`)
 		//call migration content
@@ -167,10 +173,13 @@ async function rendereDashboardContent(isParent){
         $("head").append(`<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js">`);
         if(!isDummyDashboard) {
             renderProfileDataInModal(dashboardData);
+            renderOutlookModalOnDashboard();
         }
 	}  
     if (isParent!=="true") {
-        if(data.lastPassUpdatedDate){
+        // a sibling added from enrollment still has the temporary password, so it must be changed on first login
+        window.ADD_SIBLING_FIRST_LOGIN = data.addSiblingFirstLogin === true || data.addSiblingFirstLogin === "Y";
+        if(data.lastPassUpdatedDate || window.ADD_SIBLING_FIRST_LOGIN){
             window.setTimeout(function(){callCommonDashboardPageForPasswordChange('14','No')},1000)
         }
     }
@@ -289,8 +298,10 @@ function slideMenu(val){
 }
 
 function dashboardContent(data) {
-    
+    var addSiblingSetting = getSettingsByTypeAndKey('CONFIGURATION', 'ADD_SIBILING_BTN', false);
+    var showAddSiblingButton = String(getSettingMetaValue(addSiblingSetting) || '').trim().toLowerCase() === 'true';
     let html = `
+    ${showAddSiblingButton ? `<div class="d-flex justify-content-center justify-content-md-end mb-2 mt-2 mr-md-4">${getAddChildButtonHtml('Add More Siblings')}</div>` : ''}
     <div class="app-page-title mb-3 py-2 d-lg-none">
         <div class="page-title-wrapper">
             <div class="page-title-actions mt-0 mb-1">
@@ -864,6 +875,122 @@ function batchReEnrollmentModal(){
             </div>
         </div>`;
     return html;
+}
+
+var OUTLOOK_DASHBOARD_INTERVAL = null;
+var OUTLOOK_DASHBOARD_DETAILS = null;
+var OUTLOOK_DASHBOARD_SNOOZE_UNTIL = 0;
+var OUTLOOK_DASHBOARD_SNOOZE_MS = 5 * 60 * 1000;
+var OUTLOOK_DASHBOARD_ACTIVE_CHECK_MS = 30000;
+var OUTLOOK_DASHBOARD_LAST_ACTIVE_CHECK = 0;
+var OUTLOOK_DASHBOARD_SHOWN_THIS_PAGE = false;
+
+// Student skipped the Outlook modal on the additional layer: keep triggering it here, on the same conditions
+// as the profile-completing modal (never during a live class/activity, warn when one is about to start).
+async function renderOutlookModalOnDashboard() {
+    if (OUTLOOK_DASHBOARD_INTERVAL) {
+        return;
+    }
+    var responseData = await callCommonAjax({
+        method: "POST",
+        url: APP_BASE_URL + SCHOOL_UUID + "/dashboard/additinal-layer-details",
+        body: { userId: USER_ID },
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    });
+    var details = responseData && responseData.status == 1 ? (responseData.details || {}) : {};
+    if (!details.outlookSetupPending) {
+        return;
+    }
+    // Check with the backend before ever opening the modal: if the password is already changed, never show it.
+    if (await checkOutlookActivatedOnDashboard()) {
+        return;
+    }
+    OUTLOOK_DASHBOARD_DETAILS = $.extend({}, details, { skipAction: "snoozeOutlookDashboardModal()", skipLabel: "Do It Later" });
+    OUTLOOK_DASHBOARD_INTERVAL = setInterval(outlookDashboardTick, 1000);
+    outlookDashboardTick();
+}
+
+function stopOutlookDashboardInterval() {
+    clearInterval(OUTLOOK_DASHBOARD_INTERVAL);
+    OUTLOOK_DASHBOARD_INTERVAL = null;
+}
+
+function snoozeOutlookDashboardModal() {
+    OUTLOOK_DASHBOARD_SNOOZE_UNTIL = new Date().getTime() + OUTLOOK_DASHBOARD_SNOOZE_MS;
+    $("#outlookUserCreatedModal").modal("hide");
+}
+
+function outlookDashboardTick() {
+    if (typeof MODAL_SHOW_FLAG !== "undefined" && !MODAL_SHOW_FLAG) {
+        // class/activity start warning already fired; same as the profile modal, stop until the next page load.
+        stopOutlookDashboardInterval();
+        return;
+    }
+    var now = new Date().getTime();
+    var $modal = $("#outlookUserCreatedModal");
+    var isShown = $modal.hasClass("show");
+    if (isShown && now - OUTLOOK_DASHBOARD_LAST_ACTIVE_CHECK >= OUTLOOK_DASHBOARD_ACTIVE_CHECK_MS) {
+        OUTLOOK_DASHBOARD_LAST_ACTIVE_CHECK = now;
+        checkOutlookActivatedOnDashboard();
+    }
+    if (typeof ACTIVITY_CLASS_START_TIME !== "undefined" && ACTIVITY_CLASS_START_TIME.length > 0) {
+        for (var v of ACTIVITY_CLASS_START_TIME) {
+            var timeDiff = new Date(v.startTime.replace(" ", "T")).getTime() - now;
+            if (timeDiff <= 60000 && timeDiff > 0) {
+                if (isShown) {
+                    $("#classAndActivityStartWarningModal").remove();
+                    $("body").append(getClassAndActivityStartWarningModalContent());
+                    $("#classAndActivityStartWarningModal .modal-body").html(
+                        `<h4>Your ${v.title} is about to start, would you like to continue activating your school email?</h4>`
+                    );
+                    $("#classAndActivityStartWarningModal").modal("show");
+                }
+                MODAL_SHOW_FLAG = false;
+                stopOutlookDashboardInterval();
+                return;
+            }
+        }
+    }
+    // Another popup (e.g. School System Training) is open: don't stack on top of it.
+    if ($(".modal.show").not("#outlookUserCreatedModal").length > 0) {
+        if (isShown) {
+            $modal.modal("hide");
+        }
+        return;
+    }
+    var dashboardLoaderVisible = $("#commonloaderIdNewLoader, #commonloaderId, #commonloaderBody").filter(":visible").length > 0;
+    if (!isShown && !OUTLOOK_DASHBOARD_SHOWN_THIS_PAGE && !dashboardLoaderVisible && now >= OUTLOOK_DASHBOARD_SNOOZE_UNTIL && getFlag()) {
+        $modal.remove();
+        $("body").append(outlookUserCreatedModal(OUTLOOK_DASHBOARD_DETAILS));
+        $("#outlookUserCreatedModal")
+            .one("shown.bs.modal", function () { OUTLOOK_DASHBOARD_SHOWN_THIS_PAGE = true; })
+            .modal({ backdrop: true, keyboard: true, show: true });
+        OUTLOOK_DASHBOARD_LAST_ACTIVE_CHECK = now;
+    }
+}
+
+// Stops the reminders once the student has set the Outlook password (e.g. activated it in another tab).
+async function checkOutlookActivatedOnDashboard() {
+    try {
+        var responseData = await callCommonAjax({
+            method: "POST",
+            url: getURLFor("is-outlook-account-active", ""),
+            body: { userId: USER_ID },
+            global: true,
+            showMessage: false
+        });
+        if (responseData && responseData.passwordUpdated == "Y") {
+            stopOutlookDashboardInterval();
+            $("#outlookUserCreatedModal").modal("hide");
+            return true;
+        }
+    } catch (e) {
+        // transient failure: try again on the next check
+    }
+    return false;
 }
 
 async function renderProfileDataInModal(dashboardData){

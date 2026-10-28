@@ -194,10 +194,15 @@ function parentAcademicPerformanceGetSlidesToShow(){
     return slides > 0 ? slides : 1;
 }
 
+var _excuseLmsUserId = "";
+var _excuseEntityId = "";
+
 function parentAcademicPerformanceOpenProgressDetail(studentUserId, lmsEnrollmentId, lmsCourseId){
     if(!studentUserId || !lmsEnrollmentId || !lmsCourseId){
         return;
     }
+    _excuseLmsUserId = lmsEnrollmentId;
+    _excuseEntityId = lmsCourseId;
     showAndHideDashboardAndAdditionalContent("additional");
     $("#dashboardContentInHTMLAdditional").html(getParentAcademicPerformanceDetailContent());
     $("#dashboardContentInHTMLAdditional #studentGradeHistoryPopup").appendTo("body");
@@ -280,10 +285,19 @@ function parentAcademicPerformanceBindItemsRows(enrollId, itemsData){
         }
         var status = (item.status || item.submissionStatus || "").toUpperCase();
         var statusIcon = "";
+        var excuseBtn = "";
+        var isAdminRole = (USER_ROLE !== "STUDENT" && USER_ROLE !== "PARENT" && USER_ROLE !== "TEACHER");
         if(status === "SUBMITTED"){
             statusIcon = `<i class="fa fa-check text-success"></i>`;
         }else if(status === "EXCUSED"){
-            statusIcon = `<i class="fa fa-times"></i>`;
+            statusIcon = `<span class="badge badge-warning">Excused</span>`;
+            if(isAdminRole){
+                excuseBtn = `<button class="btn btn-sm btn-outline-danger excuse-activity-btn" data-itemid="${item.itemid || ''}" data-action="UN_EXCUSE" title="Un-Excuse">Un-Excuse</button>`;
+            }
+        }else{
+            if(isAdminRole){
+                excuseBtn = `<button class="btn btn-sm btn-outline-primary excuse-activity-btn" data-itemid="${item.itemid || ''}" data-action="EXCUSE" title="Excuse">Excuse</button>`;
+            }
         }
         var scoreText = item.unitPercent ? (item.unitPercent + "%") : "";
         html += `<tr>
@@ -302,10 +316,46 @@ function parentAcademicPerformanceBindItemsRows(enrollId, itemsData){
         }else{
             html += `<td></td>`;
         }
-        html += `<td class="text-center">${statusIcon || ""}</td>`;
+        html += `<td class="text-center">${statusIcon} ${excuseBtn}</td>`;
         html += `</tr>`;
     });
     $("#studentLmsProgress").html(html);
+    parentAcademicPerformanceBindExcuseButtons();
+}
+
+function parentAcademicPerformanceBindExcuseButtons(){
+    $(".excuse-activity-btn").off("click").on("click", function(){
+        var btn = $(this);
+        var itemId = btn.data("itemid");
+        var action = btn.data("action");
+        if(!itemId || !action || !_excuseLmsUserId || !_excuseEntityId){
+            showMessageTheme2(0, "Missing required data to perform this action.");
+            return;
+        }
+        btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i>');
+        var payload = { lmsUserId: _excuseLmsUserId, entityId: _excuseEntityId, itemId: itemId, action: action };
+        $.ajax({
+            type: "POST",
+            contentType: "application/json",
+            url: getURLForHTML("dashboard", "excuse-activity"),
+            data: JSON.stringify(payload),
+            dataType: "json",
+            timeout: 60000,
+            success: function(data){
+                if(data && data.code === "SUCCESS"){
+                    showMessageTheme2(1, data.message || "Done");
+                    parentAcademicPerformanceLoadProgressDetail(null, _excuseLmsUserId, _excuseEntityId);
+                }else{
+                    showMessageTheme2(0, data && data.message ? data.message : "Failed to update activity.");
+                    btn.prop("disabled", false).html(action === "EXCUSE" ? "Excuse" : "Un-Excuse");
+                }
+            },
+            error: function(){
+                showMessageTheme2(0, "Something went wrong. Please try again.");
+                btn.prop("disabled", false).html(action === "EXCUSE" ? "Excuse" : "Un-Excuse");
+            }
+        });
+    });
 }
 
 function parentAcademicPerformanceOpenGradeHistoryPopup(enrollId, itemId){

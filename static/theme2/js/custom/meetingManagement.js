@@ -1531,10 +1531,15 @@ function showMeetingDetails(meetingId) {
 
 function savedMeetingDetails(meetingId, formData, hostDetails, timezoneDetails, allAttendees){
   let hour = null, minute = null, formattedDate = null;
-  if (formData.meetingType == "1") {
+  // A meeting saved without a date/time has no start or duration: show "Not scheduled" / "N/A" instead of "Invalid date".
+  const hasSchedule = !!(formData.startDate && formData.startTime && formData.duration);
+  let whenText = "Not scheduled", durationText = "N/A";
+  if (formData.meetingType == "1" && hasSchedule) {
     hour = formData.duration.split(":")[0];
     minute = formData.duration.split(":")[1];
     formattedDate = changeDateFormat(new Date(formData.startDate), "MMM-dd-yyyy");
+    whenText = `${formattedDate} ${(moment(formData.startTime,'h:mm a').format('h:mm a'))}`;
+    durationText = `${hour} Hour(s) ${minute} Minute(s)`;
   }
   let joinUrl = joinLensUrl(""+meetingId, formData.title);
   const meetingTypeName = formData.meetingType == "1" ? "One Day Meeting" : "Recurring Meeting"
@@ -1585,7 +1590,7 @@ function savedMeetingDetails(meetingId, formData, hostDetails, timezoneDetails, 
           <div><strong>When</strong></div>
         </div>
         <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
-          <div id="formattedDateAndFormDataStartTime" class="font-weight-semi-bold">${formattedDate} ${(moment(formData.startTime,'h:mm a').format('h:mm a'))}</div>
+          <div id="formattedDateAndFormDataStartTime" class="font-weight-semi-bold">${whenText}</div>
         </div>
       </div>
 
@@ -1594,7 +1599,7 @@ function savedMeetingDetails(meetingId, formData, hostDetails, timezoneDetails, 
           <div><strong>Duration</strong></div>
         </div>
         <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 col-12">
-          <div id="hourAndMin" class="font-weight-semi-bold">${hour} Hour(s) ${minute} Minute(s)</div>
+          <div id="hourAndMin" class="font-weight-semi-bold">${durationText}</div>
         </div>
       </div>`
     )

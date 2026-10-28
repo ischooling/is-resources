@@ -16,10 +16,6 @@ function validPassword(password) {
 	}
 	return true;
 }
-function validateCaptcha(captcha) {
-	var expr = /^[_A-z0-9]{1,}$/;
-	return expr.test(captcha);
-}
 function restrictKeyEnter(id) {
 	$('#' + id).keydown(function(e) {
 		if (e.keyCode == 13) {

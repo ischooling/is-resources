@@ -30,7 +30,12 @@ async function additionalLayer(){
 }
 function additionalLayerSections(details) {
     var html = "";
-    if (details.paymentOverDue) {
+    if (details.outlookSetupPending && !isOutlookSetupSkipped()) {
+        $("#timezoneConfirm").remove();
+        $("#outlookUserCreatedModal").remove();
+        showOutlookUserCreatedModal(details);
+
+    } else if (details.paymentOverDue) {
         $("#timezoneConfirm").remove();
         html = paymentOverDueCard(details);
         $("#additionalLayerContainer").html(html);
@@ -152,4 +157,102 @@ function getCurrentUserUniqueId() {
 function getStudentDashboardUrl() {
     var dashboardPath = (typeof USER_ROLE !== "undefined" && USER_ROLE === "TEACHER") ? "/dashboard/teacher/" : "/dashboard/student/";
     return BASE_URL + CONTEXT_PATH + SCHOOL_UUID + dashboardPath + getCurrentUserUniqueId();
+}
+
+
+// "Skip for now": remembered in a cookie (the server also reads it so login/dashboard stop redirecting here).
+// The dashboard then triggers the same modal itself on its own interval until the Outlook password is set.
+function getOutlookSkippedCookieName() {
+    return "OUTLOOK_SKIPPED_" + getCurrentUserUniqueId();
+}
+
+function isOutlookSetupSkipped() {
+    return document.cookie.split("; ").indexOf(getOutlookSkippedCookieName() + "=Y") > -1;
+}
+
+function skipOutlookSetup() {
+    stopOutlookActivationPolling();
+    document.cookie = getOutlookSkippedCookieName() + "=Y; path=/; max-age=" + (365 * 24 * 60 * 60) + "; SameSite=Lax";
+    window.location = getStudentDashboardUrl();
+}
+
+var OUTLOOK_ACTIVATION_POLL_MS = 30000;
+var outlookActivationPollTimer = null;
+var outlookActivationPollInFlight = false;
+
+function stopOutlookActivationPolling() {
+    if (outlookActivationPollTimer) {
+        clearInterval(outlookActivationPollTimer);
+        outlookActivationPollTimer = null;
+    }
+}
+
+// Every 30s asks the backend whether the student has already set the Outlook password (e.g. activated it in
+// another tab). Once passwordUpdated = Y the modal is no longer needed, so polling stops and the student goes on
+// to the dashboard.
+function startOutlookActivationPolling() {
+    stopOutlookActivationPolling();
+    outlookActivationPollTimer = setInterval(checkOutlookAccountActive, OUTLOOK_ACTIVATION_POLL_MS);
+}
+
+// Checks first (so a reload after the password was already set never flashes the modal), then shows it and keeps
+// polling. If the check itself fails the modal is shown anyway.
+async function showOutlookUserCreatedModal(details) {
+    if (await checkOutlookAccountActive()) {
+        return;
+    }
+    $("#outlookUserCreatedModal").remove();
+    $("body").append(outlookUserCreatedModal($.extend({}, details, { skipAction: "skipOutlookSetup()", skipLabel: "Do it later" })));
+    $("#outlookUserCreatedModal").modal({ backdrop: "static", keyboard: false, show: true });
+    startOutlookActivationPolling();
+}
+
+// Resolves true (and sends the student to the dashboard) when the backend says passwordUpdated = Y.
+async function checkOutlookAccountActive() {
+    if (outlookActivationPollInFlight) {
+        return false;
+    }
+    outlookActivationPollInFlight = true;
+    try {
+        var responseData = await callCommonAjax({
+            method: "POST",
+            url: getURLFor("is-outlook-account-active", ""),
+            body: { userId: USER_ID },
+            global: true,
+            showMessage: false
+        });
+        if (responseData && responseData.passwordUpdated == "Y") {
+            stopOutlookActivationPolling();
+            $("#outlookUserCreatedModal").modal("hide");
+            window.location = getStudentDashboardUrl();
+            return true;
+        }
+    } catch (e) {
+        // transient failure: try again on the next tick
+    } finally {
+        outlookActivationPollInFlight = false;
+    }
+    return false;
+}
+
+async function handleOutlookAlreadyActivated() {
+    $("#outlookAlreadyActivated").prop("disabled", true);
+    var ajaxReqDetails = {
+        method: "POST",
+        url: APP_BASE_URL + SCHOOL_UUID + "/dashboard/stamp-password-created-date/" + getCurrentUserUniqueId(),
+        body: { userId: USER_ID },
+        global: true,
+        showMessage: false,
+        onFaildResolved: true,
+        onSuccessResolved: true
+    };
+    var responseData = await callCommonAjax(ajaxReqDetails);
+    var status = responseData && responseData.status != null ? String(responseData.status).toLowerCase() : "";
+    if (status == "1" || status == "success") {
+        stopOutlookActivationPolling();
+        window.location = getStudentDashboardUrl();
+    } else {
+        $("#outlookAlreadyActivated").prop("disabled", false);
+        showMessageTheme2(0, (responseData && responseData.message) ? responseData.message : "Unable to proceed");
+    }
 }

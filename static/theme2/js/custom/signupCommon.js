@@ -26,16 +26,10 @@ function signupStudentOnLoad() {
 		if ($("#confirmPassword").val().trim() == "") {
 			validEndInvalidField(false, "confirmPassword");
 		}
-		if ($("#captcha").val().trim() == "") {
-			validEndInvalidField(false, "captcha");
-		}
 		callForUserSignUp('userSignupForm', moduleId);
 	});
 	$("#userSignupForm").on("submit", function (e) {
 		e.preventDefault();
-		if ($("#captcha").val().trim() == "") {
-			validEndInvalidField(false, "captcha");
-		}
 		callForUserSignUp('userSignupForm', moduleId);
 	});
 	$("#resendEmail").click(function (event) {
@@ -279,23 +273,6 @@ function signupStudentOnLoad() {
 			validEndInvalidField(null, "confirmPassword");
 		}
 	});
-	$("#captcha").blur(function () {
-		if ($(this).val().length > 0) {
-			// if (!validateCaptcha($("#userSignupForm #captcha").val().trim())) {
-			// 	$("#userSignupForm #captcha").css('color', '#a9a9a9');
-			// 	showElementErrorMessage(false, 'captcha', 'Captcha is either empty or invalid');
-			// 	validEndInvalidField(false, "captcha");
-			// 	flag = false
-			// }else{
-			// 	validEndInvalidField(true, "captcha");
-			// 	showElementErrorMessage(true, 'captcha', '');
-			// }
-			validEndInvalidField(null, "captcha");
-			showElementErrorMessage(false, 'captcha', '')
-		} else {
-			//validEndInvalidField(null, "captcha");
-		}
-	})
 	$("#notVerify").click(function () {
 		//		event.preventDefault();
 		callForEmailResend($("#userSignupForm #email").val().trim(), moduleId, 'false');
@@ -324,7 +301,7 @@ async function callForUserSignUp(formId, moduleId) {
 	}
 	
 	$("#signup").prop("disabled", true);
-	var payload = getRequestForSignup(formId, moduleId);
+	var payload = await getRequestForSignup(formId, moduleId);
 	var parentUrl = '';
 	if (moduleId == 'STUDENT') {
 		parentUrl = 'api/v1/student'
@@ -352,8 +329,6 @@ async function callForUserSignUp(formId, moduleId) {
 			hideStep1Div();
 			showWrapper(true, responseData["fr"], responseData["extra1"]);
 			$('#emailVerify').show();
-		} else if (responseData['statusCode'] == '0041' || responseData['statusCode'] == '0038') {
-			refreshCaptcha('captchaImage');
 		} else {
 			hideStep1Div();
 		}
@@ -459,12 +434,6 @@ function validateRequestForSignup(formId, moduleId) {
 		showElementErrorMessage(false, 'confirmPassword', 'Please re-enter the same password');
 		flag = false
 	}
-	if (!validateCaptcha($("#" + formId + " #captcha").val().trim())) {
-		$("#" + formId + " #captcha").css('color', '#a9a9a9');
-		showElementErrorMessage(false, 'captcha', 'Please enter captcha');
-		flag = false
-	}
-
 	if ($("#" + formId + " #checkTerms").is(':checked')) {
 		$("#" + formId + " #checkTerms").removeClass('terms-error');
 		showElementErrorMessage(false, 'checkTerms', '');
@@ -476,7 +445,27 @@ function validateRequestForSignup(formId, moduleId) {
 	return flag;
 }
 
-function getRequestForSignup(formId, moduleId) {
+function getRecaptchaToken(action) {
+	return new Promise(function (resolve) {
+		if (typeof RECAPTCHA_ENABLED === "undefined" || !RECAPTCHA_ENABLED || typeof grecaptcha === "undefined") {
+			resolve("");
+			return;
+		}
+		try {
+			grecaptcha.ready(function () {
+				grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: action }).then(function (token) {
+					resolve(token || "");
+				}).catch(function () {
+					resolve("");
+				});
+			});
+		} catch (e) {
+			resolve("");
+		}
+	});
+}
+
+async function getRequestForSignup(formId, moduleId) {
 	var request = {};
 	var authentication = {};
 	var signupDTO = {};
@@ -495,7 +484,6 @@ function getRequestForSignup(formId, moduleId) {
 		signupDTO['confirmEmail'] = $("#" + formId + " #confirmEmail").val();
 		signupDTO['password'] = encode($("#" + formId + " #password").val());
 		signupDTO['confirmPassword'] = encode($("#" + formId + " #confirmPassword").val());
-		signupDTO['captcha'] = $("#" + formId + " #captcha").val();
 		if (moduleId == 'STUDENT') {
 			signupDTO['referralCode'] = $("#" + formId + " #referralCode").val();
 			signupDTO['unregisteredId'] = $("#" + formId + " #unregisteredId").val();
@@ -523,6 +511,7 @@ function getRequestForSignup(formId, moduleId) {
 	signupDTO['utmCampaign'] = getCookie('ucam');
 	signupDTO['utmTerm'] = getCookie('ut');
 	signupDTO['landingPage'] = getCookie('lu');
+	signupDTO['recaptchaToken'] = await getRecaptchaToken('signup');
 	authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
 	authentication['userType'] = moduleId;
 	request['authentication'] = authentication;

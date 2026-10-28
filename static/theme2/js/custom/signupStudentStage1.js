@@ -682,8 +682,10 @@ async function moveStep(moveType){
 			if($("#userId").val() == 0){
 				await callForUserSignUp('signupStage1', 'STUDENT');
 			}
-			var flag = callForSignupStudentDetails('signupStage1');
-			if (flag && signupStage1Form.valid()) {
+			// Run the signup validator first so missing required fields get the
+			// enrollment form's visible message, then submit once. The save function
+			// is async and does not return a success flag to this click handler.
+			if (validateRequestForSignupStudent() && signupStage1Form.valid()) {
 				callForSignupStudentDetails('signupStage1');
 			}else{
 				return false;

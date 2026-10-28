@@ -61,14 +61,6 @@ input[type="radio"], input[type="checkbox"] {accent-color: var(--pc);}
 	color: #ffffff;
 }
 .day-message-text{color:#309b05 !important}
-.captcha-field{
-	/* width:100%;display:flex;position: relative;overflow-x: hidden; */
-}
-.captcha-field input{padding-right:100px;}
-.captcha-field .captcha-img-wrapper{width: 86px;display: inline-block;position: absolute;top:0; right:25px;height: 44px;background: #007fff;z-index: 2;}
-.captcha-field .captcha-img-wrapper img{width:100%;margin-top: 6px;}
-.captcha-field a{position: absolute !important;color: white !important;right: 0px;top: 12px;width: 24px;background: #019EFF;font-size: 19px;padding: 2px;text-align: center;}
-.captcha-field a.refresh-captcha{height:44px;display: flex;font-size: 16px;padding:8px;top:0;align-items:center;justify-content: center;}
 .fancytree-helper-hidden {
 	display: none;
 }
@@ -1340,7 +1332,7 @@ article, aside, figcaption, figure, footer, header, hgroup, main, nav, section {
 }
 body {
 	margin:0;
-	font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+	font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
 font-size:.88rem;
 	font-weight:400;
 	line-height:1.5;
@@ -3141,15 +3133,11 @@ a.btn.disabled, fieldset:disabled a.btn {
 	border-color:orange
 }
 .btn-primary {
-	color:#fff;
+	color:#fff !important;
 	background-color:var(--pc) !important;
 	border-color:var(--pc) !important
 }
-.btn-primary {
-	color:#fff;
-	background-color:var(--pc) !important;
-	border-color:var(--pc) !important
-}
+
 .btn-primary:hover, .btn-primary:focus {
 	color:#fff !important;
 	background-color:var(--pc) !important;
@@ -35175,6 +35163,11 @@ to { background-color: rgb(6, 145, 6); }
 /* parent dashboard css */
 .parent-tab-slider-wrapper .slick-track{display: flex;}
 .parent-tab-slider-wrapper .slick-slide{height: inherit;}
+/* slick sets slide/track widths in px at init; resizing devtools mobile -> desktop leaves the tabs stretched, so on desktop use natural width */
+@media (min-width: 992px){
+	.parent-tab-slider-wrapper .slick-track{width: auto !important;justify-content: center;justify-content: safe center;}
+	.parent-tab-slider-wrapper .slick-slide{width: auto !important;}
+}
 .parent-tab-slider-wrapper .slick-track .nav-item .nav-link{height: 100%;}
 .parent-tab-slider-wrapper .slick-track .nav-item .nav-link.active-student{background-color: #eef3ff !important;font-weight: 600;border-bottom: 3px solid var(--pc);}
 .parent-tab-slider-wrapper .slick-prev,
@@ -35186,6 +35179,8 @@ to { background-color: rgb(6, 145, 6); }
 /* parent dashboard responsive css */
 @media(max-width:768px){
 	.last-active{top:0px}
+	/* stack grade, learning program and last active one below another */
+	.last-active{position:static !important;margin-top:2px}
 }
 @media(max-width:480px){
 	.parent-dashboard-nav.app-footer{position:relative !important}

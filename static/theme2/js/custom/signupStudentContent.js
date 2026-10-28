@@ -683,9 +683,10 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
 	// 	SHOW_PAYMENT_OPTION = "N";
 	// }
 	SHOW_PAYMENT_OPTION = responseData.showPaymentOption;
+	var isPartnerEnrollmentEmbed = signupType == "Offline" && studentUserId != USER_ID;
 	var html = `
-        <div class="wrapper-style custom-field-scope full">
-			<div class="fixed-header">`
+        <div class="wrapper-style custom-field-scope full ${isPartnerEnrollmentEmbed ? 'partner-enrollment-embedded' : ''}">
+			<div class="signup-fixed-header">`
 				if(signupType == "Online" || studentUserId == USER_ID){
 					html+=
 					`<a class="tab-and-mobile-logout-btn" href="javascript:void(0)" onclick="signupLogout()">
@@ -903,7 +904,7 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
 						<img src="${PATH_FOLDER_IMAGE2}whatsapp-new.webp" width="50"/>
 					</a>
 				</div>
-				<div class="fixed-footer">
+				<div class="signup-fixed-footer">
 					<div class="whatsapp_button_wrapper d-flex flex-wrap">
 						<a target="_blank" rel="noopener noreferrer" class="flex items-center justify-center py-2 text-white whatsapp_button" href="https://api.whatsapp.com/send?phone=${schoolSettingsOffice.whatsAppCode}${schoolSettingsOffice.whatsAppContact}">Enrollment Support on&nbsp;<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 1.8a8.2 8.2 0 1 1-4.2 15.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 0 1 12 3.8zm4.7 10.3c-.3-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.1-.2 0-.4.1-.5l.4-.5c.1-.2.2-.3.3-.5v-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.9.9-1 2.1-.4 3.4a11 11 0 0 0 4.5 4.5c1.9.9 2.7.8 3.4.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.6-.3z"></path></svg> WhatsApp</a>
 					</div>
@@ -912,6 +913,83 @@ async function generateEnrollmentContent(courseProviderId, UNIQUEUUID, moduleNam
 		</div>`;
 		html += logOutModalContent();
     return html;
+}
+
+// Bound via inline onchange="changeCountry.call(this)" on #countryId (see
+// getStudentDetailsContent) so each signup form's select drives its own form
+// scope without relying on jQuery delegated/global change bindings.
+function changeCountry(){
+	var formId = $(this).closest("form").attr("id");
+	if(STUDENT_SINGUP_CURRENT_STEP==1){
+		var selectedCountry =  $('option:selected', this).attr("dail-country-code");
+		$('#'+formId+' #stateId').val('').trigger('change');
+		$('#'+formId+' #cityId').val('').trigger('change');
+		callStates(formId, this.value, 'countryId', 'stateId', 'cityId');
+		if( selectedCountry !=undefined && selectedCountry != ''){
+			// Address country no longer overrides the phone widget's country
+			// (they are independent; phone country comes from the phone dropdown
+			// / saved data). Prevents resetting a chosen phone country on prefill.
+		}else{
+			$("#stateId").html("<option value=''>Select Province/State*</option>");
+		}
+		$('#'+formId+' #cityId').html('<option value="">Select City*</option>');
+		checkCSCValidation(selectedCountry, "countryId", "Country");
+	}else{
+		$('#'+formId+' #countryId').valid();
+		var selectedCountry =  $('option:selected', this).attr("dail-country-code");
+		if(IGNORECOUNTRYARRAY.includes(selectedCountry)) {
+			selectedCountry	= "US";
+		}
+		callStates(formId, this.value, 'countryId', 'stateId', 'cityId');
+		if( selectedCountry !=undefined && selectedCountry != ''){
+			// Address country no longer overrides the phone widget's country
+			// (independent; phone country comes from the phone dropdown / saved
+			// data). Prevents resetting a chosen phone country on prefill.
+		}else{
+			$("#stateId").html("<option value=''>Select Province/State*</option>");
+		}
+		$("#signupStage1 #cityId").html("<option value=''>Select City*</option>");
+		checkCSCValidation(selectedCountry, "countryId", "Country");
+		checkCSCValidation("", "stateId", "Province/State*");
+		checkCSCValidation("", "cityId", "City");
+		//$("#signupStage1").valid()
+		// $('#signupStage1 #countryId').val('').trigger("change");
+		$('#countryId').valid();
+		$('#stateId').valid();
+		$('#cityId').valid();
+
+		// When cleared, drop focus so the field shows the unfocused (red) state
+		// instead of the blue focus outline, matching State/Province and City.
+		if(!$('#'+formId+' #countryId').val()){
+			$('#'+formId+' #countryId').select2('close');
+			$('#'+formId+' #countryId').next('.select2').find('.select2-selection').blur();
+		}
+	}
+}
+
+function changeState(){
+	var selectedState =  $('option:selected', this).attr("value");
+	var formId = $(this).closest("form").attr("id");
+	if(STUDENT_SINGUP_CURRENT_STEP!=1){
+		$('#stateId').valid();
+	}
+	checkCSCValidation($("#"+formId+" #stateId").val(), "stateId", "Province/State*");
+	checkCSCValidation("", "cityId", "City");
+	callCities(formId, this.value, 'stateId', 'cityId');
+	if(selectedState == ''){
+		$("#cityId").html("<option value=''>Select City*</option>");
+	}
+	if(STUDENT_SINGUP_CURRENT_STEP!=1){
+		$('#cityId').valid();
+	}
+}
+
+function changeCity(){
+	var formId = $(this).closest("form").attr("id");
+	checkCSCValidation($("#"+formId+" #cityId").val(), "cityId", "City");
+	if(STUDENT_SINGUP_CURRENT_STEP!=1){
+		$('#cityId').valid();
+	}
 }
 
 function renderStudentDetails(data, signupType){
@@ -1228,81 +1306,6 @@ function renderStudentDetails(data, signupType){
 	if(nonMandatoryFields.length>0){
 		formValdate('signupStage1', [], nonMandatoryFields);
 	}
-	$("#countryId").on("change",function(){
-		var formId = $(this).closest("form").attr("id");
-		if(STUDENT_SINGUP_CURRENT_STEP==1){
-			var selectedCountry =  $('option:selected', this).attr("dail-country-code");
-			$('#'+formId+' #stateId').val('').trigger('change');
-			$('#'+formId+' #cityId').val('').trigger('change');
-			callStates(formId, this.value, 'countryId', 'stateId', 'cityId');
-			if( selectedCountry !=undefined && selectedCountry != ''){
-				// Address country no longer overrides the phone widget's country
-				// (they are independent; phone country comes from the phone dropdown
-				// / saved data). Prevents resetting a chosen phone country on prefill.
-			}else{
-				$("#stateId").html("<option value=''>Select Province/State*</option>");
-			}
-			$('#'+formId+' #cityId').html('<option value="">Select City*</option>');
-			checkCSCValidation(selectedCountry, "countryId", "Country");
-		}else{
-			$('#'+formId+' #countryId').valid();
-			var selectedCountry =  $('option:selected', this).attr("dail-country-code");
-			if(IGNORECOUNTRYARRAY.includes(selectedCountry)) {
-				selectedCountry	= "US";
-			}
-			callStates(formId, this.value, 'countryId', 'stateId', 'cityId');
-			if( selectedCountry !=undefined && selectedCountry != ''){
-				// Address country no longer overrides the phone widget's country
-				// (independent; phone country comes from the phone dropdown / saved
-				// data). Prevents resetting a chosen phone country on prefill.
-			}else{
-				$("#stateId").html("<option value=''>Select Province/State*</option>");
-			}
-			$("#signupStage1 #cityId").html("<option value=''>Select City*</option>");
-			checkCSCValidation(selectedCountry, "countryId", "Country");
-			checkCSCValidation("", "stateId", "Province/State*");
-			checkCSCValidation("", "cityId", "City");
-			//$("#signupStage1").valid()
-			// $('#signupStage1 #countryId').val('').trigger("change");
-			$('#countryId').valid();
-			$('#stateId').valid();
-			$('#cityId').valid();
-			
-			// When cleared, drop focus so the field shows the unfocused (red) state
-			// instead of the blue focus outline, matching State/Province and City.
-			if(!$('#'+formId+' #countryId').val()){
-				$('#'+formId+' #countryId').select2('close');
-				$('#'+formId+' #countryId').next('.select2').find('.select2-selection').blur();
-			}
-		}
-		
-	});
-
-	$("#stateId").on("change",function(){
-		
-		var selectedState =  $('option:selected', this).attr("value");
-		var formId = $(this).closest("form").attr("id");
-		if(STUDENT_SINGUP_CURRENT_STEP!=1){
-			$('#stateId').valid();
-		}
-		checkCSCValidation($("#"+formId+" #stateId").val(), "stateId", "Province/State*");
-		checkCSCValidation("", "cityId", "City");
-		callCities(formId, this.value, 'stateId', 'cityId');
-		if(selectedState == ''){
-			$("#cityId").html("<option value=''>Select City*</option>");
-		}
-		if(STUDENT_SINGUP_CURRENT_STEP!=1){
-			$('#cityId').valid();
-		}
-
-	});
-	$("#cityId").on("change",function(){
-		var formId = $(this).closest("form").attr("id");
-		checkCSCValidation($("#"+formId+" #cityId").val(), "cityId", "City");
-		if(STUDENT_SINGUP_CURRENT_STEP!=1){
-			$('#cityId').valid();
-		}
-	});
 	$("#learningProgramPartnerStudent").val(data.signupStudent.learningProgram).trigger('change');
 	$("#learningProgramPartnerStudent").attr("onchange", "changeLearningProgramOfPartnerInitiate('"+(data.signupStudent.studyingGradeId == undefined ? "":data.signupStudent.studyingGradeId)+"')");
 	$('#learningProgramPartnerStudent').on('focus', function () {
@@ -1477,6 +1480,7 @@ function getStudentDetailsContent(data, signupType) {
                 <i class="zmdi zmdi-pin"></i>
                 <div class="custom-field">
                     <select name="countryId" id="countryId" class="form-control-field" required tabindex="${++tabindex}"
+                        onchange="changeCountry.call(this)"
                         ${data.schoolId === 5 ? 'disabled' : ''}>
                         <option value="">Select Country*</option>
                         ${getCountriesOption(signupStudent.countries, signupStudent.countryId)}
@@ -1487,7 +1491,7 @@ function getStudentDetailsContent(data, signupType) {
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-map"></i>
                 <div class="custom-field">
-                    <select name="stateId" id="stateId" class="form-control-field" required tabindex="${++tabindex}">
+                    <select name="stateId" id="stateId" class="form-control-field" required tabindex="${++tabindex}" onchange="changeState.call(this)">
                         <option value="">Select State/Province*</option>
                         ${getStatesOption(signupStudent.states, signupStudent.stateId)}
                     </select>
@@ -1497,7 +1501,7 @@ function getStudentDetailsContent(data, signupType) {
             <div class="form-holder valid-field">
                 <i class="zmdi zmdi-city"></i>
                 <div class="custom-field">
-                    <select name="cityId" id="cityId" class="form-control-field" required tabindex="${++tabindex}">
+                    <select name="cityId" id="cityId" class="form-control-field" required tabindex="${++tabindex}" onchange="changeCity.call(this)">
                         <option value="">Select City*</option>
                         ${getCitiesOption(signupStudent.cities, signupStudent.cityId)}
                     </select>
@@ -3624,7 +3628,7 @@ function getReviewAndPayRendered(data){
 						<img src="${PATH_FOLDER_IMAGE2}whatsapp-new.webp" width="50"/>
 					</a>
 				</div>
-				<div class="fixed-footer">
+				<div class="signup-fixed-footer">
 					<div class="whatsapp_button_wrapper d-flex flex-wrap">
 						<a target="_blank" rel="noopener noreferrer"
 						class="flex items-center justify-center py-2 text-white whatsapp_button"
@@ -3712,19 +3716,17 @@ function studentDetailsPreview(data){
 		+'<div class="full">'
 			
 			+'<h4 class="a-title">'
-				+'Student Details ';
-				
+				+'Student Details '
+				+'<div class="review-btn">'
+					+'<button class="cutom-btn primary-bg white-txt-color">Review</button>' 
+				+'</div>';
 				if(!data.customPaymentEnabled){
 					html+=
 					'<div class="edit-btn">'
 						+'<button class="cutom-btn primary-bg white-txt-color" onclick="event.stopPropagation();openReviewInlineEdit(\'student\')">Edit</button>'
 					+'</div>';
 				}
-				
-				html+='<div class="review-btn">'
-					+'<button class="cutom-btn primary-bg white-txt-color">Review</button>' 
-				+'</div>'
-			+'</h4>'
+			html+='</h4>'
 			// +'<div class="h_scroll primary-bg">'
 			// 	+'<img src="'+PATH_FOLDER_IMAGE2+'h_scroll.png">'
 			// +'</div>'
@@ -3821,15 +3823,15 @@ function parentDetailsPreview(data){
 						html+='Parent/Guardian Details';
 					}
 				}
+				html+='<div class="review-btn">'
+					+'<button class="cutom-btn primary-bg white-txt-color">Review</button>' 
+				+'</div>';
 				if(!data.customPaymentEnabled){
 					html+='<div class="edit-btn">'
 						+'<button class="cutom-btn primary-bg white-txt-color" onclick="event.stopPropagation();openReviewInlineEdit(\'parent\')">Edit</button>'
 					+'</div>';
 				}
-				html+='<div class="review-btn">'
-					+'<button class="cutom-btn primary-bg white-txt-color">Review</button>' 
-				+'</div>'
-			+'</h4>'
+			html+='</h4>'
 			// +'<div class="h_scroll primary-bg">'
 			// 	+'<img src="'+PATH_FOLDER_IMAGE2+'h_scroll.png">'
 			// +'</div>'
@@ -3971,17 +3973,16 @@ function courseDetailsPreview(data){
 	'<div class="student-courses-info">'
 		+'<div class="full">'
 			+'<h4 class="a-title">'
-				+'Selected Courses';
+				+'Selected Courses'
+				+'<div class="review-btn">'
+					+'<button class="cutom-btn primary-bg white-txt-color">Review</button>' 
+				+'</div>';
 				if(!data.customPaymentEnabled){
 					html+='<div class="edit-btn">'
 						+'<button class="cutom-btn primary-bg white-txt-color" onclick="event.stopPropagation();openReviewInlineEdit(\'course\')">Edit</button>'
 					+'</div>';
 				}
-				html+='<div class="review-btn">'
-					+'<button class="cutom-btn primary-bg white-txt-color">Review</button>' 
-				+'</div>'
-
-			+'</h4>'
+			html+='</h4>'
 			// +'<div class="h_scroll primary-bg">'
 			// 	+'<img src="'+PATH_FOLDER_IMAGE2+'h_scroll.png">'
 			// +'</div>'

@@ -1345,9 +1345,6 @@ async function enrollmentPartnerStudent(studentUserId){
 					margin-right: -5px;
 					margin-left: -5px;
 				}
-				.captcha-stylecss{
-					display: block !important;
-				}
 				.add-course-btn-partner{
 					display: flex !important;
 				}
