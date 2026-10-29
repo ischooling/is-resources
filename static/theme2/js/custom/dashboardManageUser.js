@@ -259,7 +259,9 @@ async function advanceStudentSearch(formId, moduleId, themetype) {
 		var baseRequest = getCallRequestForadvanceStudentSearch(formId, moduleId, themetype);
 		// How many records the user asked for in total (the legacy pageSize field, default 250).
 		var requestedRecords = parseInt(baseRequest.studentDetailDTO.pageSize, 10);
-		if (isNaN(requestedRecords) || requestedRecords <= 0) {
+		// the Manage Student form has no pageSize field, so "no limit asked" must load every matching row (not stop at 250)
+		var noExplicitLimit = isNaN(requestedRecords) || requestedRecords <= 0;
+		if (noExplicitLimit) {
 			requestedRecords = 250;
 		}
 		var startOffset = parseInt(baseRequest.studentDetailDTO.page, 10);
@@ -290,6 +292,9 @@ async function advanceStudentSearch(formId, moduleId, themetype) {
 
 		var meta = await metaPromise;
 		var totalRows = (meta && meta.status == "1" && meta.totalRows != null) ? parseInt(meta.totalRows, 10) : null;
+		if (noExplicitLimit && totalRows != null) {
+			requestedRecords = totalRows;
+		}
 		var tableApi = $("#manageAdvanceStudentContent").length ? $("#manageAdvanceStudentContent").DataTable() : null;
 		var firstChunkCount = tableApi ? tableApi.rows().count() : 0;
 		if (!tableApi || firstChunkCount < ADV_STUDENT_SEARCH_CHUNK_SIZE) {
@@ -544,6 +549,11 @@ function getCallRequestForadvanceStudentSearch(formId, moduleId, themetype) {
 	}
 	studentDetailDTO["themetype"] = themetype;
 	studentDetailDTO["schoolUUID"] = SCHOOL_UUID;
+	// Manage User List parent filters + global search: added where every student search request (list, counts,
+	// Group Learning) is built — they were defined in ManageUserStudentContent.js but never sent.
+	if (typeof muAddStudentParentFilters === 'function' && $("#" + formId + " #parentNameFilter").length) {
+		muAddStudentParentFilters(formId, studentDetailDTO);
+	}
 	request["studentDetailDTO"] = studentDetailDTO;
 	authentication["hash"] = getHash();
 	authentication["userType"] = "SCHOOL";

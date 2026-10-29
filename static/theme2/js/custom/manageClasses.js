@@ -99,6 +99,9 @@ function advanceClassroomSearch(formId, moduleId, userId, userRole) {
 		return false;
 	}
 	var argument = '?moduleId=' + moduleId + '&schoolId=' + SCHOOL_ID + '&' +decodeURIComponent($('#'+formId).serialize());
+	if ($('#mcPlatformSection').length) {
+		mcLoadPlatformCounts(formId, moduleId);
+	}
 	classroomSessionsData(formId, 'classroomSessionsList', moduleId, argument, userId, userRole);
 }
 function getRequestForClassroomSessionsData(formId, moduleId){
@@ -830,7 +833,32 @@ function advanceManageClassroomSearchReset(formId) {
 	$('#' + formId)[0].reset();
 	$('#' + formId + ' #standardId, #' + formId + ' #classStatus,#' + formId + ' #markStatus').val("").trigger("change");
 	$('#sortBy').val("ASC").trigger("change");
+	$('#mcPlatformCards .mu-platform-card').removeClass('active');
+}
 
+// Per-learning-program class counts for the current filters (learning-program filter and page
+// size ignored server-side); a program with no matching classes is absent from the response -> 0.
+function mcLoadPlatformCounts(formId, moduleId) {
+	$.ajax({
+		type: "POST",
+		contentType: APPLICATION_JSON_VALUE,
+		url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/dashboard/student-teacher-sessions-platform-counts/" + UNIQUEUUID,
+		data: JSON.stringify(getRequestForClassroomSessionsData(formId, moduleId)),
+		dataType: 'json',
+		global: false,
+		success: function (resp) {
+			if (!resp || resp.status != "1") {
+				return;
+			}
+			var counts = resp.counts || {};
+			$('#mcPlatformCards .mu-platform-card').each(function () {
+				var type = this.getAttribute('data-enroll-type');
+				$('#mcPlatformCount-' + type).text(counts[type] || 0);
+			});
+			$('#mcPlatformTotalCount').text(resp.total != null ? resp.total : 0);
+			$('#mcPlatformSection').show();
+		}
+	});
 }
 
 function showAggrigatorStatusPopup(message, status, aggregatorId, aggrigatorUserId, aggrigatorMeetingVendor, userKey, groupId) {

@@ -495,7 +495,7 @@ function outlookUserCreatedModal(details) {
                         </div>
                     </div>
                     <p class="text-muted mb-4">Log in once with these details, then choose your own password.</p>
-                    <a class="btn btn-primary rounded-10 px-4 py-2 mb-2 d-inline-flex align-items-center" href="https://outlook.office.com" target="_blank" rel="noopener">Activate my email <svg class="ml-2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"></path><path d="m20 4-9 9"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5"></path></svg></a>
+                    <button id="activateSchoolEmailBtn" type="button" class="btn btn-primary rounded-10 px-4 py-2 mb-2 d-inline-flex align-items-center" onclick="handleActivateSchoolEmail()">Activate my email <svg class="ml-2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"></path><path d="m20 4-9 9"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5"></path></svg></button>
                     ${details && details.skipAction ? `<div><button type="button" class="btn btn-outline-primary rounded-10 px-4 py-2" onclick="${details.skipAction}">${details.skipLabel || 'Do it later'}</button></div>` : ''}                   
                     <div class="border-top mt-4 pt-3">
                         <span class="text-muted">Need help?</span>

@@ -242,14 +242,55 @@ function initManageLmsUser() {
     getSessionMasterList('lmsStudentFilter', 'activeSession', false);
     $("#standardId").select2({ theme: "bootstrap4" });
     $("#standardId option[value='17']").remove();
-    $(".filterDates").datepicker({ todayBtn: 1, autoclose: true, format: 'M dd, yyyy', todayHighlight: true });
+    $(".filterDates").datepicker({ 
+      todayBtn: 1, 
+      autoclose: true, 
+      format: 'M dd, yyyy', 
+      todayHighlight: true 
+    }).off('show').on('show', function(){
+			// the picker defaults to opening upward when space above looks sufficient,
+			// which overlaps the fixed .sticky-header near the top of this page; force it
+			// to open downward instead whenever that overlap would actually happen.
+			var $picker = $('.datepicker.datepicker-dropdown:visible').last();
+			var $header = $('.sticky-header');
+			if(!$picker.length || !$header.length){ return; }
+			var pickerTop = $picker[0].getBoundingClientRect().top;
+			var headerBottom = $header[0].getBoundingClientRect().bottom;
+			if(pickerTop < headerBottom){
+				var inputRect = this.getBoundingClientRect();
+				$picker.removeClass('datepicker-orient-bottom').addClass('datepicker-orient-top');
+				$picker.css({
+					top: (inputRect.bottom + $(window).scrollTop()) + 'px',
+					bottom: 'auto'
+				});
+			}
+		});
 }
 
 function initManageSession() {
     $('#dashboardContentInHTML').html(getManageSessionUserContent('Manage Enrollments', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE));
     $("#standardId").select2({ theme: "bootstrap4", dropdownParent: "#lmsStudentFilter" });
     $("#standardId option[value='17']").remove();
-    $(".filterDates").datepicker({ todayBtn: 1, autoclose: true, format: 'M dd, yyyy', todayHighlight: true });
+    $(".filterDates").datepicker({ todayBtn: 1, autoclose: true, format: 'M dd, yyyy', todayHighlight: true })
+      .off('show').on('show', function(){
+			// the picker defaults to opening upward when space above looks sufficient,
+			// which overlaps the fixed .sticky-header near the top of this page; force it
+			// to open downward instead whenever that overlap would actually happen.
+			var $picker = $('.datepicker.datepicker-dropdown:visible').last();
+			var $header = $('.sticky-header');
+			if(!$picker.length || !$header.length){ return; }
+			var pickerTop = $picker[0].getBoundingClientRect().top;
+			var headerBottom = $header[0].getBoundingClientRect().bottom;
+			if(pickerTop < headerBottom){
+				var inputRect = this.getBoundingClientRect();
+				$picker.removeClass('datepicker-orient-bottom').addClass('datepicker-orient-top');
+				$picker.css({
+					top: (inputRect.bottom + $(window).scrollTop()) + 'px',
+					bottom: 'auto'
+				});
+        $('<style>').prop('type', 'text/css').html(`.datepicker-dropdown::before,.datepicker-dropdown::after {display: none !important;}`).appendTo('head');
+			}
+		});
     getSessionMasterList('lmsStudentFilter', 'sessionId', false);
 }
 

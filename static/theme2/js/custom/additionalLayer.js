@@ -201,10 +201,58 @@ async function showOutlookUserCreatedModal(details) {
     if (await checkOutlookAccountActive()) {
         return;
     }
+    window.OUTLOOK_NEEDS_AZURE_CREATION = !!(details && details.needsAzureCreation);
     $("#outlookUserCreatedModal").remove();
     $("body").append(outlookUserCreatedModal($.extend({}, details, { skipAction: "skipOutlookSetup()", skipLabel: "Do it later" })));
     $("#outlookUserCreatedModal").modal({ backdrop: "static", keyboard: false, show: true });
     startOutlookActivationPolling();
+}
+
+// Called when the student clicks "Activate my email" in the outlook modal.
+// If the Azure AD account has not been created yet (needsAzureCreation), creates it first,
+// updates the displayed email/password, then opens Outlook.
+async function handleActivateSchoolEmail() {
+    var btn = document.getElementById("activateSchoolEmailBtn");
+    if (btn) btn.disabled = true;
+
+    if (window.OUTLOOK_NEEDS_AZURE_CREATION) {
+        var payload = { payload: encode(JSON.stringify({ userId: USER_ID })) };
+        var ajaxReqDetails = {
+            method: "POST",
+            url: APP_BASE_URL + SCHOOL_UUID + "/dashboard/create-azure-user",
+            body: payload,
+            global: true,
+            showMessage: false,
+            onFaildResolved: true,
+            onSuccessResolved: true
+        };
+        var responseData = await callCommonAjax(ajaxReqDetails);
+        if (!responseData || responseData.status != 1) {
+            if (btn) btn.disabled = false;
+            showMessageTheme2(0, (responseData && responseData.message) ? responseData.message : "Unable to create school email account. Please try again.");
+            return;
+        }
+        window.OUTLOOK_NEEDS_AZURE_CREATION = false;
+        var d = responseData.details || {};
+        if (d.email) {
+            $("#outlookOfficialEmail").text(d.email);
+            $("#outlookOfficialEmailCopy").val(d.email);
+        }
+        if (d.password) {
+            $("#outlookTemporaryPasswordCopy").val(d.password);
+            var $passText = $("#outlookTemporaryPassword");
+            if ($passText.data("visible") === true) {
+                $passText.text(d.password);
+            }
+        }
+        // Account just created — open Outlook directly, no need to mark credentials viewed
+        setTimeout(function () { window.open("https://outlook.office.com", "_blank"); }, 1200);
+        if (btn) btn.disabled = false;
+        return;
+    }
+
+    await handleProceedToOutlook();
+    if (btn) btn.disabled = false;
 }
 
 // Resolves true (and sends the student to the dashboard) when the backend says passwordUpdated = Y.

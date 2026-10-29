@@ -1316,8 +1316,118 @@ a.bg-alternate:hover, a.bg-alternate:focus, button.bg-alternate:hover, button.bg
 --breakpoint-lg: 992px;
 --breakpoint-xl: 1200px;
 --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
---font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace
+--font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+/* Manage User List — "Students by Learning Platform" summary cards (one color theme per enroll type) */
+--mu-platform-one-to-one-bg: #F3F0FD;
+--mu-platform-one-to-one-border: #DCD2F7;
+--mu-platform-one-to-one-icon: #8A6FE0;
+--mu-platform-one-to-one-text: #4B3F91;
+--mu-platform-group-bg: #E8F8F1;
+--mu-platform-group-border: #CFEFDF;
+--mu-platform-group-icon: #2FAE7D;
+--mu-platform-group-text: #0E8A5A;
+--mu-platform-self-study-plus-bg: #FDEFE1;
+--mu-platform-self-study-plus-border: #FBDFC2;
+--mu-platform-self-study-plus-icon: #E8793D;
+--mu-platform-self-study-plus-text: #D2572A;
+--mu-platform-self-study-bg: #EAF2FE;
+--mu-platform-self-study-border: #D3E6FC;
+--mu-platform-self-study-icon: #4F8DF0;
+--mu-platform-self-study-text: #2D6CDF;
+--mu-platform-flexy-bg: #FCEAF1;
+--mu-platform-flexy-border: #F8D2E3;
+--mu-platform-flexy-icon: #E85690;
+--mu-platform-flexy-text: #D6336C;
+--mu-platform-dual-diploma-bg: #F1EAFB;
+--mu-platform-dual-diploma-border: #E2D1F5;
+--mu-platform-dual-diploma-icon: #8B5FC0;
+--mu-platform-dual-diploma-text: #6F3FA0
 }
+
+/* One-to-One */
+.ONE_TO_ONE_TXT {
+    color: var(--mu-platform-one-to-one-text);
+}
+.ONE_TO_ONE_BG {
+    background-color: var(--mu-platform-one-to-one-bg);
+}
+.ONE_TO_ONE_BORDER {
+    border-color: var(--mu-platform-one-to-one-border);
+}
+.ONE_TO_ONE_ICON {
+    color: var(--mu-platform-one-to-one-icon);
+}
+
+/* Batch / Group Learning */
+.BATCH_TXT {
+    color: var(--mu-platform-group-text);
+}
+.BATCH_BG {
+    background-color: var(--mu-platform-group-bg);
+}
+.BATCH_BORDER {
+    border-color: var(--mu-platform-group-border);
+}
+.BATCH_ICON {
+    color: var(--mu-platform-group-icon);
+}
+
+/* Self Study */
+.SCHOLARSHIP_TXT {
+    color: var(--mu-platform-self-study-text);
+}
+.SCHOLARSHIP_BG {
+    background-color: var(--mu-platform-self-study-bg);
+}
+.SCHOLARSHIP_BORDER {
+    border-color: var(--mu-platform-self-study-border);
+}
+.SCHOLARSHIP_ICON {
+    color: var(--mu-platform-self-study-icon);
+}
+
+/* Self Study Plus */
+.SSP_TXT {
+    color: var(--mu-platform-self-study-plus-text);
+}
+.SSP_BG {
+    background-color: var(--mu-platform-self-study-plus-bg);
+}
+.SSP_BORDER {
+    border-color: var(--mu-platform-self-study-plus-border);
+}
+.SSP_ICON {
+    color: var(--mu-platform-self-study-plus-icon);
+}
+
+/* Flexy Program */
+.ONE_TO_ONE_FLEX_TXT {
+    color: var(--mu-platform-flexy-text);
+}
+.ONE_TO_ONE_FLEX_BG {
+    background-color: var(--mu-platform-flexy-bg);
+}
+.ONE_TO_ONE_FLEX_BORDER {
+    border-color: var(--mu-platform-flexy-border);
+}
+.ONE_TO_ONE_FLEX_ICON {
+    color: var(--mu-platform-flexy-icon);
+}
+
+/* Dual Diploma */
+.DUAL_DIPLOMA_TXT {
+    color: var(--mu-platform-dual-diploma-text);
+}
+.DUAL_DIPLOMA_BG {
+    background-color: var(--mu-platform-dual-diploma-bg);
+}
+.DUAL_DIPLOMA_BORDER {
+    border-color: var(--mu-platform-dual-diploma-border);
+}
+.DUAL_DIPLOMA_ICON {
+    color: var(--mu-platform-dual-diploma-icon);
+}
+
 *, *::before, *::after {
 box-sizing:border-box
 }
@@ -6450,7 +6560,7 @@ a.bg-focus:hover, a.bg-focus:focus, button.bg-focus:hover, button.bg-focus:focus
 a.bg-alternate:hover, a.bg-alternate:focus, button.bg-alternate:hover, button.bg-alternate:focus {
 	background-color:#5c3a69 !important
 }
-.bg-white.toast-info.bg-white{
+.bg-white.toast-info.bg-white, .bg-white{
 	background-color:#fff !important
 }
 .bg-transparent {
@@ -35241,3 +35351,30 @@ to { background-color: rgb(6, 145, 6); }
 #studentPaymentForm .select2-selection__choice{max-width:100% !important;white-space:normal !important;word-break:break-word;}
 #studentPaymentForm .spf-progress-group{position:relative;margin-top:3px;}
 #studentPaymentForm .spf-progress-label{position:absolute;top:-27px;left:15px;background:#fff;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100% - 20px);}
+
+/* Manage User List — "Students by Learning Platform" summary cards */
+.mu-platform-section{margin-bottom:1rem;}
+.mu-platform-section-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:.6rem;}
+.mu-platform-title{font-weight:600;color:#292929;margin-bottom:0;}
+.mu-platform-total{background:#eef1f6;color:#4b5563;border-radius:6px;padding:.4rem .75rem;font-size:.85rem;}
+.mu-platform-total-count{font-weight:700;color:#121826;margin-left:.25rem;}
+.mu-platform-cards{display:flex;flex-wrap:wrap;gap:.75rem;}
+.mu-platform-card{display:flex;align-items:center;gap:.6rem;flex:1 1 150px;min-width:150px;padding:.6rem .9rem;border-radius:10px;border:1px solid transparent;cursor:pointer;background:var(--mu-platform-bg);border-color:var(--mu-platform-border);transition:box-shadow .15s ease,transform .1s ease;}
+.mu-platform-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.08);}
+.mu-platform-card.active{border-color:var(--mu-platform-icon);box-shadow:0 0 0 1px var(--mu-platform-icon);}
+.mu-platform-card-icon{width:28px;height:28px;flex:0 0 auto;border:2px solid var(--mu-platform-icon);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--mu-platform-icon);background:#fff;}
+.mu-platform-card-count{font-size:1.3rem;font-weight:700;color:var(--mu-platform-text);line-height:1.1;}
+.mu-platform-card-label{font-size:.8rem;color:#4b5563;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;}
+.mu-platform-card-one-to-one{--mu-platform-bg:var(--mu-platform-one-to-one-bg);--mu-platform-border:var(--mu-platform-one-to-one-border);--mu-platform-icon:var(--mu-platform-one-to-one-icon);--mu-platform-text:var(--mu-platform-one-to-one-text);}
+.mu-platform-card-group{--mu-platform-bg:var(--mu-platform-group-bg);--mu-platform-border:var(--mu-platform-group-border);--mu-platform-icon:var(--mu-platform-group-icon);--mu-platform-text:var(--mu-platform-group-text);}
+.mu-platform-card-self-study-plus{--mu-platform-bg:var(--mu-platform-self-study-plus-bg);--mu-platform-border:var(--mu-platform-self-study-plus-border);--mu-platform-icon:var(--mu-platform-self-study-plus-icon);--mu-platform-text:var(--mu-platform-self-study-plus-text);}
+.mu-platform-card-self-study{--mu-platform-bg:var(--mu-platform-self-study-bg);--mu-platform-border:var(--mu-platform-self-study-border);--mu-platform-icon:var(--mu-platform-self-study-icon);--mu-platform-text:var(--mu-platform-self-study-text);}
+.mu-platform-card-flexy{--mu-platform-bg:var(--mu-platform-flexy-bg);--mu-platform-border:var(--mu-platform-flexy-border);--mu-platform-icon:var(--mu-platform-flexy-icon);--mu-platform-text:var(--mu-platform-flexy-text);}
+.mu-platform-card-dual-diploma{--mu-platform-bg:var(--mu-platform-dual-diploma-bg);--mu-platform-border:var(--mu-platform-dual-diploma-border);--mu-platform-icon:var(--mu-platform-dual-diploma-icon);--mu-platform-text:var(--mu-platform-dual-diploma-text);}
+.mu-platform-card-default{--mu-platform-bg:#eef1f6;--mu-platform-border:#dde3ec;--mu-platform-icon:#6c7a93;--mu-platform-text:#3c4a61;}
+/* Plain stat tiles (e.g. Payment Report's consolidate strip) that reuse a mu-platform-card-*
+   modifier for its color but aren't the icon+count card layout: the modifier class alone only
+   defines the --mu-platform-* custom properties, so pair it with .mu-platform-card for the
+   actual background/text colors to take effect. */
+.mu-platform-card h5{color:var(--mu-platform-text);}
+

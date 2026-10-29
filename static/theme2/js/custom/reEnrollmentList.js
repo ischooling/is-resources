@@ -185,12 +185,16 @@ function bindReEnrollmentEvents() {
     $(document).off('click', '#reelExportExcel').on('click', '#reelExportExcel', function () { reEnrollExport('excel'); });
     $(document).off('click', '#reelExportCsv').on('click', '#reelExportCsv', function () { reEnrollExport('csv'); });
     // click a count box -> open the right-side list drawer for that metric
-    $(document).off('click', '.reel-card-click').on('click', '.reel-card-click', function () {
+    $(document).off('click', '.reel-card-click').on('click', '.reel-card-click', function (e) {
+        // mix line (0-count wali bhi) card ke andar hai - uska click card ko nahi khole
+        if ($(e.target).closest('.reel-mixlink, .reel-mixdim, .reel-cmix').length) { return; }
         reelCardListOpen($(this).attr('data-cm') || '', $(this).attr('data-sess') || '', $(this).attr('data-title') || 'Students', null, $(this).attr('data-sp') || '');
     });
     // a split-line value opens its card's list, narrowed to that learning program
     $(document).off('click', '.reel-mixlink').on('click', '.reel-mixlink', function (e) {
         e.stopPropagation();
+        // bina metric/flag wala link = koi filter nahi, warna poori list khul jayegi
+        if (!$(this).attr('data-cm') && !$(this).attr('data-neg') && !$(this).attr('data-g12')) { return; }
         if ($(this).attr('data-neg')) {
             reelCardListOpen('total', '', 'Negative for Re-enrolment', { reStatus: 'Negative for Re-enrolment' });
             return;
@@ -439,6 +443,7 @@ function reEnrollFetch(pageNumber) {
                 if (data.summary.filterAddedBy) { REEL_ADDEDBY = data.summary.filterAddedBy; reEnrollFillAddedByFilter(); }
                 reEnrollRenderCards(data.summary);
             }
+            
             reEnrollRenderRows(data.data || [], req.pageNumber, req.pageSize);
             reEnrollRenderCount(REEL_TOTAL, req.pageNumber, req.pageSize);
             reEnrollRenderPager(REEL_TOTAL, req.pageNumber, req.pageSize);
@@ -483,10 +488,69 @@ function reEnrollMixLine(g, o, x, metric, sess, titleBase) {
     return part('Group', g, 'GROUP') + part('1:1', o, 'ONE_TO_ONE') + part('Other', x, 'OTHER');
 }
 
+// Learning-platform breakdown shown inside the Fresh / Re-Enrollment and Timezone cards.
+var REEL_PLATFORM_COLORS = {
+    oneToOne: '#8A6FE0',
+    group: '#2FAE7D',
+    selfStudy: '#4F8DF0',
+    selfStudyPlus: '#E8793D',
+    flexy: '#E85690',
+    dualDiploma: '#8B5FC0'
+};
+
+// summary key suffix + exact REGISTRATION_TYPE for each program
+var REEL_PLATFORMS = [
+    { lab: 'One to One Learning', rt: 'ONE_TO_ONE',      k: 'Oto',         c: 'oneToOne' },
+    { lab: 'Group Learning',      rt: 'BATCH',           k: 'Batch',       c: 'group' },
+    { lab: 'Self Study Learning', rt: 'SCHOLARSHIP',     k: 'Scholarship', c: 'selfStudy' },
+    { lab: 'Self Study Plus',     rt: 'SSP',             k: 'Ssp',         c: 'selfStudyPlus' },
+    { lab: 'Flexy Learning',      rt: 'ONE_TO_ONE_FLEX', k: 'Flex',        c: 'flexy' },
+    { lab: 'Dual Diploma',        rt: 'DUAL_DIPLOMA',    k: 'Dual',        c: 'dualDiploma' }
+];
+
+// Raw REGISTRATION_TYPE from the list response -> label (same idea as sedRegLabel on the Enrollment Dashboard)
+function reEnrollRegLabel(t) {
+    switch ((t || '').toUpperCase()) {
+        case 'BATCH': return 'Group Learning';
+        case 'ONE_TO_ONE': return 'One-to-One Learning';
+        case 'ONE_TO_ONE_FLEX': return 'Flexy Learning';
+        case 'SCHOLARSHIP': return 'Accelerated Learning | Self Study';
+        case 'SSP': return 'Self Study Plus';
+        case 'DUAL_DIPLOMA': return 'Dual Diploma';
+        default: return t || '';
+    }
+}
+
+// Har card ka apna summary prefix — Fresh / Re-Enrollment / Timezone (+) / Timezone (-)
+var REEL_MIX_PREFIX = { fresh: 'fr', reEnrollment: 're', tzPlus: 'ptz', tzMinus: 'mtz' };
+
+function reEnrollPlatformMixLine(s, metric, sess, titleBase) {
+    var pre = REEL_MIX_PREFIX[metric] || 're';
+    var h = '';
+    for (var i = 0; i < REEL_PLATFORMS.length; i++) {
+        var p = REEL_PLATFORMS[i];
+        var val = Number((s && s[pre + p.k]) || 0);
+        var rt = 'RT:' + p.rt;
+        var color = REEL_PLATFORM_COLORS[p.c];
+        // 0 wali line click karne ka matlab nahi - plain text rakho
+        if (!val) {
+            h += '<span class="reel-mixdim px-3 py-1 rounded-20 bg-white">'
+                + '<span class="reel-mixlab '+p.rt+'_TXT">' + p.lab + '</span>'
+                + '<b class="reel-mixval '+p.rt+'_TXT">' + Number(val || 0).toLocaleString() + '</b></span>';
+            continue;
+        }
+        h += '<a href="javascript:void(0)" class="reel-mixlink px-3 py-1 rounded-20 bg-white" data-cm="' + metric + '" data-sess="' + (sess || '') + '"'
+            + ' data-rt="' + rt + '" data-title="' + reEnrollEsc(titleBase + ' \u00b7 ' + p.lab) + '">'
+            + '<span class="reel-mixlab '+p.rt+'_TXT">' + p.lab + '</span>'
+            + '<b class="reel-mixval '+p.rt+'_TXT">' + val.toLocaleString() + '</b></a>';
+    }
+    return h;
+}
+
 function reEnrollRenderCards(s) {
     // clickable count box -> opens the right-side list drawer for that metric
-    function card(num, label, bg, color, metric, sess, title, prevSess, sub) {
-        return '<div class="reel-card reel-card-click" data-cm="' + (metric || '') + '" data-sess="' + (sess || '') + '" data-sp="' + (prevSess || '') + '" data-title="' + reEnrollEsc(title || label) + '" style="background:' + bg + '">'
+    function card(num, label, bg, color, metric, sess, title, prevSess, sub, wide) {
+        return '<div class="reel-card reel-card-click' + (wide ? ' reel-card-wide' : '') + '" data-cm="' + (metric || '') + '" data-sess="' + (sess || '') + '" data-sp="' + (prevSess || '') + '" data-title="' + reEnrollEsc(title || label) + '" style="background:' + bg + '">'
             + '<div class="reel-cnum" style="color:' + color + '">' + Number(num || 0).toLocaleString() + '</div>'
             + '<div class="reel-clab" style="color:' + color + '">' + label + '</div>'
             + (sub ? '<div class="reel-cmix" style="color:' + color + '">' + sub + '</div>' : '')
@@ -494,9 +558,11 @@ function reEnrollRenderCards(s) {
     }
     var g1 = '<div class="reel-cgrp"><div class="reel-clabel">Total Students</div><div class="reel-cards">'
         + card(s.total, 'Total Students', '#eef2ff', '#3730a3', 'total')
-        + card(s.fresh, 'Fresh', '#e9f7ee', '#1f9d55', 'fresh', '', 'Fresh', '', reEnrollMixLine(s.frGroup, s.frOneToOne, s.frOther, 'fresh', '', 'Fresh'))
-        + card(s.totalReEnroll, 'Re-Enrollment', '#eaf1ff', '#2b62d6', 'reEnrollment', '', 'Re-Enrollment', '', reEnrollMixLine(s.reGroup, s.reOneToOne, s.reOther, 'reEnrollment', '', 'Re-Enrollment'))
         + card(s.todayFollowup, 'Today Followup', '#fff1f0', '#c0392b', 'todayFollowup', '', 'Today Followup')
+        + '</div></div>'
+        + '<div class="reel-cgrp"><div class="reel-cards">'
+        + card(s.fresh, 'Fresh', '#e9f7ee', '#1f9d55', 'fresh', '', 'Fresh', '', reEnrollPlatformMixLine(s, 'fresh', '', 'Fresh'), true)
+        + card(s.totalReEnroll, 'Re-Enrollment', '#eaf1ff', '#2b62d6', 'reEnrollment', '', 'Re-Enrollment', '', reEnrollPlatformMixLine(s, 'reEnrollment', '', 'Re-Enrollment'), true)
         + '</div></div>';
     // ---- Progression row : selected session base -> next session re-enrolled / pending (display-only) ----
     function pcard(num, label, bg, color, sub) {
@@ -521,6 +587,13 @@ function reEnrollRenderCards(s) {
             : '';
         var activeCard = card(pbase, 'Active Students', '#eef2ff', '#3730a3', 'total', '', 'Active Students' + (selName ? (' · ' + selName) : ''), '', g12Sub);
         var negSub = '<a href="javascript:void(0)" class="reel-mixlink" data-neg="1" data-title="Negative for Re-enrolment"><span class="reel-mixlab">Negative for Re-enrolment</span> <b class="reel-mixval">' + Number(s.negativeReEnroll || 0).toLocaleString() + '</b></a>';
+        // second row: the two timezone cards, wide, split by learning program
+        var tzRow = '<div class="reel-cards" style="margin-top:12px;">'
+            + card(s.plusTz || 0, 'Timezone (+) · East', '#fdeaea', '#c0392b', 'tzPlus', '', 'Timezone (+) · East', '',
+                reEnrollPlatformMixLine(s, 'tzPlus', '', 'Timezone (+)'), true)
+            + card(s.minusTz || 0, 'Timezone (−) · West', '#fdeaea', '#c0392b', 'tzMinus', '', 'Timezone (−) · West', '',
+                reEnrollPlatformMixLine(s, 'tzMinus', '', 'Timezone (−)'), true)
+            + '</div>';
         if (s.progHasNext == 1) {
             var pre = Number(s.progReEnroll || 0);
             var ppend = Number(s.progPending || 0);
@@ -532,20 +605,16 @@ function reEnrollRenderCards(s) {
                 + activeCard
                 + card(pre, 'Re-Enrolled · ' + rePct.toFixed(1) + '%', '#e7f6ec', '#16a34a', 'reEnrolledNext', '', 'Re-Enrolled · ' + (selName || 'selected session'), '', reEnrollMixLine(s.nxGroup, s.nxOneToOne, s.nxOther, 'reEnrolledNext', '', 'Re-Enrolled'))
                 + card(ppend, 'Pending · ' + pendPct.toFixed(1) + '%', '#fdeaea', '#c0392b', 'pendingNext', '', 'Pending · ' + (selName || 'selected session'), '', negSub)
-                + card(s.plusTz || 0, 'Timezone (+) · East', '#fdeaea', '#c0392b', 'tzPlus', '', 'Timezone (+) · East', '', reEnrollMixLine(s.plusTzGroup, s.plusTzOto, s.plusTzOther, 'tzPlus', '', 'Timezone (+)'))
-                + card(s.minusTz || 0, 'Timezone (−) · West', '#fdeaea', '#c0392b', 'tzMinus', '', 'Timezone (−) · West', '', reEnrollMixLine(s.minusTzGroup, s.minusTzOto, s.minusTzOther, 'tzMinus', '', 'Timezone (−)'))
                 + faCard
-                + '</div></div>';
+                + '</div>' + tzRow + '</div>';
         } else {
             var head2 = 'Re-Enrollment Progression' + (s.progPrevName ? (' · ' + s.progPrevName + ' → ') : ' · ') + (selName || '') + ' · no next session';
             g2 = '<div class="reel-cgrp"><div class="reel-clabel">' + reEnrollEsc(head2) + '</div><div class="reel-cards">'
                 + activeCard
                 + pcard('—', 'Re-Enrolled', '#eef1f4', '#98a2b3')
                 + pcard('—', 'Pending', '#fdeaea', '#c0392b', negSub)
-                + card(s.plusTz || 0, 'Timezone (+) · East', '#fdeaea', '#c0392b', 'tzPlus', '', 'Timezone (+) · East', '', reEnrollMixLine(s.plusTzGroup, s.plusTzOto, s.plusTzOther, 'tzPlus', '', 'Timezone (+)'))
-                + card(s.minusTz || 0, 'Timezone (−) · West', '#fdeaea', '#c0392b', 'tzMinus', '', 'Timezone (−) · West', '', reEnrollMixLine(s.minusTzGroup, s.minusTzOto, s.minusTzOther, 'tzMinus', '', 'Timezone (−)'))
                 + faCard
-                + '</div></div>';
+                + '</div>' + tzRow + '</div>';
         }
     }
     // ---- grade-wise + country-wise breakup (two tables in one row) ----
@@ -572,16 +641,16 @@ function reEnrollBreakupSection(title, nameCol, kind, rows) {
     // the picked mode swaps which numbers each country row shows and drills to that side only.
     var tzMode = isCountry ? (REEL_COUNTRY_TZMODE || '') : '';
     var suffix = tzMode === 'east' ? 'East' : tzMode === 'west' ? 'West' : '';
-    var body = '', tActive = 0, tRe = 0, tPend = 0;
+    var body = '', tActive = 0, tRe = 0, tPend = 0, tPos = 0;
     for (var i = 0; i < rows.length; i++) {
         var r = rows[i];
-        var active, re, pend;
-        if (tzMode === 'east') { active = Number(r.activeE || 0); re = Number(r.reEnrollE || 0); pend = Number(r.pendingE || 0); }
-        else if (tzMode === 'west') { active = Number(r.activeW || 0); re = Number(r.reEnrollW || 0); pend = Number(r.pendingW || 0); }
-        else { active = Number(r.active || 0); re = Number(r.reEnroll || 0); pend = Number(r.pending || 0); }
+        var active, re, pend, pos;
+        if (tzMode === 'east') { active = Number(r.activeE || 0); re = Number(r.reEnrollE || 0); pend = Number(r.pendingE || 0); pos = Number(r.positiveE || 0); }
+        else if (tzMode === 'west') { active = Number(r.activeW || 0); re = Number(r.reEnrollW || 0); pend = Number(r.pendingW || 0); pos = Number(r.positiveW || 0); }
+        else { active = Number(r.active || 0); re = Number(r.reEnroll || 0); pend = Number(r.pending || 0); pos = Number(r.positive || 0); }
         // in a timezone view, hide countries that have nobody on that side
         if (tzMode && active === 0) { continue; }
-        tActive += active; tRe += re; tPend += pend;
+        tActive += active; tRe += re; tPend += pend; tPos += pos;
         var pct = active > 0 ? (re / active * 100) : 0;
         var tier = pct >= 50 ? 'reel-b5' : pct >= 40 ? 'reel-b4' : pct >= 30 ? 'reel-b3' : pct >= 20 ? 'reel-b2' : pct > 0 ? 'reel-b1' : '';
         var id = reEnrollEsc(r.id || '');
@@ -595,9 +664,10 @@ function reEnrollBreakupSection(title, nameCol, kind, rows) {
             + bcell(re.toLocaleString(), 'reEnrolledNext' + suffix)
             + '<td class="reel-bpct">' + pct.toFixed(1) + '%</td>'
             + bcell(pend.toLocaleString(), 'pendingNext' + suffix)
+            + bcell(pos.toLocaleString(), 'positiveNext' + suffix, 'reel-bpos')
             + '</tr>';
     }
-    if (!body) { body = '<tr><td colspan="5" class="reel-bempty">No data</td></tr>'; }
+    if (!body) { body = '<tr><td colspan="6" class="reel-bempty">No data</td></tr>'; }
     var tPct = tActive > 0 ? (tRe / tActive * 100) : 0;
     // grand totals sit in their own grey row above the blue heading row
     var totalRow = '<tr class="reel-btotr">'
@@ -606,6 +676,7 @@ function reEnrollBreakupSection(title, nameCol, kind, rows) {
         + '<th>' + tRe.toLocaleString() + '</th>'
         + '<th>' + tPct.toFixed(1) + '%</th>'
         + '<th>' + tPend.toLocaleString() + '</th>'
+        + '<th>' + tPos.toLocaleString() + '</th>'
         + '</tr>';
     var toggle = isCountry ? reEnrollCountryTzToggle(tzMode) : '';
     return '<div class="reel-breakcol"' + (isCountry ? ' id="reelCountryCol"' : '') + '>'
@@ -614,6 +685,7 @@ function reEnrollBreakupSection(title, nameCol, kind, rows) {
         + totalRow
         + '<tr class="reel-blblr">'
         + '<th>' + reEnrollEsc(nameCol) + '</th><th>Active</th><th>Re-enrolled</th><th>%</th><th>Pending</th>'
+        + '<th title="Pending minus those marked Negative for Re-enrolment">Positive</th>'
         + '</tr></thead><tbody>' + body + '</tbody></table></div>'
         + '</div>';
 }
@@ -655,7 +727,7 @@ function reEnrollRowsHtml(rows, srBase) {
             + reEnrollSub('Grade', r.grade) + reEnrollSub('Email', r.email) + reEnrollSub('Contact', r.contact);
         var parentCell = '<div style="font-weight:600;">' + reEnrollEsc(r.parentName || '-') + '</div>'
             + reEnrollSub('Email', r.parentEmail) + reEnrollSub('Contact', r.parentContact) + reEnrollSub('Country', r.country, true);
-        var regCell = reEnrollSub('Reg', r.regType, true) + reEnrollSub('Enrolment', r.enrolType);
+        var regCell = reEnrollSub('Reg', reEnrollRegLabel(r.regType), true) + reEnrollSub('Enrolment', r.enrolType);
         var datesCell = reEnrollSub('Pay Date', r.payDate, true) + reEnrollSub('Acad Start', r.semStart || r.acadStart)
             + reEnrollSub('Acad End', r.acadEnd) + reEnrollSub('Transcript', r.transcriptIssue);
         var statusCell = reEnrollSub('Progress', prog, true) + reEnrollSub('Profile', r.profileStatus) + reEnrollSub('Last Logout', r.lastLogout);
@@ -664,7 +736,7 @@ function reEnrollRowsHtml(rows, srBase) {
             + '<td>' + idCell + '</td>'
             + '<td>' + nameCell + '</td>'
             + '<td>' + parentCell + '</td>'
-            + '<td>' + regCell + '</td>'
+            + '<td class="'+r.regType+'_BG">' + regCell + '</td>'
             + '<td>' + datesCell + '</td>'
             + '<td>' + statusCell + '</td>'
             + '<td>' + adv + '</td>'
@@ -811,6 +883,7 @@ function reEnrollExportVal(r, col, idx) {
     if (col.h === 'Avg Progress') {
         return (r.avgProgress === '' || r.avgProgress === null || r.avgProgress === undefined) ? '' : (r.avgProgress + '%');
     }
+    if (col.h === 'Reg Type') { return reEnrollRegLabel(r.regType); }
     if (col.h === 'Payment') { return reEnrollAdvLabel(r.advPayment); }
     if (col.h === 'Last Status Remark') { return reEnrollPlainText(r.lastStatusRemark); }
     var v = r[col.k];

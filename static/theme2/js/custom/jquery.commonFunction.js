@@ -1,3 +1,25 @@
+var REEL_PLATFORM_COLORS = {
+    oneToOne: '--mu-platform-one-to-one-text',
+    group: '--mu-platform-group-text',
+    selfStudy: '--mu-platform-self-study-text',
+    selfStudyPlus: '--mu-platform-self-study-plus-text',
+    flexy: '--mu-platform-flexy-text',
+    dualDiploma: '--mu-platform-dual-diploma-text'
+};
+
+function getLearningTxt(LP){
+  return REEL_PLATFORM_COLORS[LP+"_TXT"];
+}
+function getLearningBg(LP){
+  return REEL_PLATFORM_COLORS[LP+"_BG"];
+}
+function getLearningBorder(LP){
+  return REEL_PLATFORM_COLORS[LP+"_BORDER"];
+}
+function getLearningIconColor(LP){
+  return REEL_PLATFORM_COLORS[LP+"_ICON"];
+}
+
 (function () {
   if (window.__SMS_SPACE_GUARD_INIT__) {
     return;
@@ -6732,7 +6754,10 @@ $(document).on("submit", "form", function (event) {
 });
 
 $(document).on("click", function (event) {
-  $('body').find('[data-toggle="tooltip"]').tooltip("hide");
+  if(!window.location.href.includes('permission-for-sms-lms')){
+    $('body').find('[data-toggle="tooltip"]').tooltip("hide");
+  }
+
 });
 
 $(document).on("click", "#changepassword", function (event) {

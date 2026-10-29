@@ -247,9 +247,76 @@ function getStudentOrientationContentCard(){
 	return html;
 }
 
+// "Students by Learning Platform" cards (always visible). Counts come from the loaded list's
+// "learningPlan" labels; clicking a card shows only that program's rows (client-side).
+var SO_PLATFORM_DEFS = [
+	{ key: 'one-to-one', label: 'One to One Learning' },
+	{ key: 'group', label: 'Group Learning' },
+	{ key: 'self-study', label: 'Self Study Learning' },
+	{ key: 'self-study-plus', label: 'Self Study Plus' },
+	{ key: 'flexy', label: 'Flexy Learning' },
+	{ key: 'dual-diploma', label: 'Dual Diploma' }
+];
+
+// "One-to-One Learning" / "Self Study Plus" / ... -> card key; unknown labels get their own card.
+function soPlatformKey(learningPlan) {
+	var p = String(learningPlan || '').toLowerCase();
+	if (p.indexOf('flex') !== -1) { return 'flexy'; }
+	if (p.indexOf('one') !== -1) { return 'one-to-one'; }
+	if (p.indexOf('group') !== -1) { return 'group'; }
+	if (p.indexOf('plus') !== -1) { return 'self-study-plus'; }
+	if (p.indexOf('self study') !== -1) { return 'self-study'; }
+	if (p.indexOf('dual') !== -1) { return 'dual-diploma'; }
+	return 'other:' + (learningPlan || 'N/A');
+}
+
+function soPlatformCardHtml(key, label, count) {
+	var cls = key.indexOf('other:') === 0 ? 'default' : key;
+	return '<div class="mu-platform-card mu-platform-card-' + cls + '" data-plan-key="' + key.replace(/"/g, '&quot;') + '" onclick="soSelectPlatformCard(this)">'
+		+ '<div class="mu-platform-card-icon"><i class="fa fa-user"></i></div>'
+		+ '<div>'
+			+ '<div class="mu-platform-card-count">' + count + '</div>'
+			+ '<div class="mu-platform-card-label">' + label + '</div>'
+		+ '</div>'
+	+ '</div>';
+}
+
+function soRenderPlatformCards(list) {
+	var counts = {};
+	var extraLabels = {};
+	(list || []).forEach(function (row) {
+		var key = soPlatformKey(row.learningPlan);
+		counts[key] = (counts[key] || 0) + 1;
+		if (key.indexOf('other:') === 0) { extraLabels[key] = row.learningPlan || 'N/A'; }
+	});
+	var html = '';
+	SO_PLATFORM_DEFS.forEach(function (d) { html += soPlatformCardHtml(d.key, d.label, counts[d.key] || 0); });
+	Object.keys(extraLabels).forEach(function (k) { html += soPlatformCardHtml(k, extraLabels[k], counts[k]); });
+	$('#soPlatformCards').html(html);
+	$('#soPlatformTotalCount').text((list || []).length);
+}
+
+function soSelectPlatformCard(cardEl) {
+	var wasActive = cardEl.classList.contains('active');
+	$('#soPlatformCards .mu-platform-card').removeClass('active');
+	if (!wasActive) {
+		cardEl.classList.add('active');
+	}
+	var key = wasActive ? '' : cardEl.getAttribute('data-plan-key');
+	var all = (SO_ORIENT_DATA && SO_ORIENT_DATA.studentOrientationList) || [];
+	renderOrientTable(key ? all.filter(function (row) { return soPlatformKey(row.learningPlan) === key; }) : all);
+}
+
 function getStudentOrientationDataList(){
 	var html='';
 	html+=`
+		<div class="mu-platform-section">
+			<div class="mu-platform-section-head">
+				<h6 class="mu-platform-title">Students by Learning Platform</h6>
+				<div class="mu-platform-total">Total<span class="mu-platform-total-count" id="soPlatformTotalCount">0</span></div>
+			</div>
+			<div class="mu-platform-cards" id="soPlatformCards">${SO_PLATFORM_DEFS.map(function (d) { return soPlatformCardHtml(d.key, d.label, 0); }).join('')}</div>
+		</div>
 		<div class="row">
 			<div class="col-lg-12 col-md-12">
 				<table class="table table-bordered table-striped border-radius-table font-12 responsive nowrap annoucement-table-details" id="orientTbl" style="font-size:11px">

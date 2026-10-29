@@ -2201,3 +2201,81 @@ function redirectLmsFromStudentCourse(e, isPayLmsPaymentPending, lmsProviderUrl)
 	}
 	return false;
 }
+
+function updateAzureCredentialsViewed() {
+	var payload = { userId: USER_ID };
+	var ajaxReqDetails = {
+		method: "POST",
+		url: APP_BASE_URL + SCHOOL_UUID + "/dashboard/update-azure-credentials-viewed",
+		body: payload,
+		global: true,
+		showMessage: false,
+		onFaildResolved: true,
+		onSuccessResolved: true
+	};
+	return callCommonAjax(ajaxReqDetails);
+}
+
+async function handleProceedToOutlook() {
+	var responseData = await updateAzureCredentialsViewed();
+	if (responseData && responseData.status == 1) {
+		setTimeout(function () {
+			window.open("https://outlook.office.com", "_blank");
+		}, 1200);
+		var $wrap = $("#azureDashboardLinkWrap");
+		if ($wrap.length) {
+			$wrap.show();
+			var $link = $("#dashboardUrl");
+			if ($link.length && typeof getStudentDashboardUrl === "function") {
+				$link.attr("href", getStudentDashboardUrl());
+			}
+		}
+	} else {
+		showMessageTheme2(0, (responseData && responseData.message) ? responseData.message : "Unable to proceed");
+	}
+	return false;
+}
+
+async function handleActivateSchoolEmail() {
+	var btn = document.getElementById("activateSchoolEmailBtn");
+	if (btn) btn.disabled = true;
+
+	if (window.OUTLOOK_NEEDS_AZURE_CREATION) {
+		var payload = {userId: USER_ID};
+		var ajaxReqDetails = {
+			method: "POST",
+			url: APP_BASE_URL + SCHOOL_UUID + "/dashboard/create-azure-user",
+			body: payload,
+			global: true,
+			showMessage: false,
+			onFaildResolved: true,
+			onSuccessResolved: true
+		};
+		var responseData = await callCommonAjax(ajaxReqDetails);
+		if (!responseData || responseData.status != 1) {
+			if (btn) btn.disabled = false;
+			showMessageTheme2(0, (responseData && responseData.message) ? responseData.message : "Unable to create school email account. Please try again.");
+			return;
+		}
+		window.OUTLOOK_NEEDS_AZURE_CREATION = false;
+		var d = responseData.details || {};
+		if (d.email) {
+			$("#outlookOfficialEmail").text(d.email);
+			$("#outlookOfficialEmailCopy").val(d.email);
+		}
+		if (d.password) {
+			$("#outlookTemporaryPasswordCopy").val(d.password);
+			var $passText = $("#outlookTemporaryPassword");
+			if ($passText.data("visible") === true) {
+				$passText.text(d.password);
+			}
+		}
+		// Account just created — open Outlook directly, no need to mark credentials viewed
+		setTimeout(function () { window.open("https://outlook.office.com", "_blank"); }, 1200);
+		if (btn) btn.disabled = false;
+		return;
+	}
+
+	await handleProceedToOutlook();
+	if (btn) btn.disabled = false;
+}

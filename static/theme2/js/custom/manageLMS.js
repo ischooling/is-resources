@@ -1,6 +1,32 @@
 function advanceLMSUserSearchReset(formId){
 	$('#' + formId)[0].reset();
 	$("#"+formId+" #standardId").val(" ").trigger('change');
+	$('#lmsPlatformCards .mu-platform-card').removeClass('active');
+}
+
+// Per-learning-program counts for the current filters (learning-program filter and page size
+// ignored server-side); a program with no matching students is absent from the response -> 0.
+function lmsLoadPlatformCounts(formId, moduleId){
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : CONTEXT_PATH+UNIQUEUUID+"/dashboard/student-lms-platform-counts",
+		data : JSON.stringify(bodyCreate(formId, moduleId, SCHOOL_ID)),
+		dataType : 'json',
+		global : false,
+		success : function(resp) {
+			if (!resp || resp.status != "1") {
+				return;
+			}
+			var counts = resp.counts || {};
+			$('#lmsPlatformCards .mu-platform-card').each(function () {
+				var type = this.getAttribute('data-enroll-type');
+				$('#lmsPlatformCount-' + type).text(counts[type] || 0);
+			});
+			$('#lmsPlatformTotalCount').text(resp.total != null ? resp.total : 0);
+			$('#lmsPlatformSection').show();
+		}
+	});
 }
 
 function advanceLMSUSerSearch(formId,moduleId, userId, role){
@@ -40,6 +66,7 @@ function advanceLMSUSerSearch(formId,moduleId, userId, role){
 
 function advanceLMSUSerSearchPost(formId,moduleId, userId, role){
 	elementId='manageLMSUserList';
+	lmsLoadPlatformCounts(formId, moduleId);
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,

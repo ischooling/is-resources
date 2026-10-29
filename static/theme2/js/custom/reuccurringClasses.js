@@ -17,7 +17,30 @@ function getActiveSessionReset(formId) {
     $("#" + formId + " #pageSize").val('250');
 }
 
+// Row count per learning program for the same filters as the list (enroll type ignored), shown on the cards.
+// A program with no matching rows is absent from the response, so every card is reset to 0 first.
+function rcLoadPlatformCounts(formId) {
+    $.ajax({
+        type: "POST",
+        contentType: APPLICATION_JSON_VALUE,
+        url: getURLForHTML('dashboard', 'recurring-class-platform-counts'),
+        data: JSON.stringify(getRecurringBody(formId)),
+        dataType: 'json',
+        global: false,
+        async: true
+    }).done(function (resp) {
+        if (!resp || resp.status != "1") { return; }
+        var counts = resp.counts || {};
+        $('#rcPlatformCards .mu-platform-card').each(function () {
+            var type = this.getAttribute('data-enroll-type');
+            $('#rcPlatformCount-' + type).text(counts[type] || 0);
+        });
+        $('#rcPlatformTotalCount').text(resp.total != null ? resp.total : 0);
+    });
+}
+
 function getActiveSessionReuccurring(formId) {
+    rcLoadPlatformCounts(formId);
     customLoader(true);
   $.ajax({
         type: "POST",

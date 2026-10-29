@@ -6,6 +6,114 @@
  * 25-row chunk requests appended progressively).
  */
 
+var __muStudentMeta = null;
+
+// "Students by Learning Platform" summary cards — one per enroll type, same visibility rules
+// as muStudentEnrollTypeOptions(schoolId). Clicking a card sets #filterEnrollType and re-runs
+// the search filtered to that type (muSelectPlatformCard below).
+function muPlatformCardDefs(schoolId) {
+	var sid = String(schoolId);
+	if (sid === '3' || sid === '4') {
+		return [{ type: 'ONE_TO_ONE', label: 'One to One Learning', cls: 'one-to-one' }];
+	}
+	if (sid === '5') {
+		return [
+			{ type: 'BATCH', label: 'Group Learning', cls: 'group' },
+			{ type: 'ONE_TO_ONE', label: 'One to One Learning', cls: 'one-to-one' }
+		];
+	}
+	return [
+		{ type: 'ONE_TO_ONE', label: 'One to One Learning', cls: 'one-to-one' },
+		{ type: 'BATCH', label: 'Group Learning', cls: 'group' },
+		{ type: 'SCHOLARSHIP', label: 'Self Study Learning', cls: 'self-study' },
+		{ type: 'SSP', label: 'Self Study Plus', cls: 'self-study-plus' },
+		{ type: 'ONE_TO_ONE_FLEX', label: 'Flexy Learning', cls: 'flexy' },
+		{ type: 'DUAL_DIPLOMA', label: 'Dual Diploma', cls: 'dual-diploma' }
+	];
+}
+
+function muPlatformCardsHtml(schoolId) {
+	var html = '';
+	muPlatformCardDefs(schoolId).forEach(function (d) {
+		html += '' +
+			'<div class="mu-platform-card mu-platform-card-' + d.cls + '" data-enroll-type="' + d.type + '" onclick="muSelectPlatformCard(this)">' +
+				'<div class="mu-platform-card-icon"><i class="fa fa-user"></i></div>' +
+				'<div>' +
+					'<div class="mu-platform-card-count" id="muPlatformCount-' + d.type + '">0</div>' +
+					'<div class="mu-platform-card-label">' + d.label + '</div>' +
+				'</div>' +
+			'</div>';
+	});
+	return html;
+}
+
+function muPlatformSectionHtml(schoolId) {
+	return '' +
+	'<div class="mu-platform-section" id="muPlatformSection" style="display:none;">' +
+		'<div class="mu-platform-section-head">' +
+			'<h6 class="mu-platform-title">Students by Learning Platform</h6>' +
+			'<div class="mu-platform-total">Total Students: <span class="mu-platform-total-count" id="muPlatformTotalCount">0</span></div>' +
+		'</div>' +
+		'<div class="mu-platform-cards" id="muPlatformCards">' + muPlatformCardsHtml(schoolId) + '</div>' +
+	'</div>';
+}
+
+// Toggles the clicked card's selection, syncs #filterEnrollType (incl. its select2 display),
+// and re-runs the search so only that enroll type's students show — clicking the same card
+// again clears the filter back to "all types".
+function muSelectPlatformCard(cardEl) {
+	var enrollType = cardEl.getAttribute('data-enroll-type');
+	var wasActive = cardEl.classList.contains('active');
+	$('#muPlatformCards .mu-platform-card').removeClass('active');
+	var $select = $('#studentFilter #filterEnrollType');
+	if (wasActive) {
+		$select.val('').trigger('change');
+	} else {
+		cardEl.classList.add('active');
+		$select.val(enrollType).trigger('change');
+	}
+	if (typeof refreshCustomFieldState === "function") {
+		refreshCustomFieldState($("#studentFilter"));
+	}
+	advanceStudentSearchJson('studentFilter', __muStudentMeta ? __muStudentMeta.moduleId : undefined);
+}
+
+// Every card is reset to 0 first: a program with no matching students is absent from the response.
+function muRenderPlatformCounts(resp) {
+	if (!resp || resp.status != "1") {
+		return;
+	}
+	var counts = resp.counts || {};
+	$('#muPlatformCards .mu-platform-card').each(function () {
+		var type = this.getAttribute('data-enroll-type');
+		$('#muPlatformCount-' + type).text(counts[type] || 0);
+	});
+	$('#muPlatformTotalCount').text(resp.total != null ? resp.total : 0);
+	$('#muPlatformSection').show();
+}
+
+// Counts per learning program for the search request (same filters as the list, enroll type ignored).
+function muLoadPlatformCounts(searchRequest) {
+	$.ajax({
+		type: "POST",
+		contentType: APPLICATION_JSON_VALUE,
+		url: getURLForHTML("dashboard", "advance-student-search-platform-counts"),
+		data: JSON.stringify(searchRequest),
+		dataType: "json",
+		global: false,
+		async: true,
+	}).done(muRenderPlatformCounts).fail(function () {});
+}
+
+// Clears the card selection alongside the existing filter-form reset.
+function muResetStudentFilterAndCards(formId) {
+	advanceStudentSearchReset(formId);
+	$('#muPlatformCards .mu-platform-card').removeClass('active');
+	if (typeof refreshCustomFieldState === "function") {
+		refreshCustomFieldState($("#" + formId));
+	}
+}
+
 function muStudentSessionOptions(sessions) {
 	var html = '<option value="0">ALL</option>';
 	(sessions || []).forEach(function (s) {
@@ -279,7 +387,7 @@ function getManageUserStudentTabContent(meta) {
 								'<button class="btn btn-primary" onclick="profileSetting();"><i class="fa fa-cog"></i>&nbsp;Collect Student Info</button>' +
 							'</div>' +
 							'<div class="col-md-6 col-sm-12 col-12 mt-2 text-right">' +
-								'<button class="btn btn-danger  mr-2" onclick="muStudentFilterReset(\'studentFilter\')"><i class="fa fa-undo"></i>&nbsp;Reset</button>' +
+								'<button class="btn btn-danger  mr-2" onclick="muResetStudentFilterAndCards(\'studentFilter\')"><i class="fa fa-undo"></i>&nbsp;Reset</button>' +
 								'<button class="btn btn-success " onclick="advanceStudentSearchJson(\'studentFilter\',\'' + meta.moduleId + '\');"><i class="fa fa-search"></i>&nbsp;Search</button>' +
 							'</div>' +
 						'</div>' +
@@ -288,6 +396,7 @@ function getManageUserStudentTabContent(meta) {
 			'</div>' +
 		'</div>' +
 	'</div>' +
+	muPlatformSectionHtml(meta.schoolId) +
 	'<div id="manageStudent" class="pt-3">' +
 		'<table id="manageProfileStudentContent" class="table table-bordered table-striped border-radius-table font-12 responsive nowrap" style="width:100%"></table><br/>' +
 		'<div id="studentSemesterStartDateEntryHTML"></div>' +
@@ -385,12 +494,20 @@ function advStudentSearchDataAjax(requestObj) {
 function advanceStudentSearchJson(formId, moduleId) {
 	checkTextBox(formId);
 	var baseRequest = getCallRequestForadvanceStudentSearch(formId, moduleId, 'theme2');
-	muAddStudentParentFilters(formId, baseRequest.studentDetailDTO);
+	muLoadPlatformCounts(baseRequest);
 	if ((baseRequest.studentDetailDTO.enrollType || '') === 'BATCH') {
 		return advanceStudentSearch(formId, moduleId, 'theme2');
 	}
 	hideMessage("");
 	$('#studentFilterHint').hide();
+	// the Group Learning (BATCH) view swaps the whole #manageStudent html for its own table, which removes
+	// #manageProfileStudentContent — put that table back, else the next card click has nothing to render into
+	if (!$('#manageProfileStudentContent').length) {
+		if ($.fn.dataTable.isDataTable('#manageAdvanceStudentContent')) {
+			$('#manageAdvanceStudentContent').DataTable().destroy();
+		}
+		$('#manageStudent').html('<table id="manageProfileStudentContent" class="table table-bordered table-striped border-radius-table font-12 responsive nowrap" style="width:100%"></table><br/>');
+	}
 	var schoolId = SCHOOL_ID;
 
 	function buildChunkRequest(offset, size) {
@@ -428,8 +545,8 @@ function advanceStudentSearchJson(formId, moduleId) {
 }
 
 function initManageUserStudentTab(meta) {
-	// width: 100% — the filter renders collapsed, so select2 can't measure hidden selects.
-	$('#studentFilter select').not('#filterEnrollStatus, #filterProfileFieldId, #parentPreferredComm').select2({ theme: "bootstrap4", width: "100%" });
+	__muStudentMeta = meta;
+	$('#studentFilter select').not('#filterEnrollStatus, #filterProfileFieldId').select2({ theme: "bootstrap4" });
 	$('#studentFilter #filterEnrollStatus').select2({
 		theme: "bootstrap4",
 		placeholder: "Enroll Status",

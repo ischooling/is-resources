@@ -1,5 +1,50 @@
 
 var LMS_ROLE_MODULE='';
+var LMS_LEARNING_PROGRAM_OPTIONS = '';
+var LMS_SEARCH_ARGS = null;
+
+// "Students by Learning Platform" cards under the filter form. Cards come from the same
+// learning-program options as #learningProgram (per-school mapping); counts follow the filters.
+var LMS_PLATFORM_CLS = {
+	ONE_TO_ONE: 'one-to-one', BATCH: 'group', SCHOLARSHIP: 'self-study',
+	SSP: 'self-study-plus', ONE_TO_ONE_FLEX: 'flexy', DUAL_DIPLOMA: 'dual-diploma'
+};
+
+function lmsPlatformSectionHtml(optionsHtml) {
+	var cards = '';
+	var re = /<option\s+value="([^"]*)"[^>]*>([^<]*)<\/option>/g;
+	var m;
+	while ((m = re.exec(optionsHtml || '')) !== null) {
+		if (!m[1]) { continue; }
+		cards += '<div class="mu-platform-card mu-platform-card-' + (LMS_PLATFORM_CLS[m[1]] || 'default') + '" data-enroll-type="' + m[1] + '" onclick="lmsSelectPlatformCard(this)">'
+			+ '<div class="mu-platform-card-icon"><i class="fa fa-user"></i></div>'
+			+ '<div>'
+				+ '<div class="mu-platform-card-count" id="lmsPlatformCount-' + m[1] + '">0</div>'
+				+ '<div class="mu-platform-card-label">' + m[2] + '</div>'
+			+ '</div>'
+		+ '</div>';
+	}
+	return '<div class="mu-platform-section mt-3" id="lmsPlatformSection" style="display:none;">'
+		+ '<div class="mu-platform-section-head">'
+			+ '<h6 class="mu-platform-title">Students by Learning Platform</h6>'
+			+ '<div class="mu-platform-total">Total<span class="mu-platform-total-count" id="lmsPlatformTotalCount">0</span></div>'
+		+ '</div>'
+		+ '<div class="mu-platform-cards" id="lmsPlatformCards">' + cards + '</div>'
+	+ '</div>';
+}
+
+// Clicking a card filters the list to that learning program; clicking it again clears it.
+function lmsSelectPlatformCard(cardEl) {
+	var wasActive = cardEl.classList.contains('active');
+	$('#lmsPlatformCards .mu-platform-card').removeClass('active');
+	if (!wasActive) {
+		cardEl.classList.add('active');
+	}
+	$('#lmsStudentFilter #learningProgram').val(wasActive ? '' : cardEl.getAttribute('data-enroll-type')).trigger('change');
+	if (LMS_SEARCH_ARGS) {
+		advanceLMSUSerSearchPost('lmsStudentFilter', LMS_SEARCH_ARGS.moduleId, LMS_SEARCH_ARGS.userId, LMS_SEARCH_ARGS.role);
+	}
+}
 function getLMSClassroomHeader(role){
 	var html=''
 	if(role!='TEACHER'){
@@ -61,6 +106,8 @@ function getManageLMSUserTableBody(result, userId, role){
 
 function getManageLMSFilter(roleAndModule, schoolId, userId, role){
 	LMS_ROLE_MODULE=roleAndModule;
+	LMS_SEARCH_ARGS = { moduleId: roleAndModule.moduleId, userId: userId, role: role };
+	LMS_LEARNING_PROGRAM_OPTIONS = getLearningProgramContent(schoolId);
 	if($('#manageLMSFilterSelect2Css').length < 1){
 		$('head').append('<style id="manageLMSFilterSelect2Css">#lmsStudentFilter .custom-field .select2-container .select2-selection--single .select2-selection__rendered{line-height:40px !important;}</style>');
 	}
@@ -102,7 +149,7 @@ function getManageLMSFilter(roleAndModule, schoolId, userId, role){
 					+'<div class="input-group position-relative form-group custom-field">'
 						+'<select name="learningProgram" id="learningProgram" class="form-control">'
 							+'<option value="">Select Learning Program</option>'
-							+getLearningProgramContent(schoolId)
+							+LMS_LEARNING_PROGRAM_OPTIONS
 						+'</select>'
 						+'<label for="learningProgram">Select Learning Program</label>'
 					+'</div>'
@@ -247,6 +294,7 @@ function getManageLmsUserContent(title, roleAndModule, schoolId, userId, role){
 			+'<div class="full">'
 				+getManageLMSFilter(roleAndModule,schoolId,userId,role)
 			+'</div>'
+			+lmsPlatformSectionHtml(LMS_LEARNING_PROGRAM_OPTIONS)
 			+'<div class="tab-content mt-4">'
 				+'<div id="manageLMSUserContentDiv" style="width:100%;display:inline-block"></div>'
 				+'<div id="viewStudentLmsContent"></div>'

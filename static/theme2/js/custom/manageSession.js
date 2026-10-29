@@ -2,6 +2,10 @@ function advanceManageSessionSearchReset(formId){
 	$('#' + formId)[0].reset();
 	$("#"+formId+" #standardId").val(" ").trigger('change');
 	$("#"+formId+" #activeSession").val("ALL").trigger('change');
+	$('#msPlatformCards .mu-platform-card').removeClass('active');
+	if (typeof msApplyPlatformFilter === 'function') {
+		msApplyPlatformFilter('');
+	}
 }
 
 function advanceManageSessionSearch(formId,moduleId, userId, userRole){
@@ -21,6 +25,9 @@ function manageSessionData(elementId, argument, userId, role, formId){
 			payloadObj["standardId"] = grades;
 		}
 	}
+	if (typeof msLoadPlatformCounts === 'function') {
+		msLoadPlatformCounts(payloadObj);
+	}
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
@@ -29,6 +36,9 @@ function manageSessionData(elementId, argument, userId, role, formId){
 		dataType : 'json',
 		success : function(data) {
 			$('#'+elementId+' > tbody').html('');
+			if (typeof msRenderPlatformCounts === 'function' && data['status'] != '3') {
+				msRenderPlatformCounts();
+			}
 			if (data['status'] == '0' || data['status'] == '2' || data['status'] == '3') {
 				if(data['status'] == '3'){
 					redirectLoginPage();

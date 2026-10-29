@@ -3,7 +3,7 @@
 // Endpoint: {schoolUuid}/dashboard/student-enrollment-dashboard  (POST, JSON auto-wrapped as Payload).
 
 var SED_COLORS = {
-    brand: '#3d5af1', teal: '#0f766e', violet: '#7c3aed',
+    brand: '#d10505', teal: '#0f766e', violet: '#7c3aed',
     good: '#16a34a', warn: '#c2790a', crit: '#dc2626', faint: '#98a2b3'
 };
 var SED_CHARTS = {};
@@ -77,10 +77,11 @@ function renderStudentEnrollmentDashboardData(data) {
     sedSetVal('sedLearningActive', onb.learningActive);
     sedSetVal('sedTzPlus', s.plusTz);
     sedSetVal('sedTzMinus', s.minusTz);
-    sedRenderTzMix('sedTzPlusMix', 'tzPlus', 'Timezone (+) · East', s.plusTzGroup, s.plusTzOto, s.plusTzOther);
-    sedRenderTzMix('sedTzMinusMix', 'tzMinus', 'Timezone (−) · West', s.minusTzGroup, s.minusTzOto, s.minusTzOther);
+    sedRenderTzMix('sedTzPlusMix', 'tzPlus', 'Timezone (+) · East', s);
+    sedRenderTzMix('sedTzMinusMix', 'tzMinus', 'Timezone (−) · West', s);
     // show advance next-grade count inside the Re-Enrollments card (clickable)
-    $('[data-sed-kpi="sedReEnroll"] .sed-foot').html('next grade · <b class="sed-adv-link" style="color:#7c3aed;cursor:pointer;text-decoration:underline;">' + Number(s.advance || 0).toLocaleString() + ' advance</b>');
+    $('#sedReEnrollFoot').html('next grade · <b class="sed-adv-link" style="color:#7c3aed;cursor:pointer;text-decoration:underline;">' + Number(s.advance || 0).toLocaleString() + ' advance</b>');
+   
 
     sedRenderNewReChart(s);
     sedRenderRegMixChart(data.registrationMix || []);
@@ -105,15 +106,52 @@ function sedRenderBatchKpis(b) {
     $('#sedBatAvg').text(total > 0 ? (students / total).toFixed(1) : '0');
 }
 
-// Group / 1:1 / Other split inside a tile — every value opens its own student list
-function sedRenderTzMix(elId, metric, titleBase, g, o, x) {
-    var part = function (lab, val, suffix) {
-        return '<a href="javascript:void(0)" class="sed-mixlink" data-metric="' + metric + suffix + '"'
-            + ' data-title="' + titleBase + ' · ' + lab + '" style="color:inherit;text-decoration:none;margin-right:14px;">'
-            + '<span style="opacity:.75;letter-spacing:.4px;">' + lab.toUpperCase() + '</span> '
-            + '<b style="font-size:13px;">' + Number(val || 0).toLocaleString() + '</b></a>';
+// Learning-program colors — yahin declare, taki ye screen reEnrollmentList.js par depend na kare
+
+var SED_PLATFORMS = [
+    { lab: 'One to One Learning', rt: 'ONE_TO_ONE',      k: 'Oto',         c: 'oneToOne' },
+    { lab: 'Group Learning',      rt: 'BATCH',           k: 'Batch',       c: 'group' },
+    { lab: 'Self Study Learning', rt: 'SCHOLARSHIP',     k: 'Scholarship', c: 'selfStudy' },
+    { lab: 'Self Study Plus',     rt: 'SSP',             k: 'Ssp',         c: 'selfStudyPlus' },
+    { lab: 'Flexy Learning',      rt: 'ONE_TO_ONE_FLEX', k: 'Flex',        c: 'flexy' },
+    { lab: 'Dual Diploma',        rt: 'DUAL_DIPLOMA',    k: 'Dual',        c: 'dualDiploma' }
+];
+
+// Learning-program split inside a timezone tile — har value apni student list kholti hai
+function sedRenderTzMix(elId, metric, titleBase, s) {
+    var pre = (metric === 'tzPlus') ? 'ptz' : 'mtz';
+    var h = '';
+    for (var i = 0; i < SED_PLATFORMS.length; i++) {
+        var p = SED_PLATFORMS[i];
+        var val = Number((s && s[pre + p.k]) || 0);
+        // var color = SED_PLATFORM_COLORS[p.c];
+        var inner = '<span class="'+p.rt+'_TXT" style="font-size:13px;font-weight:600;">' + p.lab + '</span> '
+            + '<b class="'+p.rt+'_TXT">' + val.toLocaleString() + '</b>';
+        // 0 wali line click karne ka matlab nahi
+        if (!val) {
+            h += '<span class="sed-mixdim px-3 py-1 rounded-20 bg-white">' + inner + '</span>';
+            continue;
+        }
+        h += '<a href="javascript:void(0)" class="sed-mixlink px-3 py-1 rounded-20 bg-white" data-metric="' + metric + p.rt + '"'
+            + ' data-title="' + titleBase + ' \u00b7 ' + p.lab + '" style="text-decoration:none;">' + inner + '</a>';
+    }
+    $('#' + elId).html(h);
+}
+
+function sedRenderPlatformMix(elId) {
+    var part = function (lab, color) {
+        return '<span style="margin-right:14px;display:inline-block;">'
+            + '<span style="opacity:.75;letter-spacing:.4px;color:' + color + ';">' + lab.toUpperCase() + '</span> '
+            + '<b style="font-size:13px;color:' + color + ';">0</b></span>';
     };
-    $('#' + elId).html(part('Group', g, 'Group') + part('1:1', o, 'Oto') + part('Other', x, 'Other'));
+    $('#' + elId).html(
+        part('One to One Learning', REEL_PLATFORM_COLORS.oneToOne)
+        + part('Group Learning', REEL_PLATFORM_COLORS.group)
+        + part('Self Study Learning', REEL_PLATFORM_COLORS.selfStudy)
+        + part('Self Study Plus', REEL_PLATFORM_COLORS.selfStudyPlus)
+        + part('Flexy Learning', REEL_PLATFORM_COLORS.flexy)
+        + part('Dual Diploma', REEL_PLATFORM_COLORS.dualDiploma)
+    );
 }
 
 function sedSetVal(id, v) {
@@ -172,15 +210,25 @@ function sedRegLabel(t) {
     }
 }
 
+// REEL_PLATFORM_COLORS holds CSS custom-property names; ApexCharts needs the resolved color.
+function sedPlatformColor(type) {
+    var key = {
+        ONE_TO_ONE: 'oneToOne', BATCH: 'group', SCHOLARSHIP: 'selfStudy',
+        SSP: 'selfStudyPlus', ONE_TO_ONE_FLEX: 'flexy', DUAL_DIPLOMA: 'dualDiploma'
+    }[(type || '').toUpperCase()];
+    var cssVar = key ? REEL_PLATFORM_COLORS[key] : null;
+    var color = cssVar ? getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim() : '';
+    return color || SED_COLORS.faint;
+}
+
 function sedRenderRegMixChart(mix) {
-    var palette = [SED_COLORS.brand, SED_COLORS.teal, SED_COLORS.violet, SED_COLORS.warn, SED_COLORS.good, SED_COLORS.faint, '#e07b1a'];
     var labels = [], series = [], colors = [];
     SED_REGMIX_TYPES = [];
     for (var i = 0; i < mix.length; i++) {
         if (!mix[i].type) { continue; }
         labels.push(sedRegLabel(mix[i].type));
         series.push(Number(mix[i].count || 0));
-        colors.push(palette[i % palette.length]);
+        colors.push(sedPlatformColor(mix[i].type));
         SED_REGMIX_TYPES.push(mix[i].type);
     }
     if (series.length === 0) { labels = ['No data']; series = [0]; colors = [SED_COLORS.faint]; }
@@ -244,7 +292,7 @@ function sedRenderReadiness(o) {
     rows.push({ name: 'Contact', note: 'student & parent phone', segs: [
         { n: o.contactValid, label: 'valid', color: SED_COLORS.good, metric: 'contactValid' },
         { n: o.contactInvalid, label: 'invalid', color: SED_COLORS.crit, metric: 'contactInvalid' } ] });
-    var html = '';
+    var html = '<div class="form-row">';
     for (var r = 0; r < rows.length; r++) {
         var row = rows[r], parts = [], vtxt = [];
         var rowDenom = (row.denom !== undefined) ? row.denom : total; // Batch Mapping = over group students only
@@ -256,12 +304,20 @@ function sedRenderReadiness(o) {
                 + '<b>' + Number(seg.n || 0).toLocaleString() + '</b> ' + seg.label + '</span>');
         }
         var rowName = row.name + (row.note ? ' <span class="sed-rnote">· ' + row.note + (row.denom !== undefined ? ' (' + Number(row.denom || 0).toLocaleString() + ')' : '') + '</span>' : '');
-        html += '<div class="sed-rrow">'
-            + '<div class="sed-rtop"><span class="sed-rn">' + rowName + '</span>'
-            + '<span class="sed-rv">' + vtxt.join(' · ') + '</span></div>'
-            + sedSeg(parts) + '</div>';
+        html += 
+            '<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">'
+                +'<div class="card p-2 mb-2 border">'
+                    + '<div class="sed-rtop mb-2">'
+                        +'<span class="sed-rn">' + rowName + '</span>'
+                        + '<span class="sed-rv float-right">' + vtxt.join(' · ') + '</span>'
+                    +'</div>'
+                    + sedSeg(parts) 
+                +'</div>'
+            +'</div>';
+            
     }
-    html += '<div class="sed-legend">'
+    html +='</div>';
+    html += '<div class="sed-legend justify-content-center">'
         + '<span class="sed-li"><span class="sed-sw" style="background:' + SED_COLORS.good + '"></span>Done / Active</span>'
         + '<span class="sed-li"><span class="sed-sw" style="background:' + SED_COLORS.warn + '"></span>Pending</span>'
         + '<span class="sed-li"><span class="sed-sw" style="background:' + SED_COLORS.crit + '"></span>Missing</span>'
@@ -300,6 +356,8 @@ function bindStudentEnrollmentDashboardEvents() {
     });
     $(document).off('click', '.sed-mixlink').on('click', '.sed-mixlink', function (e) {
         e.stopPropagation();
+        // 0-count pill has no data-metric: do nothing (else the drawer opens with every student)
+        if (!$(this).attr('data-metric')) { return; }
         sedOpenDrawer($(this).attr('data-metric'), $(this).attr('data-title'));
     });
     $(document).off('click', '#sedDrawerClose, #sedDrawerOverlay').on('click', '#sedDrawerClose, #sedDrawerOverlay', function () {
@@ -452,7 +510,7 @@ function sedRenderPlanMix(mix) {
     if (labels.length === 0) { labels = ['No data']; series = [0]; modes = ['']; }
     var palette = [SED_COLORS.brand, SED_COLORS.teal, SED_COLORS.warn, SED_COLORS.violet, SED_COLORS.good, SED_COLORS.faint, '#e07b1a'];
     var opt = {
-        chart: { type: 'bar', height: 150, fontFamily: 'inherit', toolbar: { show: false },
+        chart: { type: 'bar', height: 250, fontFamily: 'inherit', toolbar: { show: false },
             events: { dataPointSelection: function (e, c, cfg) { var md = modes[cfg.dataPointIndex]; sedOpenDrawer('enrolledActive', labels[cfg.dataPointIndex], md ? { payMode: md } : null); } } },
         series: [{ name: 'Students', data: series }],
         colors: palette.slice(0, labels.length),
@@ -477,7 +535,7 @@ function sedRenderProgress(p) {
     var vals = [Number(p.na || 0), Number(p.b0 || 0), Number(p.b1 || 0), Number(p.b2 || 0), Number(p.b3 || 0), Number(p.b4 || 0), Number(p.b6 || 0), Number(p.b5 || 0)];
     var cols = [SED_COLORS.faint, SED_COLORS.crit, SED_COLORS.warn, SED_COLORS.warn, SED_COLORS.teal, SED_COLORS.good, SED_COLORS.violet, SED_COLORS.brand];
     var opt = {
-        chart: { type: 'bar', height: 280, fontFamily: 'inherit', toolbar: { show: false },
+        chart: { type: 'bar', height: 450, fontFamily: 'inherit', toolbar: { show: false },
             events: { dataPointSelection: function (e, c, cfg) { sedOpenDrawer('progress' + cfg.dataPointIndex, 'Progress · ' + cats[cfg.dataPointIndex]); } } },
         series: [{ name: 'Students', data: vals }],
         colors: cols,
@@ -930,7 +988,7 @@ function sedRenderDrawerList(rows, proofHeader, proofDate, proofContact) {
             + '<td>' + rollCell + '</td>'
             + '<td>' + (r.name || '-') + '</td>'
             + '<td>' + (r.grade || '-') + '</td>'
-            + '<td>' + sedRegLabel(r.regType) + '</td>'
+            + '<td class="'+r.regType+'_BG">' + sedRegLabel(r.regType) + '</td>'
             + '<td>' + sedEnrolLabel(r.enrolType) + '</td>'
             + '<td>' + (r.country || '-') + '</td>'
             + '<td data-order="' + sedDateSortKey(r.payDate) + '" style="white-space:nowrap;">' + (r.payDate || '-') + '</td>'

@@ -48,7 +48,121 @@ function getZoomCommandContent(aggrigatorName, aggrigatorStatus, aggregatorId, a
 	return aggrigatorName;
 }
 
+var MS_LEARNING_PROGRAM_OPTIONS = '';
+var MS_PLATFORM_CLS = {
+	ONE_TO_ONE: 'one-to-one', BATCH: 'group', SCHOLARSHIP: 'self-study',
+	SSP: 'self-study-plus', ONE_TO_ONE_FLEX: 'flexy', DUAL_DIPLOMA: 'dual-diploma'
+};
+
+// Row "learningProgram" label -> card class ("One-to-One Learning" -> one-to-one, ...).
+function msPlatformClsFromLabel(label) {
+	if (MS_PLATFORM_CLS[label]) { return MS_PLATFORM_CLS[label]; }
+	var p = String(label || '').toLowerCase();
+	if (p.indexOf('flex') !== -1) { return 'flexy'; }
+	if (p.indexOf('one') !== -1) { return 'one-to-one'; }
+	if (p.indexOf('group') !== -1) { return 'group'; }
+	if (p.indexOf('plus') !== -1) { return 'self-study-plus'; }
+	if (p.indexOf('self study') !== -1 || p.indexOf('scholarship') !== -1) { return 'self-study'; }
+	if (p.indexOf('dual') !== -1) { return 'dual-diploma'; }
+	return '';
+}
+
+// "Students by Learning Platform" cards under the filter form: hidden until Search, counts start at 0.
+function msPlatformSectionHtml(optionsHtml) {
+	var cards = '';
+	var re = /<option\s+value="([^"]*)"[^>]*>([^<]*)<\/option>/g;
+	var m;
+	while ((m = re.exec(optionsHtml || '')) !== null) {
+		if (!m[1]) { continue; }
+		var cls = MS_PLATFORM_CLS[m[1]] || 'default';
+		cards += '<div class="mu-platform-card mu-platform-card-' + cls + '" data-enroll-type="' + m[1] + '" data-cls="' + cls + '" onclick="msSelectPlatformCard(this)">'
+			+ '<div class="mu-platform-card-icon"><i class="fa fa-user"></i></div>'
+			+ '<div>'
+				+ '<div class="mu-platform-card-count">0</div>'
+				+ '<div class="mu-platform-card-label">' + m[2] + '</div>'
+			+ '</div>'
+		+ '</div>';
+	}
+	return '<div class="col-md-12">'
+		+ '<div class="mu-platform-section mt-3" id="msPlatformSection" style="display:none;">'
+			+ '<div class="mu-platform-section-head">'
+				+ '<h6 class="mu-platform-title">Students by Learning Platform</h6>'
+				+ '<div class="mu-platform-total">Total<span class="mu-platform-total-count" id="msPlatformTotalCount">0</span></div>'
+			+ '</div>'
+			+ '<div class="mu-platform-cards" id="msPlatformCards">' + cards + '</div>'
+		+ '</div>'
+	+ '</div>';
+}
+
+// Card filter on the already-loaded table: DataTables row filter on the "Learning Program"
+// column (index 2), so paging and the "Showing x of y" info follow the filter. No server call.
+var MS_ACTIVE_PLATFORM_CLS = '';
+var MS_PLATFORM_FILTER_REGISTERED = false;
+
+function msApplyPlatformFilter(cls) {
+	MS_ACTIVE_PLATFORM_CLS = cls || '';
+	if (!$.fn.dataTable) {
+		return;
+	}
+	if (!MS_PLATFORM_FILTER_REGISTERED) {
+		MS_PLATFORM_FILTER_REGISTERED = true;
+		$.fn.dataTable.ext.search.push(function (settings, data) {
+			if (settings.nTable.id !== 'manageStudentSession' || !MS_ACTIVE_PLATFORM_CLS) {
+				return true;
+			}
+			return msPlatformClsFromLabel(data[2]) === MS_ACTIVE_PLATFORM_CLS;
+		});
+	}
+	if ($.fn.dataTable.isDataTable('#manageStudentSession')) {
+		$('#manageStudentSession').DataTable().draw();
+	}
+}
+
+// Shows the section; a new search clears the card filter. The counts come from msLoadPlatformCounts.
+function msRenderPlatformCounts() {
+	MS_ACTIVE_PLATFORM_CLS = '';
+	$('#msPlatformCards .mu-platform-card').removeClass('active');
+	$('#msPlatformSection').show();
+}
+
+// Counts per learning program for the search filters, from the server — Page Size only limits the table rows,
+// never these counts. A program with no matching rows is absent from the response, so every card is reset to 0 first.
+function msLoadPlatformCounts(payloadObj) {
+	$.ajax({
+		type: "POST",
+		contentType: APPLICATION_JSON_VALUE,
+		url: CONTEXT_PATH + UNIQUEUUID + "/dashboard/student-manage-session-platform-counts",
+		data: JSON.stringify(payloadObj),
+		dataType: 'json',
+		global: false,
+		async: true
+	}).done(function (resp) {
+		if (!resp || resp.status != "1") { return; }
+		var counts = resp.counts || {};
+		var byCls = {};
+		Object.keys(counts).forEach(function (type) {
+			var cls = MS_PLATFORM_CLS[type] || 'default';
+			byCls[cls] = (byCls[cls] || 0) + counts[type];
+		});
+		$('#msPlatformCards .mu-platform-card').each(function () {
+			$(this).find('.mu-platform-card-count').text(byCls[this.getAttribute('data-cls')] || 0);
+		});
+		$('#msPlatformTotalCount').text(resp.total != null ? resp.total : 0);
+	});
+}
+
+// Clicking a card shows only that learning program's rows; clicking it again shows all.
+function msSelectPlatformCard(cardEl) {
+	var wasActive = cardEl.classList.contains('active');
+	$('#msPlatformCards .mu-platform-card').removeClass('active');
+	if (!wasActive) {
+		cardEl.classList.add('active');
+	}
+	msApplyPlatformFilter(wasActive ? '' : cardEl.getAttribute('data-cls'));
+}
+
 function getManageSessionFilter(roleAndModule, schoolId, userId, role) {
+	MS_LEARNING_PROGRAM_OPTIONS = getLearningProgramContent(schoolId);
 	var emailFilterField = (typeof isEmailSearchFilterAllowed === 'function' && isEmailSearchFilterAllowed())
 		? '<div class="col-md-3 col-sm-6 col-12">'
 		+ '<div class="input-group position-relative custom-field mb-2 mt-3 p-0">'
@@ -87,7 +201,7 @@ function getManageSessionFilter(roleAndModule, schoolId, userId, role) {
 		+ '<div class="input-group position-relative custom-field mb-2 mt-3 p-0">'
 		+ '<select name="enrollmentType" id="enrollmentType" class="form-control">'
 		+ '<option value="">Select Learning Program</option>'
-		+ getLearningProgramContent(schoolId)
+		+ MS_LEARNING_PROGRAM_OPTIONS
 		+ '</select>'
 		+ '<label for="enrollmentType">Select Learning Program</label>'
 		+ '</div>'
@@ -217,6 +331,7 @@ function getManageSessionUserContent(title, roleAndModule, schoolId, userId, rol
 					+'<div class="col-lg-12 col-md-12 col-sm-12 col-12">'
 						+getManageSessionFilter(roleAndModule, schoolId, userId, role)
 					+'</div>'
+					+msPlatformSectionHtml(MS_LEARNING_PROGRAM_OPTIONS)
 				+'</div>'
 				+'<br>'
 				+'<div class="col-md-12">'

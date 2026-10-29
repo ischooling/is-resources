@@ -963,6 +963,7 @@ function outlookDashboardTick() {
     }
     var dashboardLoaderVisible = $("#commonloaderIdNewLoader, #commonloaderId, #commonloaderBody").filter(":visible").length > 0;
     if (!isShown && !OUTLOOK_DASHBOARD_SHOWN_THIS_PAGE && !dashboardLoaderVisible && now >= OUTLOOK_DASHBOARD_SNOOZE_UNTIL && getFlag()) {
+        window.OUTLOOK_NEEDS_AZURE_CREATION = !!(OUTLOOK_DASHBOARD_DETAILS && OUTLOOK_DASHBOARD_DETAILS.needsAzureCreation);
         $modal.remove();
         $("body").append(outlookUserCreatedModal(OUTLOOK_DASHBOARD_DETAILS));
         $("#outlookUserCreatedModal")

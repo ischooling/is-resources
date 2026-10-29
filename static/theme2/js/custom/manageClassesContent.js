@@ -299,8 +299,55 @@ function initManageClassesFilterSelect2(){
 		}
 	}, 0);
 }
+var MC_LEARNING_PROGRAM_OPTIONS = '';
+var MC_SEARCH_ARGS = null;
+var MC_PLATFORM_CLS = {
+	ONE_TO_ONE: 'one-to-one', BATCH: 'group', SCHOLARSHIP: 'self-study',
+	SSP: 'self-study-plus', ONE_TO_ONE_FLEX: 'flexy', DUAL_DIPLOMA: 'dual-diploma'
+};
+
+// "Students by Learning Platform" cards under the filter form, hidden until the first Search.
+// Cards come from the same options as #enrollmentType; counts are classes matching the filters.
+function mcPlatformSectionHtml(optionsHtml) {
+	var cards = '';
+	var re = /<option\s+value="([^"]*)"[^>]*>([^<]*)<\/option>/g;
+	var m;
+	while ((m = re.exec(optionsHtml || '')) !== null) {
+		if (!m[1]) { continue; }
+		cards += '<div class="mu-platform-card mu-platform-card-' + (MC_PLATFORM_CLS[m[1]] || 'default') + '" data-enroll-type="' + m[1] + '" onclick="mcSelectPlatformCard(this)">'
+			+ '<div class="mu-platform-card-icon"><i class="fa fa-user"></i></div>'
+			+ '<div>'
+				+ '<div class="mu-platform-card-count" id="mcPlatformCount-' + m[1] + '">0</div>'
+				+ '<div class="mu-platform-card-label">' + m[2] + '</div>'
+			+ '</div>'
+		+ '</div>';
+	}
+	return '<div class="mu-platform-section mt-3" id="mcPlatformSection" style="display:none;">'
+		+ '<div class="mu-platform-section-head">'
+			+ '<h6 class="mu-platform-title">Students by Learning Platform</h6>'
+			+ '<div class="mu-platform-total">Total Classes<span class="mu-platform-total-count" id="mcPlatformTotalCount">0</span></div>'
+		+ '</div>'
+		+ '<div class="mu-platform-cards" id="mcPlatformCards">' + cards + '</div>'
+	+ '</div>';
+}
+
+// Clicking a card filters the list to that learning program; clicking it again clears it.
+function mcSelectPlatformCard(cardEl) {
+	var wasActive = cardEl.classList.contains('active');
+	$('#mcPlatformCards .mu-platform-card').removeClass('active');
+	if (!wasActive) {
+		cardEl.classList.add('active');
+	}
+	$('#classroomSessionFilter #enrollmentType').val(wasActive ? '' : cardEl.getAttribute('data-enroll-type')).trigger('change');
+	if (MC_SEARCH_ARGS) {
+		advanceClassroomSearch('classroomSessionFilter', MC_SEARCH_ARGS.moduleId, MC_SEARCH_ARGS.userId, MC_SEARCH_ARGS.role);
+	}
+}
+
 function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 	addManageClassesFilterCss();
+	MC_SEARCH_ARGS = { moduleId: roleAndModule.moduleId, userId: userId, role: role };
+	MC_LEARNING_PROGRAM_OPTIONS = role != 'TEACHER' ? getLearningProgramContent(schoolId) : '';
 	function classroomFilterField(colClass, fieldHtml, styleAttr, fieldClass){
 		return '<div class="'+colClass+'" '+(styleAttr || '')+'>'
 			+'<div class="input-group position-relative custom-field '+(fieldClass || '')+' mb-2 mt-3 p-0">'
@@ -325,7 +372,7 @@ function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 					+classroomFilterField('col-md-3 col-sm-3 col-xs-12',
 						'<select name="enrollmentType" id="enrollmentType" class="form-control-field">'
 							+'<option value="">Select Learning Program</option>'
-							+getLearningProgramContent(schoolId)
+							+MC_LEARNING_PROGRAM_OPTIONS
 						+'</select>'
 						+'<label for="enrollmentType">Select Learning Program</label>');
 				}
@@ -453,6 +500,7 @@ function getManageSessionContent(title, roleAndModule, schoolId, userId, role) {
 						+'<div class="row">'
 							+'<div class="col-lg-12 col-md-12 col-sm-12 col-12">'
 							+getClassroomSessionFilter(roleAndModule,schoolId,userId,role)
+							+(role != 'TEACHER' ? mcPlatformSectionHtml(MC_LEARNING_PROGRAM_OPTIONS) : '')
 							+'</div>'
 						+'</div>'
 						+'<br>'

@@ -94,27 +94,33 @@ function advanceSearchStudentOrient(formId, moduleId, dataFrom, clickFrom, curre
 				}
 			} else {
 				// showMessageTheme2(1, data['message'],'',true);
-				
-				var isDataTable = $.fn.dataTable.isDataTable('#orientTbl');
-					if(isDataTable){
-						$('#orientTbl').dataTable().fnDestroy();
-					}
-					var rhtml = getOrientList(data);
-					$("#studentOrientList").html(rhtml).promise().done(function(){
-						customLoader(false);
-					});
-					generateTinyUrls();
-					$('#orientTbl').DataTable();
-					var orientTable = $('#orientTbl').DataTable();
-					if (!orientTable.data().any()){
-						$(".moveOrientation-wrapper").addClass("d-none");
-					}else{
-						$(".moveOrientation-wrapper").removeClass("d-none");
-					}
-					$("#orientationSearch").modal("hide");   
+				SO_ORIENT_DATA = data;
+				if (typeof soRenderPlatformCards === 'function') {
+					soRenderPlatformCards(data.studentOrientationList);
+				}
+				renderOrientTable(data.studentOrientationList);
+				customLoader(false);
+				$("#orientationSearch").modal("hide");
 			}
 		}
  	});
+}
+
+// last search response; the learning-platform cards filter its rows client-side
+var SO_ORIENT_DATA = null;
+
+function renderOrientTable(list) {
+	if ($.fn.dataTable.isDataTable('#orientTbl')) {
+		$('#orientTbl').dataTable().fnDestroy();
+	}
+	$("#studentOrientList").html(getOrientList({ studentOrientationList: list || [] }));
+	generateTinyUrls();
+	var orientTable = $('#orientTbl').DataTable();
+	if (!orientTable.data().any()){
+		$(".moveOrientation-wrapper").addClass("d-none");
+	}else{
+		$(".moveOrientation-wrapper").removeClass("d-none");
+	}
 }
 
 function getCallRequestForAdvanceSearchStudentOrient(formId, moduleId, searchType, clickFrom, currentPage, userWiseStatus, newTheme ){
