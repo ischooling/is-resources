@@ -355,13 +355,46 @@ function validateRequestForLogin(formId) {
 	return true;
 }
 
-function getRecaptchaToken(action) {
-	return new Promise(function (resolve) {
-		if (typeof RECAPTCHA_ENABLED === "undefined" || !RECAPTCHA_ENABLED || typeof grecaptcha === "undefined") {
-			resolve("");
-			return;
+var recaptchaScriptPromise = null;
+function loadRecaptchaScript() {
+	if (recaptchaScriptPromise) {
+		return recaptchaScriptPromise;
+	}
+	recaptchaScriptPromise = new Promise(function (resolve, reject) {
+		if (!document.querySelector('script[src*="recaptcha/api.js"]')) {
+			var style = document.createElement("style");
+			style.textContent = ".grecaptcha-badge{visibility:hidden!important;}";
+			document.head.appendChild(style);
+			var script = document.createElement("script");
+			script.src = "https://www.google.com/recaptcha/api.js?render=" + encodeURIComponent(RECAPTCHA_SITE_KEY);
+			script.async = true;
+			document.head.appendChild(script);
 		}
-		try {
+		var waited = 0;
+		(function waitForGrecaptcha() {
+			if (window.grecaptcha && typeof window.grecaptcha.execute === "function") {
+				resolve();
+			} else if ((waited += 100) > 10000) {
+				recaptchaScriptPromise = null;
+				reject();
+			} else {
+				setTimeout(waitForGrecaptcha, 100);
+			}
+		})();
+	});
+	return recaptchaScriptPromise;
+}
+
+// Keyed on DEPLOYMENT_MODE rather than RECAPTCHA_ENABLED: the server re-reads RECAPTCHA_BYPASS on every
+// POST, so a page rendered while the bypass was on must still send a token once it is switched off.
+function getRecaptchaToken(action) {
+	if (typeof RECAPTCHA_SITE_KEY === "undefined" || !RECAPTCHA_SITE_KEY
+			|| typeof DEPLOYMENT_MODE === "undefined" || String(DEPLOYMENT_MODE).toUpperCase() !== "PROD") {
+		return Promise.resolve("");
+	}
+	return loadRecaptchaScript().then(function () {
+		return new Promise(function (resolve) {
+			setTimeout(function () { resolve(""); }, 10000);
 			grecaptcha.ready(function () {
 				grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: action }).then(function (token) {
 					resolve(token || "");
@@ -369,9 +402,9 @@ function getRecaptchaToken(action) {
 					resolve("");
 				});
 			});
-		} catch (e) {
-			resolve("");
-		}
+		});
+	}).catch(function () {
+		return "";
 	});
 }
 
