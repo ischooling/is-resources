@@ -356,15 +356,27 @@ function validateRequestForLogin(formId) {
 }
 
 var recaptchaScriptPromise = null;
+var recaptchaFrame = null;
+
+// Keyed on DEPLOYMENT_MODE rather than RECAPTCHA_ENABLED: the server re-reads RECAPTCHA_BYPASS on every
+// POST, so a page rendered while the bypass was on must still send a token once it is switched off.
+function isRecaptchaWanted() {
+	return typeof RECAPTCHA_SITE_KEY !== "undefined" && !!RECAPTCHA_SITE_KEY
+		&& typeof DEPLOYMENT_MODE !== "undefined" && String(DEPLOYMENT_MODE).toUpperCase() === "PROD";
+}
+
 function loadRecaptchaScript() {
 	if (recaptchaScriptPromise) {
 		return recaptchaScriptPromise;
 	}
 	recaptchaScriptPromise = new Promise(function (resolve, reject) {
-		if (!document.querySelector('script[src*="recaptcha/api.js"]')) {
+		if (!document.getElementById("recaptchaBadgeStyle")) {
 			var style = document.createElement("style");
+			style.id = "recaptchaBadgeStyle";
 			style.textContent = ".grecaptcha-badge{visibility:hidden!important;}";
 			document.head.appendChild(style);
+		}
+		if (!document.querySelector('script[src*="recaptcha/api.js"]')) {
 			var script = document.createElement("script");
 			script.src = "https://www.google.com/recaptcha/api.js?render=" + encodeURIComponent(RECAPTCHA_SITE_KEY);
 			script.async = true;
@@ -373,6 +385,7 @@ function loadRecaptchaScript() {
 		var waited = 0;
 		(function waitForGrecaptcha() {
 			if (window.grecaptcha && typeof window.grecaptcha.execute === "function") {
+				window.grecaptcha.ready(rememberRecaptchaFrame);
 				resolve();
 			} else if ((waited += 100) > 10000) {
 				recaptchaScriptPromise = null;
@@ -385,18 +398,45 @@ function loadRecaptchaScript() {
 	return recaptchaScriptPromise;
 }
 
-// Keyed on DEPLOYMENT_MODE rather than RECAPTCHA_ENABLED: the server re-reads RECAPTCHA_BYPASS on every
-// POST, so a page rendered while the bypass was on must still send a token once it is switched off.
-function getRecaptchaToken(action) {
-	if (typeof RECAPTCHA_SITE_KEY === "undefined" || !RECAPTCHA_SITE_KEY
-			|| typeof DEPLOYMENT_MODE === "undefined" || String(DEPLOYMENT_MODE).toUpperCase() !== "PROD") {
-		return Promise.resolve("");
-	}
+function rememberRecaptchaFrame() {
+	var tries = 0;
+	(function findFrame() {
+		var frame = document.querySelector(".grecaptcha-badge iframe");
+		if (frame) {
+			recaptchaFrame = frame;
+		} else if (++tries < 50) {
+			setTimeout(findFrame, 100);
+		}
+	})();
+}
+
+// Rebuilding <body> (e.g. $('body').html(...)) detaches reCAPTCHA's iframe and execute() then never settles,
+// so the only recovery is to discard the loaded library and load a fresh copy.
+function resetRecaptcha() {
+	document.querySelectorAll('script[src*="recaptcha/api.js"], script[src*="/recaptcha/releases/"]').forEach(function (s) {
+		s.remove();
+	});
+	document.querySelectorAll(".grecaptcha-badge").forEach(function (badge) {
+		var holder = badge.parentElement;
+		(holder && holder !== document.body ? holder : badge).remove();
+	});
+	try { delete window.grecaptcha; } catch (e) {}
+	try { delete window.___grecaptcha_cfg; } catch (e) {}
+	window.grecaptcha = undefined;
+	window.___grecaptcha_cfg = undefined;
+	recaptchaScriptPromise = null;
+	recaptchaFrame = null;
+}
+
+function executeRecaptcha(action, timeoutMs) {
 	return loadRecaptchaScript().then(function () {
 		return new Promise(function (resolve) {
-			setTimeout(function () { resolve(""); }, 10000);
+			setTimeout(function () { resolve(""); }, timeoutMs);
 			grecaptcha.ready(function () {
 				grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: action }).then(function (token) {
+					if (token) {
+						recaptchaFrame = document.querySelector(".grecaptcha-badge iframe");
+					}
 					resolve(token || "");
 				}).catch(function () {
 					resolve("");
@@ -406,6 +446,40 @@ function getRecaptchaToken(action) {
 	}).catch(function () {
 		return "";
 	});
+}
+
+function getRecaptchaToken(action) {
+	if (!isRecaptchaWanted()) {
+		return Promise.resolve("");
+	}
+	if (recaptchaFrame && !recaptchaFrame.isConnected) {
+		resetRecaptcha();
+	}
+	return executeRecaptcha(action, 6000).then(function (token) {
+		if (token || !window.grecaptcha) {
+			return token;
+		}
+		resetRecaptcha();
+		return executeRecaptcha(action, 15000);
+	});
+}
+
+function preloadRecaptcha() {
+	if (isRecaptchaWanted()) {
+		loadRecaptchaScript().catch(function () {});
+	}
+}
+
+// Google requires this text wherever the reCAPTCHA badge is hidden.
+function recaptchaNoticeHtml(color) {
+	if (!isRecaptchaWanted()) {
+		return "";
+	}
+	var link = 'target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline;"';
+	return '<p class="recaptcha-notice" style="margin:10px 0 0;font-size:11px;line-height:1.6;text-align:center;color:' + (color || "#94a3b8") + ';">'
+		+ 'This site is protected by reCAPTCHA and the Google '
+		+ '<a href="https://policies.google.com/privacy" ' + link + '>Privacy Policy</a> and '
+		+ '<a href="https://policies.google.com/terms" ' + link + '>Terms of Service</a> apply.</p>';
 }
 
 async function getRequestForLogin(formId, moduleId, loginType) {

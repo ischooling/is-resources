@@ -278,6 +278,7 @@ function loginFormContent(userName, fromSpoof){
                 <button type="submit" class="btn primary-bg btn-shadow white-txt-color login-submit-btn" id="loginButton" data-toggle="tooltip" data-placement="auto" title="Click to log in">
                     <span>Log in</span>
                 </button>
+                ${typeof recaptchaNoticeHtml === 'function' ? recaptchaNoticeHtml() : ''}
                 <div class="login-footer-links">
                     ${schoolSettingsLinks.termasOfUserUrl != null && schoolSettingsLinks.termasOfUserUrl != undefined && schoolSettingsLinks.termasOfUserUrl != '' ? `<a href="${schoolSettingsLinks.termasOfUserUrl}" target="blank">Terms of use</a>` : ``}
                     ${schoolSettingsLinks.termasOfUserUrl != null && schoolSettingsLinks.termasOfUserUrl != undefined && schoolSettingsLinks.termasOfUserUrl != '' && schoolSettingsLinks.privacyPolicyUrl != null && schoolSettingsLinks.privacyPolicyUrl != undefined && schoolSettingsLinks.privacyPolicyUrl != '' ? `<span class="dot">•</span>` : ``}

@@ -33,6 +33,7 @@ function sessionOutPermissionContent(data){
                             </div>
                             <div class="col-md-12">'
                                 <input type="submit" class="btn btn-primary btn-lg px-2 py-2 rounded-20" id="continueSession" value="Submit">
+                                ${typeof recaptchaNoticeHtml === 'function' ? recaptchaNoticeHtml('rgba(255,255,255,0.8)') : ''}
                             </div>
                         </div>
                     </form>
