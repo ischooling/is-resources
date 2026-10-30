@@ -293,7 +293,9 @@ function bindReEnrollmentEvents() {
         var name = $(this).attr('data-name') || '';
         var baseMetric = metric.replace(/(East|West)$/, '');
         var tzTag = /East$/.test(metric) ? ' · Timezone (+)' : /West$/.test(metric) ? ' · Timezone (−)' : '';
-        var label = (baseMetric === 'total' ? 'Active' : (baseMetric === 'reEnrolledNext' ? 'Re-enrolled' : 'Pending')) + ' · ' + name + tzTag;
+        var label = (baseMetric === 'total' ? 'Active'
+                : baseMetric === 'reEnrolledNext' ? 'Re-enrolled'
+                : baseMetric === 'positiveNext' ? 'Positive' : 'Pending') + ' · ' + name + tzTag;
         // id can be a CSV of ids (a grade/country name may map to several ids) -> filter by ALL of them
         var ids = String(id).split(',');
         var preset = (kind === 'grade') ? { grade: ids } : (kind === 'country') ? { country: ids, countryName: name } : { progress: id };
