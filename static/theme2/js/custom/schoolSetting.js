@@ -1,3 +1,34 @@
+var _glacierArchiveDaysLocal = null;
+function getGlacierArchiveDaysLocal() {
+	if (_glacierArchiveDaysLocal !== null) return _glacierArchiveDaysLocal;
+	try {
+		var res = getSettingsByTypeAndKey("CONFIGURATION", "GLACIER_ARCHIVE_DAYS", false);
+		if (typeof res === 'string') res = JSON.parse(res);
+		_glacierArchiveDaysLocal = parseInt(res.data.metaValue) || 15;
+	} catch (e) {
+		_glacierArchiveDaysLocal = 15;
+	}
+	return _glacierArchiveDaysLocal;
+}
+
+// Day-level compare: a recording dated on or before (today - archiveDays) is archived.
+function isArchivedByDateLocal(dateValue) {
+	if (!dateValue) return false;
+	var d;
+	var s = typeof dateValue === 'string' ? dateValue.trim() : '';
+	if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+		var p = s.split('-');
+		d = new Date(+p[0], +p[1] - 1, +p[2]);
+	} else {
+		d = dateValue instanceof Date ? dateValue : new Date(dateValue);
+	}
+	if (isNaN(d.getTime())) return false;
+	var cutoff = new Date();
+	cutoff.setHours(0, 0, 0, 0);
+	cutoff.setDate(cutoff.getDate() - getGlacierArchiveDaysLocal());
+	return new Date(d.getFullYear(), d.getMonth(), d.getDate()) <= cutoff;
+}
+
 function getSchoolSettingCurrentSchoolId() {
 	var selectedSchoolId = "";
 	if (window.schoolSettingPageState && window.schoolSettingPageState.data && window.schoolSettingPageState.data.selectedSchoolId) {
@@ -851,7 +882,7 @@ function getSchoolSettingData(tabCode) {
 	$("#schoolSettingForm .ss-nav-link[data-tab]").find(".ss-nav-icon").css({background: "", color: ""});
 	$('#schoolSettingForm .ss-nav-link[data-tab="' + activeMainTabCode + '"]').find(".ss-nav-icon").css({background: "#e5f6ec", color: "#27ae60"});
 	$("#errMsg").text("");
-	$("#paymentGatewayInfoDiv, #lmsSchoolMappingInfoDiv, #lmsRoleMappingInfoDiv, #cycleIntakeInfoDiv, #standardFeeInfoDiv, #settingAllData, #apiCallDetailsDiv, #LogDiv, #templateDiv, #sessionDiv, #TechnicalDiv, #SchoolSettingsDiv, #IntegrationMainDiv, #IntegrationPaymentGatewayDiv, #SchoolFeedbackDiv").hide();
+	$("#paymentGatewayInfoDiv, #lmsSchoolMappingInfoDiv, #lmsRoleMappingInfoDiv, #cycleIntakeInfoDiv, #standardFeeInfoDiv, #settingAllData, #apiCallDetailsDiv, #LogDiv, #templateDiv, #sessionDiv, #TechnicalDiv, #SchoolSettingsDiv, #IntegrationMainDiv, #IntegrationPaymentGatewayDiv, #SchoolFeedbackDiv, #GlacierDiv").hide();
 
 	if (tabCode == "PG") {
 		$("#IntegrationMainDiv").show();
@@ -905,6 +936,8 @@ function getSchoolSettingData(tabCode) {
 		if ($("#apiCallDetailsDiv").length) {
 			$("#apiCallDetailsDiv").hide();
 		}
+	} else if (tabCode == "GLACIER") {
+		$("#GlacierDiv").show();
 	}
 }
 
@@ -1794,4 +1827,139 @@ function uploadSchoolSettingTechnicalImage(inputEl, fieldId, displayId) {
 			showMessageTheme2(0, "Unable to upload file.");
 		}
 	});
+}
+
+async function searchGlacierRecordings() {
+	var raw = $("#glacierSessionId").val().trim();
+	if (!raw) {
+		$("#glacierSearchError").text("Please enter at least one Session ID or Meeting ID.").show();
+		return;
+	}
+	var ids = raw.split(/[,\n]+/).map(function(s) { return s.trim(); }).filter(Boolean);
+	if (ids.length === 0) {
+		$("#glacierSearchError").text("Please enter at least one Session ID or Meeting ID.").show();
+		return;
+	}
+	$("#glacierSearchError, #glacierRecordingsResult, #glacierRestoreMsg").hide();
+	$("#glacierSearchLoader").show();
+	var titles = {
+		"shared_screen_with_speaker_view.mp4": "Shared Screen with Speaker View",
+		"active_speaker.mp4": "Active Speaker",
+		"shared_screen_with_gallery_view.mp4": "Shared Screen With Gallery View",
+		"gallery_view.mp4": "Gallery View",
+		"shared_screen.mp4": "Shared Screen",
+		"-1.1.mp4": "Recording",
+		"-1.2.mp4": "Recording 2",
+		"audio_only": "Audio File"
+	};
+	var html = "";
+	var rowIndex = 0;
+	var errors = [];
+	try {
+		for (var idx = 0; idx < ids.length; idx++) {
+			var sessionId = ids[idx];
+			var data = await callCommonAjax({
+				method: "POST",
+				url: BASE_URL + CONTEXT_PATH + "api/v1/settings/glacier-recordings",
+				body: { sessionId: sessionId },
+				dataType: "json",
+				global: true,
+				showMessage: false,
+				onFaildResolved: true,
+				onSuccessResolved: true
+			});
+			if (!data || data.status != "1") {
+				errors.push(sessionId + ": " + ((data && data.message) || "No recordings found"));
+				continue;
+			}
+			var recordings = data.recordings || [];
+			if (recordings.length === 0) {
+				errors.push(sessionId + ": No .mp4 recordings found");
+				continue;
+			}
+			var s3Access = data.s3AccessAvailable;
+			var sessionDate = data.sessionStartDate || null;
+			html += "<tr class='table-secondary'><td colspan='4'><strong>Session: " + sessionId + "</strong>" +
+				(data.sessionStartDate ? " <span class='text-muted'>(" + data.sessionStartDate.split("T")[0] + ")</span>" : "") +
+				"</td></tr>";
+			recordings.forEach(function(rec) {
+				var title = "Recording";
+				for (var key in titles) {
+					if (rec.url && rec.url.includes(key)) { title = titles[key]; break; }
+				}
+				var sc = rec.storageClass || "UNKNOWN";
+				if (sc === "UNKNOWN" && !s3Access && sessionDate) {
+					sc = isArchivedByDateLocal(sessionDate) ? "GLACIER" : "STANDARD";
+				}
+				var badge = "";
+				var actionBtn = "";
+				if (sc === "GLACIER" || sc === "DEEP_ARCHIVE") {
+					badge = "<span class='badge' style='background:#fff3cd; color:#856404; padding:4px 10px;'><i class='fa fa-snowflake-o mr-1'></i>Archived</span>";
+					actionBtn = "<button class='btn btn-sm btn-warning' onclick=\"restoreGlacierRecording('" + encodeURIComponent(rec.url) + "', this)\"><i class='fa fa-undo mr-1'></i>Restore</button>";
+				} else if (sc === "RESTORING") {
+					badge = "<span class='badge' style='background:#cce5ff; color:#004085; padding:4px 10px;'><i class='fa fa-spinner fa-spin mr-1'></i>Restoring</span>";
+					actionBtn = "<span class='text-info font-weight-bold'>In progress</span>";
+				} else if (sc === "RESTORED") {
+					badge = "<span class='badge' style='background:#d4edda; color:#155724; padding:4px 10px;'><i class='fa fa-check-circle mr-1'></i>Available</span>";
+					var expiry = rec.restoreExpiry ? " (until " + rec.restoreExpiry.split("T")[0] + ")" : "";
+					actionBtn = "<span class='text-success font-weight-bold'>Restored" + expiry + "</span>";
+				} else if (sc === "UNKNOWN") {
+					badge = "<span class='badge' style='background:#e2e3e5; color:#383d41; padding:4px 10px;'><i class='fa fa-question-circle mr-1'></i>Unknown</span>";
+					actionBtn = "<span class='text-muted'>Check on production</span>";
+				} else {
+					badge = "<span class='badge' style='background:#d4edda; color:#155724; padding:4px 10px;'><i class='fa fa-check-circle mr-1'></i>Available</span>";
+					actionBtn = "<span class='text-success font-weight-bold'>Ready</span>";
+				}
+				rowIndex++;
+				html += "<tr>" +
+					"<td>" + rowIndex + "</td>" +
+					"<td style='font-size:12px;'>" + title + "</td>" +
+					"<td>" + badge + "</td>" +
+					"<td>" + actionBtn + "</td>" +
+					"</tr>";
+			});
+		}
+		$("#glacierSearchLoader").hide();
+		if (errors.length > 0) {
+			$("#glacierSearchError").text(errors.join(" | ")).show();
+		}
+		if (html) {
+			$("#glacierRecordingsBody").html(html);
+			$("#glacierRecordingsResult").show();
+		} else if (errors.length === 0) {
+			$("#glacierSearchError").text("No recordings found for any of the entered IDs.").show();
+		}
+	} catch (e) {
+		$("#glacierSearchLoader").hide();
+		console.error("Glacier search error:", e);
+		$("#glacierSearchError").text("Unable to connect to the server. Please try again.").show();
+	}
+}
+
+async function restoreGlacierRecording(encodedUrl, btn) {
+	var url = decodeURIComponent(encodedUrl);
+	$(btn).prop("disabled", true).html("<i class='fa fa-spinner fa-spin mr-1'></i>Restoring...");
+	try {
+		var data = await callCommonAjax({
+			method: "POST",
+			url: BASE_URL + CONTEXT_PATH + "api/v1/settings/glacier-restore",
+			body: { url: url },
+			dataType: "json",
+			global: true,
+			showMessage: false,
+			onFaildResolved: true
+		});
+		if (data.status == "1") {
+			$("#glacierRestoreMsg").removeClass("alert-danger").addClass("alert-info").text(data.message).show();
+			var row = $(btn).closest("tr");
+			row.find("td:eq(2)").html("<span class='badge' style='background:#cce5ff; color:#004085; padding:4px 10px;'><i class='fa fa-spinner fa-spin mr-1'></i>Restoring</span>");
+			row.find("td:eq(3)").html("<span class='text-info font-weight-bold'>In progress (1-5 min)</span>");
+		} else {
+			$("#glacierRestoreMsg").removeClass("alert-info").addClass("alert-danger").text(data.message || "Restore failed.").show();
+			$(btn).prop("disabled", false).html("<i class='fa fa-undo mr-1'></i>Restore");
+		}
+	} catch (e) {
+		$("#glacierRestoreMsg").removeClass("alert-info").addClass("alert-danger").text("Unable to connect to the server. Please try again.").show();
+		$(btn).prop("disabled", false).html("<i class='fa fa-undo mr-1'></i>Restore");
+	}
 }

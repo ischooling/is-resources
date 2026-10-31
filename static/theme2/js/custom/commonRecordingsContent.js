@@ -1,3 +1,35 @@
+var _glacierArchiveDays = null;
+function getGlacierArchiveDays() {
+    if (_glacierArchiveDays !== null) return _glacierArchiveDays;
+    try {
+        var res = getSettingsByTypeAndKey("CONFIGURATION", "GLACIER_ARCHIVE_DAYS", false);
+        if (typeof res === 'string') res = JSON.parse(res);
+        _glacierArchiveDays = parseInt(res.data.metaValue) || 15;
+    } catch (e) {
+        _glacierArchiveDays = 15;
+    }
+    return _glacierArchiveDays;
+}
+
+// Day-level compare: a recording dated on or before (today - archiveDays) is archived.
+function isArchivedByDate(dateValue, archiveDays) {
+    if (!dateValue) return false;
+    var d;
+    var s = typeof dateValue === 'string' ? dateValue.trim() : '';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+        var p = s.split('-');
+        d = new Date(+p[0], +p[1] - 1, +p[2]);
+    } else {
+        d = dateValue instanceof Date ? dateValue : new Date(dateValue);
+    }
+    if (isNaN(d.getTime())) return false;
+    var days = archiveDays != null ? archiveDays : getGlacierArchiveDays();
+    var cutoff = new Date();
+    cutoff.setHours(0, 0, 0, 0);
+    cutoff.setDate(cutoff.getDate() - days);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate()) <= cutoff;
+}
+
 function populateRecordingModal(recordings, inviteeName, meetingTitle, meetingStartDate, meetingStartTime, hostName, body,message,status, callFrom, userId) {
     const titles = {
         "shared_screen_with_speaker_view.mp4": "Shared Screen with Speaker View",
@@ -62,6 +94,7 @@ function populateRecordingModal(recordings, inviteeName, meetingTitle, meetingSt
                             modalContent += `<div class="">`;
 
                             const transcriptUrl = filteredRecordings[filteredRecordings.length - 1]?.url;
+                            var demoArchived = isArchivedByDate(recordings.startDate || meetingStartDate);
 
                             filteredRecordings.forEach((urlObj, index) => {
                                 let label = "Recording";
@@ -71,11 +104,20 @@ function populateRecordingModal(recordings, inviteeName, meetingTitle, meetingSt
                                         break;
                                     }
                                 }
+                                let sc = urlObj.storageClass || null;
+                                if (!sc) sc = demoArchived ? 'GLACIER' : null;
+                                const isAvail = sc !== 'GLACIER' && sc !== 'DEEP_ARCHIVE' && sc !== 'RESTORING';
+                                const isRestoring = sc === 'RESTORING';
+                                const badge = sc === 'GLACIER' || sc === 'DEEP_ARCHIVE'
+                                    ? "<span class='badge' style='background:#fff3cd; color:#856404; font-size:11px; padding:3px 8px; margin-left:8px;'><i class='fa fa-snowflake-o' style='font-size:10px; margin-right:3px;'></i>Archived</span>"
+                                    : isRestoring
+                                    ? "<span class='badge' style='background:#cce5ff; color:#004085; font-size:11px; padding:3px 8px; margin-left:8px;'><i class='fa fa-spinner fa-spin' style='font-size:10px; margin-right:3px;'></i>Restoring</span>"
+                                    : "<span class='badge' style='background:#d4edda; color:#155724; font-size:11px; padding:3px 8px; margin-left:8px;'><i class='fa fa-check-circle' style='font-size:10px; margin-right:3px;'></i>Available</span>";
 
                                 modalContent += `
                                 <div class="recording-item d-flex justify-content-between align-items-center border-bottom py-2">
-                                    <h5 class="mb-0">${index + 1}. ${label}</h5>
-                                    <button class="btn btn-primary rounded" onclick="playRecording('${urlObj.url}', '${label}')">Play</button>
+                                    <h5 class="mb-0">${index + 1}. ${label} ${badge}</h5>
+                                    <button class="btn btn-primary rounded${isAvail ? '' : ' disabled'}" ${isAvail ? `onclick="playRecording('${urlObj.url}', '${label}')"` : `style="opacity:0.5; pointer-events:none;"`}>Play</button>
                                 </div>`;
                             });
 
@@ -95,26 +137,38 @@ function populateRecordingModal(recordings, inviteeName, meetingTitle, meetingSt
                                 .map(urlData => {
                                     for (const key in titles) {
                                         if (urlData.url.includes(key)) {
-                                            return { url: urlData.url, title: titles[key] };
+                                            return { url: urlData.url, title: titles[key], storageClass: urlData.storageClass || null };
                                         }
                                     }
                                 })
                             var transcriptUrl = record.urls[record.urls.length - 1]?.url;
+                            var recordArchived = isArchivedByDate(record.startDate || meetingStartDate);
                             if (sessionUrls.length > 0) {
                                 modalContent+=`
                                 <div class="session-block mb-0" style="border-bottom: 0;">
                                     <h5>Meeting ID: ${meetingId}</h5>
-                                    ${sessionUrls.map((recording, index) =>
-                                        `<div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
-                                            <h6>${index + 1}. ${recording.title}</h6>
+                                    ${sessionUrls.map((recording, index) => {
+                                        let sc = recording.storageClass;
+                                        if (!sc) sc = recordArchived ? 'GLACIER' : null;
+                                        const isAvail = sc !== 'GLACIER' && sc !== 'DEEP_ARCHIVE' && sc !== 'RESTORING';
+                                        const isRestoring = sc === 'RESTORING';
+                                        const badge = sc === 'GLACIER' || sc === 'DEEP_ARCHIVE'
+                                            ? "<span class='badge' style='background:#fff3cd; color:#856404; font-size:11px; padding:3px 8px; margin-left:8px;'><i class='fa fa-snowflake-o' style='font-size:10px; margin-right:3px;'></i>Archived</span>"
+                                            : isRestoring
+                                            ? "<span class='badge' style='background:#cce5ff; color:#004085; font-size:11px; padding:3px 8px; margin-left:8px;'><i class='fa fa-spinner fa-spin' style='font-size:10px; margin-right:3px;'></i>Restoring</span>"
+                                            : "<span class='badge' style='background:#d4edda; color:#155724; font-size:11px; padding:3px 8px; margin-left:8px;'><i class='fa fa-check-circle' style='font-size:10px; margin-right:3px;'></i>Available</span>";
+                                        return `<div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
+                                            <h6>${index + 1}. ${recording.title} ${badge}</h6>
                                             <div class="d-flex align-items-center gap-2">
-                                                <button class="btn btn-primary" onclick="playRecording('${recording.url}', '${recording.title}')">Play</button>
-                                                <button onclick="copyToClipboardSignedUrl('${recording.url}')" class="btn btn-sm d-flex align-items-center justify-content-center" style="border:0; background:transparent; color:darkblue; padding:5px;">
-                                                    <i class="fa fa-clone" style="font-size:20px;"></i>
-                                                </button>
+                                                <button class="btn btn-primary${isAvail ? '' : ' disabled'}" ${isAvail ? "onclick=\"playRecording('" + recording.url + "', '" + recording.title + "')\"" : "style='opacity:0.5; pointer-events:none;'"}>Play</button>
+                                                ${isAvail
+                                                    ? `<button onclick="copyToClipboardSignedUrl('${recording.url}')" class="btn btn-sm d-flex align-items-center justify-content-center" style="border:0; background:transparent; color:darkblue; padding:5px;"><i class="fa fa-clone" style="font-size:20px;"></i></button>`
+                                                    : `<button class="btn btn-sm d-flex align-items-center justify-content-center" style="border:0; background:transparent; color:#ccc; padding:5px; pointer-events:none;"><i class="fa fa-clone" style="font-size:20px;"></i></button>`
+                                                }
                                             </div>
                                             <div id="toast" style="visibility: hidden;min-width: 120px; background-color: #333; color: #fff; text-align: center; border-radius: 5px; padding: 8px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000;">Copied!</div>
-                                        </div>`).join("")
+                                        </div>`;
+                                    }).join("")
                                     }
                                     ${transcriptUrl ?
                                         `<div class="recording-item pb-3 pt-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">

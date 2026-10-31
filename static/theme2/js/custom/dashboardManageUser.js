@@ -1105,16 +1105,20 @@ function manageUserStudentPerformanceBindProgressDetailData(data){
         var statusIcon = "";
         var excuseBtn = "";
         var isAdminRole = (USER_ROLE !== "STUDENT" && USER_ROLE !== "PARENT" && USER_ROLE !== "TEACHER");
+        var wasSubmitted = (item.submissionStatus && item.submissionStatus.trim() !== "") ? "Y" : "N";
         if(status === "SUBMITTED"){
             statusIcon = `<i class="fa fa-check text-success"></i>`;
+            if(isAdminRole){
+                excuseBtn = `<button class="btn btn-sm btn-outline-primary manage-user-excuse-btn" data-itemid="${item.itemid || ''}" data-action="EXCUSE" data-submitted="Y" title="Excuse">Excuse</button>`;
+            }
         }else if(status === "EXCUSED"){
             statusIcon = `<span class="badge badge-warning">Excused</span>`;
             if(isAdminRole){
-                excuseBtn = `<button class="btn btn-sm btn-outline-danger manage-user-excuse-btn" data-itemid="${item.itemid || ''}" data-action="UN_EXCUSE" title="Un-Excuse">Un-Excuse</button>`;
+                excuseBtn = `<button class="btn btn-sm btn-outline-danger manage-user-excuse-btn" data-itemid="${item.itemid || ''}" data-action="UN_EXCUSE" data-submitted="${wasSubmitted}" title="Un-Excuse">Un-Excuse</button>`;
             }
         }else{
             if(isAdminRole){
-                excuseBtn = `<button class="btn btn-sm btn-outline-primary manage-user-excuse-btn" data-itemid="${item.itemid || ''}" data-action="EXCUSE" title="Excuse">Excuse</button>`;
+                excuseBtn = `<button class="btn btn-sm btn-outline-primary manage-user-excuse-btn" data-itemid="${item.itemid || ''}" data-action="EXCUSE" data-submitted="N" title="Excuse">Excuse</button>`;
             }
         }
         html += `<tr>
@@ -1138,6 +1142,7 @@ function manageUserStudentPerformanceBindExcuseButtons(){
         var btn = $(this);
         var itemId = btn.data("itemid");
         var action = btn.data("action");
+        var wasSubmitted = btn.data("submitted") || "N";
         if(!itemId || !action || !_manageUserExcuseLmsUserId || !_manageUserExcuseEntityId){
             showMessageTheme2(0, "Missing required data to perform this action.");
             return;
@@ -1156,9 +1161,10 @@ function manageUserStudentPerformanceBindExcuseButtons(){
                     showMessageTheme2(1, data.message || "Done");
                     var td = btn.closest("td");
                     if(action === "EXCUSE"){
-                        td.html('<span class="badge badge-warning">Excused</span> <button class="btn btn-sm btn-outline-danger manage-user-excuse-btn" data-itemid="' + itemId + '" data-action="UN_EXCUSE" title="Un-Excuse">Un-Excuse</button>');
+                        td.html('<span class="badge badge-warning">Excused</span> <button class="btn btn-sm btn-outline-danger manage-user-excuse-btn" data-itemid="' + itemId + '" data-action="UN_EXCUSE" data-submitted="' + wasSubmitted + '" title="Un-Excuse">Un-Excuse</button>');
                     }else{
-                        td.html('<button class="btn btn-sm btn-outline-primary manage-user-excuse-btn" data-itemid="' + itemId + '" data-action="EXCUSE" title="Excuse">Excuse</button>');
+                        var checkIcon = wasSubmitted === "Y" ? '<i class="fa fa-check text-success"></i> ' : '';
+                        td.html(checkIcon + '<button class="btn btn-sm btn-outline-primary manage-user-excuse-btn" data-itemid="' + itemId + '" data-action="EXCUSE" data-submitted="' + wasSubmitted + '" title="Excuse">Excuse</button>');
                     }
                     manageUserStudentPerformanceBindExcuseButtons();
                 }else{

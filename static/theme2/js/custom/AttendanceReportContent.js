@@ -93,7 +93,6 @@ function getAttendanceReportContent() {
 							'<option value="all">All Types</option>' +
 							'<option value="group">Group</option>' +
 							'<option value="one-to-one">One to One</option>' +
-							'<option value="ptm">Parent Teacher Meeting</option>' +
 							'<option value="custom-class">Custom Class</option>' +
 							'<option value="activity">Activity</option>' +
 						'</select>' +

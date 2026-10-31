@@ -101,7 +101,7 @@ function renderStats(s) {
 }
 function typePill(t) {
 	var map = { "group":["groups","Group","badge-primary"], "one-to-one":["person","One to One","badge-info"],
-		"ptm":["family_restroom","PTM","badge-warning"], "custom-class":["tune","Custom Class","badge-success"],
+		"custom-class":["tune","Custom Class","badge-success"],
 		"activity":["sports_esports","Activity","badge-secondary"] };
 	var m = map[t] || map["group"];
 	return '<span class="badge badge-pill ' + m[2] + '"><i class="material-icons" style="font-size:13px;vertical-align:middle">' + m[0] + '</i> ' + m[1] + '</span>';
