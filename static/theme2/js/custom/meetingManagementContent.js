@@ -778,27 +778,40 @@ function populateRecurringRecordingModal(data, meetingTitle, hostName, entityId,
                       }
                       <div class="recording-list" id="recording-${index}" style="display: none;">
                         <div>
-                          ${session.recordings.map((recording, i) => {
-                            var title;
-                            for (const key in titles) {
-                              if (recording.includes(key)) {
-                                title = titles[key];
-                                break;
+                          ${(() => {
+                            var isOld = isArchivedByDate(session.startTime);
+                            return session.recordings.map((recording, i) => {
+                              var title;
+                              var recUrl = typeof recording === 'object' ? recording.url : recording;
+                              var sc = typeof recording === 'object' ? (recording.storageClass || null) : null;
+                              if (!sc && isOld) sc = 'GLACIER';
+                              for (const key in titles) {
+                                if (recUrl.includes(key)) {
+                                  title = titles[key];
+                                  break;
+                                }
                               }
-                            }
-
-                            return `
-                            <div class="recording-item py-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
-                              <h6 style="font-size:13px;font-weight:700;">${i + 1}. ${title}</h6>
-                              <div class="d-flex align-items-center gap-2">
-                                <button class="btn btn-sm rounded text-white" style="background-color: #027FFF; border: 1px solid #027FFF;" onclick="playRecording('${recording}', '${title}')">Play</button>
-                                <button onclick="copyToClipboardSignedUrl('${recording.url}')" class="btn btn-sm d-flex align-items-center justify-content-center" style="border:0; background:transparent; color:darkblue; padding:5px;">
-                                  <i class="fa fa-clone" style="font-size:20px;"></i>
-                                </button>
-                              </div>
-                              <div id="toast" style="visibility: hidden;min-width: 120px; background-color: #333; color: #fff; text-align: center; border-radius: 5px; padding: 8px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000;">Copied!</div>
-                            </div>`;
-                          }).join('')}
+                              var isAvail = sc !== 'GLACIER' && sc !== 'DEEP_ARCHIVE' && sc !== 'RESTORING';
+                              var isRest = sc === 'RESTORING';
+                              var badge = (sc === 'GLACIER' || sc === 'DEEP_ARCHIVE')
+                                ? "<span class='badge' style='background:#fff3cd; color:#856404; font-size:10px; padding:2px 6px; margin-left:6px;'><i class='fa fa-snowflake-o' style='font-size:9px; margin-right:2px;'></i>Archived</span>"
+                                : isRest
+                                ? "<span class='badge' style='background:#cce5ff; color:#004085; font-size:10px; padding:2px 6px; margin-left:6px;'><i class='fa fa-spinner fa-spin' style='font-size:9px; margin-right:2px;'></i>Restoring</span>"
+                                : "<span class='badge' style='background:#d4edda; color:#155724; font-size:10px; padding:2px 6px; margin-left:6px;'><i class='fa fa-check-circle' style='font-size:9px; margin-right:2px;'></i>Available</span>";
+                              return `
+                              <div class="recording-item py-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
+                                <h6 style="font-size:13px;font-weight:700;">${i + 1}. ${title} ${badge}</h6>
+                                <div class="d-flex align-items-center gap-2">
+                                  <button class="btn btn-sm rounded text-white${isAvail ? '' : ' disabled'}" style="background-color:${isAvail ? '#027FFF' : '#ccc'}; border:1px solid ${isAvail ? '#027FFF' : '#ccc'};${isAvail ? '' : ' opacity:0.5; pointer-events:none;'}" ${isAvail ? "onclick=\"playRecording('" + recUrl + "', '" + title + "')\"" : ""}>Play</button>
+                                  ${isAvail
+                                    ? `<button onclick="copyToClipboardSignedUrl('${recUrl}')" class="btn btn-sm d-flex align-items-center justify-content-center" style="border:0; background:transparent; color:darkblue; padding:5px;"><i class="fa fa-clone" style="font-size:20px;"></i></button>`
+                                    : `<button class="btn btn-sm d-flex align-items-center justify-content-center" style="border:0; background:transparent; color:#ccc; padding:5px; pointer-events:none;"><i class="fa fa-clone" style="font-size:20px;"></i></button>`
+                                  }
+                                </div>
+                                <div id="toast" style="visibility: hidden;min-width: 120px; background-color: #333; color: #fff; text-align: center; border-radius: 5px; padding: 8px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000;">Copied!</div>
+                              </div>`;
+                            }).join('');
+                          })()}
 
                           ${session.recordings.length > 0 ? (() => {
                             const transcriptUrl = session.recordings[session.recordings.length - 1];
@@ -912,27 +925,40 @@ function updateRecordingsTable(data, entityId) {
           }
           <div class="recording-list" id="recording-${index}" style="display: none;">
             <div>
-              ${session.recordings.map((recording, i) => {
-                var title = "Unknown Recording";
-                for (const key in titles) {
-                  if (recording.includes(key)) {
-                    title = titles[key];
-                    break;
+              ${(() => {
+                var isOld = isArchivedByDate(sessionDate);
+                return session.recordings.map((recording, i) => {
+                  var recUrl = typeof recording === 'object' ? recording.url : recording;
+                  var sc = typeof recording === 'object' ? (recording.storageClass || null) : null;
+                  if (!sc && isOld) sc = 'GLACIER';
+                  var title = "Unknown Recording";
+                  for (const key in titles) {
+                    if (recUrl.includes(key)) {
+                      title = titles[key];
+                      break;
+                    }
                   }
-                }
-
-                return `
-                <div class="recording-item py-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
-                  <h6 style="font-size:13px;font-weight:700;">${i + 1}. ${title}</h6>
-                    <div class="d-flex align-items-center gap-2">
-                      <button class="btn btn-sm rounded text-white" style="background-color: #027FFF; border: 1px solid #027FFF;" onclick="playRecording('${recording}', '${title}')">Play</button>
-                      <button onclick="copyToClipboardSignedUrl('${recording}')" class="btn btn-sm d-flex align-items-center justify-content-center" style="border:0; background:transparent; color:darkblue; padding:5px;">
-                        <i class="fa fa-clone" style="font-size:20px;"></i>
-                      </button>
-                    </div>
-                    <div id="toast" style="visibility: hidden;min-width: 120px; background-color: #333; color: #fff; text-align: center; border-radius: 5px; padding: 8px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000;">Copied!</div>
-                </div>`;
-              }).join('')}
+                  var isAvail = sc !== 'GLACIER' && sc !== 'DEEP_ARCHIVE' && sc !== 'RESTORING';
+                  var isRest = sc === 'RESTORING';
+                  var badge = (sc === 'GLACIER' || sc === 'DEEP_ARCHIVE')
+                    ? "<span class='badge' style='background:#fff3cd; color:#856404; font-size:10px; padding:2px 6px; margin-left:6px;'><i class='fa fa-snowflake-o' style='font-size:9px; margin-right:2px;'></i>Archived</span>"
+                    : isRest
+                    ? "<span class='badge' style='background:#cce5ff; color:#004085; font-size:10px; padding:2px 6px; margin-left:6px;'><i class='fa fa-spinner fa-spin' style='font-size:9px; margin-right:2px;'></i>Restoring</span>"
+                    : "<span class='badge' style='background:#d4edda; color:#155724; font-size:10px; padding:2px 6px; margin-left:6px;'><i class='fa fa-check-circle' style='font-size:9px; margin-right:2px;'></i>Available</span>";
+                  return `
+                  <div class="recording-item py-2 px-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid #eee;">
+                    <h6 style="font-size:13px;font-weight:700;">${i + 1}. ${title} ${badge}</h6>
+                      <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-sm rounded text-white${isAvail ? '' : ' disabled'}" style="background-color:${isAvail ? '#027FFF' : '#ccc'}; border:1px solid ${isAvail ? '#027FFF' : '#ccc'};${isAvail ? '' : ' opacity:0.5; pointer-events:none;'}" ${isAvail ? "onclick=\"playRecording('" + recUrl + "', '" + title + "')\"" : ""}>Play</button>
+                        ${isAvail
+                          ? `<button onclick="copyToClipboardSignedUrl('${recUrl}')" class="btn btn-sm d-flex align-items-center justify-content-center" style="border:0; background:transparent; color:darkblue; padding:5px;"><i class="fa fa-clone" style="font-size:20px;"></i></button>`
+                          : `<button class="btn btn-sm d-flex align-items-center justify-content-center" style="border:0; background:transparent; color:#ccc; padding:5px; pointer-events:none;"><i class="fa fa-clone" style="font-size:20px;"></i></button>`
+                        }
+                      </div>
+                      <div id="toast" style="visibility: hidden;min-width: 120px; background-color: #333; color: #fff; text-align: center; border-radius: 5px; padding: 8px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000;">Copied!</div>
+                  </div>`;
+                }).join('');
+              })()}
 
               ${session.recordings.length > 0 ? (() => {
                 const transcriptUrl = session.recordings[session.recordings.length - 1];

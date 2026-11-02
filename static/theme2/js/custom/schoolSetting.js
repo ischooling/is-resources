@@ -1841,6 +1841,7 @@ async function searchGlacierRecordings() {
 		return;
 	}
 	$("#glacierSearchError, #glacierRecordingsResult, #glacierRestoreMsg").hide();
+	stopAllGlacierRestorePolls();
 	$("#glacierSearchLoader").show();
 	var titles = {
 		"shared_screen_with_speaker_view.mp4": "Shared Screen with Speaker View",
@@ -1891,31 +1892,13 @@ async function searchGlacierRecordings() {
 				if (sc === "UNKNOWN" && !s3Access && sessionDate) {
 					sc = isArchivedByDateLocal(sessionDate) ? "GLACIER" : "STANDARD";
 				}
-				var badge = "";
-				var actionBtn = "";
-				if (sc === "GLACIER" || sc === "DEEP_ARCHIVE") {
-					badge = "<span class='badge' style='background:#fff3cd; color:#856404; padding:4px 10px;'><i class='fa fa-snowflake-o mr-1'></i>Archived</span>";
-					actionBtn = "<button class='btn btn-sm btn-warning' onclick=\"restoreGlacierRecording('" + encodeURIComponent(rec.url) + "', this)\"><i class='fa fa-undo mr-1'></i>Restore</button>";
-				} else if (sc === "RESTORING") {
-					badge = "<span class='badge' style='background:#cce5ff; color:#004085; padding:4px 10px;'><i class='fa fa-spinner fa-spin mr-1'></i>Restoring</span>";
-					actionBtn = "<span class='text-info font-weight-bold'>In progress</span>";
-				} else if (sc === "RESTORED") {
-					badge = "<span class='badge' style='background:#d4edda; color:#155724; padding:4px 10px;'><i class='fa fa-check-circle mr-1'></i>Available</span>";
-					var expiry = rec.restoreExpiry ? " (until " + rec.restoreExpiry.split("T")[0] + ")" : "";
-					actionBtn = "<span class='text-success font-weight-bold'>Restored" + expiry + "</span>";
-				} else if (sc === "UNKNOWN") {
-					badge = "<span class='badge' style='background:#e2e3e5; color:#383d41; padding:4px 10px;'><i class='fa fa-question-circle mr-1'></i>Unknown</span>";
-					actionBtn = "<span class='text-muted'>Check on production</span>";
-				} else {
-					badge = "<span class='badge' style='background:#d4edda; color:#155724; padding:4px 10px;'><i class='fa fa-check-circle mr-1'></i>Available</span>";
-					actionBtn = "<span class='text-success font-weight-bold'>Ready</span>";
-				}
+				var cells = glacierStatusCells(sc, rec);
 				rowIndex++;
-				html += "<tr>" +
+				html += "<tr data-session-id='" + encodeURIComponent(sessionId) + "' data-url='" + encodeURIComponent(rec.url) + "'>" +
 					"<td>" + rowIndex + "</td>" +
 					"<td style='font-size:12px;'>" + title + "</td>" +
-					"<td>" + badge + "</td>" +
-					"<td>" + actionBtn + "</td>" +
+					"<td>" + cells.badge + "</td>" +
+					"<td>" + cells.actionBtn + "</td>" +
 					"</tr>";
 			});
 		}
@@ -1926,6 +1909,11 @@ async function searchGlacierRecordings() {
 		if (html) {
 			$("#glacierRecordingsBody").html(html);
 			$("#glacierRecordingsResult").show();
+			$("#glacierRecordingsBody tr[data-url]").each(function() {
+				if ($(this).find(".glacier-restoring").length) {
+					startGlacierRestorePoll(this);
+				}
+			});
 		} else if (errors.length === 0) {
 			$("#glacierSearchError").text("No recordings found for any of the entered IDs.").show();
 		}
@@ -1934,6 +1922,80 @@ async function searchGlacierRecordings() {
 		console.error("Glacier search error:", e);
 		$("#glacierSearchError").text("Unable to connect to the server. Please try again.").show();
 	}
+}
+
+function glacierStatusCells(sc, rec) {
+	var badge = "";
+	var actionBtn = "";
+	if (sc === "GLACIER" || sc === "DEEP_ARCHIVE") {
+		badge = "<span class='badge' style='background:#fff3cd; color:#856404; padding:4px 10px;'><i class='fa fa-snowflake-o mr-1'></i>Archived</span>";
+		actionBtn = "<button class='btn btn-sm btn-warning' onclick=\"restoreGlacierRecording('" + encodeURIComponent(rec.url) + "', this)\"><i class='fa fa-undo mr-1'></i>Restore</button>";
+	} else if (sc === "RESTORING") {
+		badge = "<span class='badge glacier-restoring' style='background:#cce5ff; color:#004085; padding:4px 10px;'><i class='fa fa-spinner fa-spin mr-1'></i>Restoring</span>";
+		actionBtn = "<span class='text-info font-weight-bold'>In progress</span>";
+	} else if (sc === "RESTORED") {
+		badge = "<span class='badge' style='background:#d4edda; color:#155724; padding:4px 10px;'><i class='fa fa-check-circle mr-1'></i>Available</span>";
+		var expiry = rec.restoreExpiry ? " (until " + rec.restoreExpiry.split("T")[0] + ")" : "";
+		actionBtn = "<span class='text-success font-weight-bold'>Restored" + expiry + "</span>";
+	} else if (sc === "UNKNOWN") {
+		badge = "<span class='badge' style='background:#e2e3e5; color:#383d41; padding:4px 10px;'><i class='fa fa-question-circle mr-1'></i>Unknown</span>";
+		actionBtn = "<span class='text-muted'>Check on production</span>";
+	} else {
+		badge = "<span class='badge' style='background:#d4edda; color:#155724; padding:4px 10px;'><i class='fa fa-check-circle mr-1'></i>Available</span>";
+		actionBtn = "<span class='text-success font-weight-bold'>Ready</span>";
+	}
+	return { badge: badge, actionBtn: actionBtn };
+}
+
+// Re-checks S3 for a restoring recording every minute; the glacier-recordings call
+// also saves the confirmed state to LENS_RECORDINGS, so other views pick it up.
+var GLACIER_POLL_INTERVAL_MS = 60000;
+var GLACIER_POLL_MAX_ATTEMPTS = 20;
+var glacierRestorePolls = {};
+
+function stopAllGlacierRestorePolls() {
+	for (var key in glacierRestorePolls) {
+		clearInterval(glacierRestorePolls[key]);
+	}
+	glacierRestorePolls = {};
+}
+
+function startGlacierRestorePoll(rowEl) {
+	var sessionId = decodeURIComponent($(rowEl).attr("data-session-id") || "");
+	var url = decodeURIComponent($(rowEl).attr("data-url") || "");
+	if (!sessionId || !url || glacierRestorePolls[url]) return;
+	var attempts = 0;
+	var inFlight = false;
+	glacierRestorePolls[url] = setInterval(async function() {
+		if (!document.body.contains(rowEl) || ++attempts > GLACIER_POLL_MAX_ATTEMPTS) {
+			clearInterval(glacierRestorePolls[url]);
+			delete glacierRestorePolls[url];
+			return;
+		}
+		if (inFlight) return;
+		inFlight = true;
+		try {
+			var data = await callCommonAjax({
+				method: "POST",
+				url: BASE_URL + CONTEXT_PATH + "api/v1/settings/glacier-recordings",
+				body: { sessionId: sessionId },
+				dataType: "json",
+				global: false,
+				showMessage: false
+			});
+			var rec = (data && data.status == "1" && data.recordings || []).find(function(r) { return r.url === url; });
+			if (!rec || !rec.storageClass || rec.storageClass === "RESTORING" || rec.storageClass === "UNKNOWN") return;
+			clearInterval(glacierRestorePolls[url]);
+			delete glacierRestorePolls[url];
+			var cells = glacierStatusCells(rec.storageClass, rec);
+			$(rowEl).find("td:eq(2)").html(cells.badge);
+			$(rowEl).find("td:eq(3)").html(cells.actionBtn);
+		} catch (e) {
+			console.error("Glacier restore poll error:", e);
+		} finally {
+			inFlight = false;
+		}
+	}, GLACIER_POLL_INTERVAL_MS);
 }
 
 async function restoreGlacierRecording(encodedUrl, btn) {
@@ -1952,8 +2014,10 @@ async function restoreGlacierRecording(encodedUrl, btn) {
 		if (data.status == "1") {
 			$("#glacierRestoreMsg").removeClass("alert-danger").addClass("alert-info").text(data.message).show();
 			var row = $(btn).closest("tr");
-			row.find("td:eq(2)").html("<span class='badge' style='background:#cce5ff; color:#004085; padding:4px 10px;'><i class='fa fa-spinner fa-spin mr-1'></i>Restoring</span>");
+			var cells = glacierStatusCells("RESTORING", {});
+			row.find("td:eq(2)").html(cells.badge);
 			row.find("td:eq(3)").html("<span class='text-info font-weight-bold'>In progress (1-5 min)</span>");
+			startGlacierRestorePoll(row[0]);
 		} else {
 			$("#glacierRestoreMsg").removeClass("alert-info").addClass("alert-danger").text(data.message || "Restore failed.").show();
 			$(btn).prop("disabled", false).html("<i class='fa fa-undo mr-1'></i>Restore");

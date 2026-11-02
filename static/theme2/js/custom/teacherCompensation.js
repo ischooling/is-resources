@@ -1727,8 +1727,12 @@ function syncTeacherAttendanceFromLca(attendanceid) {
 				return false;
 			}
 			var confirmMessage = buildLcaTeacherAttendanceSyncSelection(data, attendanceid);
-			showWarningMessage(confirmMessage.replace(/'/g, "\\'"), "applyLcaTeacherAttendanceSync('"+attendanceid+"')");
+			showWarningMessage(confirmMessage, "applyLcaTeacherAttendanceSync('"+attendanceid+"')");
 			styleAttendanceReviewWarningModal();
+			$('#remarksresetDelete').off('change.attendanceReview').on('change.attendanceReview', '.lcaSyncEntry'+attendanceid, function() {
+				updateAttendanceReviewSelection(attendanceid);
+			});
+			updateAttendanceReviewSelection(attendanceid);
 			return false;
 		},
 		error : function() {
@@ -1759,7 +1763,7 @@ function buildLcaTeacherAttendanceSyncSelection(data, attendanceid) {
 		var entry = entries[index];
 		var checked = selectedIds.indexOf(String(entry.id)) !== -1 ? ' checked' : '';
 		html += '<label class="attendance-review-entry">'
-			+ '<input type="checkbox" class="lcaSyncEntry' + attendanceid + '" value="' + entry.id + '"' + checked + ' /> '
+			+ '<input type="checkbox" class="lcaSyncEntry' + attendanceid + '" value="' + entry.id + '" data-start="' + escapeHtml(entry.joinTime) + '" data-end="' + escapeHtml(entry.leaveTime) + '"' + checked + ' /> '
 			+ '<span><span class="attendance-review-entry-title">' + escapeHtml(entry.name) + '</span> '
 			+ '<span class="attendance-review-role">(' + escapeHtml(entry.joiningType == 'H' ? 'Host' : 'Participant') + ')</span><br/>'
 			+ '<span class="attendance-review-entry-meta">' + escapeHtml(formatAttendanceDisplayRange(entry.joinTime, entry.leaveTime)) + ' (' + escapeHtml(entry.duration) + ')</span></span>'
@@ -1767,6 +1771,35 @@ function buildLcaTeacherAttendanceSyncSelection(data, attendanceid) {
 	}
 	html += '</div>';
 	return html;
+}
+
+function updateAttendanceReviewSelection(attendanceid) {
+	var intervals = [];
+	$('.lcaSyncEntry'+attendanceid+':checked').each(function() {
+		var start = moment($(this).attr('data-start'), 'YYYY-MM-DD HH:mm:ss', true);
+		var end = moment($(this).attr('data-end'), 'YYYY-MM-DD HH:mm:ss', true);
+		if (start.isValid() && end.isValid() && end.isAfter(start)) {
+			intervals.push({start: start, end: end});
+		}
+	});
+	intervals.sort(function(a, b) { return a.start.valueOf() - b.start.valueOf(); });
+	var seconds = 0;
+	var coveredEnd = null;
+	intervals.forEach(function(interval) {
+		var uncoveredStart = coveredEnd && coveredEnd.isAfter(interval.start) ? coveredEnd : interval.start;
+		if (interval.end.isAfter(uncoveredStart)) {
+			seconds += interval.end.diff(uncoveredStart, 'seconds');
+		}
+		if (!coveredEnd || interval.end.isAfter(coveredEnd)) {
+			coveredEnd = interval.end;
+		}
+	});
+	var suggested = $('#remarksresetDelete .attendance-review-box.suggested .attendance-review-time');
+	if (suggested.length) {
+		var range = intervals.length ? formatAttendanceDisplayRange(intervals[0].start.format('YYYY-MM-DD HH:mm:ss'), coveredEnd.format('YYYY-MM-DD HH:mm:ss')) : 'Select at least one entry';
+		suggested.html(escapeHtml(range) + (intervals.length ? '<br/>(' + escapeHtml(formatSecondsAsHHMMSS(seconds)) + ')' : ''));
+	}
+	$('#resetDeleteErrorWarningYes').prop('disabled', intervals.length === 0);
 }
 
 function styleAttendanceReviewWarningModal() {
@@ -1782,6 +1815,7 @@ function styleAttendanceReviewWarningModal() {
 		.text("Cancel")
 		.attr("style", "color:#374151 !important;border:1px solid #d1d5db !important;background:#ffffff !important;font-weight:700 !important;padding:7px 14px;");
 	$("#remarksresetDelete").one("hidden.bs.modal.attendanceReview", function() {
+		$("#remarksresetDelete").off('change.attendanceReview');
 		$("#remarksresetDelete").removeClass("attendance-review-modal");
 		$("#remarksresetDelete .modal-header").attr("style", "top: 0 !important;width:100% !important;background-color:#f44336 !important; padding: 15px 10px;border-radius: 5px 5px 0px 0px !important");
 		$("#statusMessage-1").html('<i class="fa fa-trash fa-4x" style="color:#f44336 !important;"></i>');

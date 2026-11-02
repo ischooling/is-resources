@@ -229,6 +229,8 @@ const contentHandlers = {
     'student-feedback-received': () => initStudentFeedbackReceived(),
     'video-library-management': () => initVideoLibraryManagement(),
     'student-video-library': () => initStudentVideoLibrary(),
+    'certificate-management': () => initCertificateManagement(),
+    'my-certificates': () => initMyCertificates(),
 };
 
 const getLeadCategory = () => {
@@ -464,6 +466,16 @@ function initVideoLibraryManagement() {
 function initStudentVideoLibrary() {
     $('#dashboardContentInHTML').html(getStudentVideoLibraryPageContent('Videos'));
     studentVideoLibraryOnLoad();
+}
+
+function initCertificateManagement() {
+    $('#dashboardContentInHTML').html(getCertificateManagementPageContent('Manage Certificates'));
+    certificateManagementOnLoad();
+}
+
+function initMyCertificates() {
+    $('#dashboardContentInHTML').html(getMyCertificatesPageContent('My Certificates'));
+    myCertificatesOnLoad();
 }
 
 function initContractManagement() {

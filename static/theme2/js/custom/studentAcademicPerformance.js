@@ -191,7 +191,7 @@ function studentAcademicPerformanceBindItemsRows(enrollId, itemsData){
         if(status === "SUBMITTED"){
             statusIcon = `<i class="fa fa-check text-success"></i>`;
         }else if(status === "EXCUSED"){
-            statusIcon = `<i class="fa fa-times"></i>`;
+            statusIcon = `<span class="badge badge-warning">Excused</span>`;
         }
         var scoreText = item.unitPercent ? (item.unitPercent + "%") : "";
         html += `<tr>

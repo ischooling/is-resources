@@ -265,6 +265,9 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
         "video-library-management":{url:"",file:[{role:"",fileName:["videoLibraryManagementContent.js","videoLibraryManagement.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         // Video Library (student side: videos filtered by the student's subjects)
         "student-video-library":{url:"",file:[{role:"",fileName:["studentVideoLibraryContent.js","studentVideoLibrary.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        // Certificates (admin side: templates + single/bulk issuance + issued list)
+        "certificate-management":{url:"",file:[{role:"",fileName:["certificateManagementContent.js","certificateManagement.js","certificateEditorContent.js","certificateEditor.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "my-certificates":{url:"",file:[{role:"",fileName:["myCertificatesContent.js","myCertificates.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
     };
     
     var pageMapJSPWithFun = {
@@ -366,7 +369,7 @@ function openParentDashboardPreviewFromQuery() {
 
 /* ?openPage=<page link> opens that dashboard page on load (e.g. back from a Video Library payment). Only the pages
    listed here may be opened this way. */
-var OPEN_PAGE_FROM_QUERY = ["student-video-library"];
+var OPEN_PAGE_FROM_QUERY = ["student-video-library", "my-certificates"];
 function openPageFromQuery() {
     try {
         var page = new URLSearchParams(window.location.search || "").get("openPage");

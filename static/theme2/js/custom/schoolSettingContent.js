@@ -93,6 +93,7 @@ function getSchoolSettingTabs(data) {
 			${getSchoolSettingNavItem("techTab",          "TECH",        "fa-wrench",        "Technical Setting", "Runtime &amp; limits",     false)}
 			${getSchoolSettingNavItem("schoolSettingsTab","SS",          "fa-cogs",          "School Settings",   "Profile &amp; branding",   false)}
 			${getSchoolSettingNavItem("logTab",           "LOG",         "fa-clipboard-list","LOG",               "Audit trail",              false)}
+			${getSchoolSettingNavItem("glacierTab",      "GLACIER",     "fa-snowflake-o",   "Glacier Restore",   "Recording restore",        false)}
 		</ul>
 		<style>
 			/* ── School Setting two-column layout ── */
@@ -316,6 +317,43 @@ function getSchoolSettingSections(data) {
 			</div>
 			<div id="SchoolMailsDiv" class="mt-3" style="display:none;">
 				${getSchoolMailsSettingInfoDiv(data)}
+			</div>
+		</div>
+		<div id="GlacierDiv" style="display:none;">
+			${getSchoolSettingSectionHeader("Glacier Restore", "Restore archived recordings from AWS Glacier")}
+			<div class="main-card mb-3 card">
+				<div class="card-body">
+					<div class="row mb-3">
+						<div class="col-md-8">
+							<label class="font-weight-bold">Session IDs / Meeting IDs</label>
+							<textarea class="form-control" id="glacierSessionId" rows="3" placeholder="Enter one or more IDs (one per line or comma-separated)"></textarea>
+						</div>
+						<div class="col-md-4 d-flex align-items-end">
+							<button class="btn btn-primary" type="button" onclick="searchGlacierRecordings()">
+								<i class="fa fa-search mr-1"></i>Search All
+							</button>
+						</div>
+					</div>
+					<div id="glacierSearchLoader" class="text-center py-3" style="display:none;">
+						<i class="fa fa-spinner fa-spin fa-2x text-primary"></i>
+						<p class="mt-2 text-muted">Checking storage status from AWS S3...</p>
+					</div>
+					<div id="glacierSearchError" class="alert alert-warning" style="display:none;"></div>
+					<div id="glacierRecordingsResult" style="display:none;">
+						<table class="table table-bordered table-striped" id="glacierRecordingsTable">
+							<thead class="thead-light">
+								<tr>
+									<th>#</th>
+									<th>Recording</th>
+									<th>Status</th>
+									<th>Action</th>
+								</tr>
+							</thead>
+							<tbody id="glacierRecordingsBody"></tbody>
+						</table>
+					</div>
+					<div id="glacierRestoreMsg" class="alert alert-info mt-3" style="display:none;"></div>
+				</div>
 			</div>
 		</div>
 		<div id="IntegrationMainDiv" style="display:none;">

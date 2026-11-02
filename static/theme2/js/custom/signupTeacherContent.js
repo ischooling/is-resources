@@ -2071,10 +2071,18 @@ function populateRecordingModalForSignup(recordings, title) {
                 }
             }
     
+            const sc = urlObj.storageClass || null;
+            const isAvail = sc !== 'GLACIER' && sc !== 'DEEP_ARCHIVE' && sc !== 'RESTORING';
+            const badge = (sc === 'GLACIER' || sc === 'DEEP_ARCHIVE')
+                ? "<span class='badge' style='background:#fff3cd; color:#856404; font-size:11px; padding:3px 8px; margin-left:8px;'><i class='fa fa-snowflake-o' style='font-size:10px; margin-right:3px;'></i>Archived</span>"
+                : sc === 'RESTORING'
+                ? "<span class='badge' style='background:#cce5ff; color:#004085; font-size:11px; padding:3px 8px; margin-left:8px;'><i class='fa fa-spinner fa-spin' style='font-size:10px; margin-right:3px;'></i>Restoring</span>"
+                : "<span class='badge' style='background:#d4edda; color:#155724; font-size:11px; padding:3px 8px; margin-left:8px;'><i class='fa fa-check-circle' style='font-size:10px; margin-right:3px;'></i>Available</span>";
+
             modalContent += `
                 <div class="recording-item d-flex" style="border-bottom:1px solid #eee; justify-content: space-between; align-items: center; padding: 3px 5px 5px;">
-                    <h4>${index + 1}. ${label}</h4>
-                    <button class="btn btn-sm rounded" style="background-color:var(--pc); border: 1px solid var(--pc);" onclick="playRecordingSignup('${urlObj.url}', '${label}')">Play</button>
+                    <h4>${index + 1}. ${label} ${badge}</h4>
+                    <button class="btn btn-sm rounded" style="background-color:var(--pc); border: 1px solid var(--pc);${isAvail ? '' : ' opacity:0.5; pointer-events:none;'}" ${isAvail ? `onclick="playRecordingSignup('${urlObj.url}', '${label}')"` : ''}>Play</button>
                 </div>
             `;
         });

@@ -53,7 +53,7 @@ function openRecordingModal(entityId, entityType, inviteeName, meetingTitle, mee
                     });
                     $('#refreshBtn').on('click', function () {
                         closeAllVideoModal();
-                        openRecordingModal(entityId, entityType, inviteeName, meetingTitle, meetingStartDate, meetingStartTime, hostName, meetingDateSingapore, meetingStartTimeSingapore);
+                        openRecordingModal(entityId, entityType, inviteeName, meetingTitle, meetingStartDate, meetingStartTime, hostName, meetingDateSingapore, meetingStartTimeSingapore, callFrom, userId);
                     });
                 } else {
                     showMessageTheme2(0, "No recordings available.", '', true);
