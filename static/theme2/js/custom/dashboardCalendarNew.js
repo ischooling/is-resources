@@ -187,10 +187,17 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
         var startMoment;
         if (eventType === "assignment" && (rawEvent.dueDate || rawEvent.paceDate)) {
             startMoment = moment(rawEvent.dueDate || rawEvent.paceDate, "YYYY-MM-DD");
+        } else if (eventType === "holiday" && rawEvent.start) {
+            // HOLIDAY events are plain calendar dates (the admin picked "26 Nov"), not a point in time.
+            // Converting 26 Nov 00:00 from the holiday's timezone to the student's timezone moved the
+            // holiday one day back for students whose timezone is behind it (e.g. Dubai, Europe, US).
+            // So keep the date exactly as saved and only attach the student's timezone to it.
+            startMoment = moment.tz(String(rawEvent.start).substring(0, 10), "YYYY-MM-DD", getStudentTimezone());
         } else {
             startMoment = normalizeDateTime(rawEvent.start || rawEvent.startDateTime || rawEvent.date || rawEvent.dueDate || rawEvent.paceDate, rawEvent.timezone);
         }
-        var endMoment = normalizeDateTime(rawEvent.end || rawEvent.endDateTime, rawEvent.timezone);
+        // A holiday has no end time of its own: it is an all-day event, so its end becomes the end of that day below.
+        var endMoment = eventType === "holiday" ? null : normalizeDateTime(rawEvent.end || rawEvent.endDateTime, rawEvent.timezone);
         var allDay = rawEvent.allDay === true || eventType === "holiday";
         var courseId = getCourseId(rawEvent)
         // CLASS events (esp. BATCH/group classes) may not carry a subjectId — getCourseId then
