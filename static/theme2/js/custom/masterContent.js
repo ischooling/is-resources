@@ -4038,7 +4038,7 @@ function getLearningProgramLabel(registrationType) {
 function getAnnouncementAndNewsContent() {
 	var showOnlyReleaseNote = SHOW_ONLY_RELEASE_NOTE === true;
   var html = 
-    `<div class="right_fixed_action">
+    `<div class="right_fixed_action sdaf">
       <!-- Deliberately still the old app. Diary was not migrated and lives
            there; the new support app serves no /iframe/diary-bridge, so
            "fixing" this URL alongside the others would silently break diary. -->
@@ -4119,6 +4119,24 @@ function getAnnouncementAndNewsContent() {
             <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2 d-none" id="schoolDiaryBadge"></span>
           </button>`;
       }
+      // Hidden until the auto-shown App Install modal is closed once this page
+      // load (see appInstallNotification.js: showGetAppButton()); lets the user
+      // manually reopen the same modal afterwards. Restricted to the same
+      // school + role combination as the App Install feature itself.
+		if(!showOnlyReleaseNote && (USER_ROLE == "PARENT" || USER_ROLE == "TEACHER" || USER_ROLE == "STUDENT") && typeof SCHOOL_ID !== "undefined" && String(SCHOOL_ID) === "1") {
+        html += `<button type="button" class="custom-btn-open-options btn btn-primary d-none get-app-btn" id="getAppBtn" onclick="openAppInstallNotificationManually(\'button\')" data-toggle="tooltip" data-placement="left" title="Get App">
+            <span class="get-app__icons" aria-hidden="true">
+              <span class="get-app__flip-card">
+                <span class="get-app__face get-app__face--android">
+                  <svg class="get-app__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="#fff" width="24px"><path d="M131.2 125.9C136.5 125.4 141.8 126.5 146.5 128.9C151.2 131.3 155.1 135.1 157.8 139.7C174.8 169.2 192 198.6 209 228.1C212.5 226.7 216 225.4 219.5 224.2C250.8 213.3 283.7 207.6 316.9 207.3C317.9 207.3 319 207.3 320.1 207.3C358.2 207.3 396.3 214.3 431.7 228.4L483 139.7C484.8 136.5 487.3 133.7 490.2 131.5C493.1 129.3 496.4 127.6 500 126.7C503.1 125.9 506.4 125.6 509.6 125.9C513.8 126.3 517.9 127.6 521.5 129.7C525.5 132.1 528.8 135.4 531.2 139.4C533.2 142.8 534.5 146.6 535 150.6C535.5 154.6 535.1 158.6 533.8 162.3C533.2 164.2 532.4 166 531.4 167.8L481.7 253.6C501.2 265.8 519.3 280.1 535.6 296.4C547.9 308.6 559.1 321.8 569.1 335.9C577.3 347.4 584.7 359.5 591.3 372.1C608.8 405.7 619.9 442.6 624 480.2L16 480.2C20.1 442.5 31.2 405.7 48.7 372.1C63.2 344.2 82.1 318.6 104.4 296.4C120.9 280 139.1 265.5 158.9 253.3L109.4 167.9C105.7 161.5 104.7 153.8 106.6 146.7C108.5 139.6 113 133.6 119.3 129.9C122.9 127.7 127 126.4 131.2 126.1zM198.5 341.7C186.3 333.6 168.4 339.2 158.4 354.2C148.4 369.2 150.2 388 162.3 396.1C174.4 404.2 192.4 398.6 202.4 383.6C212.4 368.6 210.6 349.8 198.5 341.7zM482.1 354.2C472.1 339.2 454.2 333.6 442 341.7C429.8 349.8 428.1 368.6 438.1 383.6C448.1 404.2 466 398.6 478.2 396.1C490.4 388 492.1 369.2 482.1 354.2z"></path></svg>
+                </span>
+                <span class="get-app__face get-app__face--ios">
+                  <svg class="get-app__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" fill="#fff" width="20px"><path d="M319.1 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7-55.8 .9-115.1 44.5-115.1 133.2 0 26.2 4.8 53.3 14.4 81.2 12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zM262.5 104.5c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"></path></svg>
+                </span>
+              </span>
+            </span>
+          </button>`;
+      }
       html += `</div>`;
       if(!showOnlyReleaseNote){
         html += `
@@ -4145,7 +4163,6 @@ function getAnnouncementAndNewsContent() {
               <div class="text-muted p-3">Loading release notes...</div>
           </div>
       </div>`;
-	 
 	if (!showOnlyReleaseNote && ( USER_ROLE == "PARENT" || USER_ROLE == "TEACHER" || USER_ROLE == "STUDENT" ||  SCHOOL_DIARY_INITIATES_ROLE)) {
         html += `<div class="ui-theme-settings custome-ui-theme-settings" id="schoolDiary_side_wrapper">
           <button type="button" class="custom-btn-open-options close-right-slide-bar-btn border text-white mb-0" onclick="openRightSideBar(\'schoolDiary_side_wrapper\', true)" style="position: absolute;left: -18px;top: 20px;z-index: 99;background:red;">

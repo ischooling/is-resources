@@ -42,7 +42,7 @@ async function rendereTeacherHomeContent(){
 }
 
 async function renderTeacherDashboard(data){
-    $('#dashboardContentInHTML').html(dashboardContentTeacher(data)+getAnnouncementAndNewsContent());
+    $('#dashboardContentInHTML').html(dashboardContentTeacher(data));
     $('#currentTimeForUser').html(convertUTCToTimezoneAs(getUTCTime(), DATETIME_FORMATTER, data.userTimezone).format('MMM DD, YYYY hh:mm:ss a'));
     setInterval(function(){
         $('#currentTimeForUser').html(convertUTCToTimezoneAs(getUTCTime(), DATETIME_FORMATTER, data.userTimezone).format('MMM DD, YYYY hh:mm:ss a'));

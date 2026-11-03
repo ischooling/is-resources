@@ -47,6 +47,7 @@ async function renderParentDashboardContent(){
         $('#dashboardContentInHTML').html(getParentDashboardContent(getStudentList,'getStudentDetailsByStudentID'));
         return;
     }
+    $('#dashboardContentInHTML').html(getParentDashboardContent(getStudentList,'getStudentDetailsByStudentID'));
     // A child already picked this session (either earlier via this same flow,
     // or restored below) stays picked — re-opening the Parent Dashboard module
     // from the sidebar must not bounce the parent back to the picker; only
@@ -67,6 +68,9 @@ async function renderParentDashboardContent(){
 function renderParentChildSelectionScreen(){
     hideParentChildPickerChrome();
     $('#dashboardContentInHTML').html(getParentChildSelectionContent(STUDENT_LIST));
+    if(typeof initAppInstallNotification === 'function'){
+        initAppInstallNotification();
+    }
 }
 
 async function openParentChildDashboard(studentUserId){

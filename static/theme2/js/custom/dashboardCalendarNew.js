@@ -1,3 +1,4 @@
+var IS_CLASS_LIVE = null;
 var IS_CLICKED_FEEDBACK_BTN = false;
 var IS_CLASS_ENDED_STATUS_CALLED = false;
 var IS_PENDING_FEEDBACK_POPUP_REQUEST = false;
@@ -2985,12 +2986,10 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
         );
         console.log("studentCalendarState", studentCalendarState)
         applyFilters();
+        IS_CLASS_LIVE = checkIfAnyClassRunning(studentCalendarState.filteredEvents);
+        studentCalendarState.liveClassCheckedAt = Date.now();
         if (typeof CAN_SHOW_ENROLL_RESERVE_MODAL !== "undefined") {
-            if (studentCalendarState.filteredEvents.length < 1) {
-                CAN_SHOW_ENROLL_RESERVE_MODAL = true;
-            } else {
-                CAN_SHOW_ENROLL_RESERVE_MODAL = !checkIfAnyClassRunning(studentCalendarState.filteredEvents);
-            }
+            CAN_SHOW_ENROLL_RESERVE_MODAL = !IS_CLASS_LIVE;
         }
         renderCourseFilters();
         renderSchoolEventFilters();
@@ -3291,8 +3290,13 @@ function todayDate() {
 }
 
 function checkIfAnyClassRunning(todayClassArray) {
-    var currentTime = new Date($("#currentTimeForUser").text());
-    var currentMs = currentTime.getTime();
+    // Not new Date($("#currentTimeForUser").text()): that DOM text has no timezone
+    // marker, so it gets parsed in the browser's own system timezone rather than
+    // the student's configured one, while event.start/end are proper offset-aware
+    // ISO strings. Mixing the two mis-detects live classes whenever the two
+    // timezones differ. Date.now() is the true current instant and compares
+    // correctly against the offset-aware start/end below.
+    var currentMs = Date.now();
     for (var i = 0; i < todayClassArray.length; i++) {
         var startTime = new Date(todayClassArray[i].start).getTime();
         var endTime = new Date(todayClassArray[i].end).getTime();

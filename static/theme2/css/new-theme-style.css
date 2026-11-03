@@ -31565,6 +31565,71 @@ right:15px
 	margin-bottom: 0;
 }
 
+/* Get App button (masterContent.js: getAnnouncementAndNewsContent()) - a 3D
+   flip card where Android and iOS are two back-to-back faces of the same
+   container, so exactly one is ever visible at a time. Kept out of
+   .custom-btn-open-options so it never affects the other icon buttons sharing
+   that class. */
+#getAppBtn.get-app-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+}
+.get-app__icons {
+	position: relative;
+	display: inline-block;
+	width: 30px;
+	height: 30px;
+	pointer-events: none;
+	perspective: 600px;
+}
+.get-app__flip-card {
+	display: block;
+	position: relative;
+	width: 100%;
+	height: 100%;
+	transform-style: preserve-3d;
+	animation: get-app__flip 4s linear infinite;
+}
+.get-app__face {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	-webkit-backface-visibility: hidden;
+	backface-visibility: hidden;
+}
+/* Android starts facing the viewer; iOS starts pre-rotated to the back, so at
+   rotateY(0deg) only Android's face is visible and at rotateY(180deg) the
+   card has turned iOS's pre-rotated face to the front. */
+.get-app__face--android {
+	transform: rotateY(0deg);
+}
+.get-app__face--ios {
+	transform: rotateY(180deg);
+}
+.get-app__icon {
+	display: block;
+}
+/* 4s cycle, Android and iOS holding the front for 2s each: 0-45% Android
+   holds, 45-50% flip, 50-95% iOS holds, 95-100% flip back (360deg === 0deg,
+   so the loop has no visible seam). */
+@keyframes get-app__flip {
+	0%, 45% { transform: rotateY(0deg); }
+	50%, 95% { transform: rotateY(180deg); }
+	100% { transform: rotateY(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+	.get-app__flip-card {
+		animation: none;
+	}
+}
+
 
 
 .custome-ui-theme-settings.ui-theme-settings{max-width:500px;width:95%; background-color: #fff;right:0;z-index:1000}
@@ -31998,6 +32063,71 @@ table td.child ul li{white-space: normal;}
 .right-wrapper .Profile-field-row .label{color:#9d9d9d;letter-spacing: 0.5px;position: relative;top:-5px}
 .right-wrapper .Profile-field-row .edit-field-btn, .right-wrapper .Profile-field-row .save-field-btn, .right-wrapper .Profile-field-row .cancel-field-btn, .right-wrapper .Profile-field-row .edit-field-btn-courses{background: var(--pc) !important;color: #fff}
 .right-wrapper .Profile-field-row .field-input{background:#f7f7f7;color:#000;}
+
+/* Install app reminder — white panel on blue profile sidebar + profile step 10 */
+.profile-wrapper .admin-app-install-prompt-row .admin-app-install-prompt-title {
+	color: #fff;
+	font-weight: 600;
+	font-size: 14px;
+	margin-bottom: 8px;
+}
+.admin-app-install-prompt-panel {
+	background: #fff;
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	border-radius: 10px;
+	padding: 16px 18px;
+	color: #212529;
+	box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+.admin-app-install-prompt-panel .app-install-prompt-switch-label {
+	color: #343a40 !important;
+	font-size: 14px !important;
+	font-weight: 600;
+	line-height: 1.45;
+	padding-left: 3.25rem;
+	cursor: pointer;
+}
+.admin-app-install-prompt-panel .custom-switch-lg .custom-control-label::before {
+	width: 2.75rem;
+	height: 1.5rem;
+	border-radius: 1.5rem;
+	background-color: #dee2e6;
+	border-color: #adb5bd;
+	top: 0.1rem;
+	left: 0;
+}
+.admin-app-install-prompt-panel .custom-switch-lg .custom-control-label::after {
+	width: calc(1.5rem - 4px);
+	height: calc(1.5rem - 4px);
+	border-radius: 50%;
+	top: calc(0.1rem + 2px);
+	left: 2px;
+	background-color: #fff;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+.admin-app-install-prompt-panel .custom-control-input:checked ~ .custom-control-label::before {
+	background-color: var(--pc, #3f6ad8);
+	border-color: var(--pc, #3f6ad8);
+}
+.admin-app-install-prompt-panel .custom-control-input:checked ~ .custom-control-label::after {
+	transform: translateX(1.25rem);
+}
+.profile-app-install-prompt-embedded {
+	margin-top: 8px;
+}
+.app-install-prompt-tz-badge {
+	display: inline-block;
+	font-size: 13px;
+	color: #495057;
+	background: #e8f4fd;
+	border: 1px solid #b8daff;
+	border-radius: 6px;
+	padding: 6px 10px;
+}
+.admin-profile-wrapper .admin-app-install-prompt-panel {
+	margin-top: 4px;
+}
+
 .show-password-icon{right: 15px !important;color: #333333;font-size: 18px !important;position: absolute;bottom: 14%;transform: translateY(-50%);z-index: 999;width: 16px;height: 16px;display: inline-block;}
 .app-header-right .select2{visibility: visible;opacity: 1;padding: 0;bottom: inherit;}
 .app-header-right .select2-container--bootstrap4{width: auto}
@@ -35378,3 +35508,421 @@ to { background-color: rgb(6, 145, 6); }
    actual background/text colors to take effect. */
 .mu-platform-card h5{color:var(--mu-platform-text);}
 
+/* ===== App Install Notification (Student/Parent/Teacher, all Learning Programs) =====
+   Rendered as a standard Bootstrap 4 modal (.modal > .modal-dialog > .modal-content),
+   matching the project's existing modal convention (see announcementModalContent() in
+   announcementContent.js / $('#...').modal({backdrop:'static', keyboard:false})).
+   Only the modal's inner content is custom-styled here; Bootstrap owns position,
+   fade transition, backdrop and centering. */
+.app-install-notification .modal-content {
+	border-radius: 14px;
+	border: none;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.18);
+	font-family: var(--font-family-sans-serif);
+	overflow: hidden;
+}
+.app-install-notification .modal-body {
+	padding: 0;
+}
+
+/* ---- Header: logo, title/description, (desktop) countdown ring, close ---- */
+.app-install-notification__header {
+	display: flex;
+	align-items: flex-start;
+	gap: 14px;
+	padding: 20px 22px 16px;
+}
+.app-install-notification__header-icon {
+	width: 48px;
+	height: 48px;
+	border-radius: 12px;
+	flex: 0 0 auto;
+	background: var(--primary, #007bff);
+	color: var(--white, #fff);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 22px;
+}
+.app-install-notification__header-text {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+.app-install-notification__title {
+	margin: 0 0 4px;
+	font-size: 18px;
+	font-weight: 700;
+	color: var(--dark);
+}
+.app-install-notification__description {
+	margin: 0;
+	font-size: 14px;
+	color: var(--gray);
+	line-height: 1.4;
+}
+.app-install-notification__feature-list {
+	list-style: none;
+	margin: 0;
+	padding: 0 22px 16px;
+}
+.app-install-notification__feature-list li {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	font-size: 13px;
+	line-height: 1.4;
+	margin-bottom: 4px;
+}
+.app-install-notification__feature-list li:last-child {
+	margin-bottom: 0;
+}
+.app-install-notification__feature-icon {
+	flex: 0 0 auto;
+	font-size: 15px;
+	line-height: 1.4;
+}
+.app-install-notification__ring {
+	position: relative;
+	width: 44px;
+	height: 44px;
+	flex: 0 0 auto;
+}
+.app-install-notification__ring svg {
+	width: 44px;
+	height: 44px;
+	transform: rotate(-90deg);
+}
+.app-install-notification__ring-track {
+	fill: none;
+	stroke: var(--light);
+	stroke-width: 4;
+}
+.app-install-notification__ring-progress {
+	fill: none;
+	stroke: var(--primary, #007bff);
+	stroke-width: 4;
+	stroke-linecap: round;
+	stroke-dasharray: 119.4;
+	stroke-dashoffset: 0;
+	transition: stroke-dashoffset 1s linear;
+}
+.app-install-notification__ring-text {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 11px;
+	font-weight: 700;
+	color: var(--dark);
+}
+.app-install-notification__close--header {
+	flex: 0 0 auto;
+	border: none;
+	background: transparent;
+	color: var(--gray);
+	font-size: 16px;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	cursor: pointer;
+}
+.app-install-notification__close--header:not(:disabled):hover,
+.app-install-notification__close--header:not(:disabled):focus {
+	background: var(--light);
+	color: var(--dark);
+}
+.app-install-notification__close:disabled {
+	cursor: not-allowed;
+	opacity: 0.55;
+}
+.app-install-notification__close:focus-visible {
+	outline: 2px solid var(--primary, #007bff);
+	outline-offset: 2px;
+}
+
+/* ---- Mobile (Android/iOS) body ---- */
+.app-install-notification__graphic {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 14px;
+	padding: 10px 22px 6px;
+}
+.app-install-notification__graphic-icon {
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 24px;
+}
+.app-install-notification__graphic-icon--green {
+	background: #e3f6e8;
+	color: #2fb355;
+}
+.app-install-notification__graphic-icon--light {
+	background: #eef1f6;
+	color: #8893a6;
+}
+.app-install-notification__graphic-icon--pale {
+	background: #eefaf0;
+	color: #79c796;
+}
+.app-install-notification__graphic-icon--dark {
+	background: #2a2a2a;
+	color: var(--white, #fff);
+}
+.app-install-notification__actions {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding: 10px 22px 18px;
+}
+.app-install-notification__button {
+	border: none;
+	border-radius: 8px;
+	padding: 11px 16px;
+	font-size: 14px;
+	font-weight: 600;
+	/* cursor: pointer; */
+}
+.app-install-notification__button--primary {
+	background: var(--primary, #007bff);
+	color: var(--white, #fff);
+}
+.app-install-notification__button--primary:hover,
+.app-install-notification__button--primary:focus {
+	opacity: 0.9;
+}
+.app-install-notification__button--secondary {
+	background: var(--light);
+	color: var(--dark);
+}
+.app-install-notification__button--secondary:hover,
+.app-install-notification__button--secondary:focus {
+	background: #e2e2e2;
+}
+.app-install-notification__button:focus-visible {
+	outline: 2px solid var(--primary, #007bff);
+	outline-offset: 2px;
+}
+
+/* ---- Footer bar: countdown info + (desktop) close button ---- */
+.app-install-notification__footer-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	background: #f4f6fa;
+	padding: 12px 22px;
+	flex-wrap: wrap;
+}
+.app-install-notification__footer-info {
+	font-size: 13px;
+	color: var(--gray);
+}
+.app-install-notification__footer-info strong {
+	color: var(--dark);
+}
+.app-install-notification__close--footer {
+	border: none;
+	border-radius: 8px;
+	padding: 9px 20px;
+	font-size: 13px;
+	font-weight: 600;
+	background: var(--light);
+	color: var(--dark);
+	cursor: pointer;
+	min-width: inherit;
+}
+.app-install-notification__close--footer:not(:disabled):hover,
+.app-install-notification__close--footer:not(:disabled):focus {
+	background: var(--danger);
+	color: var(--white);
+}
+
+/* ---- Desktop: QR codes and store badges beside the installation guide ---- */
+.app-install-notification__panel {
+	display: flex;
+	gap: 0;
+	background: #f4f6fa;
+	margin: 0 22px 18px;
+	border-radius: 12px;
+	overflow: hidden;
+}
+.app-install-notification__col {
+	flex: 1 1 0;
+	padding: 20px 18px;
+	min-width: 0;
+}
+.app-install-notification__col + .app-install-notification__col {
+	border-left: 1px solid rgba(0, 0, 0, 0.06);
+}
+.app-install-notification__col-title {
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--dark);
+	margin: 0 0 14px;
+}
+.app-install-notification__qr-col {
+	text-align: center;
+}
+.app-install-notification__qr-group {
+	display: flex;
+	gap: 14px;
+	justify-content: center;
+	flex-wrap: wrap;
+}
+.app-install-notification__qr-block {
+	text-align: center;
+	flex: 1 1 0;
+	min-width: 0;
+}
+.app-install-notification__qr-label {
+	margin: 6px 0 0;
+	font-size: 12px;
+	font-weight: 600;
+}
+.app-install-notification__qr-code {
+	display: block;
+	width: 100%;
+	height: auto;
+	max-width: 180px;
+	aspect-ratio: 1;
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	border-radius: 8px;
+	padding: 6px;
+	background: var(--white);
+}
+.app-install-notification__store-badges {
+	margin: 0 auto;
+	display: flex;
+	gap: 12px;
+}
+.app-install-notification__qr-caption {
+	display: flex;
+	align-items: flex-start;
+	gap: 6px;
+	text-align: left;
+	font-size: 11px;
+	color: var(--gray);
+	background: rgba(0, 123, 255, 0.08);
+	border-radius: 8px;
+	padding: 8px 10px;
+	margin: 14px 0 0;
+}
+.app-install-notification__button--store-badge {
+	width: auto;
+	flex: 1 1 0;
+	min-width: 0;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 14px;
+	border-radius: 8px;
+	margin-bottom: 0;
+	color: var(--white, #fff);
+	font-size: 13px;
+}
+.app-install-notification__button--store-badge:last-of-type {
+	margin-bottom: 0;
+}
+.app-install-notification__button--google {
+	background: #1f9d55;
+}
+.app-install-notification__button--apple {
+	background: #000;
+}
+.app-install-notification__store-badge-text {
+	display: flex;
+	flex-direction: column;
+	text-align: left;
+	font-weight: 600;
+	line-height: 1.2;
+	flex: 1 1 auto;
+	font-size: 16px;
+}
+.app-install-notification__store-badge-text small {
+	font-weight: 400;
+	font-size: 10px;
+	opacity: 0.85;
+}
+.app-install-notification__store-badge-chevron {
+	font-size: 11px;
+	opacity: 0.8;
+}
+.app-install-notification__button--link {
+	background: none;
+	padding: 0;
+	font-size: 12px;
+	font-weight: 600;
+	color: #000;
+	display: flex;
+	gap:5px;
+	align-items: center;
+
+}
+.app-install-notification__guide {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.app-install-notification__guide-step {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	font-size: 12px;
+	color: var(--dark);
+	line-height: 1.4;
+}
+.app-install-notification__guide-step:not(:last-child){margin-bottom: 14px;}
+.app-install-notification__guide-step-badge {
+	flex: 0 0 auto;
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+	background: var(--primary, #007bff);
+	color: var(--white, #fff);
+	font-size: 11px;
+	font-weight: 700;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.app-install-notification__guide-highlight {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	background: rgba(0, 123, 255, 0.08);
+	border-radius: 8px;
+	padding: 10px 12px;
+	font-size: 11px;
+	color: var(--dark);
+}
+
+@media (max-width: 991.98px) {
+	.app-install-notification__panel {
+		flex-direction: column;
+	}
+	.app-install-notification__col + .app-install-notification__col {
+		border-left: none;
+		border-top: 1px solid rgba(0, 0, 0, 0.06);
+	}
+}
+
+@media (max-width: 575.98px) {
+	.app-install-notification__footer-bar {
+		flex-direction: column;
+		align-items: stretch;
+		text-align: center;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.app-install-notification.modal.fade .modal-dialog,
+	.app-install-notification__ring-progress {
+		transition: none;
+	}
+}

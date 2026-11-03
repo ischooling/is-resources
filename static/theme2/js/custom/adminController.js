@@ -138,6 +138,9 @@ const contentHandlers = {
     'add-sub-partner': () => renderB2BSubPartnerContent("Sub Partner List", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'partner-fee-structure': () => renderB2BPartnerFeeStructureContent("Fee Structure", roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'profile-view': async ({ extraParam }) => {
+        if (typeof mountAppInstallPromptAdminToggle !== 'function') {
+            await new Promise((res, rej) => $.getScript(PATH_FOLDER_JS2 + RESOURCES_FROM_MIN_LOCATION + 'custom/appInstallPromptAdminToggle.js').done(res).fail(rej));
+        }
         if (typeof renderStudentProfilePage !== 'function') {
             await new Promise((res, rej) => $.getScript(PATH_FOLDER_JS2 + RESOURCES_FROM_MIN_LOCATION + 'custom/profileViewNewContent.js').done(res).fail(rej));
         }

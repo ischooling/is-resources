@@ -742,6 +742,9 @@ function updateTeacherProfileDTO() {
 	updateProfileTeacherDTO['teacherPlacementSubjectIds'] = $('#teacherPlacementSubjectIds').val().trim();
 	updateProfileTeacherDTO['officialEmailId'] = escapeCharacters($('#officialEmailId').val().trim());
 	updateProfileTeacherDTO['providerId'] = $('#courseProvider').val().trim();
+	if ($('#appInstallPromptEnabled').length) {
+		updateProfileTeacherDTO['appInstallPromptEnabled'] = $('#appInstallPromptEnabled').is(':checked') ? 'Y' : 'N';
+	}
 
 	return updateProfileTeacherDTO;
 
@@ -778,7 +781,9 @@ function updateProfileStudentDTO() {
 	updateProfileStudentDTO['guardianEmail'] = escapeCharacters($('#guardianEmail').val().trim());
 	updateProfileStudentDTO['guardianWorkCodeNo'] = $('#guardianWorkCodeNo').val().trim();
 	updateProfileStudentDTO['guardianWorkContactNo'] = $('#guardianWorkContactNo').val().trim();
-
+	if ($('#appInstallPromptEnabled').length) {
+		updateProfileStudentDTO['appInstallPromptEnabled'] = $('#appInstallPromptEnabled').is(':checked') ? 'Y' : 'N';
+	}
 
 	return updateProfileStudentDTO;
 
@@ -790,7 +795,9 @@ function updateProfileParentDTO() {
 	updateProfileParentDTO['workStdCode'] = escapeCharacters($('#workStdCode').val().trim());
 	updateProfileParentDTO['workPhoneNo'] = $('#workPhoneNo').val().trim();
 	updateProfileParentDTO['occupation'] = escapeCharacters($('#occupation').val().trim());
-
+	if ($('#appInstallPromptEnabled').length) {
+		updateProfileParentDTO['appInstallPromptEnabled'] = $('#appInstallPromptEnabled').is(':checked') ? 'Y' : 'N';
+	}
 
 	return updateProfileParentDTO;
 

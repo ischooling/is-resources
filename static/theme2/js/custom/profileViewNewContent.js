@@ -63,6 +63,10 @@ async function renderStudentProfilePage(extraParam) {
         var html = getStudentProfilePageContent(data);
         $("#dashboardContentInHTML").hide();
         $("#dashboardContentInHTMLAdditional").html(getProfilePageHeader() + html).show();
+        if (PROFILE_RESPONSE_DATA.showAppInstallPromptAdminToggle && PROFILE_RESPONSE_DATA.userId) {
+            mountAppInstallPromptAdminToggle($("#appInstallPromptMount"), PROFILE_RESPONSE_DATA.userId,
+                PROFILE_RESPONSE_DATA.appInstallPromptEnabled, true);
+        }
         checkJoinedSports(data[4]);
         profileViewPageLoadEvent(data);
         initProfileContactVerificationForProfilePage();
@@ -176,6 +180,9 @@ function getStudentProfilePageContent(data) {
     }
     html += `<div class="full profile-section" id="studentEmailDIV"></div>`
     html += `<div class="full profile-section" id="zoomRegistrationDIV"></div>`
+    if (PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA.showAppInstallPromptAdminToggle) {
+        html += appInstallPromptProfileSectionShell();
+    }
     if (USER_ROLE == "STUDENT") {
         html += `<div class="card profile-section wd-student-section" id="withdrawal_request_information">
             <div class="card-body">
@@ -198,10 +205,38 @@ function getStudentProfilePageContent(data) {
     return html;
 }
 
+function profileAppInstallPromptStepIndex() {
+    var emailIndex = (USER_ROLE != "STUDENT" && SHOW_RESERVE_SEAT_SECTION) ? 8 : 7;
+    var registrationIndex = parseInt(emailIndex, 10) + 1;
+    if (SHOW_STUDENT_REGISTRATION_SECTION) {
+        return (registrationIndex + 1).toString();
+    }
+    return (parseInt(emailIndex, 10) + 1).toString();
+}
+
+function appInstallPromptProfileSectionShell() {
+    var step = profileAppInstallPromptStepIndex();
+    return `<div class="card profile-section mt-3 mb-4" id="app_install_prompt_information">
+            <div class="card-body">
+                <div class="col-12 p-0 mb-2">
+                    <h5 class="text-dark font-weight-semi-bold d-flex align-items-center mb-0">
+                        <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px">
+                            <i class="fa fa-mobile font-12"></i>
+                        </span>
+                        <span class="flex-grow-1">${step}. Install Mobile App Reminder</span>
+                    </h5>
+                </div>
+                <div id="appInstallPromptMount"></div>
+            </div>
+        </div>`;
+}
+
 function profileSectionTabs() {
     var commIndex = (USER_ROLE != "STUDENT" && SHOW_RESERVE_SEAT_SECTION) ? "7" : "6";
     var emailIndex = (USER_ROLE != "STUDENT" && SHOW_RESERVE_SEAT_SECTION) ? "8" : "7";
     var registrationIndex = (parseInt(emailIndex, 10) + 1).toString();
+    var appInstallIndex = profileAppInstallPromptStepIndex();
+    var showAppInstallNav = PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA.showAppInstallPromptAdminToggle;
     var html =
         `<div class="full mt-3">
         <ul class="m-0 p-0">
@@ -307,7 +342,7 @@ function profileSectionTabs() {
                     </a>
                 </li>`: ``
         }
-            <li class="bg-white border border-top-left-rounded ${SHOW_STUDENT_REGISTRATION_SECTION || USER_ROLE == "STUDENT" ? '' : 'rounded-bottom-left-10 rounded-bottom-right-10'} overflow-hidden">
+            <li class="bg-white border border-top-left-rounded ${SHOW_STUDENT_REGISTRATION_SECTION || USER_ROLE == "STUDENT" || showAppInstallNav ? '' : 'rounded-bottom-left-10 rounded-bottom-right-10'} overflow-hidden">
                 <a href="#studentEmailDIV" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
                     <div class="text-dark font-weight-bold flex-grow-1">${USER_ROLE == "STUDENT" ? '6' : emailIndex}. Student School Email Account</div>
                     <div class="widget-content-wrapper flex-fill circle-percentage text-right">
@@ -322,7 +357,7 @@ function profileSectionTabs() {
                 </a>
             </li>
             ${SHOW_STUDENT_REGISTRATION_SECTION ?
-                `<li class="bg-white border border-top-left-rounded ${USER_ROLE == "STUDENT" ? '' : 'rounded-bottom-left-10 rounded-bottom-right-10'} overflow-hidden">
+                `<li class="bg-white border border-top-left-rounded ${USER_ROLE == "STUDENT" || showAppInstallNav ? '' : 'rounded-bottom-left-10 rounded-bottom-right-10'} overflow-hidden">
                     <a href="#zoomRegistrationDIV" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
                         <div class="text-dark font-weight-bold flex-grow-1">${USER_ROLE == "STUDENT" ? '6' : registrationIndex}. Enable Registration</div>
                         <div class="widget-content-wrapper flex-fill circle-percentage text-right">
@@ -334,6 +369,13 @@ function profileSectionTabs() {
                                 </div>
                             </div>
                         </div>
+                    </a>
+                </li>`
+                : ``}
+            ${showAppInstallNav ?
+                `<li class="bg-white border border-top-left-rounded ${USER_ROLE == "STUDENT" ? '' : 'rounded-bottom-left-10 rounded-bottom-right-10'} overflow-hidden">
+                    <a href="#app_install_prompt_information" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
+                        <div class="text-dark font-weight-bold flex-grow-1">${appInstallIndex}. Install Mobile App Reminder</div>
                     </a>
                 </li>`
                 : ``}

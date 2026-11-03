@@ -22,6 +22,10 @@ async function renderProfilePage(arg0){
     var html= getProfilePageContent(responseData.details, callFrom, arg0);
     $("#dashboardContentInHTML").hide();
     $("#dashboardContentInHTMLAdditional").html(html).show();
+    if (responseData.details && responseData.details.showAppInstallPromptAdminToggle) {
+        mountAppInstallPromptAdminToggle($("#parentAppInstallPromptMount"), userId,
+            responseData.details.appInstallPromptEnabled, true, responseData.details.countryTimezone);
+    }
     if(USER_ROLE == "B2B_PARTNER"){
         var payloadBank = {
         userId: USER_ID,
@@ -225,13 +229,17 @@ function getProfilePageContent(data, callFrom, arg0){
                                 </div>
                                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
                                     <div class="form-group">
-                                        <div class="profile-label field-value font-weight-semi-bold text-dark countryTimezoneIdLabel">${data.countryTimezone}</div>
+                                        <div class="profile-label field-value font-weight-semi-bold text-dark countryTimezoneIdLabel">${formatProfileTimezoneLabel(data.countryTimezone)}</div>
                                         <div class="field-input w-100 position-relative custom-field">
                                             <select id="countryTimezoneId" name="countryTimezoneId" class="form-control field-input"></select>
                                             <label class="m-0">Timezone</label>
                                         </div> 
                                     </div>  
                                 </div>
+                                ${data.showAppInstallPromptAdminToggle ? `
+                                <div class="col-12 mb-2">
+                                    <div id="parentAppInstallPromptMount"></div>
+                                </div>` : ``}
                                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
                                     <div class="form-group">
                                         <div class="profile-label field-value font-weight-semi-bold text-dark langKnownLabel">`+getLanguagesValueByCode(data.languagesKnown)+`</div>
@@ -449,4 +457,20 @@ function getProfileBankDetailsContent(data){
             </div>
         </div>`
     return html;
+}
+
+/** Display IANA zone (e.g. Asia/Dubai) without posix/right prefixes from legacy DB values. */
+function formatProfileTimezoneLabel(raw) {
+    if (raw == null || raw === '') {
+        return 'N/A';
+    }
+    var text = String(raw).trim();
+    if (!text) {
+        return 'N/A';
+    }
+    var slash = text.lastIndexOf('/');
+    if (slash >= 0 && (text.indexOf('posix/') === 0 || text.indexOf('right/') === 0)) {
+        return text.substring(slash + 1);
+    }
+    return text;
 }

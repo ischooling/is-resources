@@ -17,7 +17,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
         "user-list":{url:"",file:[{role:"",fileName:["adminManageuserListContent.js","adminManageuserList.js","roleList.js","dashboardUserActivity.js","dashboardStudent.js","agilixbuzzApi.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         // JS-rendered module (ManageUserListContent.js) — shell + tabs built client-side;
         // the old JSP fragment endpoint (manage-profile-content?profileFor=common) is no longer fetched.
-        "manage-user-list":{url:"",file:[{role:"",fileName:["ManageUserListContent.js","ManageUserStudentContent.js","ManageUserTeacherContent.js","ManageUserParentContent.js","dashboardManageUser.js","dashboardUserActivity.js","dashboardStudentTeacherSession.js","studentProfileCompletingProcess.js","profileViewNewContent.js","profileViewNew.js","withdrawalRequestUser.js"]},{role:"",fileName:["dashboardStudent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "manage-user-list":{url:"",file:[{role:"",fileName:["ManageUserListContent.js","ManageUserStudentContent.js","ManageUserTeacherContent.js","ManageUserParentContent.js","dashboardManageUser.js","dashboardUserActivity.js","dashboardStudentTeacherSession.js","studentProfileCompletingProcess.js","profileViewNewContent.js","profileViewNew.js","withdrawalRequestUser.js","appInstallPromptAdminToggle.js"]},{role:"",fileName:["dashboardStudent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         // JS-rendered Enrollment Tracker (Student Management) — cards + filters + chunked table + detail drawer.
         "enrollment-tracker":{url:"",file:[{role:"",fileName:["EnrollmentTrackerContent.js","masterContent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "student-list":{url:"manage-profile-content?moduleId="+moduleId+"&profileFor=student&userClickFrom=list&registrationType=ONE_TO_ONE&themeType=theme2",file:[],type:"JSP",init: function () {$("#studentTab").show();$("#teacherTab").hide();$("#parentsTab").hide();$("#flexStudentTab").hide();$("#batchStudentTab").hide();},pageReqType:"IN"},
@@ -448,8 +448,8 @@ async function callSchoolInneraction(actionType, arg0, replaceDiv, roleModuleId)
       "attendance":{url:"attendance-content"+arg0,file:[],type:"JSP",pageReqType:"IN"},
       "extention":{url:"student-acacdemic-year-extention?subjectId="+arg0+"&moduleId="+roleModuleId+"&extraSubjStatus="+replaceDiv,file:[],type:"JSP",pageReqType:"IN"},
       "edit-user":{url:"create-user-edit?userId="+arg0,file:[],type:"JSP",pageReqType:"IN"},
-      "1a":{url:"",file:[{role:"",fileName:["profileViewNewContent.js","profileViewNew.js","withdrawalRequestUser.js", "jquery.ckeditor.js"]},{role:"js",fileName:["ckeditor.js","circle-progress.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
-      "profile-view":{url:"",file:[{role:"",fileName:["profileViewNewContent.js","profileViewNew.js","withdrawalRequestUser.js", "jquery.ckeditor.js"]},{role:"js",fileName:["ckeditor.js","circle-progress.js"]}],funName:function(){},type:"JS",pageReqType:"IN"}
+      "1a":{url:"",file:[{role:"",fileName:["profileViewNewContent.js","profileViewNew.js","withdrawalRequestUser.js", "jquery.ckeditor.js","appInstallPromptAdminToggle.js"]},{role:"js",fileName:["ckeditor.js","circle-progress.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+      "profile-view":{url:"",file:[{role:"",fileName:["profileViewNewContent.js","profileViewNew.js","withdrawalRequestUser.js", "jquery.ckeditor.js","appInstallPromptAdminToggle.js"]},{role:"js",fileName:["ckeditor.js","circle-progress.js"]}],funName:function(){},type:"JS",pageReqType:"IN"}
     };
     var requestType = pageRequest[actionType];
     if (requestType.type == "JSP") {
@@ -490,7 +490,7 @@ async function callInneraction(actionType, arg0) {
         customLoader(true);
         var pageRequest = 
         {
-            "1a":{url:"",file:[{role:"",fileName:["adminProfileContent.js","adminProfile.js","withdrawalRequestUser.js"]}],funName:function(){renderProfilePage(arg0);},type:"JS"},
+            "1a":{url:"",file:[{role:"",fileName:["adminProfileContent.js","adminProfile.js","withdrawalRequestUser.js","appInstallPromptAdminToggle.js"]}],funName:function(){renderProfilePage(arg0);},type:"JS"},
         
         };
         var requestType = pageRequest[actionType];
