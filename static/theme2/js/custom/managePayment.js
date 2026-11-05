@@ -145,6 +145,9 @@ function advancePaymentSearchStudent(formId, moduleId) {
                         $('#' + elementId + ' tbody').html(await getAdvancePaymentSearchResult(formId, data, moduleId));
                         var table = $('#' + elementId).DataTable();//{ "pagingType": "full" }
                         $("#autoWeeklyMailStudent").DataTable();
+                        if (typeof markDuplicatePaymentRows === 'function') {
+                            markDuplicatePaymentRows(elementId);
+                        }
                         // table.on('page.dt', function () {
                         //     table.responsive.recalc();
                         // });

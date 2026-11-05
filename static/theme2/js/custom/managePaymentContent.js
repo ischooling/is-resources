@@ -142,6 +142,105 @@ function verifyAirwallexPayment(userPaymentDetailsId, serialNum) {
 	});
 }
 
+/* Duplicate gateway payments (directors only): payment-attempt-duplicates lists unrefunded
+   second charges; each matching row gets a "Duplicate" badge and a "Refund duplicate" button. */
+var DUPLICATE_PAYMENT_ATTEMPTS = {};
+
+function escapeDuplicatePaymentText(value) {
+	return $('<div>').text(value == null ? '' : String(value)).html();
+}
+
+function getDuplicatePaymentAmountText(dup) {
+	var amount = Number(dup.amount);
+	var amountText = isNaN(amount) ? (dup.amount == null ? '' : String(dup.amount))
+		: amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+	return ((dup.currency || '') + ' ' + amountText).trim();
+}
+
+function getDuplicatePaymentBadgeText(prefix, dup) {
+	return `${prefix}: ${getDuplicatePaymentAmountText(dup)} · ${dup.gateway || ''} ${dup.gatewayPaymentId || ''}`.trim();
+}
+
+async function markDuplicatePaymentRows(tableId) {
+	// Only directors see duplicates and refund them; the server checks the role again.
+	if (typeof USER_ROLE === 'undefined' || USER_ROLE != 'DIRECTOR') {
+		return;
+	}
+	var responseData;
+	try {
+		responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(false, false, 'payment-attempt-duplicates', {}, 'common');
+	} catch (e) {
+		console.error('payment-attempt-duplicates failed:', e);
+		return;
+	}
+	// FORBIDDEN (not a director) or nothing to refund: leave the table as it is.
+	if (!responseData || responseData.status != '1' || !Array.isArray(responseData.details)) {
+		return;
+	}
+	// Rows on other DataTable pages are detached from the DOM, so search the table's own nodes.
+	var $rows = $.fn.dataTable.isDataTable('#' + tableId)
+		? $($('#' + tableId).DataTable().rows().nodes())
+		: $('#' + tableId + ' tbody tr');
+	$.each(responseData.details, function (k, dup) {
+		var attemptId = parseInt(dup.attemptId, 10);
+		var userPaymentDetailsId = parseInt(dup.userPaymentDetailsId, 10);
+		if (isNaN(attemptId) || isNaN(userPaymentDetailsId)) {
+			return;
+		}
+		var $slot = $rows.filter(`[data-user-payment-details-id="${userPaymentDetailsId}"]`).find('.payment-duplicate-slot');
+		if ($slot.length === 0 || $slot.find(`#duplicate-attempt-${attemptId}`).length > 0) {
+			return;
+		}
+		DUPLICATE_PAYMENT_ATTEMPTS[attemptId] = dup;
+		$slot.append(`
+			<div id="duplicate-attempt-${attemptId}" class="mt-1 mb-2">
+				<span id="duplicate-badge-${attemptId}" class="badge text-white" style="background:var(--danger);white-space:normal;text-align:left;">${escapeDuplicatePaymentText(getDuplicatePaymentBadgeText('Duplicate', dup))}</span>
+				<a href="javascript:void(0)" id="duplicate-refund-btn-${attemptId}" class="btn btn-sm btn-outline-danger ml-1 mt-1" onclick="confirmRefundDuplicatePayment(${attemptId});">Refund duplicate</a>
+				<span id="duplicate-refund-msg-${attemptId}" style="display:block;font-weight:600;margin-top:4px;"></span>
+			</div>`);
+	});
+}
+
+function confirmRefundDuplicatePayment(attemptId) {
+	var dup = DUPLICATE_PAYMENT_ATTEMPTS[attemptId];
+	if (!dup) {
+		return;
+	}
+	var amountText = escapeDuplicatePaymentText(getDuplicatePaymentAmountText(dup));
+	var payer = dup.payerName ? ` to ${escapeDuplicatePaymentText(dup.payerName)}` : '';
+	var paymentId = escapeDuplicatePaymentText(`${dup.gateway || ''} ${dup.gatewayPaymentId || ''}`.trim());
+	showWarningMessageShow(`Refund the duplicate payment of <b>${amountText}</b>${payer} (${paymentId})? The original payment for this fee stays paid.`, `refundDuplicatePayment(${attemptId})`, '');
+}
+
+async function refundDuplicatePayment(attemptId) {
+	var btnSel = `#duplicate-refund-btn-${attemptId}`;
+	var msgSel = `#duplicate-refund-msg-${attemptId}`;
+	if ($(btnSel).hasClass('disabled')) {
+		return;
+	}
+	$(btnSel).addClass('disabled').prop('disabled', true);
+	$(msgSel).css('color', 'var(--gray)').text('Refunding...');
+	var responseData;
+	try {
+		responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, false, 'payment-attempt-refund', { attemptId: attemptId }, 'common');
+	} catch (e) {
+		console.error('payment-attempt-refund failed:', e);
+		$(msgSel).css('color', 'var(--danger)').text("We couldn't reach the server, so the refund was not started. Please check your internet connection and try again.");
+		$(btnSel).removeClass('disabled').prop('disabled', false);
+		return;
+	}
+	if (responseData && responseData.statusCode == 'REFUNDED') {
+		$(btnSel).remove();
+		$(`#duplicate-badge-${attemptId}`).css('background', 'var(--success)')
+			.text(getDuplicatePaymentBadgeText('Refunded', DUPLICATE_PAYMENT_ATTEMPTS[attemptId] || {}));
+		$(msgSel).css('color', 'var(--success)').text(responseData.message || 'The duplicate payment was refunded.');
+	} else {
+		$(msgSel).css('color', 'var(--danger)').text((responseData && responseData.message) ? responseData.message
+			: 'The refund did not go through and no money was moved. Please try again in a minute.');
+		$(btnSel).removeClass('disabled').prop('disabled', false);
+	}
+}
+
 async function getAdvancePaymentSearchResult(formId, data, moduleId) {
     const isCopyLinkAllowed = data && data.copyLinkAllowed === true;
     const allowedUsers = getSettingsByTypeAndKey('CONFIGURATION','ALLOW_EDIT_CUSTOM_PAYMENTS');
@@ -178,7 +277,7 @@ async function getAdvancePaymentSearchResult(formId, data, moduleId) {
 		}
 
 		html += `
-			<tr id="row_${k}">
+			<tr id="row_${k}" data-user-payment-details-id="${apsrSingle.userPaymentDetailsId}">
 				<td>${serialNum}</td>
 				<td>
 					<span>
@@ -268,6 +367,7 @@ async function getAdvancePaymentSearchResult(formId, data, moduleId) {
 					<span>
 						<i id="payment-status-${serialNum}" class="fa ${paymentStatusIcon} text-success"></i>
 						<span id="payment-status-message-${serialNum}">&nbsp;${paymentStatusText}</span><br>
+						<div class="payment-duplicate-slot"></div>
 						<strong>Receipt:</strong>
 						${apsrSingle.recieptLink !== 'N/A' ? `
 							<a href="${apsrSingle.recieptLink}" target="_blank" class="btn btn-outline-info">
@@ -396,6 +496,7 @@ async function getAdvancePaymentSearchResult(formId, data, moduleId) {
 			if (apsrSingle.paymentStatus == "SUCCESS") {
 				html += '<span class="btn btn-sm btn-primary  mr-1"  onclick="return showWarningMessageShow(\'Are you sure you want to re-send mail?\',\'sendmail(' + apsrSingle.userPaymentDetailsId + ')\'); ">Resend Mail</span>';
 			}
+			html += '<span class="btn btn-sm btn-primary  mr-1" onclick="showPaymentInitiationLog(' + apsrSingle.userPaymentDetailsId + ');">Log</span>';
 			if (null != apsrSingle.signupUrl && apsrSingle.signupUrl != '') {
 				html += '<span class="btn btn-sm btn-primary  mr-1" onclick="return mapUnregisteredUserPayment(\'mapStudentForm\',' + apsrSingle.entityId + ',' + SCHOOL_ID + ',\'STUDENT\',\'10,11,12,13,14,15,16\',\'' + apsrSingle.studentName + '\',\'' + apsrSingle.studentEmail + '\'); ">Map to Student</span>';
 			}
@@ -1234,3 +1335,81 @@ $(document).on('shown.bs.modal', '#mapStudentModal, #addPaymentModal, #advSerch,
         refreshCustomFieldState($(this));
     }
 });
+
+function showPaymentInitiationLog(userPaymentDetailsId) {
+    var existingModal = document.getElementById('paymentInitiationLogModal');
+    if (existingModal) existingModal.remove();
+
+    var modalHtml = '<div class="modal fade" id="paymentInitiationLogModal" tabindex="-1" role="dialog">'
+        + '<div class="modal-dialog modal-xl" role="document">'
+        + '<div class="modal-content">'
+        + '<div class="modal-header bg-primary text-white">'
+        + '<h5 class="modal-title">Payment Initiation Log</h5>'
+        + '<button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>'
+        + '</div>'
+        + '<div class="modal-body" id="paymentInitiationLogBody">'
+        + '<div class="text-center"><i class="fa fa-spinner fa-spin fa-2x"></i> Loading...</div>'
+        + '</div>'
+        + '<div class="modal-footer">'
+        + '<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>'
+        + '</div></div></div></div>';
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    $('#paymentInitiationLogModal').modal('show');
+
+    $.ajax({
+        url: '/' + SCHOOL_UUID + '/dashboard/payment-initiation-log?userPaymentDetailsId=' + userPaymentDetailsId,
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (response.status === 'SUCCESS' && response.data && response.data.length > 0) {
+                var html = '<div class="table-responsive"><table class="table table-bordered table-sm font-12">';
+                html += '<thead class="bg-light"><tr>';
+                html += '<th>S.N.</th><th>Date</th><th>Payment Details</th><th>Payer / Student</th><th>Transaction Details</th><th>Status</th>';
+                html += '</tr></thead><tbody>';
+                var sn = 1;
+                response.data.forEach(function(log) {
+                    html += '<tr>';
+                    html += '<td>' + sn++ + '</td>';
+                    html += '<td style="white-space:nowrap">' + (log.createdDate || '-') + '</td>';
+                    html += '<td>';
+                    html += '<b>Gateway:</b> ' + (log.pgName || '-');
+                    html += '<br><b>Amount:</b> ' + (log.amount || '-') + ' ' + (log.currency || '');
+                    html += '<br><b>Payment:</b> ' + (log.paymentName || '-');
+                    html += '<br><b>Via:</b> ' + (log.initiatedVia || '-');
+                    if (log.browserDetails) html += '<br><b>Browser:</b> <small>' + log.browserDetails + '</small>';
+                    html += '</td>';
+                    html += '<td>';
+                    html += '<b>' + (log.payerName || '-') + '</b>';
+                    html += '<br><small>' + (log.payerEmail || '') + '</small>';
+                    if (log.payerPhone) html += '<br><small>' + log.payerPhone + '</small>';
+                    html += '<hr class="my-1">';
+                    html += '<b>Student:</b> ' + (log.studentName || '-');
+                    if (log.studentGrade) html += '<br><small>' + log.studentGrade + '</small>';
+                    html += '</td>';
+                    html += '<td style="word-break:break-all">';
+                    html += '<b>Ref:</b> ' + (log.referenceNumber || '-');
+                    html += '<br><b>Session ID:</b> ' + (log.gatewaySessionId || '-');
+                    html += '<br><b>Txn ID:</b> ' + (log.gatewayPaymentId || '-');
+                    html += '<br><b>IP:</b> ' + (log.ipAddress || '-');
+                    html += '</td>';
+                    html += '<td><span class="badge badge-' + getLogStatusBadge(log.logStatus) + '">' + (log.logStatus || '-') + '</span></td>';
+                    html += '</tr>';
+                });
+                html += '</tbody></table></div>';
+                $('#paymentInitiationLogBody').html(html);
+            } else {
+                $('#paymentInitiationLogBody').html('<div class="text-center text-muted">No payment initiation logs found.</div>');
+            }
+        },
+        error: function() {
+            $('#paymentInitiationLogBody').html('<div class="text-center text-danger">Error loading payment logs.</div>');
+        }
+    });
+}
+
+function getLogStatusBadge(status) {
+    if (status === 'SUCCESS') return 'success';
+    if (status === 'FAILURE') return 'danger';
+    if (status === 'INITIATED') return 'warning';
+    return 'secondary';
+}

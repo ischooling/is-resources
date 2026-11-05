@@ -1,5 +1,16 @@
 var CHECK_PAYMENT_INTERVAL;
 var CHECK_PAYMENT_INTERVAL_COUNT=0;
+// Double-click guard for invokePaymentGateway: true while the open-payment check (or the
+// AJAX invoke) is running, and while the page navigates to the gateway after it.
+var PAYMENT_ATTEMPT_CHECK_RUNNING = false;
+// State of the "payment already in progress" modal: {details, retryArgs, reopenOptions, ...}.
+var PAYMENT_IN_PROGRESS_CONTEXT = null;
+// Back/forward cache restores this page with the guard still set; release it so Pay works again.
+window.addEventListener('pageshow', function (event) {
+	if (event.persisted) {
+		PAYMENT_ATTEMPT_CHECK_RUNNING = false;
+	}
+});
 function getSchoolAdminChatButton() {
 	return `<a target="_blank" href="${CHAT_URL}/onboarding-support?uuid=${UNIQUEUUID}" class="btn btn-success btn-lg btn-block btn-shadow rounded-10 mb-3 scale-animate" style="width:92%;margin:0 auto 1rem auto;font-size:15px;">
 								<i class="fa fa-comments mr-2"></i>Live Chat with School Administration
@@ -123,7 +134,9 @@ async function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, 
         initiateVia: window.location.href.includes('fee-receipt') ? 'Link' : '',
         // Explicit caller URL for the AFS external-app Back button (don't rely on the
         // Referer header, which Safari/referrer-policy can strip on a top-level launch).
-        backUrl: window.location.href
+        backUrl: window.location.href,
+        // This browser's own id: if its checkout tab is closed and it comes back, the in-progress modal is skipped.
+        browserId: getPaymentBrowserId()
     };
 
     /* =========================================================================
@@ -142,7 +155,37 @@ async function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, 
        MUST be added to this list or it will render the server error page.
     ========================================================================== */
     var CLIENT_SIDE_GATEWAYS = ['wellsfargo', 'convera', 'yoco', 'wiretransfer', 'cash', 'paypal transfer', 'smoovpay'];
+    // A second Pay click while the check below (or the AJAX invoke) is still running does nothing.
+    if (PAYMENT_ATTEMPT_CHECK_RUNNING) {
+        return;
+    }
+    var retryArgs = [formId, userPaymentDetailsId, paidByUserId, schoolId, paymentGateway, schoolIdOfPaymentGateway];
     if (CLIENT_SIDE_GATEWAYS.indexOf((paymentGateway || '').toLowerCase()) === -1) {
+        // Ask the server first whether this fee already has an open (or paid) payment, so the
+        // parent sees the "already in progress" modal instead of the blocked launch page.
+        PAYMENT_ATTEMPT_CHECK_RUNNING = true;
+        var checkResponse;
+        try {
+            checkResponse = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,false,'payment-attempt-check',
+                {userPaymentDetailsId: userPaymentDetailsId, browserId: payload.browserId, location: payload.location},'common');
+        } catch (error) {
+            console.error('Payment attempt check failed:', error);
+            PAYMENT_ATTEMPT_CHECK_RUNNING = false;
+            showModalMessage(0, "We couldn't check whether a payment is already in progress, so we haven't started a new one. Please check your internet connection and try again.");
+            return;
+        }
+        if (handleOpenPaymentAttempt(checkResponse, retryArgs)) {
+            PAYMENT_ATTEMPT_CHECK_RUNNING = false;
+            return;
+        }
+        if (!checkResponse || checkResponse.status != '1') {
+            PAYMENT_ATTEMPT_CHECK_RUNNING = false;
+            showModalMessage(0, (checkResponse && checkResponse.message) ? checkResponse.message
+                : "We couldn't check whether a payment is already in progress, so we haven't started a new one. Please try again in a minute.");
+            return;
+        }
+        // NO_OPEN_PAYMENT: launch as before. The guard stays set while the page navigates away
+        // (the pageshow listener releases it if the browser restores this page).
         showModalMessage(1, "Please wait while redirecting to payment gateway...");
         submitPaymentGatewayForm(payload);
         return;
@@ -157,15 +200,21 @@ async function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, 
     }
 
     var responseData;
+    PAYMENT_ATTEMPT_CHECK_RUNNING = true;
     try {
         responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true,false,'invoke-payment-gateway',payload,'common');
     }catch (error) {
         console.error('Payment invoke failed:', error);
+        PAYMENT_ATTEMPT_CHECK_RUNNING = false;
         showModalMessage(0, 'Network error. Please try again.');
         // newWindow.close();
         return;
     }
+    PAYMENT_ATTEMPT_CHECK_RUNNING = false;
 	if(responseData.status == '0' || responseData.status == '2' || responseData.status == '3') {
+		if (handleOpenPaymentAttempt(responseData, retryArgs)) {
+			return;
+		}
 		if (responseData.statusCode == 'OLD_FEE') {
 			renderFeeCard(responseData);
 		}else{
@@ -204,6 +253,390 @@ function submitPaymentGatewayForm(payload) {
     form.appendChild(input);
     document.body.appendChild(form);
     form.submit();
+}
+
+/* =========================================================================
+   OPEN PAYMENT ATTEMPT (payment-attempt-check / invoke-payment-gateway outcomes)
+   PAYMENT_IN_PROGRESS -> modal with the earlier attempt's details, "Continue my payment" (Stripe only),
+   "Start a new payment" (payment-attempt-cancel) and "Not now". The browser that started the payment
+   skips the modal (resumeOrRestartInThisBrowser).
+   ALREADY_PAID -> message + fee row marked paid.
+========================================================================== */
+// Returns true when the response is an open-payment outcome and has been handled here.
+function handleOpenPaymentAttempt(responseData, retryArgs) {
+	if (!responseData) {
+		return false;
+	}
+	if (responseData.statusCode == 'ALREADY_PAID') {
+		showModalMessage(0, responseData.message || "This fee is already paid. You don't need to pay again.");
+		markFeeRowAsPaid(retryArgs[1]);
+		return true;
+	}
+	if (responseData.statusCode == 'PAYMENT_IN_PROGRESS' && responseData.details) {
+		if (responseData.details.sameBrowser) {
+			resumeOrRestartInThisBrowser(responseData.details, retryArgs);
+		} else {
+			showPaymentInProgressModal(responseData.details, retryArgs);
+		}
+		return true;
+	}
+	return false;
+}
+
+// A random id per browser, kept in localStorage. '' when storage is unavailable (private mode): then the
+// modal always shows, as before.
+function getPaymentBrowserId() {
+	try {
+		var id = window.localStorage.getItem('isPaymentBrowserId');
+		if (!id) {
+			id = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID()
+				: 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
+			window.localStorage.setItem('isPaymentBrowserId', id);
+		}
+		return id;
+	} catch (e) {
+		return '';
+	}
+}
+
+// This browser started the open payment and its checkout tab was closed: nobody else is involved, so no modal.
+// Same fee and gateway (Stripe): back to that checkout. Otherwise close it at the gateway and start again here.
+function resumeOrRestartInThisBrowser(details, retryArgs) {
+	var sameGateway = (details.gateway || '').toLowerCase() == (retryArgs[4] || '').toLowerCase();
+	if (details.sameFee !== false && sameGateway && details.canContinue && details.continueUrl) {
+		$('#paymentOptionsModal').modal('hide');
+		showModalMessage(1, "Taking you back to the payment you started...");
+		window.location.assign(details.continueUrl);
+		return;
+	}
+	showPaymentInProgressModal(details, retryArgs);
+	cancelOpenPaymentAttempt();
+}
+
+// Same fee-row update getPaymentPaidStatus does on SUCCESS.
+function markFeeRowAsPaid(userPaymentDetailsId) {
+	if($("#payNowBtn"+userPaymentDetailsId).length>0){
+		$("#payNowBtn"+userPaymentDetailsId).remove();
+		$("#paymentStatus"+userPaymentDetailsId).text("SUCCESS");
+		$("#paymentDate"+userPaymentDetailsId+"Wrapper").removeClass("d-none");
+		$("#paymentDate"+userPaymentDetailsId).text(changeDateFormat(new Date(), "MMM-dd-yyyy"));
+	}
+	$("#paymentOptionsModal").modal("hide");
+	$(".paymentUnderProcessOverlay").remove();
+}
+
+function escapePaymentAttemptText(value) {
+	return $('<div>').text(value == null ? '' : String(value)).html();
+}
+
+// ISO-8601 UTC -> the viewer's local date and time, e.g. "3 Nov 2026, 6:21 AM".
+function formatPaymentAttemptDateTime(isoValue, timeOnly) {
+	if (!isoValue) {
+		return '';
+	}
+	var date = new Date(isoValue);
+	if (isNaN(date.getTime())) {
+		return String(isoValue);
+	}
+	if (timeOnly) {
+		return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+	}
+	return date.toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+
+// "a Mac (Chrome)" style phrase for where the earlier payment was started ('' when unknown).
+function getPaymentAttemptDeviceSummary(details) {
+	var device = (details.device || '').trim();
+	var browserName = (details.browser || '').trim().split(' ')[0];
+	if (!device) {
+		return '';
+	}
+	var article = /^[aeiou]/i.test(device) ? 'an ' : 'a ';
+	return article + device + (browserName ? ' (' + browserName + ')' : '');
+}
+
+function getPaymentAttemptGatewayName(details) {
+	return details.gateway || details.gatewayLabel || 'the payment gateway';
+}
+
+function isPaymentAttemptToday(isoValue) {
+	var date = new Date(isoValue);
+	return !isNaN(date.getTime()) && date.toDateString() == new Date().toDateString();
+}
+
+// The card under the title: what is being paid, when and where it was started, and when it closes by itself.
+function getPaymentInProgressSummary(details) {
+	var deviceSummary = escapePaymentAttemptText(getPaymentAttemptDeviceSummary(details));
+	var startedLine = '';
+	if (details.startedAt) {
+		startedLine = isPaymentAttemptToday(details.startedAt)
+			? 'Started at ' + escapePaymentAttemptText(formatPaymentAttemptDateTime(details.startedAt, true))
+			: 'Started on ' + escapePaymentAttemptText(formatPaymentAttemptDateTime(details.startedAt, false));
+	}
+	if (deviceSummary) {
+		startedLine += (startedLine ? ' on ' : 'Started on ') + deviceSummary;
+	}
+	return `<div class="pip-summary">
+		${details.paymentName ? `<div class="pip-summary-name">${escapePaymentAttemptText(details.paymentName)}</div>` : ''}
+		${startedLine ? `<div class="pip-summary-meta">${startedLine}</div>` : ''}
+		${getPaymentInProgressExpiryLine(details)}
+	</div>`;
+}
+
+function getPaymentInProgressExpiryLine(details) {
+	if (!details.expiresAt) {
+		return '';
+	}
+	var expires = new Date(details.expiresAt);
+	if (isNaN(expires.getTime())) {
+		return '';
+	}
+	var msLeft = expires.getTime() - Date.now();
+	if (msLeft <= 0) {
+		return `<div class="pip-summary-meta">It has reached its time limit and will close by itself in a moment. Then you can pay from any device.</div>`;
+	}
+	var minsLeft = Math.round(msLeft / 60000);
+	var inText = minsLeft < 1 ? 'in less than a minute' : `in ${minsLeft} min`;
+	return `<div class="pip-summary-meta">If it isn't finished, it closes by itself at ${escapePaymentAttemptText(formatPaymentAttemptDateTime(details.expiresAt, true))} (${inText}).</div>`;
+}
+
+// Round icon at the top of every state. tone: warn | ok | err | info
+function getPaymentInProgressIcon(tone, iconClass) {
+	return `<div class="pip-icon pip-icon-${tone}" aria-hidden="true"><i class="fa ${iconClass}"></i></div>`;
+}
+
+function getPaymentInProgressModalShell() {
+	return `<div id="paymentInProgressModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="paymentInProgressTitle" data-backdrop="static" data-keyboard="false">
+		<style>
+			#paymentInProgressModal .modal-dialog{max-width:460px;box-shadow:none;}
+			#paymentInProgressModal .modal-content{border:0;border-radius:20px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.18);}
+			#paymentInProgressModal .pip-body{background:var(--white);padding:28px 24px 18px;text-align:center;}
+			#paymentInProgressModal .pip-icon{width:64px;height:64px;margin:0 auto 14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;border:1px solid transparent;background:var(--light);}
+			#paymentInProgressModal .pip-icon-warn{background:color-mix(in oklab, var(--warning) 20%, var(--white));color:color-mix(in oklab, var(--warning), black 40%);}
+			#paymentInProgressModal .pip-icon-ok{background:color-mix(in oklab, var(--success) 14%, var(--white));color:var(--success);}
+			#paymentInProgressModal .pip-icon-err{background:color-mix(in oklab, var(--danger) 14%, var(--white));color:var(--danger);}
+			#paymentInProgressModal .pip-icon-info{background:var(--plc);color:var(--pc);}
+			#paymentInProgressModal .pip-title{font-size:21px;font-weight:600;line-height:1.3;margin:0 0 6px;text-transform:none;color:inherit;}
+			#paymentInProgressModal .pip-lead{color:var(--gray);font-size:15px;line-height:1.5;margin:0 auto 18px;max-width:360px;}
+			#paymentInProgressModal .pip-summary{text-align:left;background:var(--light);background:color-mix(in oklab, var(--light) 55%, var(--white));border:1px solid transparent;border-radius:12px;padding:12px 14px;margin-bottom:14px;}
+			#paymentInProgressModal .pip-summary-name{font-weight:600;font-size:16px;line-height:1.35;word-break:break-word;}
+			#paymentInProgressModal .pip-summary-meta{color:var(--gray);font-size:13.5px;line-height:1.45;margin-top:2px;}
+			#paymentInProgressModal .pip-note{display:flex;gap:10px;text-align:left;font-size:13.5px;line-height:1.45;background:var(--plc);border:1px solid transparent;border-radius:12px;padding:10px 12px;margin-bottom:14px;}
+			#paymentInProgressModal .pip-note .fa{color:var(--pc);margin-top:2px;}
+			#paymentInProgressModal .pip-option{text-align:left;border:1px solid var(--light);border:1px solid color-mix(in oklab, var(--gray) 30%, var(--white));border-radius:14px;padding:14px 16px 16px;margin-bottom:12px;}
+			#paymentInProgressModal .pip-option-main{background:var(--plc);border-color:var(--pc);border-color:color-mix(in oklab, var(--pc) 45%, var(--white));}
+			#paymentInProgressModal .pip-option-title{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:600;margin:0 0 4px;text-transform:none;color:inherit;}
+			#paymentInProgressModal .pip-option-main .pip-option-title{color:var(--pc);color:color-mix(in oklab, var(--pc), black 25%);}
+			#paymentInProgressModal .pip-option-text{color:var(--gray);font-size:14px;line-height:1.45;margin:0 0 12px;}
+			#paymentInProgressModal .btn.pip-btn{display:block;width:100%;border-radius:10px;padding:10px 16px;font-size:15.5px;font-weight:500;}
+			#paymentInProgressModal .btn.pip-btn + .btn.pip-btn{margin-top:10px;}
+			#paymentInProgressModal .btn.pip-btn-primary{background:var(--pc);border:1px solid var(--pc);color:#fff;}
+			#paymentInProgressModal .btn.pip-btn-primary:hover{background:color-mix(in oklab, var(--pc), black 12%);}
+			#paymentInProgressModal .btn.pip-btn-outline{background:var(--white);border:1px solid var(--gray);color:inherit;}
+			#paymentInProgressModal .btn.pip-btn-outline:hover{background:var(--light);}
+			#paymentInProgressModal .btn.pip-link{display:inline-block;background:none;border:0;color:var(--gray);font-size:15px;padding:6px 14px;margin-top:2px;}
+			#paymentInProgressModal .btn.pip-link:hover{color:inherit;text-decoration:underline;}
+			#paymentInProgressModal .pip-spinner{display:block;width:44px;height:44px;margin:4px auto 16px;border:4px solid var(--light);border-top-color:var(--pc);border-radius:50%;animation:pipSpin .8s linear infinite;}
+			@keyframes pipSpin{to{transform:rotate(360deg);}}
+			@media (prefers-reduced-motion: reduce){#paymentInProgressModal .pip-spinner{animation-duration:2.4s;}}
+			@media (max-width: 575.98px){#paymentInProgressModal .pip-body{padding:22px 16px 14px;}#paymentInProgressModal .pip-title{font-size:19px;}}
+		</style>
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-body pip-body" id="paymentInProgressBody" aria-live="polite"></div>
+			</div>
+		</div>
+	</div>`;
+}
+
+function showPaymentInProgressModal(details, retryArgs) {
+	var $options = $('#paymentOptionsModal');
+	var alreadyShown = $('#paymentInProgressModal').hasClass('show');
+	PAYMENT_IN_PROGRESS_CONTEXT = {
+		details: details,
+		retryArgs: retryArgs,
+		reopenOptions: alreadyShown && PAYMENT_IN_PROGRESS_CONTEXT ? PAYMENT_IN_PROGRESS_CONTEXT.reopenOptions
+			: ($options.length > 0 && $options.hasClass('show')),
+		cancelRunning: false,
+		failureDetail: ''
+	};
+	if (alreadyShown) {
+		renderPaymentInProgressState('details');
+		return;
+	}
+	$('#paymentInProgressModal').remove();
+	$('body').append(getPaymentInProgressModalShell());
+	// Bootstrap focuses the modal box once it is shown; move focus on to the state's main button.
+	$('#paymentInProgressModal').on('shown.bs.modal', focusPaymentInProgressControl);
+	renderPaymentInProgressState('details');
+	// Swap with the payment options modal instead of stacking two Bootstrap modals.
+	// The show waits a tick: the global hidden.bs.modal handler (jquery.commonFunction.js) runs after this
+	// one and removes every .modal-backdrop when no modal is open yet, which would leave this modal stuck.
+	if (PAYMENT_IN_PROGRESS_CONTEXT.reopenOptions) {
+		$options.one('hidden.bs.modal', function () {
+			setTimeout(function () { $('#paymentInProgressModal').modal('show'); }, 0);
+		});
+		$options.modal('hide');
+	} else {
+		$('#paymentInProgressModal').modal('show');
+	}
+}
+
+// The control marked data-pip-focus in the current state (the main action, or the safe one in the confirmation).
+function focusPaymentInProgressControl() {
+	var $modal = $('#paymentInProgressModal');
+	if ($modal.hasClass('show')) {
+		var $target = $modal.find('[data-pip-focus]').first();
+		($target.length > 0 ? $target : $modal).trigger('focus');
+	}
+}
+
+// state: details | confirm | cancelling | cancelled | paid | failed
+function renderPaymentInProgressState(state) {
+	var ctx = PAYMENT_IN_PROGRESS_CONTEXT;
+	if (!ctx) {
+		return;
+	}
+	var details = ctx.details;
+	var gatewayName = escapePaymentAttemptText(getPaymentAttemptGatewayName(details));
+	var deviceSummary = escapePaymentAttemptText(getPaymentAttemptDeviceSummary(details));
+	// sameFee false: the open payment is for another of the user's fees (one payment at a time per user).
+	var otherFee = details.sameFee === false;
+	var notNow = `<button type="button" class="btn pip-link" onclick="closePaymentInProgressModal();">Not now</button>`;
+	var html = '';
+	if (state == 'details') {
+		var canContinue = details.canContinue && details.continueUrl;
+		var whyNot = details.replaced
+			? "This payment is for a plan that has since been changed, so it can't be finished."
+			: (details.gateway || '').toLowerCase() == 'airwallex'
+			? 'Airwallex payments can only be finished on the device where they were started.'
+			: 'This payment can only be finished on the device where it was started.';
+		html += `${getPaymentInProgressIcon('warn', 'fa-credit-card')}
+			<h2 class="pip-title" id="paymentInProgressTitle">${otherFee ? 'You already started another payment' : 'You already started this payment'}</h2>
+			<p class="pip-lead">${otherFee
+				? 'Only one payment can be open at a time, and this one is still open on another page or device. What would you like to do?'
+				: 'It is still open on another page or device. What would you like to do?'}</p>
+			${getPaymentInProgressSummary(details)}
+			${canContinue ? `<section class="pip-option pip-option-main" aria-labelledby="pipOptionContinue">
+				<h3 class="pip-option-title" id="pipOptionContinue"><i class="fa fa-reply" aria-hidden="true"></i>Go back to my payment</h3>
+				<p class="pip-option-text">Carry on from where you stopped. Nothing is lost.</p>
+				<button type="button" class="btn pip-btn pip-btn-primary" data-pip-focus onclick="continueOpenPaymentAttempt();">Continue my payment</button>
+			</section>` : `<div class="pip-note"><i class="fa fa-info-circle" aria-hidden="true"></i><span>${whyNot}</span></div>`}
+			<section class="pip-option${canContinue ? '' : ' pip-option-main'}" aria-labelledby="pipOptionRestart">
+				<h3 class="pip-option-title" id="pipOptionRestart"><i class="fa fa-refresh" aria-hidden="true"></i>Start a new payment</h3>
+				<p class="pip-option-text">${canContinue
+					? 'The old payment will be closed. Use this only if you cannot open the old one.'
+					: 'The old payment will be closed, and a new one will start here.'}
+					If someone else is paying on another device, let them finish.</p>
+				<button type="button" class="btn pip-btn ${canContinue ? 'pip-btn-outline' : 'pip-btn-primary'}" ${canContinue ? '' : 'data-pip-focus'}
+					onclick="${details.sameDevice ? 'cancelOpenPaymentAttempt();' : "renderPaymentInProgressState('confirm');"}">Start a new payment</button>
+			</section>
+			${notNow}`;
+	} else if (state == 'confirm') {
+		html += `${getPaymentInProgressIcon('warn', 'fa-refresh')}
+			<h2 class="pip-title" id="paymentInProgressTitle">Start a new payment?</h2>
+			<p class="pip-lead">The payment page opened ${deviceSummary ? 'on ' + deviceSummary : 'earlier'} will stop working, and a new payment will start here. You are never charged for a payment that is closed.</p>
+			<button type="button" class="btn pip-btn pip-btn-primary" onclick="cancelOpenPaymentAttempt();">Yes, start a new payment</button>
+			<button type="button" class="btn pip-btn pip-btn-outline" data-pip-focus onclick="renderPaymentInProgressState('details');">Keep the old payment</button>`;
+	} else if (state == 'cancelling') {
+		html += `<span class="pip-spinner" aria-hidden="true"></span>
+			<h2 class="pip-title" id="paymentInProgressTitle">Closing the old payment…</h2>
+			<p class="pip-lead mb-2">Checking with ${gatewayName}. Please don't close this page.</p>`;
+	} else if (state == 'cancelled') {
+		html += `${getPaymentInProgressIcon('ok', 'fa-check')}
+			<h2 class="pip-title" id="paymentInProgressTitle">The old payment is closed</h2>
+			<p class="pip-lead mb-2">You were not charged for it. Taking you to the payment page now…</p>`;
+	} else if (state == 'paid') {
+		var startedTime = escapePaymentAttemptText(formatPaymentAttemptDateTime(details.startedAt, true));
+		var forName = details.paymentName ? ' for ' + escapePaymentAttemptText(details.paymentName) : '';
+		var nextStep = otherFee ? 'You can pay this fee now.' : "You don't need to pay again.";
+		var paidDetail = deviceSummary
+			? `The payment${forName} started on ${deviceSummary}${startedTime ? ' at ' + startedTime : ''} went through. ${nextStep}`
+			: `The earlier payment${forName}${startedTime ? ', started at ' + startedTime + ',' : ''} went through. ${nextStep}`;
+		html += `${getPaymentInProgressIcon('ok', 'fa-check')}
+			<h2 class="pip-title" id="paymentInProgressTitle">${otherFee ? 'That payment went through' : 'This fee is already paid'}</h2>
+			<p class="pip-lead">${paidDetail}</p>
+			<button type="button" class="btn pip-btn pip-btn-primary" data-pip-focus onclick="closePaymentInProgressModal();">Close</button>`;
+	} else if (state == 'failed') {
+		html += `${getPaymentInProgressIcon('err', 'fa-exclamation')}
+			<h2 class="pip-title" id="paymentInProgressTitle">We couldn't close the old payment</h2>
+			<p class="pip-lead">${escapePaymentAttemptText(ctx.failureDetail)}</p>
+			<button type="button" class="btn pip-btn pip-btn-primary" data-pip-focus onclick="cancelOpenPaymentAttempt();">Try again</button>
+			${notNow}`;
+	}
+	$('#paymentInProgressBody').html(html);
+	// Replacing the body drops focus from the button that was clicked; keep it inside the modal.
+	focusPaymentInProgressControl();
+}
+
+// Opens the SAME Stripe checkout in this browser; no new payment is created.
+function continueOpenPaymentAttempt() {
+	var ctx = PAYMENT_IN_PROGRESS_CONTEXT;
+	if (ctx && ctx.details.canContinue && ctx.details.continueUrl) {
+		window.location.assign(ctx.details.continueUrl);
+	}
+}
+
+async function cancelOpenPaymentAttempt() {
+	var ctx = PAYMENT_IN_PROGRESS_CONTEXT;
+	if (!ctx || ctx.cancelRunning) {
+		return;
+	}
+	ctx.cancelRunning = true;
+	renderPaymentInProgressState('cancelling');
+	var responseData = null;
+	try {
+		// global=false: the modal shows its own spinner instead of the page loader.
+		responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(false,false,'payment-attempt-cancel',{attemptRef: ctx.details.attemptRef},'common');
+	} catch (error) {
+		console.error('Payment attempt cancel failed:', error);
+	}
+	ctx.cancelRunning = false;
+	if (PAYMENT_IN_PROGRESS_CONTEXT !== ctx) {
+		return;
+	}
+	if (responseData && responseData.statusCode == 'CANCELLED') {
+		renderPaymentInProgressState('cancelled');
+		// Start the payment again with the same arguments, now that the earlier one is closed.
+		setTimeout(function () {
+			if (PAYMENT_IN_PROGRESS_CONTEXT !== ctx) {
+				return;
+			}
+			PAYMENT_IN_PROGRESS_CONTEXT = null;
+			// Re-run only after the hide transition, so a new modal never meets a half-closed one.
+			$('#paymentInProgressModal').one('hidden.bs.modal', function () {
+				$('#paymentInProgressModal').remove();
+				invokePaymentGateway.apply(null, ctx.retryArgs);
+			}).modal('hide');
+		}, 1200);
+	} else if (responseData && responseData.statusCode == 'ALREADY_PAID') {
+		ctx.reopenOptions = false;
+		markFeeRowAsPaid(ctx.retryArgs[1]);
+		renderPaymentInProgressState('paid');
+	} else {
+		if (responseData && responseData.statusCode == 'CANCEL_FAILED') {
+			ctx.failureDetail = getPaymentAttemptGatewayName(ctx.details) + " didn't respond, so we haven't started a new payment. Starting one now could charge you twice. Please try again in a minute.";
+		} else if (responseData && responseData.message) {
+			ctx.failureDetail = responseData.message;
+		} else {
+			ctx.failureDetail = "We couldn't reach the server, so the earlier payment is still open and we haven't started a new one. Please check your internet connection and try again.";
+		}
+		renderPaymentInProgressState('failed');
+	}
+}
+
+function closePaymentInProgressModal() {
+	var ctx = PAYMENT_IN_PROGRESS_CONTEXT;
+	PAYMENT_IN_PROGRESS_CONTEXT = null;
+	var reopenOptions = ctx && ctx.reopenOptions && $('#paymentOptionsModal').length > 0;
+	$('#paymentInProgressModal').one('hidden.bs.modal', function () {
+		$('#paymentInProgressModal').remove();
+		if (reopenOptions) {
+			// A tick later, after the global hidden.bs.modal backdrop cleanup (see showPaymentInProgressModal).
+			setTimeout(function () { $('#paymentOptionsModal').modal('show'); }, 0);
+		}
+	});
+	$('#paymentInProgressModal').modal('hide');
 }
 
 
@@ -1495,14 +1928,7 @@ async function getPaymentPaidStatus(userPaymentDetailsId, schoolId) {
 				CHECK_PAYMENT_INTERVAL_COUNT++;
 				if(responseData.statusCode == "SUCCESS" ){
 					clearInterval(CHECK_PAYMENT_INTERVAL);
-					if($("#payNowBtn"+userPaymentDetailsId).length>0){
-						$("#payNowBtn"+userPaymentDetailsId).remove();
-						$("#paymentStatus"+userPaymentDetailsId).text("SUCCESS");
-						$("#paymentDate"+userPaymentDetailsId+"Wrapper").removeClass("d-none");
-						$("#paymentDate"+userPaymentDetailsId).text(changeDateFormat(new Date(), "MMM-dd-yyyy"));
-					}
-					$("#paymentOptionsModal").modal("hide");
-					$(".paymentUnderProcessOverlay").remove();
+					markFeeRowAsPaid(userPaymentDetailsId);
 				}else if(responseData.statusCode == "FAILURE"){
 					flushPaymentInterval();
 				}
