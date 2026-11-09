@@ -492,7 +492,7 @@ function getVerificationModalContent(data, userId) {
 					</div>
 				</div>
 			</div>
-			<a href="javascript:void(0);" class="btn btn-primary d-flex ml-auto my-2 w-fit-content" onclick="getAsPost('/dashboard/profile-view-content?userId=${userId}&moduleId=${ROLE_MODULE.moduleId}&actionType=1a')">Edit</a>
+			<a href="javascript:void(0);" class="btn btn-primary d-flex ml-auto my-2 w-fit-content" onclick="viewTeacherProfileInline(${userId}, '','',true)">Edit</a>
 		</div>`;
     return html;
 }

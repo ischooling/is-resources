@@ -109,7 +109,7 @@ function attemptLoadScript(role, src, id, attempt) {
 }
 
 
-function callForDashboardData(formId, actionUrl, replaceDiv) {
+function callForDashboardData(formId, actionUrl, replaceDiv, subPage) {
 	return new Promise((resolve, reject) => {
 		if (!validateRequestForDashboardData(formId)) {
 			reject("Validation failed");
@@ -158,7 +158,12 @@ function callForDashboardData(formId, actionUrl, replaceDiv) {
 				}
                 // Otherwise, update the HTML content dynamically
 				if (!replaceDiv) {
-					$('#dashboardContentInHTML').html(htmlContent);
+                    if(subPage){
+                        $('#dashboardContentInHTML').hide();
+                        $('#dashboardContentInHTMLAdditional').html(htmlContent).show();
+                    }else{
+                        $('#dashboardContentInHTML').html(htmlContent);
+                    }
 				} else {
 					switch (replaceDiv) {
 						case 'section-linebox':

@@ -372,9 +372,6 @@ function openUpdateStatusModal(meetingId, leadId, eventName, name, meetingStartT
 		}
 	});
 
-    $("#leadSource").select2({
-		theme:"bootstrap4"
-	});
 
     $("#meetingType").val(eventName);
     if($("#meetingType").val()!=='School Demo'){

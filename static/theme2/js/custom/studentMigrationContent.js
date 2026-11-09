@@ -1785,7 +1785,7 @@ async function getPaymentModeContent(cdrDTO){
 		+'<div class="modal-dialog modal-md modal-dialog-centered box-shadow-none" role="document" style="max-width:550px">'
 			+'<div class="modal-content rounded-20">'
 				+'<div class="modal-header py-2 rounded-top-left-10 rounded-top-right-10 bg-white text-dark" style="height:32px">'
-					+'<h5 class="modal-title text-white flex-grow-1 text-center" style=" margin-left: 10px;"><span class="payment-option-modal-title text-center">Payment Option Available</span>'
+					+'<h5 class="modal-title text-dark flex-grow-1 text-center" style=" margin-left: 10px;"><span class="payment-option-modal-title text-center">Payment Option Available</span>'
 						// +'<p class="font-12 m-0">You have to choose from '+getPaymentOptionCount(cdrDTO)+' option</p>'
 					+'</h5>'
 					+'<button type="button" class="close opacity-10 close-top-right" aria-label="Close" data-dismiss="modal"><span aria-hidden="true" class="text-white d-inline-block bg-red ">&times;</span></button>'

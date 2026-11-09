@@ -171,8 +171,8 @@ function openClassFeedback(info) {
             // showMessageTheme2(0, data.message);
             return false;
         }
-    }).catch(function () {
-        showMessageTheme2(0, "Something went wrong. Please try again.");
+    }).catch(function (error) {
+        showMessageTheme2(0, getActualErrorMessage(error && error.responseData, error && error.xhr, error, "Something went wrong. Please try again."));
     });
 }
 

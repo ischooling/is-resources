@@ -3752,7 +3752,7 @@ async function resetStudentSchoolEmailPassword(buttonElement) {
     if (responseData && responseData.status == 1) {
         showMessageTheme2(1, responseData.message || "Password reset request sent successfully.");
     } else {
-        showMessageTheme2(0, responseData && responseData.message ? responseData.message : "Unable to reset student school email password.");
+        showMessageTheme2(0, getActualErrorMessage(responseData, null, null, "Unable to reset student school email password."));
     }
     $(buttonElement).prop("disabled", false);
 }

@@ -69,8 +69,21 @@ function hideEmail(email) {
     return hiddenUsername + "@" + domain;
 }
 
-async function requestJobTrackingForOTP(entityId,email,reqType){   
-     var payload = {
+async function requestJobTrackingForOTP(entityId,email,reqType){
+     var payload = jobTrackingOTPPayload(entityId, email, reqType == "send" ? 1 : 2, "");
+     var response =  await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true,"otp-process", payload, "api/v1/common");
+     console.log(response);
+     if(response.status == 1){
+         startTenSecondTimer('otpTimer', 11);
+         $("#job-verify-identity").hide();
+         $("#job-verify-OTP").show();
+     }
+
+ }
+
+// otpType 1 send, 2 resend, 3 verify
+function jobTrackingOTPPayload(entityId, email, otpType, otpCode){
+     return {
          authentication: {
              hash: "",
              loginHash: "",
@@ -80,9 +93,9 @@ async function requestJobTrackingForOTP(entityId,email,reqType){
              sessionUserId: USER_ID
          },
          requestOTPData: {
-             otpType: reqType == "send" ? 1 : 2,
+             otpType: otpType,
              userphone: "",
-             otpCode: "",
+             otpCode: otpCode,
              signupType: "",
              isDemoUser: "false",
              email:email,
@@ -94,16 +107,7 @@ async function requestJobTrackingForOTP(entityId,email,reqType){
              schoolId:SCHOOL_ID,
              varifiedUsing:"E"
          }
-     } 
- 
-     var response =  await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true,"otp-process", payload, "api/v1/common");
-     console.log(response);
-     if(response.status == 1){
-         startTenSecondTimer('otpTimer', 11);
-         $("#job-verify-identity").hide();
-         $("#job-verify-OTP").show();
-     }
-     
+     };
  }
 
 async function verifyJobTrackingOTP(entityId,email){
@@ -114,10 +118,16 @@ async function verifyJobTrackingOTP(entityId,email){
         return false;
     }else{
         var OTP="";
-        $(".otp-input").each(function(){ 
-            OTP += $(this).val() 
+        $(".otp-input").each(function(){
+            OTP += $(this).val()
         });
-        console.log(OTP)
+
+        // the server checks the code and only then lets this browser read the tracker
+        var otpResponse = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, "otp-process",
+            jobTrackingOTPPayload(entityId, email, 3, OTP), "api/v1/common");
+        if(otpResponse.status != 1){
+            return false;
+        }
 
         var payload = {
             timezone: getSystemTimezone(),

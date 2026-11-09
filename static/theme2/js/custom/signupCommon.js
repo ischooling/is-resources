@@ -301,7 +301,7 @@ async function callForUserSignUp(formId, moduleId) {
 	}
 	
 	$("#signup").prop("disabled", true);
-	var payload = await getRequestForSignup(formId, moduleId);
+	var payload = getRequestForSignup(formId, moduleId);
 	var parentUrl = '';
 	if (moduleId == 'STUDENT') {
 		parentUrl = 'api/v1/student'
@@ -434,6 +434,7 @@ function validateRequestForSignup(formId, moduleId) {
 		showElementErrorMessage(false, 'confirmPassword', 'Please re-enter the same password');
 		flag = false
 	}
+
 	if ($("#" + formId + " #checkTerms").is(':checked')) {
 		$("#" + formId + " #checkTerms").removeClass('terms-error');
 		showElementErrorMessage(false, 'checkTerms', '');
@@ -572,7 +573,7 @@ function recaptchaNoticeHtml(color) {
 		+ '<a href="https://policies.google.com/terms" ' + link + '>Terms of Service</a> apply.</p>';
 }
 
-async function getRequestForSignup(formId, moduleId) {
+function getRequestForSignup(formId, moduleId) {
 	var request = {};
 	var authentication = {};
 	var signupDTO = {};
@@ -618,7 +619,6 @@ async function getRequestForSignup(formId, moduleId) {
 	signupDTO['utmCampaign'] = getCookie('ucam');
 	signupDTO['utmTerm'] = getCookie('ut');
 	signupDTO['landingPage'] = getCookie('lu');
-	signupDTO['recaptchaToken'] = await getRecaptchaToken('signup');
 	authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
 	authentication['userType'] = moduleId;
 	request['authentication'] = authentication;
@@ -766,9 +766,9 @@ function callSingupCommon(globalflag, showMessage, url, payload, parentUrl){
           },
           error: function (xhr, status, e) {
               if(showMessage){
-                showMessageTheme2(0, e.responseText,'',true);
+                showMessageTheme2(0, getActualErrorMessage(null, xhr, { message: e, status: status }, 'Unable to complete the request.'),'',true);
               }
-              reject(e);
+              reject({ xhr: xhr, status: status, error: e });
           }
       });
   });

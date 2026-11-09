@@ -188,7 +188,7 @@ function loadPaymentReportTab(tabKey, studentStandardId, userId){
 		},
 		error : function(xhr) {
 			$row.attr('data-loading', 'N');
-			if(xhr && (xhr.status === 401 || xhr.status === 403)){ redirectLoginPage(); return; }
+			if(xhr && xhr.status === 403){ redirectLoginPage(); return; }
 			if(paneSelector){
 				$(paneSelector).html('<div class="text-center text-muted py-4">Unable to load data.</div>');
 			}

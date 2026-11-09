@@ -444,7 +444,7 @@ async function partnerEnrollmentListDetails(studentList){
                             let tickFlag = true;
 									if(item.studentEnrollBy=='P' && item.admissionType == "Partial Entry"){
 										html+='<a href="javascript:void(0);" onclick="enrollmentPartnerStudent('+item.stdUserId+')" data-toggle="tooltip" data-placement="top" data-original-title="Edit" class="text-primary">'
-											+'<i class="fa fa fa-pencil" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i>'
+											+'<i class="fa fa-pencil fa-pencil-alt" aria-hidden="true" style="font-size:16px;margin-bottom:4px;padding:4px;"></i>'
 										+'</a>';
 										tickFlag = false;
 									}

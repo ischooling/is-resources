@@ -3522,7 +3522,7 @@ function callFreeSlotsToBookEvent(visitDate,dayId) {
 			if (checkonlineOfflineStatus()) {
 				return;
 			}else{
-				showMessageTheme2(0, e.responseText);
+				showMessageTheme2(0, getActualErrorMessage(null, e, null, 'Unable to complete the request.'));
 			}
 			customLoader(false);
 		}

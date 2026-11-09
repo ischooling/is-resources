@@ -681,7 +681,7 @@ async function createTeacherOfficialEmail(){
         showMessageTheme2(1, responseData.message || "Teacher Official Email Created");
 		$('#teacherOfficialModel').modal('hide');
     } else {
-        showMessageTheme2(0, responseData ? responseData.message : "Something went wrong");
+        showMessageTheme2(0, getActualErrorMessage(responseData, null, null, "Unable to create the teacher's official email."));
 	}
 }
 async function intializeTeacherAzureUser(email, pass, userId, isUserCreated){
@@ -709,7 +709,7 @@ async function intializeTeacherAzureUser(email, pass, userId, isUserCreated){
 		$('#teacherOfficialMailForm #zoomPassword').val((responseData.password || '').trim());
 		applyTeacherOfficialModalState(createdStatus);
     } else {
-        showMessageTheme2(0, responseData ? responseData.message : "Something went wrong");
+        showMessageTheme2(0, getActualErrorMessage(responseData, null, null, "Unable to initialize the teacher's official email."));
 	}
 }
 
@@ -780,7 +780,7 @@ async function resetTeacherSchoolEmailPassword(buttonElement){
     if(responseData && responseData.status == 1){
         showMessageTheme2(1, responseData.message || "Password reset request sent successfully.");
     }else{
-        showMessageTheme2(0, responseData && responseData.message ? responseData.message : "Unable to reset student school email password.");
+        showMessageTheme2(0, getActualErrorMessage(responseData, null, null, "Unable to reset student school email password."));
     }
 	if(buttonElement){
 		$(buttonElement).prop("disabled", false);

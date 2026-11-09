@@ -78,13 +78,16 @@
         };
     }
 
-    function _isProd() {
-        try { return (window.DEPLOYMENT_MODE || '').toUpperCase() === 'PROD'; } catch (e) { return false; }
+    function _isLoggingEnabled() {
+        try {
+            var mode = (window.DEPLOYMENT_MODE || '').toUpperCase();
+            return mode === 'PROD' || mode === 'DEV' || mode === 'LOCAL';
+        } catch (e) { return false; }
     }
 
     /** Core fire-and-forget send — never throws. */
     function _send(payload) {
-        if (!_isProd()) return;
+        if (!_isLoggingEnabled()) return;
         try {
             /* Prefer fetch (modern); fall back to XHR (IE11 / older jQuery apps) */
             if (window.fetch) {
@@ -210,9 +213,9 @@
          */
         ajaxErrorHandler: function (jqXHR, textStatus, errorThrown) {
             // abort = user navigated away; status 0 = network offline — not a blocker
-            if (textStatus === 'abort' || jqXHR.status === 0) return;
-            // Only log real server errors (4xx, 5xx)
-            if (jqXHR.status < 400) return;
+            if (textStatus === 'abort') return;
+            var isNetworkFailure = jqXHR.status === 0 || textStatus === 'error' || textStatus === 'timeout';
+            if (!isNetworkFailure && jqXHR.status < 400) return;
             // 502/503/504 = infrastructure/gateway noise (Cloudflare, load balancer)
             if (jqXHR.status === 502 || jqXHR.status === 503 || jqXHR.status === 504) return;
             var settings = jqXHR._smsSettings || {};

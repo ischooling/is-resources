@@ -23,6 +23,13 @@ async function renderSmsErrorLog(title, roleAndModule, SCHOOL_ID, USER_ID, USER_
 }
 
 function getSmsErrorLogContent(title, roleAndModule) {
+    var isProductionEnvironment = typeof DEPLOYMENT_MODE !== 'undefined'
+        && String(DEPLOYMENT_MODE).toUpperCase() === 'PROD';
+    var environmentOptions = isProductionEnvironment
+        ? '<option value="PROD">Production</option>'
+        : '<option value="">All Environments</option>'
+            + '<option value="PROD">Production</option>'
+            + '<option value="LOCAL">Local</option>';
     return `
     <!-- Page Title -->
     <div class="app-page-title mb-3 py-2">
@@ -104,6 +111,14 @@ function getSmsErrorLogContent(title, roleAndModule) {
                                 </select>
                             </div>
                         </div>
+                        <div class="col-md-2 col-sm-6">
+                            <div class="form-group">
+                                <label>Environment</label>
+                                <select id="errEnvironment" class="form-control form-control-sm">
+                                    ${environmentOptions}
+                                </select>
+                            </div>
+                        </div>
                         <div class="col-md-3 col-sm-6">
                             <div class="form-group">
                                 <label>App Version</label>
@@ -145,6 +160,7 @@ function getSmsErrorLogContent(title, roleAndModule) {
                         <th>HTTP Status</th>
                         <th>Error Message</th>
                         <th>App Version</th>
+                        <th>Environment</th>
                         <th>Action</th>
                     </tr>
                 </thead>

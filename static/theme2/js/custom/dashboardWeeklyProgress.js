@@ -281,7 +281,16 @@ function getStudentMailHistory(weeklyReportId, userId, uniueId, courseProviderId
 		success : function(data) {
 			//console.log(data);
 			customLoader(false);
-			if (data['status'] == '0' || data['status'] == '2') {
+			if (data['status'] == '0' || data['status'] == '2' || data['status'] == 'ERROR') {
+				if (typeof SMSErrorLogger !== 'undefined') {
+					SMSErrorLogger.log({
+						errorType: 'WeeklyProgressApiError',
+						errorMessage: data['message'] || 'mail-student-weekly-progress returned an error response',
+						httpStatus: 200,
+						requestParams: JSON.stringify(getRequestForWeeklyReportStudent(weeklyReportId, userId, uniueId, "sadf", studentStandardId, isCron, reportType, isFilter, startLimit)),
+						pageNo: 'mail-student-weekly-progress'
+					});
+				}
 				showMessageTheme2(0, data['message']);
 			} else {
 				if(reportType === 'view'){
@@ -356,7 +365,179 @@ function getStudentMailHistory(weeklyReportId, userId, uniueId, courseProviderId
 			
 		}
 	});
-} 
+}
+
+
+// function getStudentMailHistory(weeklyReportId, userId, uniueId, courseProviderId, studentStandardId, isCron, reportType, isFilter, startLimit) {
+//     try {
+//         hideMessageTheme2('');
+//         customLoader(true);
+
+//         $.ajax({
+//             type: "POST",
+//             contentType: APPLICATION_JSON_VALUE,
+//             url: getURLForHTML('dashboard', 'mail-student-weekly-progress'),
+//             data: JSON.stringify(getRequestForWeeklyReportStudent(
+//                 weeklyReportId, userId, uniueId, "sadfasdf",
+//                 studentStandardId, isCron, reportType, isFilter, startLimit
+//             )),
+//             dataType: 'json',
+//             cache: false,
+//             timeout: 600000,
+
+//             success: function (data) {
+//                 try {
+//                     if (data['status'] == '0' || data['status'] == '2') {
+//                         showMessageTheme2(0, data['message'] || "Something went wrong. Please try again.");
+//                     } else {
+//                         if (reportType === 'view') {
+//                             $("#studentReportSendMail").html("");
+
+//                             var weeklyStudent = data['studentWeeklyList'];
+
+//                             if (weeklyStudent != undefined) {
+//                                 var htmlTable = "";
+//                                 var inc = 1;
+
+//                                 for (var i = 0; i < weeklyStudent.length; i++) {
+//                                     htmlTable += "<tr>";
+//                                     htmlTable += "<td> " + weeklyStudent[i]['srNo'] + "</td>";
+//                                     htmlTable += "<td>" + weeklyStudent[i]['courseProviderName'] + "</td>";
+//                                     htmlTable += "<td>" + weeklyStudent[i]['studentName'] + "</td>";
+//                                     htmlTable += "<td>" + weeklyStudent[i]['studentStringId'] + "</td>";
+//                                     htmlTable += "<td>" + weeklyStudent[i]['grade'] + "</td>";
+//                                     htmlTable += "<td><a href=" + weeklyStudent[i]['playloadUrl'] + " target=\"_blank\" data-toggle=\"tooltip\" title=\"View and Send Report\"><i class=\"fa fa-eye\"></i></a></td>";
+
+//                                     if (weeklyStudent[i]['mailStatus'] == 'Y') {
+//                                         htmlTable += "<td><i class=\"fa fa-check\"></i></td>";
+//                                     } else {
+//                                         htmlTable += "<td><i class=\"fa fa-times\"></i></td>";
+//                                     }
+
+//                                     if (weeklyStudent[i]['mailStatus'] == 'B' || weeklyStudent[i]['mailStatus'] == 'N') {
+//                                         htmlTable += "<td>Yes</td>";
+//                                     } else {
+//                                         htmlTable += "<td>No</td>";
+//                                     }
+
+//                                     htmlTable += "<td>" + weeklyStudent[i]['createdDate'] + "</td>";
+//                                     htmlTable += "</tr>";
+//                                     inc++;
+//                                 }
+
+//                                 $("#studentReportSendMail").html(htmlTable);
+
+//                                 $(".studentProgressListpaging").html(
+//                                     dataStudentProgressPagging(data, isCron, reportType, weeklyReportId)
+//                                 );
+
+//                                 if (!$("#autoMailStudent").hasClass('show')) {
+//                                     $("#autoMailStudent").modal('show');
+//                                 }
+//                             }
+
+//                         } else {
+//                             $("#autoFailedWeeklyMailStudent").dataTable().fnDestroy();
+//                             $("#studentFailedReportSendMail").html("");
+
+//                             var weeklyStudent = data['studentWeeklyList'];
+//                             var htmlTable = "";
+//                             var inc = 1;
+
+//                             for (var i = 0; i < weeklyStudent.length; i++) {
+//                                 studentIds.push(weeklyStudent[i]['studentId']);
+
+//                                 htmlTable += "<tr>";
+//                                 htmlTable += "<td>" + weeklyStudent[i]['srNo'] + "</td>";
+//                                 htmlTable += "<td>" + weeklyStudent[i]['courseProviderName'] + "</td>";
+//                                 htmlTable += "<td>" + weeklyStudent[i]['studentName'] + "</td>";
+//                                 htmlTable += "<td>" + weeklyStudent[i]['studentStringId'] + "</td>";
+//                                 htmlTable += "<td>" + weeklyStudent[i]['grade'] + "</td>";
+//                                 htmlTable += "<td>" + weeklyStudent[i]['createdDate'] + "</td>";
+
+//                                 htmlTable += "<td><a href='javascript:void(0);' onclick=\"sendMailStudentGradebookSummary('" +
+//                                     weeklyReportId + "','" +
+//                                     weeklyStudent[i]['payload'] + "','" +
+//                                     weeklyStudent[i]['uploadId'] + "','" +
+//                                     weeklyStudent[i]['startDate'] + "','" +
+//                                     weeklyStudent[i]['endDate'] +
+//                                     "','weekly')\" data-toggle=\"tooltip\" title=\"Send Report\"><i class=\"fa fa-view\"></i>&nbsp;Resend Report</a></td>";
+
+//                                 htmlTable += "<input type='hidden' class='studentsId' value='" + weeklyStudent[i]['studentId'] + "'/>";
+//                                 htmlTable += "</tr>";
+
+//                                 inc++;
+//                             }
+
+//                             $("#sendAllMail").attr(
+//                                 'onclick',
+//                                 "return showWarningMessageForGenerate('Are you sure you want to generate the report?','againSendAllFailedMail(" + weeklyReportId + ")')"
+//                             );
+
+//                             $("#studentFailedReportSendMail").html(htmlTable);
+
+//                             $(".studentFaildProgressListpaging").html(
+//                                 dataStudentProgressPagging(data, isCron, reportType, weeklyReportId)
+//                             );
+
+//                             $("#autoFailedWeeklyMailStudent").DataTable();
+//                             $("#autoFailedMailStudent").modal('show');
+//                         }
+
+//                         $("#reportID").val(weeklyReportId);
+//                     }
+
+//                 } catch (error) {
+//                     console.error("getStudentMailHistory - Success Callback Error:", error);
+//                     showMessageTheme2(0, error.message || "Something went wrong. Please try again.");
+//                 }
+//             },
+
+//             error: function (xhr, status, error) {
+//                 try {
+//                     var errorMessage = "";
+
+//                     if (xhr.responseJSON && xhr.responseJSON.message) {
+//                         errorMessage = xhr.responseJSON.message;
+//                     } else if (xhr.responseText) {
+//                         errorMessage = xhr.responseText;
+//                     } else if (error) {
+//                         errorMessage = error;
+//                     } else {
+//                         errorMessage = status;
+//                     }
+
+//                     console.error("getStudentMailHistory - AJAX Error:", {
+//                         status: status,
+//                         error: error,
+//                         response: xhr.responseText
+//                     });
+
+//                     showMessageTheme2(0, errorMessage || "Something went wrong. Please try again.");
+
+//                 } catch (catchError) {
+//                     console.error("getStudentMailHistory - AJAX Error Handler:", catchError);
+//                     showMessageTheme2(0, catchError.message || "Something went wrong. Please try again.");
+//                 }
+//             },
+
+//             complete: function () {
+//                 try {
+//                     customLoader(false);
+//                 } catch (error) {
+//                     console.error("getStudentMailHistory - Loader Error:", error);
+//                 }
+//             }
+//         });
+
+//     } catch (error) {
+//         customLoader(false);
+
+//         console.error("getStudentMailHistory - Main Error:", error);
+//         showMessageTheme2(0, error.message || "Something went wrong. Please try again.");
+//     }
+// }
+
 
 function getRequestForWeeklyReportStudent(weeklyReportId, userId, uniueId, courseProviderId, studentStandardId, isCron, reportType, isFilter, startLimit) {
 	var studentWeeklyDTO = {};

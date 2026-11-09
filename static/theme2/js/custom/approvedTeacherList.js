@@ -157,7 +157,7 @@ function getApprovedTeacherListHtml(teahcerRequestList){
 				}
 				
 				html+=`<td>${teacherRequest.profileStatus!=undefined?teacherRequest.profileStatus:''}</td>
-				<td><a href="javascript:void(0);" onclick="getAsPost('/dashboard/profile-view-content?userId=${teacherRequest.userId}&moduleId=${teacherRequest.mangeUserListModId}&actionType=1a')" class="waves-effect">Click here</a></td>`;
+				<td><a href="javascript:void(0);" onclick="viewTeacherProfileInline(${teacherRequest.userId}, 'myApprovedTeacher','', true)" class="waves-effect">Click here</a></td>`;
 				if(roleAndModule.viewed=='Y'){
 					html+=
 					`<td>

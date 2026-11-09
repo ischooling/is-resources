@@ -149,13 +149,6 @@ var date = new Date();
 var today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 var end = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 var CHAT_BOT_OPEN_FLAG = true;
-function copyToClipboardText(originalValue) {
-  var $tempInput = $("<input>");
-  $("body").append($tempInput);
-  $tempInput.val(originalValue).select();
-  document.execCommand("copy");
-  $tempInput.remove();
-}
 window.addEventListener("offline", (event) => {
   if (tt == "theme1") {
     showMessageTheme2(
@@ -203,6 +196,189 @@ function redirectLoginPage() {
     }
   }
 }
+// ── Silent token renewal on 401 ───────────────────────────────────────────
+// The access cookie lives 15 minutes (auth.token.access-ttl). A page request
+// that outlives it is redirected through /<school>/auth/renew by
+// BrowserTokenFilter, which is why reloading fixes things; a script call
+// instead gets 401 plus an X-Auth-Renew header naming the renew URL. Nothing
+// read that header, so every expiry surfaced as "technical glitch" until the
+// user reloaded. Renew once, replay the call, and the page never notices.
+var SMS_RENEW_HEADER = "X-Auth-Renew";
+(function () {
+  if (!window.jQuery || typeof $.ajax !== "function") {
+    return;
+  }
+  var nativeAjax = $.ajax;
+  // One renew at a time. A dashboard fires many calls at once and they expire
+  // together: without this each would rotate the refresh token, and the races
+  // between them look like token reuse, which ends the login outright.
+  var renewInFlight = null;
+
+  function csrfToken() {
+    // Named __Host-IS_CSRF over https; the prefix is dropped on plain http
+    // (BrowserCookies#name), so localhost sends the bare name.
+    var found = document.cookie.match(/(?:^|;\s*)(?:__Host-)?IS_CSRF=([^;]*)/);
+    return found ? decodeURIComponent(found[1]) : "";
+  }
+
+  function renew(renewUrl, blocking) {
+    // A caller using async:false reads the result on the line after $.ajax, so
+    // its renew has to block too — it cannot wait on someone else's in-flight
+    // one. Rotating twice is tolerated: auth.token.refresh-grace keeps the
+    // previous refresh token valid for 10s precisely for overlaps like this.
+    if (blocking) {
+      return nativeAjax({
+        url: renewUrl,
+        type: "POST",
+        cache: false,
+        async: false,
+        headers: { "X-CSRF-Token": csrfToken() },
+      });
+    }
+    if (renewInFlight) {
+      return renewInFlight;
+    }
+    renewInFlight = nativeAjax({
+      url: renewUrl,
+      type: "POST",
+      cache: false,
+      headers: { "X-CSRF-Token": csrfToken() },
+    });
+    renewInFlight.always(function () {
+      renewInFlight = null;
+    });
+    return renewInFlight;
+  }
+
+  /** The renew URL a 401 points at, or null when this is not a renewable 401. */
+  function renewUrlOf(jqXHR) {
+    if (!jqXHR || jqXHR.status !== 401 || typeof jqXHR.getResponseHeader !== "function") {
+      return null;
+    }
+    return jqXHR.getResponseHeader(SMS_RENEW_HEADER) || null;
+  }
+  window.smsRenewUrlOf = renewUrlOf;
+
+  $.ajax = function (url, options) {
+    if (url && typeof url === "object") {
+      options = url;
+      url = undefined;
+    }
+    options = $.extend({}, options);
+    if (url) {
+      options.url = url;
+    }
+    if (options.smsIsRenewRetry) {
+      return nativeAjax(options);
+    }
+
+    // Held back and fired by us: jQuery would otherwise run the caller's own
+    // error handler on the 401 we are about to retry, showing the glitch
+    // message for a call that then succeeds.
+    var onSuccess = options.success;
+    var onError = options.error;
+    var onComplete = options.complete;
+    delete options.success;
+    delete options.error;
+    delete options.complete;
+
+    var outcome = $.Deferred();
+    var context = options.context;
+    var liveXHR = null;
+    var renewed = false;
+
+    function succeed(data, textStatus, jqXHR) {
+      var scope = context || this;
+      if (onSuccess) onSuccess.call(scope, data, textStatus, jqXHR);
+      outcome.resolveWith(scope, [data, textStatus, jqXHR]);
+      if (onComplete) onComplete.call(scope, jqXHR, textStatus);
+    }
+
+    function give_up(jqXHR, textStatus, errorThrown) {
+      var scope = context || this;
+      if (onError) onError.call(scope, jqXHR, textStatus, errorThrown);
+      outcome.rejectWith(scope, [jqXHR, textStatus, errorThrown]);
+      if (onComplete) onComplete.call(scope, jqXHR, textStatus);
+    }
+
+    function attempt() {
+      liveXHR = nativeAjax(options);
+      liveXHR.done(succeed).fail(function (jqXHR, textStatus, errorThrown) {
+        var renewUrl = renewUrlOf(jqXHR);
+        if (!renewUrl || renewed) {
+          give_up.call(this, jqXHR, textStatus, errorThrown);
+          return;
+        }
+        renewed = true; // one renew per call: a second 401 is a real one
+        renew(renewUrl, options.async === false).done(attempt).fail(function () {
+          give_up.call(this, jqXHR, textStatus, errorThrown);
+          if (typeof redirectLoginPage === "function") {
+            redirectLoginPage();
+          }
+        });
+      });
+    }
+    attempt();
+
+    // Callers treat the return value as a jqXHR (abort, header reads), so keep
+    // those working against whichever attempt is currently in flight.
+    var handle = outcome.promise();
+    handle.abort = function () {
+      if (liveXHR) liveXHR.abort();
+      return handle;
+    };
+    handle.getResponseHeader = function (name) {
+      return liveXHR ? liveXHR.getResponseHeader(name) : null;
+    };
+    handle.getAllResponseHeaders = function () {
+      return liveXHR ? liveXHR.getAllResponseHeaders() : "";
+    };
+    handle.setRequestHeader = function (name, value) {
+      if (liveXHR) liveXHR.setRequestHeader(name, value);
+      return handle;
+    };
+    handle.statusCode = function (map) {
+      if (liveXHR) liveXHR.statusCode(map);
+      return handle;
+    };
+    return handle;
+  };
+
+  // The handful of callers that use fetch() instead of jQuery.
+  if (typeof window.fetch === "function") {
+    var nativeFetch = window.fetch.bind(window);
+    window.fetch = function (input, init) {
+      var options = init || {};
+      if (options.smsIsRenewRetry) {
+        return nativeFetch(input, options);
+      }
+      return nativeFetch(input, options).then(function (response) {
+        if (!response || response.status !== 401) {
+          return response;
+        }
+        var renewUrl = response.headers.get(SMS_RENEW_HEADER);
+        if (!renewUrl) {
+          return response;
+        }
+        // Replaying needs the body again, so a one-shot stream cannot be
+        // retried; everything here sends a string or FormData.
+        return Promise.resolve(renew(renewUrl)).then(
+          function () {
+            var replay = $.extend({}, options, { smsIsRenewRetry: true });
+            return nativeFetch(input, replay);
+          },
+          function () {
+            if (typeof redirectLoginPage === "function") {
+              redirectLoginPage();
+            }
+            return response;
+          }
+        );
+      });
+    };
+  }
+})();
+
 function getURLForHTML(apiType, suffixUrl) {
   if(apiType == "" || apiType == undefined){
     return (
@@ -235,9 +411,6 @@ function getURLFor(apiType, suffixUrl) {
 function getURLForCommon(suffixUrl) {
   return BASE_URL + API_VERSION + "common" + "/" + suffixUrl;
 }
-function getURLForMeeting(suffixUrl) {
-  return BASE_URL + API_VERSION + "meetings" + "/" + suffixUrl;
-}
 
 function getURLForWithoutUnique(apiType, suffixUrl) {
   return BASE_URL + API_VERSION_WITHOUT_UNIQUEID + apiType + "/" + suffixUrl;
@@ -260,9 +433,44 @@ function getURLForAdmissionCycle(apiType, suffixUrl, session) {
     session
   );
 }
+/*
+ * Several users can be signed in to one browser: logging one out removes only that user's data. The school
+ * caches (keys ending in the school id, CDN_VERSION, SCRIPT_VERSION) are shared by the other users' tabs and stay.
+ * sessionStorage belongs to this tab only, so it is cleared.
+ */
+var USER_LOCAL_STORAGE_KEYS = [
+  "ALL_PROFILE_DATA", "PROFILE_NOW_DATA", "PROFILE_SCHEDULE_DATA", "IS_PROFILE_DATA_CALL",
+  "MISSING_PARENT_NAME_SECTION_FLAG", "localStorage_Profile_Missing_Fields", "welcome", "needToPaging"
+];
+function clearSignedOutUserStorage() {
+  try {
+    var userId = typeof USER_ID === "string" || typeof USER_ID === "number" ? String(USER_ID) : "";
+    for (var i = localStorage.length - 1; i >= 0; i--) {
+      var key = localStorage.key(i);
+      if (!key) {
+        continue;
+      }
+      var mine = USER_LOCAL_STORAGE_KEYS.indexOf(key) >= 0
+        || key.indexOf("DUMMY_") === 0
+        || key.indexOf("PARENT_DEMO_") === 0
+        || (userId !== "" && key.length > userId.length && key.slice(-userId.length) === userId
+          && /^(profile|chatavailability|referralCode|originalPartnerType)$/.test(key.slice(0, -userId.length)));
+      if (mine) {
+        localStorage.removeItem(key);
+      }
+    }
+  } catch (e) {
+    // storage unavailable: nothing to remove
+  }
+  try {
+    sessionStorage.clear();
+  } catch (e) {
+    // storage unavailable
+  }
+}
+
 function logout(suffix) {
-  localStorage.clear();
-  sessionStorage.clear();
+  clearSignedOutUserStorage();
   var url =
     BASE_URL +
     CONTEXT_PATH +
@@ -863,7 +1071,7 @@ function initTooltipLongPressForTouch() {
     }
   }
   function hideActiveTooltip() {
-    if (activeTooltipEl) {
+    if (activeTooltipEl && hasTooltipPlugin()) {
       $(activeTooltipEl).tooltip('hide');
       activeTooltipEl = null;
     }
@@ -873,6 +1081,9 @@ function initTooltipLongPressForTouch() {
     clearTouchTimer();
     touchTimer = setTimeout(function () {
       hideActiveTooltip();
+      if (!hasTooltipPlugin()) {
+        return;
+      }
       $(el).tooltip('show');
       activeTooltipEl = el;
     }, LONG_PRESS_MS);
@@ -892,7 +1103,9 @@ function initTooltipLongPressForTouch() {
   $(document).on('click', '[data-toggle="tooltip"]', function () {
     clearTouchTimer();
     activeTooltipEl = null;
-    $(this).tooltip('hide');
+    if (hasTooltipPlugin()) {
+      $(this).tooltip('hide');
+    }
     this.blur();
   });
   $(window).on('blur', function () {
@@ -1074,23 +1287,6 @@ function hideModalMessage(signupError, id) {
     $(".messageModalDiv").hide();
   }
 }
-function showMessageTheme2BankDetails(isWarnig, message, id) {
-  if (isWarnig) {
-    $("#errorHeading").html("Error! Be focus on work");
-    $("#statusMessageBD").addClass("danger-color");
-    $("#statusMessageBD").removeClass("success-color");
-  } else {
-    $("#errorHeading").html("Information!");
-    $("#statusMessageBD").removeClass("danger-color");
-    $("#statusMessageBD").addClass("success-color");
-  }
-  $("#statusMessageBD").html(message);
-  $("#modalMessageBD").show();
-  $("#withdrawnRequestBankForm .modal-body").animate({ scrollTop: 0 }, "slow");
-  setTimeout(function () {
-    $("#modalMessageBD").hide();
-  }, 5000);
-}
 // function showMessageTheme2(messageType, message, id, msgHide) {
 //   if (message == "") {
 //     return false;
@@ -1132,9 +1328,10 @@ function showMessageTheme2BankDetails(isWarnig, message, id) {
 // }
 
 function showMessage(messageType, message, id, msgHide) {
-  if (message == "") {
+  if (message == "" || message == null || message == undefined) {
     return false;
   } else {
+    message = String(message);
     $("#messageDiv1").removeClass("error");
     $("#messageDiv1").removeClass("success");
     $("#messageDiv1").removeClass("notification");
@@ -1184,48 +1381,187 @@ function hideMessageTheme2(){
 	$('.message-hide-bar').css({'width':'100%',});
 }
 
-function showMessageTheme2(messageType, message, id, msgHide, timer) {
-  $(document).on("click", ".server-message", function () {
-      $(this).removeClass("show");
-  });
+// Global timer references
+var messageTheme2Timer = null;
+var messageTheme2HideTimer = null;
 
-  // .msg pe click - event bubble stop
-  $(document).on("click", ".server-message .msg", function (e) {
-      e.stopPropagation();
-  });
-  if (timer == undefined || timer == null || timer == "") {
-    timer = 6000;
+function showMessageTheme2(messageType, message, id, msgHide, timer) {
+
+    $(document).off("click", ".server-message");
+    $(document).off("click", ".server-message .msg");
+
+    $(document).on("click", ".server-message", function () {
+        $(this).removeClass("show");
+    });
+
+    $(document).on("click", ".server-message .msg", function (e) {
+        e.stopPropagation();
+    });
+
+    if (timer == undefined || timer == null || timer == "") {
+        timer = 6000;
+    }
+
+    if (message == "") {
+        return false;
+    } else {
+
+        // Clear previous timers before showing a new message
+        clearTimeout(messageTheme2Timer);
+        clearTimeout(messageTheme2HideTimer);
+
+        hideMessageTheme2(id);
+
+        $("#msgTheme2").removeClass("error success notification");
+
+        if (messageType == 0) {
+            $("#msgTheme2").addClass("error");
+            $("#msgTheme2").text(message);
+
+        } else if (messageType == 1) {
+            $("#msgTheme2").addClass("success");
+            $("#msgTheme2").empty()
+                .append($('<i>').addClass('fa fa-check'))
+                .append(document.createTextNode(' ' + message));
+
+        } else if (messageType == 2) {
+            $("#msgTheme2").addClass("notification");
+            $("#msgTheme2").empty()
+                .append($('<i>').addClass('fa fa-info'))
+                .append(document.createTextNode(' ' + message));
+        }
+
+        $(".server-message").addClass("show");
+
+        // Reset auto-hide timer
+        messageTheme2Timer = setTimeout(function () {
+            $(".server-message").removeClass("show");
+        }, timer);
+
+        if (msgHide) {
+            messageTheme2HideTimer = setTimeout(function () {
+                $("#msgTheme2").html("");
+                $(".server-message").removeClass("show");
+            }, timer);
+        }
+    }
+}
+
+function getActualErrorMessage(responseData, xhr, error, fallback) {
+  var status = xhr && xhr.status ? parseInt(xhr.status, 10) : 0;
+  var textStatus = error && error.status ? error.status : '';
+  var hasTransportError = !!xhr || !!(error && error.status);
+  var transportDetails = [
+    xhr && xhr.statusText,
+    error && error.message,
+    typeof error === 'string' ? error : ''
+  ].join(' ');
+  var candidates = [];
+  var parsedResponse;
+
+  function clean(value) {
+    if (typeof value !== 'string') {
+      return '';
+    }
+    value = $.trim(value);
+    if (!value || value.length > 500 || value == 'null' || value == 'undefined' || value == '[object Object]') {
+      return '';
+    }
+    if (/^\s*[\[{]/.test(value) || /<[^>]+>/.test(value)) {
+      return '';
+    }
+    if (/(^|\n)\s*at\s+[^\n]+|exception in thread|select\s+.+\s+from|password|api[-_ ]?key|authorization\s*:/i.test(value)) {
+      return '';
+    }
+    return value;
   }
-  if (message == "") {
-    return false;
+
+  function addObjectValues(value) {
+    var i;
+    if (!value || typeof value !== 'object') {
+      return;
+    }
+    candidates.push(value.message, value.MESSAGE, value.error);
+    if (typeof value.errors === 'string') {
+      candidates.push(value.errors);
+    } else if ($.isArray(value.errors)) {
+      for (i = 0; i < value.errors.length; i++) {
+        candidates.push(value.errors[i]);
+      }
+    }
+  }
+
+  if (typeof responseData === 'string') {
+    try {
+      parsedResponse = JSON.parse(responseData);
+    } catch (ignore) {
+      parsedResponse = null;
+    }
+    if (parsedResponse) {
+      addObjectValues(parsedResponse);
+    } else {
+      candidates.push(responseData);
+    }
   } else {
-    hideMessageTheme2(id);
-    $("#msgTheme2").removeClass("error");
-    $("#msgTheme2").removeClass("success");
-    $("#msgTheme2").removeClass("notification");
-    if (messageType == 0) {
-      $("#msgTheme2").addClass("error");
-      $("#msgTheme2").html(
-        '&nbsp;' + message
-      );
-    } else if (messageType == 1) {
-      $("#msgTheme2").addClass("success");
-      $("#msgTheme2").html('<i class="fa fa-check"></i>&nbsp;' + message);
-    } else if (messageType == 2) {
-      $("#msgTheme2").addClass("notification");
-      $("#msgTheme2").html('<i class="fa fa-info"></i>&nbsp;' + message);
-    }
-    $(".server-message").addClass("show");
-    setTimeout(function () {
-      $(".server-message").removeClass("show");
-    }, timer);
-    if (msgHide) {
-      setTimeout(function () {
-        $("#msgTheme2").html("");
-        $(".server-message").removeClass("show");
-      }, timer);
+    addObjectValues(responseData);
+  }
+
+  if (xhr) {
+    addObjectValues(xhr.responseJSON);
+    if (xhr.responseText) {
+      try {
+        parsedResponse = JSON.parse(xhr.responseText);
+      } catch (ignoreText) {
+        parsedResponse = null;
+      }
+      if (parsedResponse) {
+        addObjectValues(parsedResponse);
+      } else {
+        candidates.push(xhr.responseText);
+      }
     }
   }
+
+  if (typeof error === 'string') {
+    candidates.push(error);
+  } else if (error) {
+    candidates.push(error.message);
+  }
+
+  if (/ERR_CONNECTION_REFUSED|connection refused|failed to fetch/i.test(transportDetails)) {
+    return 'Unable to connect to the server. Please check your connection and try again.';
+  }
+
+  var i;
+  for (i = 0; i < candidates.length; i++) {
+    var message = clean(candidates[i]);
+    if (message) {
+      return message;
+    }
+  }
+
+  if (textStatus == 'timeout' || status == 408 || status == 504) {
+    return 'The request timed out. Please try again.';
+  }
+  if (status == 401) {
+    return 'Your session has expired. Please login again.';
+  }
+  if (status == 403) {
+    return 'You do not have permission to perform this action.';
+  }
+  if (status == 404) {
+    return 'The requested resource was not found.';
+  }
+  if (status == 429) {
+    return 'Too many requests. Please wait a moment and try again.';
+  }
+  if (status >= 500) {
+    return 'A server error occurred. Please try again later.';
+  }
+  if (hasTransportError && (status == 0 || textStatus == 'error' || textStatus == 'parsererror')) {
+    return 'A network error occurred. Please check your connection and try again.';
+  }
+  return clean(fallback) || 'Something went wrong. Please try again.';
 }
 $("#msgTheme2").click(function () { $('.server-message').removeClass('show'); })
 function hideMessageTheme2(id) {
@@ -1406,13 +1742,18 @@ $.ajaxSetup({
   },
 });
 
-//$( document ).ajaxSend(function() {
-//	customLoader(true);
-//});
-//$( document ).ajaxSuccess(function() {
-//	customLoader(false);
-//});
 $(document).ajaxError(function (event, jqxhr, settings, exception) {
+  // An expired access cookie is renewed and the call replayed (see the silent
+  // token renewal above). This fires for that first 401 too, so without this
+  // the glitch message would appear for a call that is about to succeed.
+  if (typeof window.smsRenewUrlOf === "function" && window.smsRenewUrlOf(jqxhr)) {
+    return;
+  }
+  // Nobody is signed in for this page any more (its user logged out in another tab, or this is a duplicated or
+  // restored tab): accountAuth.js sends it to the login page, so no "technical glitch" message.
+  if (typeof window.smsLeaveForLogin === "function" && window.smsLeaveForLogin(jqxhr)) {
+    return;
+  }
   console.log(
     "event is" +
       event +
@@ -1451,14 +1792,14 @@ $(document).ajaxError(function (event, jqxhr, settings, exception) {
     var hasProperty = parseResponse.hasOwnProperty("message");
     if (hasProperty) {
       showMessageTheme2(0, parseResponse.message);
-      showModalMessage(0, TECHNICAL_GLITCH);
+      // showModalMessage(0, TECHNICAL_GLITCH);
     } else {
       showMessageTheme2(0, TECHNICAL_GLITCH);
-      showModalMessage(0, TECHNICAL_GLITCH);
+      // showModalMessage(0, TECHNICAL_GLITCH);
     }
   } else {
     showMessageTheme2(0, TECHNICAL_GLITCH);
-    showModalMessage(0, TECHNICAL_GLITCH);
+    // showModalMessage(0, TECHNICAL_GLITCH);
   }
 });
 
@@ -2199,6 +2540,7 @@ function getRequestForReset(formId, moduleId) {
   authentication["userId"] = $("#" + formId + " #userId")
     .val()
     .trim();
+  authentication["pslId"] = parseInt($("#" + formId + " #pslId").val().trim(), 10) || 0;
   request["authentication"] = authentication;
   request["data"] = data;
   return request;
@@ -2406,7 +2748,6 @@ function validateRequestForContact(formId) {
     showMessageTheme2(1, "Contact Description is required");
     return false;
   }
-
   return true;
 }
 
@@ -6754,11 +7095,19 @@ $(document).on("submit", "form", function (event) {
 });
 
 $(document).on("click", function (event) {
-  if(!window.location.href.includes('permission-for-sms-lms')){
+  if (hasTooltipPlugin()) {
     $('body').find('[data-toggle="tooltip"]').tooltip("hide");
   }
-
 });
+
+/*
+ * Bootstrap's tooltip plugin is not on every page that loads this file (for example the SMS / LMS permission
+ * page loads jQuery without Bootstrap). Without this check every click there threw
+ * "$(...).find(...).tooltip is not a function".
+ */
+function hasTooltipPlugin() {
+  return !!(window.jQuery && window.jQuery.fn && typeof window.jQuery.fn.tooltip === "function");
+}
 
 $(document).on("click", "#changepassword", function (event) {
   var form = $("#passwordForm");
@@ -6781,6 +7130,19 @@ function parseUrlToJson(params) {
     }
   }
   return data;
+}
+
+var TEACHER_BACK_TABLE_ID = '';
+
+function viewTeacherProfileInline(userId, tableId, moduleId, subPage) {
+  TEACHER_BACK_TABLE_ID = tableId || '';
+  showAndHideDashboardAndAdditionalContent('main');
+  callForDashboardData('formIdIfAny','profile-view-content/' + SCHOOL_UUID + '?userId=' + userId + '&moduleId=' + (moduleId || 0) + '&actionType=1a', '', subPage);
+}
+
+function backToTeacherList() {
+  showAndHideDashboardAndAdditionalContent('main');
+  backToMain(TEACHER_BACK_TABLE_ID, '');
 }
 
 function getAsPost(paramas, isSelf) {
@@ -7153,7 +7515,7 @@ function getSession() {
       if (checkonlineOfflineStatus()) {
         return;
       } else {
-        showMessageTheme2(true, e.responseText);
+        showMessageTheme2(0, e.statusText);
       }
     },
   });
@@ -7257,13 +7619,6 @@ function openZoomJoinInAppOrFallback(url) {
     }
   } catch (e) {
     window.open(url);
-  }
-}
-function callWithSessionWithGetAsPost(url, isSelf) {
-  if (getSession()) {
-    getAsPost(url, isSelf);
-  } else {
-    logout("?from=session-out");
   }
 }
 var debouncing = function (mainFun, delay) {
@@ -7421,9 +7776,9 @@ function getDashboardDataBasedUrlAndPayload(globalflag,showMessage,url,payload) 
       },
       error: function (xhr, status, e) {
         if (showMessage) {
-          showMessageTheme2(0, e.responseText, "", true);
+          showMessageTheme2(0, getActualErrorMessage(null, xhr, { message: e, status: status }, "Unable to load the requested data."), "", true);
         }
-        reject(e);
+        reject({ xhr: xhr, status: status, error: e });
       },
     });
   });
@@ -7455,9 +7810,9 @@ function getDashboardDataBasedUrlAndPayloadWithParentUrl(globalflag, showMessage
           },
           error: function (xhr, status, e) {
               if(showMessage){
-                showMessageTheme2(0, e.responseText,'',true);
+                showMessageTheme2(0, getActualErrorMessage(null, xhr, { message: e, status: status }, "Unable to load the requested data."),'',true);
               }
-              reject(e);
+              reject({ xhr: xhr, status: status, error: e });
           }
       });
   });
@@ -7487,9 +7842,9 @@ function getDashboardDataBasedUrlAndPayloadWithParentUrlForContract(globalflag, 
           },
           error: function (xhr, status, e) {
               if(showMessage){
-                showMessageTheme2(0, e.responseText,'',true);
+                showMessageTheme2(0, getActualErrorMessage(null, xhr, { message: e, status: status }, "Unable to load the requested data."),'',true);
               }
-              reject(e);
+              reject({ xhr: xhr, status: status, error: e });
           }
       });
   });
@@ -7524,12 +7879,12 @@ function getDashboardDataBasedUrlAndPayloadWithParentUrlGET(globalflag, showMess
                 
                 if (showMessage) {
                     try {
-                        showMessageTheme2(0, "Network Error", '', true);
+                        showMessageTheme2(0, getActualErrorMessage(null, xhr, { message: e, status: status }, "Unable to load the requested data."), '', true);
                     } catch(err) {
                         console.error("Popup function failed:", err);
                     }
                 }
-                reject(e);
+                reject({ xhr: xhr, status: status, error: e });
             }
         });
     });
@@ -7560,9 +7915,9 @@ function callCommonAjax(ajaxReqDetails){
         },
         error: function (xhr, status, e) {
           if(ajaxReqDetails.showMessage){
-            showMessageTheme2(0, e.responseText,'',true);
+            showMessageTheme2(0, getActualErrorMessage(null, xhr, { message: e, status: status }, "Unable to complete the request."),'',true);
           }
-          reject(e);
+          reject({ xhr: xhr, status: status, error: e });
         }
     });
   });
@@ -7654,7 +8009,7 @@ function getDesiredObject(type) {
         .then(() => {
           checkAndReturn(type, resolve);
         })
-        .catch(reject);
+        .catch(() => resolve(getNeedToCall()));
     } else {
       checkAndReturn(type, resolve);
     }
@@ -7663,17 +8018,24 @@ function getDesiredObject(type) {
 
 function checkAndReturn(type, resolve) {
   var scriptVersionType = "SCRIPT_VERSION";
-  var svObject = JSON.parse(localStorage.getItem(scriptVersionType));
-  var data = JSON.parse(svObject.metaKey);
-  if (data.data.metaValue != SCRIPT_VERSION) {
-    localStorage.clear();
-    resolve(getNeedToCall());
-  } else {
-    if (localStorage.getItem(type) == null) {
+  try {
+    var svObject = JSON.parse(localStorage.getItem(scriptVersionType));
+    var metaKey = svObject.metaKey;
+    // metaKey may be a JSON string (normal case) or an object (fresh getFreshValue store)
+    var data = typeof metaKey === 'string' ? JSON.parse(metaKey) : metaKey;
+    if (!data || !data.data || data.data.metaValue != SCRIPT_VERSION) {
+      localStorage.clear();
       resolve(getNeedToCall());
     } else {
-      resolve(JSON.parse(localStorage.getItem(type)));
+      if (localStorage.getItem(type) == null) {
+        resolve(getNeedToCall());
+      } else {
+        resolve(JSON.parse(localStorage.getItem(type)));
+      }
     }
+  } catch(e) {
+    localStorage.clear();
+    resolve(getNeedToCall());
   }
 }
 function getPrimaryColor() {
@@ -7839,18 +8201,6 @@ function getTimezoneIdByTimeName(timeZoneName) {
   return responseData;
 }
 
-function getTimezoneIdByTimeNameRequest(key, value){
-	var request = {};
-	var requestData = {};
-	var authentication = {};
-	authentication['hash'] = getHash(); authentication['schoolId'] = SCHOOL_ID; authentication['schoolUUID'] = SCHOOL_UUID;
-	authentication['userType'] = 'COMMON';
-	requestData['requestKey'] = key;
-	requestData['requestValue'] = value;
-	request['requestData'] = requestData;
-	request['authentication'] = authentication;
-	return request;
-}
 
 
 function showMessageErrorNew(isWarnig, message, id) {
@@ -8556,15 +8906,19 @@ async function previewContractPdf(callFrom){
     payload["entityType"] = "USER_SCREENING";
   }
 
+	// Open the tab inside the click (before the await): after it the browser blocks window.open as a popup.
+	var previewWindow = window.open("", "_blank");
+	if (previewWindow) previewWindow.document.write("<p style='font-family:Arial,sans-serif;text-align:center;margin-top:20vh;'>Please wait...</p>");
 	var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrlForContract(true, true, "preview-contracts", payload, "");
 	if (responseData.status == '0' || responseData.status == '2' || responseData.status == '3') {
+		if (previewWindow) previewWindow.close();
 		showMessageTheme2(0, responseData.message);
 		return;
 	}
 	var byteArray = new Uint8Array(responseData.pdfData);
 	var blob = new Blob([byteArray], { type: "application/pdf" });
 	var pdfUrl = URL.createObjectURL(blob) + "#toolbar=0&navpanes=0&scrollbar=0";
-  window.open(pdfUrl);
+	if (previewWindow) previewWindow.location.href = pdfUrl;
 	// var modalHtml = `
 	// 	<div class="modal fade" id="pdfPreviewModal" tabindex="-1" role="dialog">
 	// 	  <div class="modal-dialog" role="document" style="max-width:60%;">

@@ -32,23 +32,12 @@ function collectFilters(page) {
 	};
 }
 
-function handleAttendanceSessionOut() {
-	if ($("#sessionOutPermission").length > 0 && typeof redirectLoginPage === "function") {
-		redirectLoginPage();
-		return true;
-	}
-	return false;
-}
-
 function handleAttendanceResponseError(jqXHR) {
-	if (jqXHR && jqXHR.status === 401) {
-		return handleAttendanceSessionOut();
-	}
 	if (typeof checkonlineOfflineStatus === "function" && checkonlineOfflineStatus()) {
 		return true;
 	}
 	if (typeof showMessageTheme2 === "function") {
-		showMessageTheme2(0, (jqXHR && jqXHR.responseText) ? jqXHR.responseText : "Something went wrong. Please try again.", "", true);
+		showMessageTheme2(0, getActualErrorMessage(null, jqXHR, null, "Something went wrong. Please try again."), "", true);
 	}
 	return true;
 }
@@ -65,7 +54,7 @@ function ajaxPost(path, data, onDone) {
 		data: JSON.stringify(data),
 		success: function (r) {
 			if (r && r.status == "3") {
-				handleAttendanceSessionOut();
+				if (typeof redirectLoginPage === "function") { redirectLoginPage(); }
 				onDone(null);
 				return;
 			}

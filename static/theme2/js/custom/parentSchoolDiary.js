@@ -14,15 +14,11 @@ var PARENT_MENTION_NAME = "Parent";
 var STUDENT_ARRAY;
 var PAGE_NO=0;
 var LATEST_CHAT_FLAG=false;
-var DIARY_BRIDGE_CONNECTED = false;
-var DIARY_BRIDGE_IFRAME_ID = "diary-bridge-iframe";
-var DIARY_BRIDGE_NEXT_ORIGIN = null;
 var DIARY_BRIDGE_PENDING_USER_LIST_REFRESH = false;
-var DIARY_BRIDGE_MESSAGE_HANDLER = null;
-var DIARY_BRIDGE_CONNECT_SCHEDULED = false;
 var DIARY_BRIDGE_VISIBILITY_OBSERVER = null;
 var DIARY_BRIDGE_BADGE_REFRESH_IN_FLIGHT = false;
 var DIARY_BRIDGE_BADGE_REFRESH_QUEUED = false;
+var DIARY_BUTTON_RENDER_PROMISE = null;
 var CHAT_STATUS;
 var CHAT_SESSION_END=false;
 try {
@@ -36,32 +32,6 @@ try {
 if(USER_ROLE == "TEACHER" && !SCHOOL_DIARY_INITIATES_ROLE){
     SCHOOL_DIARY_INITIATES_ROLE = true;
 }
-/* The diary's own host, which is not the chat host any more: chat is moving to
-   the new support app and the diary is staying put, because /iframe/diary-bridge
-   exists only in the old one. DIARY_URL is its own configuration key
-   (application-*.yml -> DIARY_URL -> CommonUtil.getDiaryUrl), and it falls back
-   to CHAT_URL so an environment that has not been given the key behaves exactly
-   as it did before the split.
-
-   The iframe src and the postMessage origin check below MUST come from the same
-   value. Point the frame at one host and check origins against another and every
-   badge update is dropped in silence -- no 404, no console error, nothing. */
-function diaryBridgeHost(){
-    if(typeof DIARY_URL !== "undefined" && DIARY_URL) return DIARY_URL;
-    if(typeof CHAT_URL !== "undefined" && CHAT_URL) return CHAT_URL;
-    return null;
-}
-
-function diaryBridgeResolveChatOrigin(){
-    try{
-        var host = diaryBridgeHost();
-        if(!host) return null;
-        return new URL(host, window.location.href).origin;
-    }catch(e){
-        return null;
-    }
-}
-
 function diaryBridgeShouldRefreshUserList(){
     return !$(".school-diary-notebook").is(":visible") && $(".user-list-wrapper").is(":visible");
 }
@@ -87,58 +57,131 @@ function diaryBridgeEnsureVisibilityObserver(){
     });
 }
 
-function diaryBridgeEnsureConnected(){
-    if(DIARY_BRIDGE_CONNECTED) return;
+/* Live diary updates come from is-rest-api itself, over a plain WebSocket at
+   /ws/diary?userId=<this user>. The server pushes {"type":"diary.updated"}
+   whenever this person's diary changes, and this re-reads what is on screen.
+
+   The event carries no data on purpose -- the diary service owns the counts, so
+   the page asks it, exactly as it does on load. A missed or duplicate event
+   therefore costs one extra read, never a wrong number.
+
+   Same origin as the page, so no sign-in and no separate host: the user is named
+   by USER_ID in the query, as the rest of the school-app surface identifies a
+   caller. Replaces the earlier omni STOMP path. */
+var DIARY_RT = {
+    started: false,
+    socket: null,
+    retry: 0,
+    timer: null,
+    pingTimer: null
+};
+
+function diaryRealtimeBase(){
+    // The page's own server (is-rest-api). http(s) -> ws(s).
+    return String(window.location.origin).replace(/^http/i, "ws").replace(/\/+$/, "");
+}
+
+function diaryRealtimeStart(){
+    if(DIARY_RT.started) return;
+    if(!["TEACHER", "STUDENT", "PARENT"].includes(USER_ROLE)) return;
     if(typeof USER_ID === "undefined" || USER_ID === null || USER_ID === "") return;
-    if(!diaryBridgeHost()) return;
+    if(!diaryRealtimeBase() || typeof WebSocket === "undefined") return;
+    DIARY_RT.started = true;
+    diaryRealtimeConnect();
+}
 
-    if(!document.body){
-        if(DIARY_BRIDGE_CONNECT_SCHEDULED) return;
-        DIARY_BRIDGE_CONNECT_SCHEDULED = true;
-        document.addEventListener("DOMContentLoaded", function(){
-            DIARY_BRIDGE_CONNECT_SCHEDULED = false;
-            diaryBridgeEnsureConnected();
-        }, {once:true});
+function diaryRealtimeConnect(){
+    var url = diaryRealtimeBase() + "/ws/diary?userId=" + encodeURIComponent(USER_ID);
+    var ws;
+    try{
+        ws = new WebSocket(url);
+    }catch(e){
+        diaryRealtimeReconnectLater();
         return;
     }
-
-    DIARY_BRIDGE_NEXT_ORIGIN = diaryBridgeResolveChatOrigin();
-    if(!DIARY_BRIDGE_NEXT_ORIGIN){
-        // Cannot validate postMessage origin safely.
-        return;
-    }
-
-    var existingIframe = document.getElementById(DIARY_BRIDGE_IFRAME_ID);
-    if(!existingIframe){
-        var iframe = document.createElement("iframe");
-        iframe.id = DIARY_BRIDGE_IFRAME_ID;
-        iframe.src =
-          `${diaryBridgeHost()}/iframe/diary-bridge?userId=${encodeURIComponent(USER_ID)}` +
-          `&origin=${encodeURIComponent(window.location.origin)}`;
-        iframe.style.display = "none";
-        document.body.appendChild(iframe);
-    }
-
-    if(DIARY_BRIDGE_MESSAGE_HANDLER){
-        window.removeEventListener("message", DIARY_BRIDGE_MESSAGE_HANDLER);
-    }
-    DIARY_BRIDGE_MESSAGE_HANDLER = function(event){
-        if(event.origin !== DIARY_BRIDGE_NEXT_ORIGIN) return;
-        var msg = event.data;
-        if(!msg || typeof msg !== "object") return;
-
-        if(msg.type === "DAIRY_COUNT_CHANGED" && String(msg.userId) === String(USER_ID)){
-            if(diaryBridgeShouldRefreshUserList()){
-                refreshDiaryUserListingBadges(true);
-            }else{
-                DIARY_BRIDGE_PENDING_USER_LIST_REFRESH = true;
-                diaryBridgeEnsureVisibilityObserver();
-            }
+    DIARY_RT.socket = ws;
+    ws.onopen = function(){
+        DIARY_RT.retry = 0;
+        diaryRealtimeStartPing(ws);
+        // The initial badge fetch is part of renderSchoolDaiaryBtnCount(). A
+        // reconnect still needs a refresh for changes missed while offline.
+        if(DIARY_RT.hasOpened){
+            diaryRealtimeApply();
         }
+        DIARY_RT.hasOpened = true;
     };
-    window.addEventListener("message", DIARY_BRIDGE_MESSAGE_HANDLER);
-    DIARY_BRIDGE_CONNECTED = true;
-    diaryBridgeEnsureVisibilityObserver();
+    ws.onmessage = function(event){
+        var data = (typeof event.data === "string") ? event.data : "";
+        if(!data || data === "pong") return;
+        try{
+            var parsed = JSON.parse(data);
+            if(parsed && parsed.type === "diary.updated") diaryRealtimeApply();
+        }catch(e){}
+    };
+    ws.onclose = function(){
+        if(DIARY_RT.socket !== ws) return;
+        diaryRealtimeStopPing();
+        DIARY_RT.socket = null;
+        diaryRealtimeReconnectLater();
+    };
+    ws.onerror = function(){ try{ ws.close(); }catch(e){} };
+}
+
+function diaryRealtimeStartPing(ws){
+    diaryRealtimeStopPing();
+    // The server closes a connection quiet for 90s; ping well inside that.
+    DIARY_RT.pingTimer = setInterval(function(){
+        if(ws.readyState === 1) ws.send("ping");
+    }, 25000);
+}
+
+function diaryRealtimeStopPing(){
+    if(DIARY_RT.pingTimer){ clearInterval(DIARY_RT.pingTimer); DIARY_RT.pingTimer = null; }
+}
+
+function diaryRealtimeReconnectLater(){
+    if(DIARY_RT.timer) return;
+    // 2s, 4s, ... capped at 60s.
+    var delay = Math.min(60000, 2000 * Math.pow(2, DIARY_RT.retry++));
+    DIARY_RT.timer = setTimeout(function(){
+        DIARY_RT.timer = null;
+        diaryRealtimeConnect();
+    }, delay);
+}
+
+/* A burst of events costs one read. */
+function diaryRealtimeApply(){
+    if(DIARY_RT.applyTimer) clearTimeout(DIARY_RT.applyTimer);
+    DIARY_RT.applyTimer = setTimeout(function(){
+        DIARY_RT.applyTimer = null;
+        diaryRealtimeRefreshScreen();
+    }, 300);
+}
+
+async function diaryRealtimeRefreshScreen(){
+    try{
+        var unread = await getUnreadChatCount();
+        var count = unread && unread.details ? unread.details.unreadMessageCount : null;
+        if(count !== null && typeof count !== "undefined"){
+            $("#schoolDiaryBadge, .schoolDiaryBadge").text(count).removeClass("d-none");
+        }
+        var panelOpen = $("#schoolDiary_side_wrapper").hasClass("settings-open");
+        if(!panelOpen) return;
+        if(diaryBridgeShouldRefreshUserList()){
+            await refreshDiaryUserListingBadges(true);
+        }else if($(".school-diary-notebook").is(":visible") && !$(".user-list-wrapper").is(":visible")){
+            // A conversation is open: pull in what was just said.
+            var threadId = $(".school-diary-notebook").attr("data-open-chat");
+            if(threadId){
+                await gotoChat(threadId, true, $("#chatUserName").text(), $("#studentDropDown").val());
+            }
+        }else{
+            DIARY_BRIDGE_PENDING_USER_LIST_REFRESH = true;
+            diaryBridgeEnsureVisibilityObserver();
+        }
+    }catch(e){
+        console.error(e);
+    }
 }
 
 async function refreshDiaryUserListingBadges(force){
@@ -643,7 +686,22 @@ function parentSchoolDiaryEscapeHtml(rawText) {
     return $("<div/>").text(rawText == null ? "" : rawText).html();
 }
 
-async function renderSchoolDaiaryBtnCount(studentUserId){
+function renderSchoolDaiaryBtnCount(studentUserId){
+    // Director home is re-rendered by dashboard navigation. Keep one diary
+    // initialization per page so it does not add duplicate unread requests,
+    // socket connections, scroll handlers, or delegated event handlers.
+    if(!DIARY_BUTTON_RENDER_PROMISE){
+        DIARY_BUTTON_RENDER_PROMISE = renderSchoolDaiaryBtnCountOnce(studentUserId)
+            .catch(function(error){
+                DIARY_BUTTON_RENDER_PROMISE = null;
+                throw error;
+            });
+    }
+    return DIARY_BUTTON_RENDER_PROMISE;
+}
+
+async function renderSchoolDaiaryBtnCountOnce(studentUserId){
+    diaryRealtimeStart();
     var unreadChatCount = await getUnreadChatCount();
     var unreadThreadCount = unreadChatCount && unreadChatCount.details ? unreadChatCount.details.unreadThreadCount : null;
     if(unreadThreadCount == null){
@@ -668,40 +726,6 @@ async function renderSchoolDaiaryBtnCount(studentUserId){
         $("#schoolDiaryDiv").html(getParentSchoolDiaryEntriesHtml());
     }
     
-    $("head").append(
-        `<script>
-        var k = 0;
-            window.addEventListener("message", function (event) {
-                if (event.data?.type !== "diary-bridge-update") return;
-
-                var countInput = document.getElementById("input-count-alok-iitian");
-                var lastMessageInput = document.getElementById("input-last-message-id-alok-iitian");
-                var chatIdInput = document.getElementById("input-chat-id-alok-iitian");
-                const chatStatusInput = document.getElementById("input-chat-status-alok-iitian");
-                if (countInput) {
-                    countInput.value = event.data.count || "0";
-                    countInput.dispatchEvent(new Event("input", { bubbles: true }));
-                    countInput.dispatchEvent(new Event("change", { bubbles: true }));
-                }
-                if (chatIdInput){
-                    chatIdInput.value = event.data.chatId || "0";
-                    chatIdInput.dispatchEvent(new Event("input", { bubbles: true }));
-                    chatIdInput.dispatchEvent(new Event("change", { bubbles: true }));
-                }
-                if (lastMessageInput) {
-                    lastMessageInput.value = event.data.lastMessageId || "0";
-                    lastMessageInput.dispatchEvent(new Event("input", { bubbles: true }));
-                    lastMessageInput.dispatchEvent(new Event("change", { bubbles: true }));
-                }
-                if (chatStatusInput) {
-                    chatStatusInput.value = JSON.stringify(event.data.chats) || "";
-                    chatStatusInput.dispatchEvent(new Event("input", { bubbles: true }));
-                    chatStatusInput.dispatchEvent(new Event("change", { bubbles: true }));
-                    CHAT_STATUS = event.data.chats || "";
-                }
-            });
-            </script>`
-    )
     var isLoading = false;
 
     $(".school-diary-notebook").on("scroll", async function () {

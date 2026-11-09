@@ -630,7 +630,7 @@ async function getSchoolSettingAllDataList() {
 	var details = getSchoolSettingAllDataRows(responseData);
 	if (!$.isArray(details)) {
 		$("#settingTable tbody").html("");
-		showMessageTheme2(0, (responseData && responseData.message) ? responseData.message : "No setting data available.", "", true);
+		showMessageTheme2(0, getActualErrorMessage(responseData, null, null, "No setting data available."), "", true);
 		return;
 	}
 	renderSchoolSettingAllDataTable(details);
@@ -1815,7 +1815,7 @@ function uploadSchoolSettingTechnicalImage(inputEl, fieldId, displayId) {
 			}
 			if (!uploadedFileName) {
 				$(inputEl).val("");
-				showMessageTheme2(0, (responseData && responseData.message) ? responseData.message : "Unable to upload file.");
+				showMessageTheme2(0, getActualErrorMessage(responseData, null, null, "Unable to upload file."));
 				return;
 			}
 			$("#" + fieldId).val(uploadedFileName);

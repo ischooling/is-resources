@@ -586,7 +586,7 @@ async function saveEnrollmentStandardDocumentSettings(){
 			await loadEnrollmentStandardDocumentSettings();
 			return responseData;
 		}else{
-			showMessageTheme2(0, (responseData && responseData.message) ? responseData.message : 'Unable to save enrollment settings.');
+			showMessageTheme2(0, getActualErrorMessage(responseData, null, null, 'Unable to save enrollment settings.'));
 			return null;
 		}
 	}catch(error){
@@ -762,7 +762,7 @@ async function updateEnrollmentCountries(toggle, countryIds){
 		if(responseData && responseData.status === '1'){
 			return responseData;
 		}
-		showMessageTheme2(0, (responseData && responseData.message) ? responseData.message : 'Unable to update countries.');
+			showMessageTheme2(0, getActualErrorMessage(responseData, null, null, 'Unable to update countries.'));
 		return null;
 	}catch(error){
 		showMessageTheme2(0, 'Unable to update countries.');

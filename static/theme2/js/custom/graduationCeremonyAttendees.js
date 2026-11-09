@@ -832,7 +832,7 @@ async function confirmDiscardGraduationCeremonyAttendee(attendeeId){
         showMessageTheme2(1, responseData.message || "Record discarded successfully.");
         loadGraduationCeremonyAttendees();
     }else{
-        showMessageTheme2(0, responseData && responseData.message ? responseData.message : "Unable to discard attendee.");
+        showMessageTheme2(0, getActualErrorMessage(responseData, null, null, "Unable to discard attendee."));
     }
 }
 

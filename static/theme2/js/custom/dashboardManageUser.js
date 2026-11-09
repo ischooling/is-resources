@@ -1172,8 +1172,8 @@ function manageUserStudentPerformanceBindExcuseButtons(){
                     btn.prop("disabled", false).html(action === "EXCUSE" ? "Excuse" : "Un-Excuse");
                 }
             },
-            error: function(){
-                showMessageTheme2(0, "Something went wrong. Please try again.");
+            error: function(xhr, status, e){
+                showMessageTheme2(0, getActualErrorMessage(null, xhr, { message: e, status: status }, "Something went wrong. Please try again."));
                 btn.prop("disabled", false).html(action === "EXCUSE" ? "Excuse" : "Un-Excuse");
             }
         });
@@ -1381,7 +1381,7 @@ async function doResendInvitationMail(userId) {
 	if (responseData && responseData.status == 1) {
 		showMessageTheme2(1, responseData.message || "Invitation email resent successfully.");
 	} else {
-		showMessageTheme2(0, (responseData && responseData.message) ? responseData.message : "Failed to resend invitation.");
+		showMessageTheme2(0, getActualErrorMessage(responseData, null, null, "Failed to resend invitation."));
 	}
 	return false;
 }

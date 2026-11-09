@@ -197,8 +197,8 @@ function deleteAllUserData(userId, schoolId, roleModuleId) {
                 }, 1000);
             }
         },
-        error: function() {
-            showMessageTheme2(0, 'Something went wrong while deleting user.', '', true);
+        error: function(xhr, status, e) {
+            showMessageTheme2(0, getActualErrorMessage(null, xhr, { message: e, status: status }, 'Something went wrong while deleting user.'), '', true);
         }
     });
 }

@@ -392,16 +392,6 @@ function enrollOnBehalfOf(btn) {
 	if ($btn.data("loading")) {
 		return false;
 	}
-	// This button can sit on an open dashboard tab for a long time (e.g. while the
-	// parent is away doing the enrollment itself in the is-sms wizard, where logging
-	// out there invalidates this same HttpSession server-side — see
-	// ClientCommonController#logoutSchool). Re-check the session on click, same
-	// pattern as callWithSession() above, so a stale click surfaces the existing
-	// "session has been logged out" modal instead of silently hitting a dead session.
-	if (!getSession()) {
-		redirectLoginPage();
-		return false;
-	}
 	var parentId = commonProfileDTO && commonProfileDTO.parentId;
 	if (!parentId) {
 		showMessageTheme2(0, "Parent not found", "", true);
@@ -419,7 +409,6 @@ function enrollOnBehalfOf(btn) {
 			data: JSON.stringify({
 				parentId: parentId,
 				sessionUserId: UNIQUEUUID,
-				rollNo: (commonProfileDTO.hasPartialChild === "Y" && commonProfileDTO.partialChildRollNo) || "",
 				location: (locationData != undefined && locationData != '') ? JSON.stringify(locationData) : ""
 			}),
 			dataType: "json",
@@ -457,9 +446,9 @@ function enrollOnBehalfOf(btn) {
 				showMessageTheme2(0, (res && res.message) || "Unable to process", "", true);
 				$btn.data("loading", false).prop("disabled", false);
 			},
-			error: function () {
+			error: function (xhr, status, e) {
 				if (newTab) { newTab.close(); }
-				showMessageTheme2(0, "Something went wrong. Please try again.", "", true);
+				showMessageTheme2(0, getActualErrorMessage(null, xhr, { message: e, status: status }, "Something went wrong. Please try again."), "", true);
 				$btn.data("loading", false).prop("disabled", false);
 			}
 		});
@@ -1075,6 +1064,7 @@ function validateRequestForSendEmail(formId, moduleId) {
 // 	signupDTO['confirmEmail'] = $("#" + formId + " #emailId").val().trim();
 // 	signupDTO['password'] = '1234567';
 // 	signupDTO['confirmPassword'] = '1234567';
+
 // 	signupDTO['signupType'] = 'Offline';
 // 	signupDTO['isAdminCreateUser'] = 'AdminCreateUser';
 // 	signupDTO['userType'] = moduleId;
@@ -2238,7 +2228,7 @@ async function handleProceedToOutlook() {
 			}
 		}
 	} else {
-		showMessageTheme2(0, (responseData && responseData.message) ? responseData.message : "Unable to proceed");
+		showMessageTheme2(0, getActualErrorMessage(responseData, null, null, "Unable to proceed"));
 	}
 	return false;
 }
@@ -2261,7 +2251,7 @@ async function handleActivateSchoolEmail() {
 		var responseData = await callCommonAjax(ajaxReqDetails);
 		if (!responseData || responseData.status != 1) {
 			if (btn) btn.disabled = false;
-			showMessageTheme2(0, (responseData && responseData.message) ? responseData.message : "Unable to create school email account. Please try again.");
+			showMessageTheme2(0, getActualErrorMessage(responseData, null, null, "Unable to create school email account. Please try again."));
 			return;
 		}
 		window.OUTLOOK_NEEDS_AZURE_CREATION = false;

@@ -127,10 +127,10 @@ function cfmMutate(path, body, okMessage) {
             if (okMessage) { showMessageTheme2(1, okMessage); }
             return response;
         }
-        showMessageTheme2(0, (response && response.message) ? response.message : 'Something went wrong. Please try again.');
+        showMessageTheme2(0, getActualErrorMessage(response, null, null, 'Something went wrong. Please try again.'));
         return null;
-    }, function () {
-        showMessageTheme2(0, 'Something went wrong. Please try again.');
+    }, function (error) {
+        showMessageTheme2(0, getActualErrorMessage(error && error.responseData, error && error.xhr, error, 'Something went wrong. Please try again.'));
         return null;
     });
 }

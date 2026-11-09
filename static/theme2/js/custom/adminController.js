@@ -617,53 +617,53 @@ async function getContent(moduleId, pageNo, replaceDiv, extraParam, extraParam1)
 
         switch (status) {
             case 400:
-                showMessageTheme2(0, "Invalid request. Please try again.");
+                showMessageTheme2(0, getActualErrorMessage(err && (err.responseData || err.response), err && (err.xhr || err.response), err, "Invalid request. Please try again."));
                 break;
             case 401:
-                showMessageTheme2(0, "Your session has expired. Please login again.");
+                showMessageTheme2(0, getActualErrorMessage(err && (err.responseData || err.response), err && (err.xhr || err.response), err, "Your session has expired. Please login again."));
                 break;
             case 403:
-                showMessageTheme2(0, "You do not have permission to access this page.");
+                showMessageTheme2(0, getActualErrorMessage(err && (err.responseData || err.response), err && (err.xhr || err.response), err, "You do not have permission to access this page."));
                 break;
             case 404:
-                showMessageTheme2(0, "Requested resource not found.");
+                showMessageTheme2(0, getActualErrorMessage(err && (err.responseData || err.response), err && (err.xhr || err.response), err, "Requested resource not found."));
                 break;
             case 408:
-                showMessageTheme2(0, "Request timeout. Please try again.");
+                showMessageTheme2(0, getActualErrorMessage(err && (err.responseData || err.response), err && (err.xhr || err.response), err, "Request timeout. Please try again."));
                 break;
             case 409:
-                showMessageTheme2(0, "A conflict occurred. Please refresh and try again.");
+                showMessageTheme2(0, getActualErrorMessage(err && (err.responseData || err.response), err && (err.xhr || err.response), err, "A conflict occurred. Please refresh and try again."));
                 break;
             case 429:
-                showMessageTheme2(0, "Too many requests. Please wait a moment and try again.");
+                showMessageTheme2(0, getActualErrorMessage(err && (err.responseData || err.response), err && (err.xhr || err.response), err, "Too many requests. Please wait a moment and try again."));
                 break;
             case 500:
-                showMessageTheme2(0, "Server error occurred. Please try again later.");
+                showMessageTheme2(0, getActualErrorMessage(err && (err.responseData || err.response), err && (err.xhr || err.response), err, "Server error occurred. Please try again later."));
                 break;
             case 502:
-                showMessageTheme2(0, "Bad gateway. Please try again shortly.");
+                showMessageTheme2(0, getActualErrorMessage(err && (err.responseData || err.response), err && (err.xhr || err.response), err, "Bad gateway. Please try again shortly."));
                 break;
             case 503:
-                showMessageTheme2(0, "Server is busy. Please try again in a few minutes.");
+                showMessageTheme2(0, getActualErrorMessage(err && (err.responseData || err.response), err && (err.xhr || err.response), err, "Server is busy. Please try again in a few minutes."));
                 break;
             case 504:
-                showMessageTheme2(0, "Server response timeout. Please try again.");
+                showMessageTheme2(0, getActualErrorMessage(err && (err.responseData || err.response), err && (err.xhr || err.response), err, "Server response timeout. Please try again."));
                 break;
             default:
                 if (err === "offline" || reason === "offline") {
-                    showMessageTheme2(0, "You are offline. Please check your internet connection.");
+                    showMessageTheme2(0, getActualErrorMessage(err && (err.responseData || err.response), err && (err.xhr || err.response), err, "You are offline. Please check your internet connection."));
                 } else if (reason === "abort" || err?.name === "AbortError") {
                     // Request was interrupted (user navigated / reloaded). Not an error — stay silent.
                     console.warn("getContent: request aborted, ignoring.");
                 } else if (reason === "timeout") {
-                    showMessageTheme2(0, "Request timed out. Please try again.");
+                    showMessageTheme2(0, getActualErrorMessage(err && (err.responseData || err.response), err && (err.xhr || err.response), err, "Request timed out. Please try again."));
                 } else if (status === 0 || reason === "parsererror" || reason === "error"
                            || err?.message?.includes("Network Error") || err?.message?.includes("Failed to fetch")) {
-                    showMessageTheme2(0, "Network error. Please check your internet connection and try again.");
+                    showMessageTheme2(0, getActualErrorMessage(err && (err.responseData || err.response), err && (err.xhr || err.response), err, "Network error. Please check your internet connection and try again."));
                 } else if (err === "Empty response" || reason === "empty") {
-                    showMessageTheme2(0, "Permission data not available.");
+                    showMessageTheme2(0, getActualErrorMessage(err && (err.responseData || err.response), err && (err.xhr || err.response), err, "Permission data not available."));
                 } else {
-                    showMessageTheme2(0, "Something went wrong. Please reload.");
+                    showMessageTheme2(0, getActualErrorMessage(err && (err.responseData || err.response), err && (err.xhr || err.response), err, "Something went wrong. Please reload."));
                 }
         }
     } finally {
@@ -2099,7 +2099,7 @@ function dashboardRequestDemo() {
         return;
       }else{
         customLoaderDashBoard(6, false);
-        showMessageTheme2(0, e.responseText, "", false);
+        showMessageTheme2(0, getActualErrorMessage(null, e, null, "Unable to complete the request."), "", false);
       }
     },
   });
@@ -2150,7 +2150,7 @@ function dashboardRequestDemoDateWise(strDate) {
         return;
       }else{
         customLoaderDashBoard(6, false);
-        showMessageTheme2(0, e.responseText, "", false);
+        showMessageTheme2(0, getActualErrorMessage(null, e, null, "Unable to complete the request."), "", false);
       }
     },
   });

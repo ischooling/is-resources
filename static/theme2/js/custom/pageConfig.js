@@ -311,7 +311,12 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
                 requestType.init();
             }
         }catch(error){
-            console.error("Error fetching data:", error);
+            if(!getSession()){
+                // redirectLoginPage();
+            }else{
+                showMessageTheme2(0, getActualErrorMessage(null, null, error, "Something went wrong while loading this page. Please try again."));
+            }
+            // console.error("Error fetching data:", error);
         }
       } else if(requestType.type == "JS") {
         try{
@@ -333,7 +338,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
             if(!getSession()){
                 // redirectLoginPage();
             }else{
-                showMessageTheme2(0, "Something went wrong while loading this page. Please try again.");
+                showMessageTheme2(0, getActualErrorMessage(null, null, error, "Something went wrong while loading this page. Please try again."));
             }
         }
       } else {

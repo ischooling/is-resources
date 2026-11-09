@@ -93,10 +93,10 @@ function vlmMutate(path, body, okMessage, quiet) {
             if (okMessage) { showMessageTheme2(1, okMessage); }
             return response;
         }
-        showMessageTheme2(0, (response && response.message) ? response.message : 'Something went wrong. Please try again.');
+        showMessageTheme2(0, getActualErrorMessage(response, null, null, 'Something went wrong. Please try again.'));
         return null;
-    }, function () {
-        showMessageTheme2(0, 'Something went wrong. Please try again.');
+    }, function (error) {
+        showMessageTheme2(0, getActualErrorMessage(error && error.responseData, error && error.xhr, error, 'Something went wrong. Please try again.'));
         return null;
     });
 }
@@ -453,11 +453,11 @@ function vlmLoadVideos(silent) {
             vlmRender();
             if (vlmState.view === 'playlists' && !vlmState.openPlaylistId) { vlmRenderPlaylists(); }   // "to place" badges
         } else {
-            showMessageTheme2(0, (response && response.message) ? response.message : 'Failed to load videos.');
+            showMessageTheme2(0, getActualErrorMessage(response, null, null, 'Failed to load videos.'));
         }
-    }).catch(function () {
+    }).catch(function (error) {
         if (!silent) { customLoader(false); }
-        showMessageTheme2(0, 'Failed to load videos.');
+        showMessageTheme2(0, getActualErrorMessage(error && error.responseData, error && error.xhr, error, 'Failed to load videos.'));
     });
 }
 
@@ -1032,11 +1032,11 @@ function vlmSaveVideo() {
                 vlmLoadVideos();
                 vlmRefreshPlaylistViews();
             } else {
-                showMessageTheme2(0, (response && response.message) ? response.message : 'Failed to save video.');
+                showMessageTheme2(0, getActualErrorMessage(response, null, null, 'Failed to save video.'));
                 if (newLesson) { vlmLoadLessons(); }
             }
-        }, function () {
-            showMessageTheme2(0, 'Failed to save video.');
+        }, function (error) {
+            showMessageTheme2(0, getActualErrorMessage(error && error.responseData, error && error.xhr, error, 'Failed to save video.'));
             if (newLesson) { vlmLoadLessons(); }
         });
     });
@@ -1076,12 +1076,12 @@ function vlmDoDelete() {
             vlmLoadVideos();
             vlmRefreshPlaylistViews();
         } else {
-            showMessageTheme2(0, (response && response.message) ? response.message : 'Failed to remove video.');
+            showMessageTheme2(0, getActualErrorMessage(response, null, null, 'Failed to remove video.'));
         }
-    }).catch(function () {
+    }).catch(function (error) {
         customLoader(false);
         $('#vlmConfirmModal').modal('hide');
-        showMessageTheme2(0, 'Failed to remove video.');
+        showMessageTheme2(0, getActualErrorMessage(error && error.responseData, error && error.xhr, error, 'Failed to remove video.'));
     });
 }
 

@@ -999,7 +999,10 @@ function otherRolesStage3OnLoadEvent(data){
 			phoneIds.forEach(function(sel){
 				var field = $(sel).closest('.icon-field');
 				if(!field.length){ return; }
-				field.css('z-index', sel === selector ? '100050' : '1');
+				// Kept well below any Bootstrap modal's z-index (~1050) so a later
+				// modal (e.g. the submit-verification "Note" popup) never ends up
+				// painted underneath a phone field that's still mid-interaction.
+				field.css('z-index', sel === selector ? '5' : '1');
 			});
 		});
 		input.addEventListener('close:countryselector', function(){

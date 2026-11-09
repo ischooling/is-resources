@@ -459,7 +459,11 @@ function buildStudentSearchRowCells(student, rowIndex, schoolId) {
 		: muNv(student.emailId) + '<br/>' + muNv(student.userName) + '<br/>';
 	cells.push(
 		'Student Id: ' + muNv(student.rollNumber) + '<br/>' +
-		muNv(student.name) + '<br/>' +
+		// The table carries DataTables Responsive's "nowrap" class (forces
+		// white-space:nowrap on every cell) so a very long name doesn't wrap —
+		// it just pushes the column wide and overflows. Override it locally
+		// for just the name so it wraps instead.
+		'<span style="white-space:normal;word-break:break-word;display:inline-block;max-width:220px;">' + muNv(student.name) + '</span><br/>' +
 		muNv(student.standard) + '<br/>' +
 		emailCell +
 		muNv(student.countryCode) + ' ' + muNv(student.mobileNumber) + '<br/>' +

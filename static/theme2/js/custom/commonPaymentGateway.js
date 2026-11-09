@@ -161,8 +161,6 @@ async function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, 
     }
     var retryArgs = [formId, userPaymentDetailsId, paidByUserId, schoolId, paymentGateway, schoolIdOfPaymentGateway];
     if (CLIENT_SIDE_GATEWAYS.indexOf((paymentGateway || '').toLowerCase()) === -1) {
-        // Ask the server first whether this fee already has an open (or paid) payment, so the
-        // parent sees the "already in progress" modal instead of the blocked launch page.
         PAYMENT_ATTEMPT_CHECK_RUNNING = true;
         var checkResponse;
         try {
@@ -184,8 +182,6 @@ async function invokePaymentGateway(formId, userPaymentDetailsId, paidByUserId, 
                 : "We couldn't check whether a payment is already in progress, so we haven't started a new one. Please try again in a minute.");
             return;
         }
-        // NO_OPEN_PAYMENT: launch as before. The guard stays set while the page navigates away
-        // (the pageshow listener releases it if the browser restores this page).
         showModalMessage(1, "Please wait while redirecting to payment gateway...");
         submitPaymentGatewayForm(payload);
         return;

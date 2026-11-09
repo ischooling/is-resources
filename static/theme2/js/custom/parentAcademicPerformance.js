@@ -350,8 +350,8 @@ function parentAcademicPerformanceBindExcuseButtons(){
                     btn.prop("disabled", false).html(action === "EXCUSE" ? "Excuse" : "Un-Excuse");
                 }
             },
-            error: function(){
-                showMessageTheme2(0, "Something went wrong. Please try again.");
+            error: function(xhr, status, e){
+                showMessageTheme2(0, getActualErrorMessage(null, xhr, { message: e, status: status }, "Something went wrong. Please try again."));
                 btn.prop("disabled", false).html(action === "EXCUSE" ? "Excuse" : "Un-Excuse");
             }
         });

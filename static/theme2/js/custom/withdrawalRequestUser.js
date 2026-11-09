@@ -613,11 +613,11 @@ async function withdrawalDoSubmitBank(requestId){
             if(typeof showMessageTheme2 === "function"){ showMessageTheme2(1, resp.message || "Bank details submitted.", "", true); }
             withdrawalRefresh();
         }else{
-            if(typeof showMessageTheme2 === "function"){ showMessageTheme2(0, resp.message || "Unable to submit bank details.", "", true); }
+            if(typeof showMessageTheme2 === "function"){ showMessageTheme2(0, getActualErrorMessage(resp, null, null, "Unable to submit bank details."), "", true); }
             btn.prop("disabled", false);
         }
     }catch(e){
-        if(typeof showMessageTheme2 === "function"){ showMessageTheme2(0, "Something went wrong.", "", true); }
+        if(typeof showMessageTheme2 === "function"){ showMessageTheme2(0, getActualErrorMessage(e && e.responseData, e && e.xhr, e, "Something went wrong."), "", true); }
         btn.prop("disabled", false);
     }
 }
@@ -654,11 +654,11 @@ async function withdrawalStartOtp(){
             WITHDRAWAL_OTP_CTX = { requestId: resp.requestId, email: resp.email };
             withdrawalOpenOtpModal(resp.email);
         }else{
-            if(typeof showMessageTheme2 === "function"){ showMessageTheme2(0, resp.message || "Unable to send OTP.", "", true); }
+            if(typeof showMessageTheme2 === "function"){ showMessageTheme2(0, getActualErrorMessage(resp, null, null, "Unable to send OTP."), "", true); }
             btn.prop("disabled", false);
         }
     }catch(e){
-        if(typeof showMessageTheme2 === "function"){ showMessageTheme2(0, "Something went wrong.", "", true); }
+        if(typeof showMessageTheme2 === "function"){ showMessageTheme2(0, getActualErrorMessage(e && e.responseData, e && e.xhr, e, "Something went wrong."), "", true); }
         btn.prop("disabled", false);
     }
 }
@@ -757,11 +757,11 @@ async function withdrawalDoVerifyOtp(){
             withdrawalOpenM("withdrawalOkModal");
             withdrawalRefresh();
         }else{
-            if(typeof showMessageTheme2 === "function"){ showMessageTheme2(0, resp.message || "The OTP is incorrect.", "", true); }
+            if(typeof showMessageTheme2 === "function"){ showMessageTheme2(0, getActualErrorMessage(resp, null, null, "The OTP is incorrect."), "", true); }
             btn.prop("disabled", false);
         }
     }catch(e){
-        if(typeof showMessageTheme2 === "function"){ showMessageTheme2(0, "Something went wrong.", "", true); }
+        if(typeof showMessageTheme2 === "function"){ showMessageTheme2(0, getActualErrorMessage(e && e.responseData, e && e.xhr, e, "Something went wrong."), "", true); }
         btn.prop("disabled", false);
     }
 }

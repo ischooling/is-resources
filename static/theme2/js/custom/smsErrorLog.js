@@ -31,14 +31,14 @@ function initSmsErrorLogTable() {
                 text:      '<i class="fa fa-file-excel-o mr-1"></i>Excel',
                 className: 'btn btn-success btn-sm',
                 title:     'SMS Error Logs',
-                exportOptions: { columns: [0,1,2,3,4,5,6,7,8] }
+                exportOptions: { columns: [0,1,2,3,4,5,6,7,8,9] }
             },
             {
                 extend:    'csvHtml5',
                 text:      '<i class="fa fa-file-text-o mr-1"></i>CSV',
                 className: 'btn btn-info btn-sm',
                 title:     'SMS Error Logs',
-                exportOptions: { columns: [0,1,2,3,4,5,6,7,8] }
+                exportOptions: { columns: [0,1,2,3,4,5,6,7,8,9] }
             }
         ],
         ajax: {
@@ -51,6 +51,7 @@ function initSmsErrorLogTable() {
                 d.fUserId      = $('#errUserId').val()      || '';
                 d.fModuleId    = $('#errModuleId').val()    || '';
                 d.fHttpStatus     = $('#errHttpStatus').val()     || '';
+                d.fEnvironment    = $('#errEnvironment').val()    || '';
                 d.fAppVersion     = $('#errAppVersion').val()     || '';
                 d.fErrorMessage   = $('#errErrorMessage').val()   || '';
                 return d;
@@ -100,6 +101,14 @@ function initSmsErrorLogTable() {
             },
             { data: 'appVersion', title: 'App Version', defaultContent: '-' },
             {
+                data:    'environment',
+                title:   'Environment',
+                defaultContent: '-',
+                render: function(data) {
+                    return getEnvironmentBadge(data);
+                }
+            },
+            {
                 data:       null,
                 title:      'Action',
                 orderable:  false,
@@ -134,6 +143,14 @@ function initSmsErrorLogTable() {
     });
 }
 
+function getEnvironmentBadge(environment) {
+    if (!environment) return '-';
+    var value = String(environment).toUpperCase();
+    var label = value === 'PROD' ? 'Production' : value === 'LOCAL' ? 'Local' : value;
+    var badgeClass = value === 'PROD' ? 'badge-danger' : value === 'LOCAL' ? 'badge-info' : 'badge-secondary';
+    return '<span class="badge ' + badgeClass + '">' + escapeHtml(label) + '</span>';
+}
+
 function applySmsErrorLogFilters() {
     if (smsErrorLogTable) {
         smsErrorLogTable.ajax.reload(null, true);
@@ -147,6 +164,7 @@ function clearSmsErrorLogFilters() {
     $('#errUserId').val('');
     $('#errModuleId').val('');
     $('#errHttpStatus').val('');
+    $('#errEnvironment').val('');
     $('#errAppVersion').val('');
     $('#errErrorMessage').val('');
     if (smsErrorLogTable) {

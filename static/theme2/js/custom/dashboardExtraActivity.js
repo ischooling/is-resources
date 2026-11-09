@@ -544,8 +544,8 @@ function updateExtraActivityRegistration(id, enableRegistration, roleModuleId) {
 			}
 			return false;
 		},
-		error : function() {
-			showMessageTheme2(0, 'Something went wrong');
+		error : function(xhr, status, e) {
+			showMessageTheme2(0, getActualErrorMessage(null, xhr, { message: e, status: status }, 'Something went wrong'));
 		}
 	});
 }

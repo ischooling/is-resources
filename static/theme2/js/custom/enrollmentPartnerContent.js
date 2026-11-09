@@ -449,7 +449,7 @@ function enrollmentPartnerBasicDetails(data){
 									+'<small id="additionalInfoWordCount" class="d-block mt-1">0 / 25 words minimum</small>'
 								+'<label id="additionalInfoLabel" for="additionalInfo">Tell us more about you*</label>'
 								+'</div>'
-								+'<p class="m-0" id="additionalInfoError"></p>'
+								+'<p class="m-0 mt-4" id="additionalInfoError"></p>'
 								+'</div>'
 								+'<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mt-2 organization-field">'
 									+'<div class="full">'

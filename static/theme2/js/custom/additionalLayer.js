@@ -127,7 +127,7 @@ async function handleProceedToOutlook() {
 		}, 1200);
 		showDashboardRelocationbButton();
 	} else {
-		showMessageTheme2(0, (responseData && responseData.message) ? responseData.message : "Unable to proceed");
+		showMessageTheme2(0, getActualErrorMessage(responseData, null, null, "Unable to proceed"));
 	}
 	return false;
 }
@@ -229,7 +229,7 @@ async function handleActivateSchoolEmail() {
         var responseData = await callCommonAjax(ajaxReqDetails);
         if (!responseData || responseData.status != 1) {
             if (btn) btn.disabled = false;
-            showMessageTheme2(0, (responseData && responseData.message) ? responseData.message : "Unable to create school email account. Please try again.");
+            showMessageTheme2(0, getActualErrorMessage(responseData, null, null, "Unable to create school email account. Please try again."));
             return;
         }
         window.OUTLOOK_NEEDS_AZURE_CREATION = false;
@@ -301,6 +301,6 @@ async function handleOutlookAlreadyActivated() {
         window.location = getStudentDashboardUrl();
     } else {
         $("#outlookAlreadyActivated").prop("disabled", false);
-        showMessageTheme2(0, (responseData && responseData.message) ? responseData.message : "Unable to proceed");
+        showMessageTheme2(0, getActualErrorMessage(responseData, null, null, "Unable to proceed"));
     }
 }

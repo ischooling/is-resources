@@ -159,7 +159,7 @@ function getPaymentDetails() {
 			if (checkonlineOfflineStatus()) {
 				return;
 			}else{
-				showMessageTheme2(0, e.responseText, '', true);
+				showMessageTheme2(0, getActualErrorMessage(null, e, null, 'Unable to complete the payment request.'), '', true);
 			}
 		}
 	});
@@ -553,7 +553,7 @@ function saveCustomPaymentPlan(status) {
 			if (checkonlineOfflineStatus()) {
 				return;
 			}else{
-				showMessageTheme2(0, e.responseText, '', true);
+				showMessageTheme2(0, getActualErrorMessage(null, e, null, 'Unable to complete the payment request.'), '', true);
 			}
 		}
 	});
@@ -752,7 +752,7 @@ function getGradeFeeDetails() {
 			if (checkonlineOfflineStatus()) {
 				return;
 			}else{
-				showMessageTheme2(0, e.responseText, '', true);
+				showMessageTheme2(0, getActualErrorMessage(null, e, null, 'Unable to complete the payment request.'), '', true);
 			}
 		}
 	});
@@ -802,7 +802,7 @@ function getAdvancePaymentDetails(studentStandardId) {
 			if (checkonlineOfflineStatus()) {
 				return;
 			} else {
-				showMessageTheme2(0, e.responseText, '', true);
+				showMessageTheme2(0, getActualErrorMessage(null, e, null, 'Unable to complete the payment request.'), '', true);
 			}
 		}
 	});
@@ -1057,7 +1057,7 @@ function saveAdvanceFeeDetails(status) {
 					if (checkonlineOfflineStatus()) {
 						return;
 					} else {
-						showMessageTheme2(0, e.responseText, '', true);
+						showMessageTheme2(0, getActualErrorMessage(null, e, null, 'Unable to complete the payment request.'), '', true);
 					}
 				}
 			});

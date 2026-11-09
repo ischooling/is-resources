@@ -193,7 +193,7 @@ function getReceivedTeachedProfileListHtml(receivedTeachedProfileList){
 					}
 				}
 			html+=`</td>
-			<td class="text-center">${ROLE_MODULE.viewed == "Y"?`<a href="javascript:void(0);"  class="btn btn-primary btn-sm " onclick="getAsPost('/dashboard/profile-view-content?userId=${receivedTeachedProfile.userId}&moduleId=${receivedTeachedProfile.mangeUserListModId}&actionType=1a')"  >Click here</a> `:""}</td>
+			<td class="text-center">${ROLE_MODULE.viewed == "Y"?`<a href="javascript:void(0);"  class="btn btn-primary btn-sm " onclick="viewTeacherProfileInline(${receivedTeachedProfile.userId}, 'receivedTeachedProfileListTable','', true)"  >Click here</a> `:""}</td>
 			<td class="text-center">
 				${
 					ROLE_MODULE.updated == "Y"
@@ -295,11 +295,11 @@ function getRejectedTeacherListListHtml(rejectedTeacherList){
 			if(ROLE_MODULE.viewed=='Y'){
 				html+=`<td>`;
 					if(rejectedTeacher.teacherFirstReset == '14' || rejectedTeacher.teacherFirstReset == '17' || rejectedTeacher.teacherFirstReset == '20'){
-						html+=`<a onclick="getAsPost('/dashboard/profile-view-content?userId=${rejectedTeacher.userId}&moduleId=${ROLE_MODULE.moduleId}&actionType=1a')" href="javascript:void(0);" class="btn btn-outline-primary btn-sm"><i class="fa fa-eye"></i>&nbsp;View</a></a>`;
+						html+=`<a onclick="viewTeacherProfileInline(${rejectedTeacher.userId}, 'rejectedTeacherListTable','', true)" href="javascript:void(0);" class="btn btn-outline-primary btn-sm"><i class="fa fa-eye"></i>&nbsp;View</a>`;
 					}else if(rejectedTeacher.teacherFirstReset == '15' || rejectedTeacher.teacherFirstReset == '18' || rejectedTeacher.teacherFirstReset == '21'){
-						html+=`<a onclick="getAsPost('/dashboard/profile-view-content?userId=${rejectedTeacher.userId}&moduleId=${ROLE_MODULE.moduleId}&actionType=1a')" href="javascript:void(0);" class="btn btn-outline-primary btn-sm"><i class="fa fa-eye"></i>&nbsp;View</a></a>`;
+						html+=`<a onclick="viewTeacherProfileInline(${rejectedTeacher.userId}, 'rejectedTeacherListTable','', true)" href="javascript:void(0);" class="btn btn-outline-primary btn-sm"><i class="fa fa-eye"></i>&nbsp;View</a>`;
 					}else{
-						html+=`<a onclick="getAsPost('/dashboard/profile-view-content?userId=${rejectedTeacher.userId}&moduleId=${ROLE_MODULE.moduleId}&actionType=1a')" href="javascript:void(0);" class="btn btn-outline-primary btn-sm"><i class="fa fa-eye"></i>&nbsp;View</a></a>`;
+						html+=`<a onclick="viewTeacherProfileInline(${rejectedTeacher.userId}, 'rejectedTeacherListTable','', true)" href="javascript:void(0);" class="btn btn-outline-primary btn-sm"><i class="fa fa-eye"></i>&nbsp;View</a>`;
 					}
 				html+=`</td><td>
 					<a onclick="return callUserActivity('formId','${rejectedTeacher.userId}','true','false',${ROLE_MODULE.moduleId});" href="javascript:void(0);" class="btn btn-outline-primary btn-sm"><i class="fa fa-cogs"></i>&nbsp;Click here</a>
@@ -694,7 +694,7 @@ function getPendingVerificationTeachedProfileListHtml(teacherDetails){
 					}
 				}
 			html+=`</td>
-			<td class="text-center">${ROLE_MODULE.viewed == "Y"?`<a href="javascript:void(0);"  class="btn btn-primary btn-sm " onclick="getAsPost('/dashboard/profile-view-content?userId=${teacherDetail.userId}&moduleId=${ROLE_MODULE.moduleId}&actionType=1a')"  >Click here</a> `:""}</td>
+			<td class="text-center">${ROLE_MODULE.viewed == "Y"?`<a href="javascript:void(0);"  class="btn btn-primary btn-sm " onclick="viewTeacherProfileInline(${teacherDetail.userId}, 'PendingVerificationProfileListTable','', true)"  >Click here</a> `:""}</td>
 			<td class="text-center">${ROLE_MODULE.updated == "Y"?`<a href="javascript:void(0);" class="btn btn-primary btn-sm " onclick="return callPendingReqModel('${teacherDetail.userId}', '${teacherDetail.firstReset}', '${teacherDetail.policeVerificationAcceptance == undefined ? "N" : teacherDetail.policeVerificationAcceptance}');">Update Status</a>`:""}</td>
 			</tr>`;
 		}
@@ -791,7 +791,7 @@ function getPendingBankDetailsTeacherProfileListHtml(teacherDetails){
            	<td>${teacherDetail.teacherName}</td>
            	<td>${teacherDetail.contactNumber}</td>
 			<td>${teacherDetail.email}</td>
-			<td class="text-center">${ROLE_MODULE.viewed == "Y"?`<a href="javascript:void(0);"  class="btn btn-primary btn-sm " onclick="getAsPost('/dashboard/profile-view-content?userId=${teacherDetail.userId}&moduleId=${ROLE_MODULE.moduleId}&actionType=1a')"  >Click here</a> `:""}</td>
+			<td class="text-center">${ROLE_MODULE.viewed == "Y"?`<a href="javascript:void(0);"  class="btn btn-primary btn-sm " onclick="viewTeacherProfileInline(${teacherDetail.userId}, 'BankDetailsProfileListTable','', true)"  >Click here</a> `:""}</td>
 			<td class="text-center">${ROLE_MODULE.updated == "Y"?`<a href="javascript:void(0);" class="btn btn-primary btn-sm " onclick="return callPendingReqModel('${teacherDetail.userId}', '${teacherDetail.firstReset}', '${teacherDetail.isTeacherPoliceVerifide}');">Update Status</a>`:""}</td>
 			</tr>`;
 		}

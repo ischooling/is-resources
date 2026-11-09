@@ -147,7 +147,7 @@ async function resendUserInvitationMail(userId){
 	if(responseData && responseData.status == 1){
 		showMessageTheme2(1, responseData.message || "Invitation mail sent successfully.");
 	}else{
-		showMessageTheme2(0, responseData && responseData.message ? responseData.message : "Unable to resend invitation mail.");
+		showMessageTheme2(0, getActualErrorMessage(responseData, null, null, "Unable to resend invitation mail."));
 	}
 	return false;
 }
@@ -184,7 +184,7 @@ async function resetAdminAzurePasswordAndNotifyPrimaryMail(userId){
 	if(responseData && responseData.status == 1){
 		showMessageTheme2(1, responseData.message || "Password reset request sent successfully.");
 	}else{
-		showMessageTheme2(0, responseData && responseData.message ? responseData.message : "Unable to reset azure password.");
+		showMessageTheme2(0, getActualErrorMessage(responseData, null, null, "Unable to reset azure password."));
 	}
 	return false;
 }

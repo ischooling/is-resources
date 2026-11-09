@@ -3919,7 +3919,7 @@ async function submitStudentDocumentVerification() {
             showMessageTheme2(1, "Document review completed");
             await loadProfileStudentDocumentVerification();
         } else {
-            showMessageTheme2(0, responseData && responseData.message ? responseData.message : "Unable to verify student documents.");
+            showMessageTheme2(0, getActualErrorMessage(responseData, null, null, "Unable to verify student documents."));
             $("#studentDocumentVerificationSubmitBtn").prop("disabled", false);
         }
     } catch (e) {
@@ -8693,7 +8693,7 @@ async function activateYourSchoolEmail() {
         $("#student_Email_Information").replaceWith(html);
         showMessageTheme2(1, responseData.message || "Student school user ID activated successfully.");
     } else {
-        showMessageTheme2(0, responseData && responseData.message ? responseData.message : "Unable to activate school user ID.");
+        showMessageTheme2(0, getActualErrorMessage(responseData, null, null, "Unable to activate school user ID."));
     }
 
     return false;

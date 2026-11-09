@@ -1003,7 +1003,7 @@ function updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCou
 			</div>`;
 	const leadSourceBlock = `<div class="col-xl-3 col-lg-5 col-md-5 col-sm-12 col-12 leadSourceHide">
 				<div class="input-group position-relative custom-field mb-2 mt-3 p-0">
-					<select name="leadSource" id="leadSource" class="form-control"><option value="">Select Source</option></select>
+					<select name="leadSource" id="leadSource" class="form-control" style="height:38px !important"><option value="">Select Source</option></select>
 					<label class="mb-0">Source</label>
 				</div>
 			</div>`;
@@ -1011,6 +1011,7 @@ function updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCou
 	const remarksCounter = isRemarkMandatory ? `<small id="scheduleRemarksCounter" class="text-muted">0 / ${minRemarkCount}</small>` : '';
 	var html =
 			'<div id="updateSystemTraningModal" class="modal fade fade-scale" tabindex="" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">'
+				+'<style>#updateSystemTraningModal .modal-body label{display:block;margin-bottom:.4rem;}#updateSystemTraningModal .modal-body select.form-control{height:38px;}</style>'
 				+'<div class="modal-dialog modal-md modal-dialog-centered box-shadow-none">'
 					+'<div class="modal-content border-0">'
 						+'<div class="modal-header py-2 bg-primary text-white">'
@@ -1090,15 +1091,15 @@ function updateSystemTraningModal(meetingId, leadId,remarkMendatory,minRemarkCou
 										+'</div>'
 										+'<div id="finalInterviewSlotsWrapper" class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 mt-2" style="display: none;"></div>'
 									}
-									html+='<div class="col-xl-3 col-lg-5 col-md-5 col-sm-12 col-12 tentative_date" style="display:none">'
-										+'<label class="mb-0">Tentative Date</label>'
+									html+='<div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12 tentative_date" style="display:none">'
+										+'<label>Tentative Date</label>'
 										+'<input type="text" name="tentativeDate" id="tentativeDate" value="" class="form-control tentativeDate" maxlength="50" autocomplete="off" readonly onkeydown="return false" />'
 									+'	</div>'
-									+'<div class="col-xl-3 col-lg-5 col-md-5 col-sm-12 col-12 leadSourceHide">'
-										+'<label class="mb-0">Source</label>'
-										+'<select	name="leadSource" id="leadSource" class="form-control" ><option value="">Select Source</option></select>'
+									+'<div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12 leadSourceHide">'
+										+'<label>Source</label>'
+										+'<select	name="leadSource" id="leadSource" class="form-control" style="height:38px !important"><option value="">Select Source</option></select>'
 									+'	</div>'
-									+'<div class="col-xl-12 col-lg-7 col-md-7 col-sm-12 col-12">'
+									+'<div class="col-12 mt-2">'
 										+'<label>Remarks</label>'
 										+`<input type="text" name="remarks" id="remarks"  class="form-control ${isRemarkMandatory ? 'schedule_remarks remarks' : ''}" ${isRemarkMandatory ? `isRemarkMendatory="true" minlength="${minRemarkCount}" required` : ''}>`
 										+ `${(!isRemarkMandatory)? '':'<small id="scheduleRemarksCounter" class="text-muted">0 / '+minRemarkCount+'</small>'}`

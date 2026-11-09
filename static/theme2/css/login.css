@@ -58,7 +58,6 @@ font-8 {
 .true.valid-field:after, .false.valid-field:after{visibility: visible;opacity: 1; transform:translateY(-50%); }
 .true.valid-field input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]){padding-right: 50px;border-color:green}
 .false.valid-field input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]){border-color:red}
-.captch-field.valid-field.false:after, .captch-field.valid-field.true:after{right: 15px !important;}
 #statusMessage.modal-body{margin: 0 auto;padding:15px 0;font-size: 18px;color: #666;font-weight: bold;margin-top:0 !important;}
 .modal-dialog { margin: 30px auto; top: 20%;}
 .modal-body p{ padding:10px 0 10px;}
@@ -213,7 +212,7 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  border-radius:26px;
  max-width:430px;
  width:100%;
- /* min-height:min(680px,calc(100vh - 44px)); */
+ min-height:min(680px,calc(100vh - 44px));
  padding:22px 24px 20px;
  position:relative;
  right:0;
@@ -451,7 +450,7 @@ input:-webkit-autofill:focus {-webkit-text-fill-color:#000;-webkit-box-shadow: 0
  font-size:18px;
  font-weight:700;
  letter-spacing:.2px;
- /* margin:18px 0 18px; */
+ margin:18px 0 18px;
 }
 .login-redesign .login .form-group .login-submit-btn svg{
  flex:0 0 auto;

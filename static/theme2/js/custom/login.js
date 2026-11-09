@@ -275,9 +275,9 @@ async function initiateSetting(){
 	schoolSettings = JSON.parse(onetimedetails.schoolSettings);
 }
 async function loginPageOnLoadEvent(){
-	callLocationAndSelectCountryNew('loginForm');
+	callLocationAndSelectCountryNew('loginForm');		
     $("form").attr('autocomplete', 'off');
-
+	  
 	//   /* DON'T REMOVE BELOW SCRIPT THIS IS USE FOR EID MUBARAK LOGIN PAGE */
 	  
 	//   $("body").sparkle({
@@ -482,11 +482,11 @@ function recaptchaNoticeHtml(color) {
 		+ '<a href="https://policies.google.com/terms" ' + link + '>Terms of Service</a> apply.</p>';
 }
 
-async function getRequestForLogin(formId, moduleId, loginType) {
+function getRequestForLogin(formId, moduleId, loginType) {
 	var request = {};
 	var authentication = {};
 	var loginDTO = {};
-
+	
 	var timezone=getSystemTimezone();
 	if(timezone=='Asia/Calcutta'){
 		timezone='Asia/Kolkata';
@@ -496,7 +496,6 @@ async function getRequestForLogin(formId, moduleId, loginType) {
 	loginDTO['password'] = encode($("#" + formId + " #password").val().trim());
 	loginDTO['location'] = $("#" + formId + " #location").val().trim();
 	loginDTO['fromSpoof'] = $("#" + formId + " #fromSpoof").val().trim();
-	loginDTO['recaptchaToken'] = await getRecaptchaToken('login');
 	authentication['hash'] = getHash();authentication['schoolId'] = SCHOOL_ID;authentication['schoolUUID'] = SCHOOL_UUID;
 	authentication['userType'] = moduleId;
 	request['authentication'] = authentication;
@@ -553,22 +552,21 @@ function proceedWithUserChangedTimezone(currentTimezoneId, userId){
 }
 
 const callUserLogin = debouncing(callUserLoginFun, 300);
-async function callUserLoginFun(formId, moduleId, loginType) {
+function callUserLoginFun(formId, moduleId, loginType) {
 	if($("#modalMessage.in").length>0){
         hideMessage('');
 		return false;
 	}
-
+	
 	if (!validateRequestForLogin(formId)) {
 		return false;
 	}
 	$("#"+formId+" #login").prop("disabled", true);
-	var loginRequest = await getRequestForLogin(formId, moduleId, loginType);
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
 		url : getURLForCommon('login'),
-		data : JSON.stringify(loginRequest),
+		data : JSON.stringify(getRequestForLogin(formId, moduleId, loginType)),
 		dataType : 'json',
 		cache : false,
 		timeout : 600000,
@@ -608,6 +606,8 @@ async function callUserLoginFun(formId, moduleId, loginType) {
 				customLoader(false)
 			} else {
 				customLoader(true);
+				// The user this tab's page was for, before this sign-in (session-out "continue" modal).
+				var tabAccount = typeof UNIQUEUUID === 'string' ? UNIQUEUUID : '';
 				UNIQUEUUID=data['uniqueId']
 				var redirectUrl = data['redirectUrl'];
 				console.log('redirectUrl :: '+redirectUrl)
@@ -618,6 +618,12 @@ async function callUserLoginFun(formId, moduleId, loginType) {
 						//sync one by one all static contents
 						// getCommonCustomScript(data['userId'],SCHOOL_ID);
 					}else if(loginType=='CONTINUE'){
+						// Several users can be signed in to one browser: "continue" may only continue the same user.
+						// Someone else signing in here goes to their own page, never into the page of the user before.
+						if (tabAccount && data['uniqueId'] && tabAccount !== data['uniqueId']) {
+							window.location.href = redirectUrl;
+							return false;
+						}
 						customLoader(false)
 						if(moduleId=='STUDENT'){
 							showMessage(true, data.message,'',true);
@@ -634,6 +640,16 @@ async function callUserLoginFun(formId, moduleId, loginType) {
 			}
 			$("#"+formId+" #login").prop("disabled", false);
 			return false;
+		},
+		error: function(xhr, status, e) {
+			var message = getActualErrorMessage(null, xhr, { message: e, status: status }, "Unable to sign in right now. Please try again.");
+			customLoader(false);
+			$("#"+formId+" #login").prop("disabled", false);
+			if(typeof showMessageTheme2 === "function") {
+				showMessageTheme2(0, message, '', true);
+			} else {
+				showMessage(false, message, '', true);
+			}
 		}
 	});
 }
@@ -886,7 +902,7 @@ function showPassWord(elementId, iconId) {
   } else {
     return false;
   }
-} 
+}
 $.ajaxSetup({
   beforeSend: function (xhr, settings) {
     if (settings.data != undefined) {
@@ -953,4 +969,4 @@ function checkonlineOfflineStatus() {
     return true;
   }
   return false;
-} 
+}

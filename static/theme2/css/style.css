@@ -2825,7 +2825,7 @@ label.error {
 	}
 }
 .tab-and-mobile-logout-btn {
-	color:red;
+	color:red !important;
 	display: flex;
 	position: absolute;
 	z-index: 9;
@@ -3800,3 +3800,10 @@ border-top: 7px solid rgba(0,0,0,.1);
 @media (max-width:550px){
 	.feeDetailsContentDiv .radio-payment-option label{padding: 14px 14px 14px 44px !important;}
 }
+
+.primary-txt-color, .primary-hov-txt:hover{color:var(--pc)  !important}
+.secondary-txt-color, .secondary-hov-txt:hover{color:var(--sc) !important}
+.tertiary-txt-color, .tertiary-hov-txt:hover{color:var(--pc) !important}
+.quartary-txt-color, .quartary-hov-txt:hover{color:var(--pc) !important}
+.black-txt-color, .black-hov-txt:hover{color:#000 !important}
+.white-txt-color, .white-hov-txt:hover{color:#fff !important}

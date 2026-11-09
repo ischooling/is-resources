@@ -4038,7 +4038,7 @@ function getLearningProgramLabel(registrationType) {
 function getAnnouncementAndNewsContent() {
 	var showOnlyReleaseNote = SHOW_ONLY_RELEASE_NOTE === true;
   var html = 
-    `<div class="right_fixed_action sdaf">
+    `<div class="right_fixed_action">
       <!-- Deliberately still the old app. Diary was not migrated and lives
            there; the new support app serves no /iframe/diary-bridge, so
            "fixing" this URL alongside the others would silently break diary. -->

@@ -266,6 +266,8 @@ async function callUserLoginFun(formId, moduleId, loginType) {
 				customLoader(false)
 			} else {
 				customLoader(true);
+				// The user this tab's page was for, before this sign-in (session-out "continue" modal).
+				var tabAccount = typeof UNIQUEUUID === 'string' ? UNIQUEUUID : '';
 				UNIQUEUUID=data['uniqueId']
 				var redirectUrl = data['redirectUrl'];
 				console.log('redirectUrl :: '+redirectUrl)
@@ -276,6 +278,12 @@ async function callUserLoginFun(formId, moduleId, loginType) {
 						//sync one by one all static contents
 						// getCommonCustomScript(data['userId'],SCHOOL_ID);
 					}else if(loginType=='CONTINUE'){
+						// Several users can be signed in to one browser: "continue" may only continue the same user.
+						// Someone else signing in here goes to their own page, never into the page of the user before.
+						if (tabAccount && data['uniqueId'] && tabAccount !== data['uniqueId']) {
+							window.location.href = redirectUrl;
+							return false;
+						}
 						customLoader(false)
 						if(moduleId=='STUDENT'){
 							showMessage(true, data.message,'',true);
@@ -293,6 +301,16 @@ async function callUserLoginFun(formId, moduleId, loginType) {
 			}
 			$("#"+formId+" #login").prop("disabled", false);
 			return false;
+		},
+		error: function(xhr, status, e) {
+			var message = getActualErrorMessage(null, xhr, { message: e, status: status }, "Unable to continue the session right now. Please try again.");
+			customLoader(false);
+			$("#"+formId+" #login").prop("disabled", false);
+			if(typeof showMessageTheme2 === "function") {
+				showMessageTheme2(0, message, '', true);
+			} else {
+				showMessage(false, message, '', true);
+			}
 		}
 	});
 }

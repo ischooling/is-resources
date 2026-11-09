@@ -6493,6 +6493,9 @@ animation:spinner-grow .75s linear infinite
 .align-text-top {
 	vertical-align:text-top !important
 }
+.bg-white {
+	background-color:#fff !important
+}
 .bg-primary {
 	background-color:var(--pc) !important
 }
