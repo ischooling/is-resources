@@ -48,6 +48,106 @@ function mqDashboardWidget() {
     setTimeout(showQuoteOfMoment, 900);
 }
 
+/*
+ * Inbox: the unread count on the sidebar's Inbox link (last 30 days). Runs once when the
+ * dashboard loads, and again from the Inbox page after the user reads something.
+ * Silent on failure: the badge is a hint, never a blocker.
+ */
+function refreshInboxBadge() {
+    var link = $('#main-nav a[onclick*="\'inbox\'"]').first();
+    if (!link.length) {
+        return;
+    }
+    $.ajax({
+        contentType: APPLICATION_JSON_VALUE,
+        type: 'POST',
+        url: getURLForHTML('dashboard', 'inbox/unread'),
+        data: JSON.stringify({}),
+        dataType: 'json',
+        success: function (response) {
+            if (!response || response.status !== '1' || !response.data) {
+                return;
+            }
+            var total = response.data.TOTAL || 0;
+            var label = total > 99 ? '99+' : String(total);
+            var badge = link.find('.ib-menu-badge');
+            if (!badge.length) {
+                badge = $('<span class="badge badge-pill badge-danger ml-2 ib-menu-badge"></span>').appendTo(link);
+            }
+            badge.text(label).attr('aria-label', total + ' unread').toggle(total > 0);
+            // Inbox sits under the "Communication" menu: show the count on it too, so it is seen while the menu is closed.
+            var parentLink = link.closest('ul').closest('li').children('a').first();
+            if (parentLink.length && parentLink[0] !== link[0]) {
+                var parentBadge = parentLink.find('.ib-menu-badge');
+                if (!parentBadge.length) {
+                    parentBadge = $('<span class="badge badge-pill badge-danger ml-2 ib-menu-badge"></span>');
+                    var menuName = parentLink.children('span').first();
+                    if (menuName.length) {
+                        parentBadge.insertAfter(menuName);
+                    } else {
+                        parentBadge.appendTo(parentLink);
+                    }
+                }
+                parentBadge.text(label).attr('aria-label', total + ' unread').toggle(total > 0);
+            }
+            inboxHeaderBell(link, total, label);
+        },
+        error: function () {
+            // Keep the menu as it is.
+        }
+    });
+}
+
+/* The same count on a bell in the page header; the bell opens the Inbox through its menu link. */
+function inboxHeaderBell(link, total, label) {
+    var bell = $('#ibBell');
+    if (!bell.length) {
+        var slot = $('#cartCounts');
+        if (!slot.length) {
+            return;
+        }
+        bell = $('<button type="button" id="ibBell" class="btn btn-link mr-2 position-relative" style="color:inherit;font-size:1.25rem">'
+            + '<i class="fa fa-bell" aria-hidden="true"></i>'
+            + '<span class="badge badge-pill badge-danger position-absolute ib-bell-count" style="top:0;right:0;font-size:10px"></span>'
+            + '</button>').insertBefore(slot);
+        bell.on('click', function () {
+            $('#main-nav a[onclick*="\'inbox\'"]').first().trigger('click');
+        });
+    }
+    bell.attr('aria-label', total > 0 ? 'Inbox, ' + total + ' unread' : 'Inbox');
+    bell.find('.ib-bell-count').text(label).toggle(total > 0);
+}
+
+$(function () {
+    refreshInboxBadge();
+});
+
+/*
+ * "Communications" shortcuts on profiles: open Communications > Email Logs > Person for one
+ * user. Only for admins whose menu has Email Logs (the server checks the right again).
+ */
+function emailLogsMenuLink() {
+    return $('#main-nav a[onclick*="\'email-logs\'"]').first();
+}
+
+function canOpenPersonCommunications() {
+    return emailLogsMenuLink().length > 0;
+}
+
+function openPersonCommunications(userId) {
+    var link = emailLogsMenuLink();
+    if (!link.length || !(parseInt(userId, 10) > 0)) {
+        return false;
+    }
+    try {
+        sessionStorage.setItem('emailLogs.person', String(parseInt(userId, 10)));
+    } catch (e) {
+        // Without storage the Email Logs page still opens; the admin searches for the person there.
+    }
+    link.trigger('click');
+    return false;
+}
+
 function isParentDemoUser() {
     return USER_ROLE === "PARENT" && isDemoUser == true;
 }
@@ -109,6 +209,7 @@ const contentHandlers = {
     'email-status': () => $("#dashboardContentInHTML").html(getEmailVerifyContent("Email Verification", false)),
     'email-logs': () => initEmailLogs(),
     'email-recovery': () => initEmailRecovery(),
+    'message-templates': () => initMessageTemplates(),
     'wati-numbers': () => renderWatiNumbersContent(),
     'partner-school-payment': () => initPartnerSchoolPayment(),
     'graduation-ceremony-attendees': () => initGraduationCeremonyAttendees(),
@@ -234,6 +335,9 @@ const contentHandlers = {
     'student-video-library': () => initStudentVideoLibrary(),
     'certificate-management': () => initCertificateManagement(),
     'my-certificates': () => initMyCertificates(),
+    'inbox': () => initInbox(),
+    // Communication > Compose: the Inbox page with a new message open.
+    'inbox-compose': () => initInbox({ compose: true }),
 };
 
 const getLeadCategory = () => {

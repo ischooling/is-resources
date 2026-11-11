@@ -6,7 +6,8 @@
  *   - X-Account: the page's UNIQUEUUID, on every same-origin jQuery and fetch call;
  *   - X-CSRF-Token: the CSRF cookie's value, on the same calls, and a hidden _csrf field on POST forms;
  *   - when a call answers 401 with an X-Auth-Renew header (the access token expired), it renews once
- *     and repeats the call; if renewing fails, it goes to the login page;
+ *     and repeats the call; if renewing fails, it goes to the login page. Renewals are shared by every tab
+ *     (see renew below) and also serve jquery.commonFunction.js (window.smsRenew);
  *   - when a call answers 401 with an X-Auth-Visitor header (a signed-out page whose visitor token expired,
  *     section 29), it gets a new visitor token once and repeats the call;
  *   - when a call answers 401 with an X-Auth-Login header (nobody is signed in for it: the page's user has
@@ -48,6 +49,7 @@
 	var renewing = null;
 	var visiting = null;
 	var leaving = false;
+	var nativeFetch = typeof window.fetch === 'function' ? window.fetch.bind(window) : null;
 
 	function readCookie(name) {
 		var parts = document.cookie ? document.cookie.split('; ') : [];
@@ -64,7 +66,17 @@
 		return readCookie(CSRF_COOKIE) !== null;
 	}
 
+	/**
+	 * The signed-in user the page was served to: AUTH_ACCOUNT (set by the server for every signed-in page), else
+	 * UNIQUEUUID. They differ when a page shows someone else's data, such as a director viewing a counselor's lead
+	 * list: UNIQUEUUID is then the counselor, whose cookies this browser does not hold, and naming it signed the
+	 * page's calls in as nobody (401, then the login page).
+	 */
 	function account() {
+		var signedIn = typeof window.AUTH_ACCOUNT === 'string' ? window.AUTH_ACCOUNT : '';
+		if (ACCOUNT_ID.test(signedIn)) {
+			return signedIn;
+		}
 		var id = typeof window.UNIQUEUUID === 'string' ? window.UNIQUEUUID : '';
 		return ACCOUNT_ID.test(id) ? id : null;
 	}
@@ -182,24 +194,126 @@
 		return visiting;
 	}
 
-	/** One renewal at a time, shared by every call that hit the expiry together. */
+	/*
+	 * Renewing rotates the refresh token: the old one stops working. The access cookie is shared by every tab, so
+	 * all tabs hit its expiry together, and each renewing on its own sends the same refresh token at once. The
+	 * server lets one rotate and answers the others 409 (concurrent_refresh); sent again after its 10s grace, the
+	 * old token counts as stolen and ends the login in every tab. So:
+	 *   - one renewal at a time across tabs (Web Locks); a tab that waited skips its own when another tab renewed
+	 *     after it asked (RENEWED_AT, in localStorage), since the shared cookies are fresh already;
+	 *   - a 409 is not a failure: another call rotated a moment ago, its new cookies are on the way, so wait a
+	 *     little and let the caller repeat its call.
+	 */
+	var RENEW_LOCK = 'is-auth-renew';
+	var RENEWED_AT = 'is-auth-renewed-at:';
+	var CONCURRENT_WAIT_MS = 1000;
+	// Nothing may hold up renewing for good. A tab holding the lock can be frozen or throttled in the background,
+	// or its request can sit behind slow ones; every other tab then waited on it forever and every call answered
+	// 401. So the lock is waited for only so long (then renewing goes ahead without it: the server's grace answers
+	// an overlap with 409, which is handled), and a renewal that never answers is given up.
+	var LOCK_WAIT_MS = 8000;
+	var RENEW_TIMEOUT_MS = 15000;
+	// A renewal that could not tell (no answer, network error): not a sign-out. The call is repeated once; a real
+	// end of the login answers 401 and goes to the login page.
+	var UNKNOWN = 'unknown';
+
+	function renewedAt(url) {
+		try {
+			return Number(window.localStorage.getItem(RENEWED_AT + url)) || 0;
+		} catch (e) {
+			return 0;
+		}
+	}
+
+	function markRenewed(url) {
+		try {
+			window.localStorage.setItem(RENEWED_AT + url, String(Date.now()));
+		} catch (e) {
+			// storage unavailable: a waiting tab then renews once more, which is harmless
+		}
+	}
+
+	function wait(ms) {
+		return new Promise(function (resolve) {
+			window.setTimeout(resolve, ms);
+		});
+	}
+
+	/** A controller aborted after {@code ms}, or null where AbortController is missing. */
+	function abortAfter(ms) {
+		if (typeof window.AbortController !== 'function') {
+			return null;
+		}
+		var controller = new window.AbortController();
+		window.setTimeout(function () {
+			controller.abort();
+		}, ms);
+		return controller;
+	}
+
+	/**
+	 * Resolves when the renewal is done (or could not tell: UNKNOWN), rejects only when the server refused it
+	 * (the login has ended).
+	 */
+	function postRenew(url, askedAt) {
+		if (renewedAt(url) >= askedAt) {
+			return Promise.resolve();
+		}
+		var timeout = abortAfter(RENEW_TIMEOUT_MS);
+		return nativeFetch(url, {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: { 'X-CSRF-Token': readCookie(CSRF_COOKIE) || '' },
+			signal: timeout ? timeout.signal : undefined
+		}).then(function (response) {
+			if (response.ok) {
+				markRenewed(url);
+				return;
+			}
+			if (response.status === 409) {
+				return wait(CONCURRENT_WAIT_MS);
+			}
+			if (response.status === 401 || response.status === 403) {
+				throw new Error('renew refused: ' + response.status);
+			}
+			// 429, 5xx: the server could not renew right now, which does not end the login
+			return UNKNOWN;
+		}, function () {
+			// no answer: timed out, offline, or the page is going away
+			return UNKNOWN;
+		});
+	}
+
+	/** Runs {@code run} holding the cross-tab renew lock, or without it once the lock was waited for too long. */
+	function withRenewLock(run) {
+		var locks = window.navigator && window.navigator.locks;
+		if (!locks || typeof locks.request !== 'function') {
+			return run();
+		}
+		var waited = abortAfter(LOCK_WAIT_MS);
+		var options = waited ? { signal: waited.signal } : {};
+		return locks.request(RENEW_LOCK, options, run).then(null, function (error) {
+			if (error && error.name === 'AbortError') {
+				return run();
+			}
+			throw error;
+		});
+	}
+
+	/** One renewal at a time, shared by every call (and every tab) that hit the expiry together. */
 	function renew(url) {
 		if (!renewing) {
-			renewing = window.fetch(url, {
-				method: 'POST',
-				credentials: 'same-origin',
-				headers: { 'X-CSRF-Token': readCookie(CSRF_COOKIE) || '' },
-				__authNoRetry: true
-			}).then(function (response) {
-				if (!response.ok) {
-					throw new Error('renew failed');
-				}
+			var askedAt = Date.now();
+			renewing = withRenewLock(function () {
+				return postRenew(url, askedAt);
 			}).finally(function () {
 				renewing = null;
 			});
 		}
 		return renewing;
 	}
+	// jquery.commonFunction.js renews through this too, so a page never runs two renewals of its own.
+	window.smsRenew = renew;
 
 	// ---- this tab's user (read by the "Choose account" page)
 	function rememberTabAccount() {
@@ -268,7 +382,9 @@
 				return;
 			}
 			options.headers = $.extend({}, authHeaders(), options.headers || {});
-			if (options.async === false) {
+			// smsRenewHandled: jquery.commonFunction.js's $.ajax renews and replays this call itself (through
+			// smsRenew); renewing here too would send a second renewal for the same 401.
+			if (options.async === false || options.smsRenewHandled) {
 				return;
 			}
 			var success = options.success;

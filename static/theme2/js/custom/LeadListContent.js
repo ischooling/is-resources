@@ -50,6 +50,7 @@ async function renderCounselorLeadListDashboard(title, roleAndModule, SCHOOL_ID,
 			schoolDropDown += '<option value="'+school.schoolId+'" extraschooluserid="'+school.userId+'" ' + (school.schoolId == SCHOOL_ID ? 'selected="true"' : '')+'>'+school.schoolName+'</option>';
 		});
 		$("#leadDemoSchoolMove").append(schoolDropDown);
+		refreshCustomFieldState($("#leadDemoSchoolMove").closest('.custom-field'));
 	}).catch(function(){});
 	// CORRECTNESS (must run BEFORE the fetches): the assign-to filter defaults to the logged-in
 	// user and IS part of the /lead-list + get-total-lead payload (assignTos). If the row/count

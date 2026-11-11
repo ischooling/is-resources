@@ -229,22 +229,17 @@ function migrationDetailsOptionContent(data) {
 											|| (studentCredit.currentGradeId>3))
 										{
 											if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
-												// only for flexy grade
-												if(data.registrationType=="BATCH" || data.registrationType=="ONE_TO_ONE"){
-													html+=getMigrationCountdownWapper(data);
-												}
+												html+=getMigrationCountdownWapper(data);
 											}
 										}
 									}else if(studentCredit.withDrawSubject == 0 ){
-											if(studentCredit.currentGradeId==17 
+											if(studentCredit.currentGradeId==17
 												|| (studentCredit.currentGradeId>=11 && studentCredit.currentGradeId<16)
 												|| (studentCredit.currentGradeId==16  && data.cgpaRule == 'Apply' && studentCredit.avgCumulativeGpa>2.0)
 												|| (studentCredit.currentGradeId==16  && data.cgpaRule == 'Dont Apply'))
 											{
 												if(data.migrationOptionsForNextGrade!=undefined && data.migrationOptionsForNextGrade.length>0){
-													if(data.registrationType=="BATCH" || data.registrationType=="ONE_TO_ONE"){
-														html+=getMigrationCountdownWapper(data);
-													}
+													html+=getMigrationCountdownWapper(data);
 												}
 											}
 									}else{

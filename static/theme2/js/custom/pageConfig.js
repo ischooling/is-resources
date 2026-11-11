@@ -108,6 +108,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
         "email-status":{url:"",file:[{role:"",fileName:["emailLogsContent.js","emailLogs.js","emailVerifyContent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "email-logs":{url:"",file:[{role:"",fileName:["emailLogsContent.js","emailLogs.js","emailVerifyContent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "email-recovery":{url:"",file:[{role:"",fileName:["emailRecoveryContent.js","emailRecovery.js","emailLogsContent.js","emailLogs.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "message-templates":{url:"",file:[{role:"",fileName:["messageTemplatesContent.js","messageTemplates.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "meeting-management":{url:"",file:[],funName:function(){},type:"JS",pageReqType:"EX",urlSend:"/dashboard/meeting-management-request?moduleId="+moduleId+"&schoolId="+SCHOOL_ID},
         "wati-numbers":{url:"",file:[{role:"",fileName:["watiNumbersContent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "partner-school-payment":{url:"",file:[{role:"",fileName:["partnerSchoolPaymentContent.js","partnerSchoolPayment.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
@@ -268,6 +269,8 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
         // Certificates (admin side: templates + single/bulk issuance + issued list)
         "certificate-management":{url:"",file:[{role:"",fileName:["certificateManagementContent.js","certificateManagement.js","certificateEditorContent.js","certificateEditor.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "my-certificates":{url:"",file:[{role:"",fileName:["myCertificatesContent.js","myCertificates.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "inbox":{url:"",file:[{role:"",fileName:["inboxContent.js","inbox.js","inboxComposeAssist.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "inbox-compose":{url:"",file:[{role:"",fileName:["inboxContent.js","inbox.js","inboxComposeAssist.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
     };
     
     var pageMapJSPWithFun = {
@@ -374,7 +377,7 @@ function openParentDashboardPreviewFromQuery() {
 
 /* ?openPage=<page link> opens that dashboard page on load (e.g. back from a Video Library payment). Only the pages
    listed here may be opened this way. */
-var OPEN_PAGE_FROM_QUERY = ["student-video-library", "my-certificates"];
+var OPEN_PAGE_FROM_QUERY = ["student-video-library", "my-certificates", "inbox"];
 function openPageFromQuery() {
     try {
         var page = new URLSearchParams(window.location.search || "").get("openPage");

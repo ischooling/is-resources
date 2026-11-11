@@ -1805,7 +1805,6 @@ function moveLeadsData(userId, roleModuleId, leadFrom, currentPage, newTheme, ob
 		 if (data['statusCode'] == '0' || data['statusCode'] == '2') {
 			showMessageTheme2(0, data['message'],'',true);
 		 } else {
-				showMessageTheme2(1, data['message'],'',false);
 				$("#leadNoMove").val('')
 				$('#moveLeads').modal('hide');
 				if(leadFrom=='new-leadmove'){
@@ -1818,7 +1817,9 @@ function moveLeadsData(userId, roleModuleId, leadFrom, currentPage, newTheme, ob
 				}
 			
 			 $("#leadDemoSchoolMove").val("1").trigger("change");
+
 			 $("#moveRemarks").val("");
+			 showMessageTheme2(1, data['message'],'',false);
 		 }
 		 return false;
 	 }

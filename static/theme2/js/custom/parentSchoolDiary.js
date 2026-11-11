@@ -57,96 +57,103 @@ function diaryBridgeEnsureVisibilityObserver(){
     });
 }
 
-/* Live diary updates come from is-rest-api itself, over a plain WebSocket at
-   /ws/diary?userId=<this user>. The server pushes {"type":"diary.updated"}
-   whenever this person's diary changes, and this re-reads what is on screen.
+/* Live diary updates by polling, not by socket.
 
-   The event carries no data on purpose -- the diary service owns the counts, so
-   the page asks it, exactly as it does on load. A missed or duplicate event
-   therefore costs one extra read, never a wrong number.
+   The dashboard is made of full page loads, so a socket per page was opened and
+   thrown away every 20-40 seconds, holding an Apache worker each time (Nov 10
+   2026). Instead the page asks GET /api/diary/badge-version -- a number that
+   moves whenever this person's diary changes -- and re-reads what is on screen
+   only when it moved. An unchanged answer is a bodiless 304 from one Redis read.
 
-   Same origin as the page, so no sign-in and no separate host: the user is named
-   by USER_ID in the query, as the rest of the school-app surface identifies a
-   caller. Replaces the earlier omni STOMP path. */
+   The person is the signed-in user (from the access token), never a parameter.
+   It polls only while the tab is visible, every ~60s with jitter so tabs do not
+   line up, at once when the tab comes back, and backs off on errors. The first
+   answer is a baseline taken before the page reads the count, so a change in
+   between is never missed. The school apps keep /ws/diary. */
 var DIARY_RT = {
     started: false,
-    socket: null,
-    retry: 0,
+    version: null,       // last version seen; null = no baseline yet
+    etag: null,          // sent back as If-None-Match
     timer: null,
-    pingTimer: null
+    inFlight: false,
+    failures: 0,
+    lastPollAt: 0
 };
-
-function diaryRealtimeBase(){
-    // The page's own server (is-rest-api). http(s) -> ws(s).
-    return String(window.location.origin).replace(/^http/i, "ws").replace(/\/+$/, "");
-}
+var DIARY_RT_POLL_MS = 60000;
+var DIARY_RT_JITTER_MS = 15000;
+var DIARY_RT_MAX_BACKOFF_MS = 300000;
 
 function diaryRealtimeStart(){
     if(DIARY_RT.started) return;
     if(!["TEACHER", "STUDENT", "PARENT"].includes(USER_ROLE)) return;
     if(typeof USER_ID === "undefined" || USER_ID === null || USER_ID === "") return;
-    if(!diaryRealtimeBase() || typeof WebSocket === "undefined") return;
+    if(typeof window.fetch !== "function" || typeof APP_BASE_URL === "undefined") return;
+    if(typeof window.isDummyStudentMode === "function" && window.isDummyStudentMode()) return;
     DIARY_RT.started = true;
-    diaryRealtimeConnect();
+    document.addEventListener("visibilitychange", diaryRealtimeOnVisibility);
+    diaryRealtimePoll();
 }
 
-function diaryRealtimeConnect(){
-    var url = diaryRealtimeBase() + "/ws/diary?userId=" + encodeURIComponent(USER_ID);
-    var ws;
-    try{
-        ws = new WebSocket(url);
-    }catch(e){
-        diaryRealtimeReconnectLater();
-        return;
-    }
-    DIARY_RT.socket = ws;
-    ws.onopen = function(){
-        DIARY_RT.retry = 0;
-        diaryRealtimeStartPing(ws);
-        // The initial badge fetch is part of renderSchoolDaiaryBtnCount(). A
-        // reconnect still needs a refresh for changes missed while offline.
-        if(DIARY_RT.hasOpened){
-            diaryRealtimeApply();
-        }
-        DIARY_RT.hasOpened = true;
-    };
-    ws.onmessage = function(event){
-        var data = (typeof event.data === "string") ? event.data : "";
-        if(!data || data === "pong") return;
-        try{
-            var parsed = JSON.parse(data);
-            if(parsed && parsed.type === "diary.updated") diaryRealtimeApply();
-        }catch(e){}
-    };
-    ws.onclose = function(){
-        if(DIARY_RT.socket !== ws) return;
-        diaryRealtimeStopPing();
-        DIARY_RT.socket = null;
-        diaryRealtimeReconnectLater();
-    };
-    ws.onerror = function(){ try{ ws.close(); }catch(e){} };
-}
-
-function diaryRealtimeStartPing(ws){
-    diaryRealtimeStopPing();
-    // The server closes a connection quiet for 90s; ping well inside that.
-    DIARY_RT.pingTimer = setInterval(function(){
-        if(ws.readyState === 1) ws.send("ping");
-    }, 25000);
-}
-
-function diaryRealtimeStopPing(){
-    if(DIARY_RT.pingTimer){ clearInterval(DIARY_RT.pingTimer); DIARY_RT.pingTimer = null; }
-}
-
-function diaryRealtimeReconnectLater(){
-    if(DIARY_RT.timer) return;
-    // 2s, 4s, ... capped at 60s.
-    var delay = Math.min(60000, 2000 * Math.pow(2, DIARY_RT.retry++));
+function diaryRealtimeSchedule(delay){
+    if(DIARY_RT.timer) clearTimeout(DIARY_RT.timer);
     DIARY_RT.timer = setTimeout(function(){
         DIARY_RT.timer = null;
-        diaryRealtimeConnect();
+        diaryRealtimePoll();
     }, delay);
+}
+
+function diaryRealtimeNextDelay(){
+    if(DIARY_RT.failures > 0){
+        return Math.min(DIARY_RT_MAX_BACKOFF_MS, DIARY_RT_POLL_MS * Math.pow(2, DIARY_RT.failures - 1));
+    }
+    return DIARY_RT_POLL_MS + Math.floor(Math.random() * DIARY_RT_JITTER_MS);
+}
+
+function diaryRealtimeOnVisibility(){
+    if(document.visibilityState === "hidden"){
+        // Nothing runs in a hidden tab; the next poll happens when it comes back.
+        if(DIARY_RT.timer){ clearTimeout(DIARY_RT.timer); DIARY_RT.timer = null; }
+        return;
+    }
+    var since = Date.now() - DIARY_RT.lastPollAt;
+    diaryRealtimeSchedule(since >= DIARY_RT_POLL_MS ? 0 : DIARY_RT_POLL_MS - since);
+}
+
+async function diaryRealtimePoll(){
+    if(document.visibilityState === "hidden" || DIARY_RT.inFlight) return;
+    DIARY_RT.inFlight = true;
+    DIARY_RT.lastPollAt = Date.now();
+    try{
+        var headers = {"Accept": "application/json"};
+        if(DIARY_RT.etag) headers["If-None-Match"] = DIARY_RT.etag;
+        // no-store: the browser must not answer from its own cache or rewrite our 304.
+        var response = await fetch(APP_BASE_URL + "/api/diary/badge-version", {
+            method: "GET",
+            credentials: "same-origin",
+            cache: "no-store",
+            headers: headers
+        });
+        if(response.status === 304){
+            DIARY_RT.failures = 0;
+        }else if(response.ok){
+            DIARY_RT.failures = 0;
+            var data = await response.json();
+            var version = data && data.version != null ? String(data.version) : null;
+            if(version !== null){
+                var changed = DIARY_RT.version !== null && DIARY_RT.version !== version;
+                DIARY_RT.version = version;
+                DIARY_RT.etag = response.headers.get("ETag") || DIARY_RT.etag;
+                if(changed) diaryRealtimeApply();
+            }
+        }else{
+            DIARY_RT.failures++;
+        }
+    }catch(e){
+        DIARY_RT.failures++;
+    }finally{
+        DIARY_RT.inFlight = false;
+        if(document.visibilityState !== "hidden") diaryRealtimeSchedule(diaryRealtimeNextDelay());
+    }
 }
 
 /* A burst of events costs one read. */

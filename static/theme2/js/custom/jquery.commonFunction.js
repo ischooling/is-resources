@@ -221,19 +221,42 @@ var SMS_RENEW_HEADER = "X-Auth-Renew";
     return found ? decodeURIComponent(found[1]) : "";
   }
 
+  // A 409 (concurrent_refresh) means another call or tab rotated the same
+  // refresh token a moment ago: the fresh cookies are already set or on their
+  // way, so it is not a failed renewal. Treating it as one sent the page to
+  // the login screen while the user was still signed in.
+  var CONCURRENT_REFRESH = 409;
+
+  // Only the server refusing the renewal (401: the login ended; 403: CSRF)
+  // ends the session. No answer, 409, 429 or a 5xx is not a sign-out: the call
+  // is repeated once instead of sending a signed-in user to the login page.
+  function renewRefused(jqXHR) {
+    return !!jqXHR && (jqXHR.status === 401 || jqXHR.status === 403);
+  }
+
   function renew(renewUrl, blocking) {
     // A caller using async:false reads the result on the line after $.ajax, so
     // its renew has to block too — it cannot wait on someone else's in-flight
-    // one. Rotating twice is tolerated: auth.token.refresh-grace keeps the
-    // previous refresh token valid for 10s precisely for overlaps like this.
+    // one. If it overlaps another renewal it gets the 409 above.
     if (blocking) {
-      return nativeAjax({
+      var sync = nativeAjax({
         url: renewUrl,
         type: "POST",
         cache: false,
         async: false,
+        // Its own outcome is handled here: a 409 must not reach the page's
+        // ajaxError handler (the "technical glitch" message) nor the
+        // $.ajaxSetup error logger some pages install.
+        global: false,
+        error: $.noop,
         headers: { "X-CSRF-Token": csrfToken() },
       });
+      return renewRefused(sync) ? sync : $.Deferred().resolve().promise();
+    }
+    // accountAuth.js renews once for every tab of the browser; use it so this
+    // page never runs a second renewal of its own next to it.
+    if (typeof window.smsRenew === "function") {
+      return $.when(window.smsRenew(renewUrl));
     }
     if (renewInFlight) {
       return renewInFlight;
@@ -242,7 +265,17 @@ var SMS_RENEW_HEADER = "X-Auth-Renew";
       url: renewUrl,
       type: "POST",
       cache: false,
+      global: false,
+      error: $.noop,
+      timeout: 15000,
       headers: { "X-CSRF-Token": csrfToken() },
+    }).then(null, function (jqXHR) {
+      if (renewRefused(jqXHR)) {
+        return jqXHR;
+      }
+      return $.Deferred(function (wait) {
+        window.setTimeout(wait.resolve, jqXHR && jqXHR.status === CONCURRENT_REFRESH ? 1000 : 0);
+      }).promise();
     });
     renewInFlight.always(function () {
       renewInFlight = null;
@@ -286,6 +319,9 @@ var SMS_RENEW_HEADER = "X-Auth-Renew";
     var context = options.context;
     var liveXHR = null;
     var renewed = false;
+    // Tells accountAuth.js's ajaxPrefilter that this call's 401 is renewed and
+    // replayed here, so it does not start a second renewal for it.
+    options.smsRenewHandled = true;
 
     function succeed(data, textStatus, jqXHR) {
       var scope = context || this;
@@ -349,7 +385,9 @@ var SMS_RENEW_HEADER = "X-Auth-Renew";
     var nativeFetch = window.fetch.bind(window);
     window.fetch = function (input, init) {
       var options = init || {};
-      if (options.smsIsRenewRetry) {
+      // accountAuth.js wraps fetch too and already renews and replays; a second
+      // wrapper here would renew again for the same 401.
+      if (options.smsIsRenewRetry || window.__accountAuthInstalled) {
         return nativeFetch(input, options);
       }
       return nativeFetch(input, options).then(function (response) {

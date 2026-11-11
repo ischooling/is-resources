@@ -387,8 +387,19 @@ function profileSectionTabs() {
                 </li>`
                 : ``}
         </ul>
+        ${profileCommunicationsShortcut()}
     </div>`;
     return html;
+}
+
+/* Admins with Communications > Email Logs: everything this student (and, from there, each parent) was sent. */
+function profileCommunicationsShortcut() {
+    var userId = PROFILE_RESPONSE_DATA && parseInt(PROFILE_RESPONSE_DATA.userId, 10);
+    if (USER_ROLE == "STUDENT" || !(userId > 0) || typeof canOpenPersonCommunications !== 'function' || !canOpenPersonCommunications()) {
+        return '';
+    }
+    return `<button type="button" class="btn btn-outline-primary btn-sm btn-block mt-2" onclick="return openPersonCommunications(${userId});">
+            <i class="fa fa-envelope-o" aria-hidden="true"></i>&nbsp;Communications (student and parents)</button>`;
 }
 
 function personalInformation(data) {
