@@ -216,6 +216,7 @@ const contentHandlers = {
     'sms-error-log': () => renderSmsErrorLog('SMS Error Log', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'withdrawal-requests': () => renderWithdrawalRequests('Withdrawal Requests', roleAndModule),
     'manage-cron': () => renderManageCron('Manage CRON', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
+    'class-quality': () => renderClassQuality('Class Quality', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'manage-motivational-quotes': () => renderMotivationalQuotesDashboard('Motivational Quotes', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'manage-login-highlights': () => renderLoginHighlightsDashboard('Login Highlights', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
     'financial-cost': () => renderFinancialCost('Cost Distribution', roleAndModule, SCHOOL_ID, USER_ID, USER_ROLE),
