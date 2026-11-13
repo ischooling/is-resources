@@ -584,6 +584,7 @@ function getCallRequestForadvanceTeacherSearch(formId, moduleId) {
 	teacherDetailsDTO["teacherName"] = $("#" + formId + " #teacherName").val();
 	teacherDetailsDTO["schoolId"] = $("#" + formId + " #schoolId").val();
 	teacherDetailsDTO["email"] = $("#" + formId + " #emailId").val();
+	teacherDetailsDTO["emailStatus"] = $("#" + formId + " #emailStatusFilter").val() || "";
 	teacherDetailsDTO["contactNo"] = $("#" + formId + " #mobileNo").val();
 	teacherDetailsDTO["academicYear"] = $("#" + formId + " #activeSession").val();
 	teacherDetailsDTO["countryId"] = $("#" + formId + " #teacherCountryId").val();
@@ -651,6 +652,7 @@ function advanceTeacherSearchReset(formId) {
 		.trigger("change");
 	$("#" + formId + " #teacherFilterEnrollStatus").val("");
 	$("#" + formId + " #filterEmployeeType").val("");
+	$("#" + formId + " #emailStatusFilter").val("");
 	// $("#" + formId + " #filterAssignedCourses")
 	//   .val("")
 	//   .trigger("change");

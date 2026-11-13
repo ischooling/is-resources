@@ -8655,6 +8655,12 @@ function profileFormSectionTile(sectionName) {
                 <i class="fa fa-envelope font-12"></i>
             </span>
             <span>Student School Email Account</span>
+        </h5>`,
+        "Add Quiet Hours": `<h5 class="text-dark font-weight-semi-bold d-flex align-items-center">
+            <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px">
+                <i class="fa fa-envelope font-12"></i>    
+            </span>
+            <span>Add Quiet Hours</span>
         </h5>`
     };
 

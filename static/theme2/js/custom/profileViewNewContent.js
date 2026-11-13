@@ -70,6 +70,12 @@ async function renderStudentProfilePage(extraParam) {
         checkJoinedSports(data[4]);
         profileViewPageLoadEvent(data);
         initProfileContactVerificationForProfilePage();
+        if (PROFILE_RESPONSE_DATA.userId && typeof initProfileQuietHoursSection === "function") {
+            initProfileQuietHoursSection(PROFILE_RESPONSE_DATA.userId, {
+                summarySelector: "#profileQuietHoursSummary",
+                buttonId: "quietHoursBtn"
+            });
+        }
         if (USER_ROLE == "STUDENT" && typeof openWithdrawalRequestForStudent === "function") {
             initStudentWithdrawalSection();
         }
@@ -183,13 +189,14 @@ function getStudentProfilePageContent(data) {
     if (PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA.showAppInstallPromptAdminToggle) {
         html += appInstallPromptProfileSectionShell();
     }
+    html += quietHoursInformation();
     if (USER_ROLE == "STUDENT") {
         html += `<div class="card profile-section wd-student-section" id="withdrawal_request_information">
             <div class="card-body">
                 <div class="col-12 p-0 mb-2">
                     <h5 class="text-dark font-weight-semi-bold d-flex align-items-center">
                         <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px"><i class="fa fa-sign-out font-12"></i></span>
-                        <span class="flex-grow-1">7. Withdrawal Request</span>
+                        <span class="flex-grow-1">${profileWithdrawalStepIndex()}. Withdrawal Request</span>
                     </h5>
                 </div>
                 <div class="wd-scope" id="withdrawalRequestBody"></div>
@@ -212,6 +219,30 @@ function profileAppInstallPromptStepIndex() {
         return (registrationIndex + 1).toString();
     }
     return (parseInt(emailIndex, 10) + 1).toString();
+}
+
+function profileQuietHoursStepIndex() {
+    if (USER_ROLE == "STUDENT") {
+        var n = 6;
+        if (SHOW_STUDENT_REGISTRATION_SECTION) {
+            n++;
+        }
+        if (PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA.showAppInstallPromptAdminToggle) {
+            return String(parseInt(profileAppInstallPromptStepIndex(), 10) + 1);
+        }
+        return String(n + 1);
+    }
+    var emailIndex = (USER_ROLE != "STUDENT" && SHOW_RESERVE_SEAT_SECTION) ? 8 : 7;
+    var registrationIndex = parseInt(emailIndex, 10) + 1;
+    var base = SHOW_STUDENT_REGISTRATION_SECTION ? parseInt(registrationIndex, 10) : parseInt(emailIndex, 10);
+    if (PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA.showAppInstallPromptAdminToggle) {
+        base = parseInt(profileAppInstallPromptStepIndex(), 10);
+    }
+    return String(base + 1);
+}
+
+function profileWithdrawalStepIndex() {
+    return String(parseInt(profileQuietHoursStepIndex(), 10) + 1);
 }
 
 function appInstallPromptProfileSectionShell() {
@@ -237,6 +268,7 @@ function profileSectionTabs() {
     var registrationIndex = (parseInt(emailIndex, 10) + 1).toString();
     var appInstallIndex = profileAppInstallPromptStepIndex();
     var showAppInstallNav = PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA.showAppInstallPromptAdminToggle;
+    var quietHoursIndex = profileQuietHoursStepIndex();
     var html =
         `<div class="full mt-3">
         <ul class="m-0 p-0">
@@ -342,7 +374,7 @@ function profileSectionTabs() {
                     </a>
                 </li>`: ``
         }
-            <li class="bg-white border border-top-left-rounded ${SHOW_STUDENT_REGISTRATION_SECTION || USER_ROLE == "STUDENT" || showAppInstallNav ? '' : 'rounded-bottom-left-10 rounded-bottom-right-10'} overflow-hidden">
+            <li class="bg-white border border-top-left-rounded overflow-hidden">
                 <a href="#studentEmailDIV" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
                     <div class="text-dark font-weight-bold flex-grow-1">${USER_ROLE == "STUDENT" ? '6' : emailIndex}. Student School Email Account</div>
                     <div class="widget-content-wrapper flex-fill circle-percentage text-right">
@@ -373,16 +405,21 @@ function profileSectionTabs() {
                 </li>`
                 : ``}
             ${showAppInstallNav ?
-                `<li class="bg-white border border-top-left-rounded ${USER_ROLE == "STUDENT" ? '' : 'rounded-bottom-left-10 rounded-bottom-right-10'} overflow-hidden">
+                `<li class="bg-white border border-top-left-rounded overflow-hidden">
                     <a href="#app_install_prompt_information" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
                         <div class="text-dark font-weight-bold flex-grow-1">${appInstallIndex}. Install Mobile App Reminder</div>
                     </a>
                 </li>`
                 : ``}
+            <li class="bg-white border border-top-left-rounded ${USER_ROLE == "STUDENT" ? '' : 'rounded-bottom-left-10 rounded-bottom-right-10'} overflow-hidden">
+                <a href="#quiet_hours_information" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
+                    <div class="text-dark font-weight-bold flex-grow-1">${quietHoursIndex}. Quiet Hours</div>
+                </a>
+            </li>
             ${USER_ROLE == "STUDENT" ?
                 `<li class="bg-white border border-top-left-rounded rounded-bottom-left-10 rounded-bottom-right-10 overflow-hidden wd-student-nav">
                     <a href="#withdrawal_request_information" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
-                        <div class="text-dark font-weight-bold flex-grow-1">7. Withdrawal Request</div>
+                        <div class="text-dark font-weight-bold flex-grow-1">${profileWithdrawalStepIndex()}. Withdrawal Request</div>
                     </a>
                 </li>`
                 : ``}
@@ -410,9 +447,9 @@ function personalInformation(data) {
                     <div class="col-12">
                         <h5 class="text-dark font-weight-semi-bold d-flex align-items-center">
                             <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px">
-                                <i class="fa fa-user font-12"></i>    
+                                <i class="fa fa-user font-12"></i>
                             </span>
-                            <span>1. Personal Information</span>
+                            <span class="flex-grow-1">1. Personal Information</span>
                         </h5>
                     </div>
                     <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-12">
@@ -481,6 +518,32 @@ function personalInformation(data) {
             </div>    
         </div>`;
     return html;
+}
+
+function quietHoursInformation() {
+    var step = profileQuietHoursStepIndex();
+    var userId = PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA.userId ? PROFILE_RESPONSE_DATA.userId : "";
+    return `<div class="card profile-section mt-3" id="quiet_hours_information">
+        <div class="card-body">
+            <div class="form-row">
+                <div class="col-12 mb-2">
+                    <h5 class="text-dark font-weight-semi-bold d-flex align-items-center mb-0">
+                        <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px">
+                            <i class="fa fa-clock-o font-12"></i>
+                        </span>
+                        <span class="flex-grow-1">${step}. Quiet Hours</span>
+                    </h5>
+                </div>
+                <div class="col-12 mb-2">
+                    <p class="text-muted small mb-2">Set when non-urgent notifications should not be sent.</p>
+                    <div id="profileQuietHoursSummary" class="small"></div>
+                </div>
+                <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 d-flex align-items-center mb-2">
+                    <button type="button" id="quietHoursBtn" class="btn btn-sm btn-outline-primary" onclick="openQuietHoursModalSafe('${userId}', 'quietHoursBtn')">Add Quiet Hours</button>
+                </div>
+            </div>
+        </div>
+    </div>`;
 }
 
 
@@ -601,12 +664,73 @@ function getProfileViewWhatsappFieldId(phoneFieldId) {
     return whatsappFieldMap[phoneFieldId] || "";
 }
 
-function isProfileViewContactVerified(fieldId) {
+var PROFILE_VIEW_EMAIL_FIELD_IDS = ["studentEmailId", "altEmailId", "motherEmail", "fatherEmail", "guardianEmail"];
+
+function getProfileViewContactVerificationEntry(fieldId) {
     var profileData = PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA.profileData ? PROFILE_RESPONSE_DATA.profileData : {};
     var verificationMap = profileData.profileContactVerification
         || (PROFILE_RESPONSE_DATA && PROFILE_RESPONSE_DATA.profileContactVerification)
         || {};
-    return verificationMap[fieldId] && isProfileViewContactVerifiedStatus(verificationMap[fieldId].verifiedStatus);
+    return verificationMap[fieldId] || {};
+}
+
+function isProfileViewContactVerified(fieldId) {
+    return isProfileViewContactVerifiedStatus(getProfileViewContactVerificationEntry(fieldId).verifiedStatus);
+}
+
+function isProfileViewEmailFormatInvalid(entry) {
+    return entry.formatStatus && entry.formatStatus !== "OK";
+}
+
+function profileStatusChipHtml(variant, label) {
+    var safe = String(label || "").replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+    return (
+        '<span class="profile-status-chip profile-status-chip--' + variant + '">' +
+        '<span class="profile-status-chip__dot" aria-hidden="true"></span>' +
+        '<span class="profile-status-chip__label">' + safe + "</span></span>"
+    );
+}
+
+function profileEmailStatusChip(entry, otpVerified) {
+    // Server tag from SendGrid results (+ OTP): Verified / Not verified / Unsubscribed.
+    var emailStatus = entry && entry.emailStatus ? String(entry.emailStatus).toUpperCase() : "";
+    if (emailStatus === "UNSUBSCRIBED") {
+        return profileStatusChipHtml("progress", "Unsubscribed");
+    }
+    if (emailStatus === "VERIFIED") {
+        return profileStatusChipHtml("success", "Verified");
+    }
+    if (emailStatus === "NOT_VERIFIED") {
+        return profileStatusChipHtml("neutral", "Not verified");
+    }
+    if (otpVerified) {
+        return profileStatusChipHtml("success", "Verified");
+    }
+    if (isProfileViewEmailFormatInvalid(entry)) {
+        return profileStatusChipHtml("review", "Incorrect email");
+    }
+    var status = (entry.deliverabilityStatus || "UNKNOWN").toUpperCase();
+    if (status === "INVALID") {
+        return profileStatusChipHtml("danger", "Invalid");
+    }
+    if (status === "RISKY") {
+        return profileStatusChipHtml("progress", "Risky");
+    }
+    if (status === "VALID") {
+        return profileStatusChipHtml("success", "Deliverable");
+    }
+    return profileStatusChipHtml("neutral", "Not verified");
+}
+
+function isProfileViewEmailFieldId(fieldId) {
+    return PROFILE_VIEW_EMAIL_FIELD_IDS.indexOf(fieldId) > -1;
+}
+
+if (typeof window !== "undefined") {
+    window.profileStatusChipHtml = profileStatusChipHtml;
+    window.profileEmailStatusChip = profileEmailStatusChip;
 }
 
 function isProfileViewWhatsappChecked(statusValue) {
@@ -618,19 +742,24 @@ function profileContactVerificationBadges(fieldId, fieldValue, whatsappStatusVal
         return "";
     }
     var badges = [];
-    var whatsappFieldId = getProfileViewWhatsappFieldId(fieldId);
-    var whatsappVerified = whatsappFieldId !== ""
-        && isProfileViewWhatsappChecked(whatsappStatusValue)
-        && isProfileViewContactVerified(whatsappFieldId);
-    var fieldVerified = isProfileViewContactVerified(fieldId) || whatsappVerified;
-    if (fieldVerified) {
-        badges.push('<span class="badge badge-success font-10"><i class="fa fa-check mr-1"></i>Verified</span>');
-    }
-    if (whatsappVerified) {
-        badges.push('<span class="badge badge-success font-10"><i class="fa fa-whatsapp mr-1"></i>WhatsApp Verified</span>');
+    var entry = getProfileViewContactVerificationEntry(fieldId);
+    var otpVerified = isProfileViewContactVerified(fieldId);
+    if (isProfileViewEmailFieldId(fieldId)) {
+        badges.push(profileEmailStatusChip(entry, otpVerified));
+    } else {
+        var whatsappFieldId = getProfileViewWhatsappFieldId(fieldId);
+        var whatsappVerified = whatsappFieldId !== ""
+            && isProfileViewWhatsappChecked(whatsappStatusValue)
+            && isProfileViewContactVerified(whatsappFieldId);
+        if (otpVerified) {
+            badges.push(profileStatusChipHtml("success", "Verified"));
+        }
+        if (whatsappVerified) {
+            badges.push(profileStatusChipHtml("whatsapp", "WhatsApp verified"));
+        }
     }
     return badges.length > 0
-        ? '<div class="profile-contact-status-labels d-flex flex-wrap mt-n1 mb-2" style="gap:4px;">' + badges.join("") + '</div>'
+        ? '<div class="profile-contact-status-labels profile-contact-status-chips d-flex flex-wrap mt-1 mb-2">' + badges.join("") + "</div>"
         : "";
 }
 
@@ -1165,7 +1294,7 @@ function guardianInformation(data) {
                     <div class="col-12">
                         ${preferredCommunicationContent(data)}
                     </div>
-                </div>  
+                </div>
                 <hr/>
                 <div class="form-row mt-2 w-100">
                     ${communicationPreferredTimingInformation(data)}

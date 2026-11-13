@@ -1,0 +1,1 @@
+function showView(t){return callNoticePage(t)}function navTo(t){const e=t.currentTarget;callNoticePage(e.getAttribute("data-page")||e.getAttribute("data-view"))}function bootNoticeApp(){callNoticePage("dashboard")}document.addEventListener("DOMContentLoaded",bootNoticeApp);

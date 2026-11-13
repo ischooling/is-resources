@@ -501,6 +501,9 @@ function getRequestForPaymentReport(formId, type, forDownload){
 		PaymentReportRequestDTO['transcriptStatus'] = $('#transcriptStatus').val();
 	}
 
+	if($('#emailStatus').val()){
+		PaymentReportRequestDTO['emailStatus'] = $('#emailStatus').val();
+	}
 	if($('#recordingStatus').val()!=''){
 		PaymentReportRequestDTO['recordingStatus'] = $('#recordingStatus').val();
 	}
@@ -600,6 +603,7 @@ function resetStudentPaymentForm(formID){
 	$('#'+formID+" #studentStatus").val('');
 	$('#'+formID+" #transcriptStatus").val('');
 	$('#'+formID+" #recordingStatus").val('');
+	$('#'+formID+" #emailStatus").val('');
 	$('#'+formID+" #reasonFilter").val('');
 	$('#'+formID+" #documentTypes").val(null).trigger('change');
 	$('#'+formID+" #documentTypesWrapper").hide();

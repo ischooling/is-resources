@@ -1,4 +1,118 @@
 var callFrom="";
+
+function isAdminProfileContactVerified(entry) {
+    return entry && (entry.verifiedStatus === "Y" || entry.verifiedStatus === "y");
+}
+
+function isAdminProfileEmailFormatInvalid(entry) {
+    return entry && entry.formatStatus && entry.formatStatus !== "OK";
+}
+
+function adminProfileStatusChipHtml(variant, label) {
+    var safe = String(label || "").replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+    return (
+        '<span class="profile-status-chip profile-status-chip--' + variant + '">' +
+        '<span class="profile-status-chip__dot" aria-hidden="true"></span>' +
+        '<span class="profile-status-chip__label">' + safe + "</span></span>"
+    );
+}
+
+function adminProfileEmailStatusChip(entry, otpVerified) {
+    // Server tag from SendGrid results (+ OTP): Verified / Not verified / Unsubscribed.
+    var emailStatus = entry && entry.emailStatus ? String(entry.emailStatus).toUpperCase() : "";
+    if (emailStatus === "UNSUBSCRIBED") {
+        return adminProfileStatusChipHtml("progress", "Unsubscribed");
+    }
+    if (emailStatus === "VERIFIED") {
+        return adminProfileStatusChipHtml("success", "Verified");
+    }
+    if (emailStatus === "NOT_VERIFIED") {
+        return adminProfileStatusChipHtml("neutral", "Not verified");
+    }
+    if (otpVerified) {
+        return adminProfileStatusChipHtml("success", "Verified");
+    }
+    if (isAdminProfileEmailFormatInvalid(entry)) {
+        return adminProfileStatusChipHtml("review", "Incorrect email");
+    }
+    var status = ((entry && entry.deliverabilityStatus) || "UNKNOWN").toUpperCase();
+    if (status === "INVALID") {
+        return adminProfileStatusChipHtml("danger", "Invalid");
+    }
+    if (status === "RISKY") {
+        return adminProfileStatusChipHtml("progress", "Risky");
+    }
+    if (status === "VALID") {
+        return adminProfileStatusChipHtml("success", "Deliverable");
+    }
+    return adminProfileStatusChipHtml("neutral", "Not verified");
+}
+
+function adminProfileEmailStatusBadgesHtml(fieldId, fieldValue, verificationMap) {
+    if (fieldValue === "" || fieldValue === undefined || fieldValue === null) {
+        return "";
+    }
+    var entry = verificationMap && verificationMap[fieldId] ? verificationMap[fieldId] : {};
+    var otpVerified = isAdminProfileContactVerified(entry);
+    var chip = adminProfileEmailStatusChip(entry, otpVerified);
+    return '<div class="profile-contact-status-labels profile-contact-status-chips d-flex flex-wrap mt-1 mb-0">' + chip + "</div>";
+}
+
+function refreshAdminProfileEmailStatusBadges(verificationMap) {
+    var $email = $("#emailId").first();
+    if ($email.length < 1) {
+        return;
+    }
+    var $formGroup = $email.closest(".form-group");
+    $formGroup.find(".profile-contact-status-labels").remove();
+    var badgeHtml = adminProfileEmailStatusBadgesHtml("emailId", $email.val(), verificationMap || {});
+    if (badgeHtml !== "") {
+        $formGroup.find(".admin-profile-email-status-wrap").html(badgeHtml);
+    }
+}
+
+function initAdminProfileQuietHours(targetUserId) {
+    if (!targetUserId) {
+        return;
+    }
+    if (typeof initProfileQuietHoursSection === "function") {
+        initProfileQuietHoursSection(targetUserId, { summarySelector: "#adminQuietHoursSummary", buttonId: "quietHoursBtn" });
+    } else if (typeof openQuietHoursModalSafe === "function") {
+        $.getScript(PATH_FOLDER_JS2 + RESOURCES_FROM_MIN_LOCATION + "custom/quietHours.js" + SCRIPT_VERSION, function () {
+            if (typeof initProfileQuietHoursSection === "function") {
+                initProfileQuietHoursSection(targetUserId, { summarySelector: "#adminQuietHoursSummary", buttonId: "quietHoursBtn" });
+            }
+        });
+    }
+}
+
+function adminQuietHoursSectionHtml(data) {
+  return `<div class="card profile-section mt-3 d-none" id="quiet_hours_information">
+        <div class="card-body">
+            <div class="form-row">
+                <div class="col-12 mb-2">
+                    <h5 class="text-dark font-weight-semi-bold d-flex align-items-center mb-0">
+                        <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-2 rounded" style="width:20px;height:20px">
+                            <i class="fa fa-clock-o font-12"></i>
+                        </span>
+                        <span class="flex-grow-1">2. Quiet Hours</span>
+                    </h5>
+                </div>
+                <div class="col-12 mb-3">
+                    <p class="text-muted small mb-2">Set when this user should not receive non-urgent notifications.</p>
+                    <div id="adminQuietHoursSummary" class="small"></div>
+                </div>
+                <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 d-flex align-items-center mb-2">
+                    <button type="button" id="quietHoursBtn" class="btn btn-sm btn-pill btn-outline-primary"
+                        onclick="openQuietHoursModalSafe('${data.userId}', 'quietHoursBtn')">Add Quiet Hours</button>
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
 async function renderProfilePage(arg0){
     var arg1=arg0.split("&");
     var userId=arg1[0];
@@ -19,7 +133,7 @@ async function renderProfilePage(arg0){
         userIdSession: USER_ID
     };
     var responseData = await getDashboardDataBasedUrlAndPayload(true, false, 'get-common-profile-details', payload);
-    var html= getProfilePageContent(responseData.details, callFrom, arg0);
+    var html = getAdminProfilePageHeader(callFrom) + getProfilePageContent(responseData.details, callFrom, arg0);
     $("#dashboardContentInHTML").hide();
     $("#dashboardContentInHTMLAdditional").html(html).show();
     if (responseData.details && responseData.details.showAppInstallPromptAdminToggle) {
@@ -44,6 +158,7 @@ async function renderProfilePage(arg0){
     await getAllCountryTimezone('profilePageFromTag','','countryTimezoneId');
     $('#country').select2({
         theme:"bootstrap4",
+        width:"100%",
     }).on("change", function(){
         var selectedCountryID= $(this).val()
         callStates('profilePageFromTag',selectedCountryID, 'country', 'state', 'city')
@@ -52,11 +167,13 @@ async function renderProfilePage(arg0){
         }
         $("#state").select2({
             theme:"bootstrap4",
+            width:"100%",
         });
         $("#state").attr("disabled",false);
     });
     $("#state").select2({
         theme:"bootstrap4",
+        width:"100%",
     }).on("change", function(){
         var selectedStateID= $(this).val()
         callCities('profilePageFromTag',selectedStateID, 'state', 'city')
@@ -65,17 +182,21 @@ async function renderProfilePage(arg0){
         }
         $("#city").select2({
             theme:"bootstrap4",
+            width:"100%",
         });
         $("#city").attr("disabled",false);
     });
     $("#city").select2({
         theme:"bootstrap4",
+        width:"100%",
     });
     $('#countryTimezoneId').select2({
         theme:"bootstrap4",
+        width:"100%",
     });
     $("#languages").select2({
         theme:"bootstrap4",
+        width:"100%",
     });
     $("#country").val(responseData.details.countryId).trigger("change");
     $("#state").val(responseData.details.stateId).trigger("change");
@@ -90,57 +211,82 @@ async function renderProfilePage(arg0){
     }
     //return html;
     corpAdminProfile();
+    if(callFrom=='' || callFrom=='callFrom=admin'){
+        editProfilePage();
+    }
+    if (typeof refreshCustomFieldState === "function") {
+        refreshCustomFieldState($("#profilePageFromTag"));
+        setTimeout(function () {
+            refreshCustomFieldState($("#profilePageFromTag"));
+        }, 300);
+    }
+    $("#profilePageFromTag input, #profilePageFromTag select, #profilePageFromTag textarea").on("input change blur select2:select select2:clear", function () {
+        if (typeof refreshCustomFieldState === "function") {
+            refreshCustomFieldState($("#profilePageFromTag"));
+        }
+    });
+    adminProfileSectionSwitching();
+    adminProfileAdjustLayout();
+    initAdminProfileQuietHours(responseData.details && responseData.details.userId);
+    if (responseData.details && responseData.details.profileContactVerification) {
+        refreshAdminProfileEmailStatusBadges(responseData.details.profileContactVerification);
+    }
 }
 
 function getProfilePageContent(data, callFrom, arg0){
+    var verificationMap = data.profileContactVerification || {};
+    var emailChips = adminProfileEmailStatusBadgesHtml("emailId", data.emailId, verificationMap);
     var html=
-        `<div class="main-card mb-3 p-3">
-            <div class="card" id="withdrawalProfileCard">
-                <div class="card-body p-0 pb-4">
-                    <div class="profile-head bg-primary p-4 rounded-top">`;
+        `<style>
+            .admin-profile-wrapper .admin-profile-email-status-wrap .profile-contact-status-labels{display:flex !important;}
+            #profilePageView .profile-picture-wrapper .profile-name{color:#fff;}
+            #profilePageView .profile-selection-list-anchor.bg-light{background:#e8f2fc !important;}
+        </style>
+        <div class="main-card mb-3 p-0" id="profilePageView">
+            <div class="card border-0 shadow-sm" id="withdrawalProfileCard">
+                <div class="card-body p-3 p-lg-4">
+                    <form class="admin-profile-wrapper custom-field-scope row mx-0" id="profilePageFromTag">
+                        <div class="col-xl-3 col-lg-4 col-md-12 col-12 mb-3 mb-xl-0">`;
                         if(callFrom=='callFrom=admin'){
-                            html+= `<a href="javascript:void(0)" onClick="backToMain(\'manageProfileParentContent\');" class="btn btn-pill btn-outline-white pull-right"><i class="fa fa-arrow-left"></i>&nbsp;Back</a>`;
+                            html+= `<div class="d-lg-none text-right mb-2"><a href="javascript:void(0)" onClick="backToMain(\'manageProfileParentContent\');" class="btn btn-sm btn-dark"><i class="fa fa-arrow-left"></i>&nbsp;Back</a></div>`;
                         }else if(typeof USER_ROLE !== "undefined" && USER_ROLE == "PARENT"){
-                            // Parent Dashboard's picker/child-dashboard content is still sitting underneath
-                            // (hidden, not destroyed) in #dashboardContentInHTML — just reveal it again.
-                            html+= `<a href="javascript:void(0)" onClick="showAndHideDashboardAndAdditionalContent('main');" class="btn btn-pill btn-outline-white pull-right"><i class="fa fa-arrow-left"></i>&nbsp;Back</a>`;
+                            html+= `<div class="d-lg-none text-right mb-2"><a href="javascript:void(0)" onClick="showAndHideDashboardAndAdditionalContent('main');" class="btn btn-sm btn-dark"><i class="fa fa-arrow-left"></i>&nbsp;Back</a></div>`;
                         }
-                   html+= `</div>
-                    <form class="full admin-profile-wrapper px-4 position-relative custom-field-scope" id="profilePageFromTag" style="margin-top:-95px">
-                        <div class="profile-picture-wrapper">
-                            <div class="profile-picture">
-                                <div class="full">
-                                    <div class="user-img admin-proifle">
-                                        <img id="profileImageStudent" name="profileImageStudent" class="user profile-pic" src="${data.profileImage}" alt="image" title="Profile Image" thumbtype="">
-                                        <div class="edit-user-img trans5s">
+                   html+= `<div class="profile-picture-wrapper bg-primary rounded p-3">
+                            <div class="profile-picture text-center text-xl-left">
+                                <div class="user-img admin-proifle d-inline-block mx-auto">
+                                    <img id="profileImageStudent" name="profileImageStudent" class="user profile-pic" src="${data.profileImage}" alt="image" title="Profile Image" thumbtype="">
+                                    <div class="edit-user-img trans5s">
                                         <input class="file-input" type="file" name="fileupload1" id="fileupload1" onchange="cropImage(event, 'fileupload1', 'profileImageStudent', 'Profile Image', '15808')">
-                                        <span class="upload-img-btn">
-                                            <i class="fa fa-upload"></i> Upload </span>
-                                        </div>
+                                        <span class="upload-img-btn"><i class="fa fa-upload"></i> Upload</span>
                                     </div>
-                                    <p class="text-center img-notification">Profile Image (Max size 5MB)</p>
                                 </div>
-                                <div class="profile-name text-primary text-center font-weight-semi-bold font-size-lg mt-2 userNameLabel">${data.userFullName}</div>
-                                <div class="profile-name text-dark text-center font-size-12 mb-1">Recognition</div>    
-                            </div>    
+                                <div class="mt-2 text-center text-xl-left">
+                                    <div class="profile-name font-weight-semi-bold font-size-lg userNameLabel">${data.userFullName}</div>
+                                    <p class="text-white font-size-12 mb-0 img-notification opacity-90">Profile Image (Max 5MB)</p>
+                                </div>
+                            </div>
+                            ${adminProfileSectionTabs()}
                         </div>
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center">
-                                <i class="fa fa-user font-24 bg-light-primary text-primary rounded p-1 mr-2" aria-hidden="true"></i>
-                                <h5 class="font-weight-bold text-dark">Personal Details</h5>
-                            </div>`
-                            if(callFrom=='' || callFrom=='callFrom=admin'){
-                                html+=`<a href="javascript:void(0)" class="btn btn-pill btn-outline-primary float-right editProfileBtn" onclick="editProfilePage()">
-                                    <i class="fa fa-edit"></i>&nbsp; Edit
-                                </a>`;
-                            }
-                        html+=`</div>
-                        <div class="profile-details-wrapper float-left w-100">
-                            <input type="hidden" id="pCountryCode" value="${data.countryCode}"/>
-                            <input type="hidden" id="isdCode" value="${data.dialCode}"/>
-                            <input type="hidden" id="userId" value="${data.userId}"/>
-                            <div class="row mt-4 ">
-                                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
+                        </div>
+                        <div class="col-xl-9 col-lg-8 col-md-12 col-12 overflow-y-auto overflow-x-hidden profile-right-section position-relative pl-xl-3" style="will-change:scroll-position">
+                            <div class="profile-details-wrapper float-left w-100">
+                                <input type="hidden" id="pCountryCode" value="${data.countryCode}"/>
+                                <input type="hidden" id="isdCode" value="${data.dialCode}"/>
+                                <input type="hidden" id="userId" value="${data.userId}"/>
+                                <div class="card profile-section" id="personal_information">
+                                    <div class="card-body">
+                                        <div class="form-row">
+                                            <div class="col-12 d-flex align-items-center justify-content-between mb-2">
+                                                <h5 class="text-dark font-weight-semi-bold d-flex align-items-center mb-0">
+                                                    <span class="bg-light-primary border border-primary text-primary d-inline-flex justify-content-center align-items-center mr-1 rounded" style="width:20px;height:20px">
+                                                        <i class="fa fa-user font-12"></i>
+                                                    </span>
+                                                    <span class="flex-grow-1">1. Personal Information</span>
+                                                </h5>
+                                            </div>
+                            <div class="form-row">
+                                <div class="col-md-4 col-sm-6 col-12 custom-field mb-3">
                                     <div class="form-group">
                                         <div class="profile-label field-value font-weight-semi-bold text-dark userNameLabel">${data.userFullName}</div> 
                                         <div class="field-input w-100 position-relative custom-field">
@@ -149,7 +295,7 @@ function getProfilePageContent(data, callFrom, arg0){
                                         </div>
                                     </div>  
                                 </div>
-                                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
+                                <div class="col-md-4 col-sm-6 col-12 custom-field mb-3">
                                     <div class="form-group">
                                         <div class="profile-label field-value font-weight-semi-bold text-dark genderLabel">${data.gender}</div> 
                                         <div class="field-input w-100 position-relative custom-field">
@@ -163,7 +309,7 @@ function getProfilePageContent(data, callFrom, arg0){
                                         </div>
                                     </div>  
                                 </div>
-                                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3 w-100">
+                                <div class="col-md-4 col-sm-6 col-12 custom-field mb-3">
                                     <div class="form-group">
                                         <div class="profile-label field-value font-weight-semi-bold text-dark phoneNumberLabel">${data.contactNumber !=''? data.contactNumber:'N/A' }</div> 
                                         <div class="w-100 position-relative custom-field field-input">
@@ -173,16 +319,17 @@ function getProfilePageContent(data, callFrom, arg0){
                                     </div>  
                                 </div>
                                 
-                                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
+                                <div class="col-md-4 col-sm-6 col-12 custom-field mb-3">
                                     <div class="form-group">
                                         <div class="profile-label field-value font-weight-semi-bold text-dark emailIdLabel">${data.emailId}</div> 
                                         <div class="field-input w-100 position-relative custom-field">
                                             <input type="text" id="emailId" name="emailId" class="form-control field-input" value="${data.emailId}" disabled placeholder=" "/>
                                             <label class="m-0">Email</label>
-                                        </div>  
+                                        </div>
+                                        <div class="admin-profile-email-status-wrap mt-1">`+ emailChips +`</div>
                                     </div>  
                                 </div>
-                                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
+                                <div class="col-md-4 col-sm-6 col-12 custom-field mb-3">
                                     <div class="form-group">
                                         <div class="profile-label field-value font-weight-semi-bold text-dark useremailIdLabel">${data.userName}</div> 
                                         <div class="field-input w-100 position-relative custom-field">
@@ -191,7 +338,7 @@ function getProfilePageContent(data, callFrom, arg0){
                                         </div>  
                                     </div>  
                                 </div>
-                                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
+                                <div class="col-md-4 col-sm-6 col-12 custom-field mb-3">
                                     <div class="form-group">
                                         <div class="profile-label field-value font-weight-semi-bold text-dark addedDateLabel">Added Date</div> 
                                         <div class="field-input w-100 position-relative custom-field">
@@ -200,7 +347,7 @@ function getProfilePageContent(data, callFrom, arg0){
                                         </div>  
                                     </div>  
                                 </div>
-                                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
+                                <div class="col-md-4 col-sm-6 col-12 custom-field mb-3">
                                     <div class="form-group">
                                         <div class="profile-label field-value font-weight-semi-bold text-dark countryLabel">${data.country !=""?data.country:"N/A"}</div> 
                                         <div class="field-input w-100 position-relative custom-field">
@@ -209,7 +356,7 @@ function getProfilePageContent(data, callFrom, arg0){
                                         </div>  
                                     </div>  
                                 </div>
-                                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
+                                <div class="col-md-4 col-sm-6 col-12 custom-field mb-3">
                                     <div class="form-group">
                                         <div class="profile-label field-value font-weight-semi-bold text-dark stateLabel">${data.state !=""?data.state:"N/A"}</div> 
                                         <div class="field-input w-100 position-relative custom-field">
@@ -218,7 +365,7 @@ function getProfilePageContent(data, callFrom, arg0){
                                         </div> 
                                     </div>  
                                 </div>
-                                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
+                                <div class="col-md-4 col-sm-6 col-12 custom-field mb-3">
                                     <div class="form-group">
                                         <div class="profile-label field-value font-weight-semi-bold text-dark cityLabel">${data.city !=""?data.city:"N/A"}</div> 
                                         <div class="field-input w-100 position-relative custom-field">
@@ -227,7 +374,7 @@ function getProfilePageContent(data, callFrom, arg0){
                                         </div> 
                                     </div>  
                                 </div>
-                                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12 mb-3">
+                                <div class="col-md-4 col-sm-6 col-12 custom-field mb-3">
                                     <div class="form-group">
                                         <div class="profile-label field-value font-weight-semi-bold text-dark countryTimezoneIdLabel">${formatProfileTimezoneLabel(data.countryTimezone)}</div>
                                         <div class="field-input w-100 position-relative custom-field">
@@ -254,22 +401,22 @@ function getProfilePageContent(data, callFrom, arg0){
                                 <div class="col-12 text-right save-proifle-btn-row" style="display:none">
                                     <a href="javascript:void(0)" class="btn btn-pill btn-outline-primary cancelEditProfileBtn" style="display:none" onclick="cancelEditProfilePage()">Cancel</a>
                                     <a href="javascript:void(0)" class="btn btn-outline-success btn-pill" onclick="saveProfileDetails('profilePageFromTag', \'${arg0}\')">Save</a>    
-                                </div>`
-                                if(typeof USER_ROLE !== "undefined" && USER_ROLE == "PARENT"){
-                                    html+=`<div class="col-12 text-right mt-2">
-                                    <a href="javascript:void(0)" class="btn btn-pill btn-outline-primary float-right"  onclick="openWithdrawalRequest()">Withdrawal Request</a>
-                                </div>`;
-                                }
-                            html+=`</div>
+                                </div>    
+                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                `+ adminQuietHoursSectionHtml(data) +`
+                            </div>
                         </div>
                     </form>
-                </div>`
+                </div>
+            </div>`;
                 if(USER_ROLE == "B2B_PARTNER"){
-                    html+=`<div id="bankDetailsWrapper"></div>`;
+                    html+=`<div id="bankDetailsWrapper" class="px-3 pb-3"></div>`;
                 }
-            html+=`</div>`;
             if(typeof USER_ROLE !== "undefined" && USER_ROLE == "PARENT"){
-                html+=`<div class="card mt-3 d-none" id="withdrawalRequestSection"><div class="card-body wd-scope" id="withdrawalRequestBody"></div></div>`;
+                html+=`<div class="card mt-0 border-0 shadow-sm d-none" id="withdrawalRequestSection"><div class="card-body wd-scope" id="withdrawalRequestBody"></div></div>`;
             }
             html+=`</div>`;
     return html;
@@ -295,11 +442,33 @@ function getAdminProfilePageHeader(callFrom) {
     return html;
 }
 
+function adminProfileSectionTabs(){
+    var html =
+        `<div class="full mt-3">
+            <ul class="m-0 p-0">
+                <li class="bg-white border border-top-left-rounded overflow-hidden">
+                    <a href="#personal_information" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light profile-selection-list-anchor">
+                        <div class="text-dark font-weight-bold flex-grow-1">1. Personal Information</div>
+                    </a>
+                </li>
+                <li class="bg-white border border-top-left-rounded rounded-bottom-left-10 rounded-bottom-right-10 overflow-hidden">
+                    <a href="#quiet_hours_information" class="d-flex align-items-center py-1 px-3 text-decoration-none bg-light-hover profile-selection-list-anchor">
+                        <div class="text-dark font-weight-bold flex-grow-1">2. Quiet Hours</div>
+                    </a>
+                </li>
+            </ul>
+        </div>`;
+    return html;
+}
 /* ==========================================================================
    Withdrawal Request — parent entry (profile link -> child cards -> form)
    ========================================================================== */
+
 function adminProfileSectionSwitching(){
     var profileWrapper = $("#profilePageView");
+    if (profileWrapper.length < 1) {
+        profileWrapper = $("#profilePageFromTag").closest(".main-card");
+    }
     profileWrapper.find(".profile-selection-list-anchor").off("click.adminProfile").on("click.adminProfile", function(e){
         e.preventDefault();
         var target = $(this).attr("href");
@@ -315,6 +484,9 @@ function adminProfileSectionSwitching(){
 
 function adminProfileAdjustLayout(){
     var profileWrapper = $("#profilePageView");
+    if (profileWrapper.length < 1) {
+        profileWrapper = $("#profilePageFromTag").closest(".main-card");
+    }
     var rightSection = profileWrapper.find(".profile-right-section");
     if(rightSection.length < 1){
         return;

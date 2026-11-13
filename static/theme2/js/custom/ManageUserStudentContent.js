@@ -108,6 +108,7 @@ function muLoadPlatformCounts(searchRequest) {
 // Clears the card selection alongside the existing filter-form reset.
 function muResetStudentFilterAndCards(formId) {
 	advanceStudentSearchReset(formId);
+	$("#" + formId + " #emailStatusFilter, #" + formId + " #parentEmailStatusFilter").val("").trigger("change");
 	$('#muPlatformCards .mu-platform-card').removeClass('active');
 	if (typeof refreshCustomFieldState === "function") {
 		refreshCustomFieldState($("#" + formId));
@@ -169,6 +170,17 @@ function muProfileFieldOptions(labels, useCommonName) {
 	return html;
 }
 
+/* ---- Email Status filter (one dropdown) ----
+   Verified     — SendGrid confirmed at least one email was delivered to the address.
+   Not Verified — no delivered email on record (never sent, deferred, bounced, blocked or dropped).
+   Unsubscribed — the recipient unsubscribed. */
+function muEmailStatusOptionsHtml() {
+	return '<option value="">Select Email Status</option>' +
+		'<option value="VERIFIED">Verified</option>' +
+		'<option value="NOT_VERIFIED">Not Verified</option>' +
+		'<option value="UNSUBSCRIBED">Unsubscribed</option>';
+}
+
 function muYesNoOptions(placeholder) {
 	return '<option value="">' + placeholder + '</option>' +
 		'<option value="Y">Yes</option>' +
@@ -227,6 +239,10 @@ function muStudentParentFilterFields(meta) {
 				'<option value="Guardian">Guardian</option>' +
 			'</select>' +
 			'<label>Relation to Student</label>' +
+		'</div>' +
+		'<div class="col-md-3 col-sm-3 col-12 custom-field">' +
+			'<select name="parentEmailStatusFilter" id="parentEmailStatusFilter" class="form-control">' + muEmailStatusOptionsHtml() + '</select>' +
+			'<label>Parent Email Status</label>' +
 		'</div>';
 }
 
@@ -246,6 +262,8 @@ function muAddStudentParentFilters(formId, studentDetailDTO) {
 	studentDetailDTO["parentStateId"] = muPositiveIdOrNull($(form + "#parentStateId").val());
 	studentDetailDTO["parentCityId"] = muPositiveIdOrNull($(form + "#parentCityId").val());
 	studentDetailDTO["parentAccountCreated"] = $(form + "#parentAccountCreated").val() || "";
+	studentDetailDTO["emailStatus"] = $(form + "#emailStatusFilter").val() || "";
+	studentDetailDTO["parentEmailStatus"] = $(form + "#parentEmailStatusFilter").val() || "";
 	studentDetailDTO["isPrimaryParent"] = $(form + "#isPrimaryParent").val() || "";
 	// Multi-select → comma list; backend matches a parent with ANY of the selected modes.
 	studentDetailDTO["parentPreferredComm"] = ($(form + "#parentPreferredComm").val() || []).join(",");
@@ -256,6 +274,7 @@ function muStudentFilterReset(formId) {
 	advanceStudentSearchReset(formId);
 	var form = "#" + formId + " ";
 	$(form + "#globalSearch, " + form + "#parentNameFilter, " + form + "#parentEmailId, " + form + "#parentMobileNo").val("");
+	$("#" + formId + " #emailStatusFilter, #" + formId + " #parentEmailStatusFilter").val("").trigger("change");
 	$(form + "#parentCountryId, " + form + "#parentAccountCreated, " + form + "#isPrimaryParent, " +
 		form + "#parentRelation").val("").trigger("change");
 	$(form + "#parentPreferredComm").val([]).trigger("change");
@@ -382,9 +401,13 @@ function getManageUserStudentTabContent(meta) {
 								'</select>' +
 								'<label>Profile Field Value</label>' +
 							'</div>' +
+							'<div class="col-md-3 col-sm-3 col-12 custom-field">' +
+								'<select name="emailStatusFilter" id="emailStatusFilter" class="form-control">' + muEmailStatusOptionsHtml() + '</select>' +
+								'<label>Student Email Status</label>' +
+							'</div>' +
 							'<div class="col-md-6 col-sm-12 col-12 mt-2 text-left">' +
 								addProfileFieldButton +
-								'<button class="btn btn-primary" onclick="profileSetting();"><i class="fa fa-cog"></i>&nbsp;Collect Student Info</button>' +
+								'<button class="btn btn-primary ml-2" onclick="profileSetting();"><i class="fa fa-cog"></i>&nbsp;Collect Student Info</button>' +
 							'</div>' +
 							'<div class="col-md-6 col-sm-12 col-12 mt-2 text-right">' +
 								'<button class="btn btn-danger  mr-2" onclick="muResetStudentFilterAndCards(\'studentFilter\')"><i class="fa fa-undo"></i>&nbsp;Reset</button>' +

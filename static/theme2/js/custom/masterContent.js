@@ -4085,6 +4085,15 @@ function getAnnouncementAndNewsContent() {
           }, 0);
         }
 	}
+      if (!showOnlyReleaseNote) {
+        html +=
+        `<button type="button" class="custom-btn-open-options btn btn-primary" id="webNoticeBtn"
+          onclick="openRightSideBar('notice_side_wrapper');loadWebNoticePanel();"
+          data-toggle="tooltip" data-placement="left" title="Web notifications">
+          <i class="fa fa-bell fa-w-16"></i>
+          <span class="counts-badge badge badge-pill badge-danger ml-0 mr-2 d-none" id="webNoticeBadge"></span>
+        </button>`;
+      }
       if(!showOnlyReleaseNote && USER_ROLE != "DIRECTOR"){
         html+=
         `<button type="button" class="custom-btn-open-options btn btn-primary" onclick="openRightSideBar(\'announcement_side_wrapper\')" data-toggle="tooltip" data-placement="left" title="Announcement">
@@ -4138,6 +4147,16 @@ function getAnnouncementAndNewsContent() {
           </button>`;
       }
       html += `</div>`;
+      if (!showOnlyReleaseNote) {
+        html += `
+        <div class="ui-theme-settings custome-ui-theme-settings" id="notice_side_wrapper">
+            <button type="button" class="custom-btn-open-options close-right-slide-bar-btn border text-white mb-0"
+              onclick="openRightSideBar('notice_side_wrapper')" style="background:#6c757d; position: absolute;left: -18px;top: 20px;z-index: 99;">
+                <i class="fa fa-times"></i>
+            </button>
+            <div class="full" id="webNoticePanelRoot"></div>
+        </div>`;
+      }
       if(!showOnlyReleaseNote){
         html += `
         <div class="ui-theme-settings custome-ui-theme-settings" id="announcement_side_wrapper" >
@@ -4175,6 +4194,9 @@ function getAnnouncementAndNewsContent() {
   setTimeout(function () {
       loadDashboardReleaseNotePanel(true);
       initNotificationBadgeObservers();
+      if (typeof initWebNoticeDashboard === "function") {
+        initWebNoticeDashboard();
+      }
   }, 250);
   return html;
 }
@@ -4198,7 +4220,7 @@ function updateNotificationBadge(el) {
 // Watch the notification badges so their visibility stays in sync with the count,
 // which is set asynchronously from several other scripts.
 function initNotificationBadgeObservers() {
-  var ids = ["chatUnseenCoutn", "announcementBadge", "newsBadge", "schoolDiaryBadge"];
+  var ids = ["chatUnseenCoutn", "announcementBadge", "newsBadge", "schoolDiaryBadge", "webNoticeBadge"];
   ids.forEach(function (id) {
     var el = document.getElementById(id);
     if (!el || el.dataset.badgeObserved === "true") return;
@@ -4229,6 +4251,10 @@ function openRightSideBar(eleId, closeFlag) {
 	if(!closeFlag){
     	getChatUserList(true);
 	}
+  }
+  if (eleId === "notice_side_wrapper" && $("#" + eleId).hasClass("settings-open")
+      && typeof loadWebNoticePanel === "function") {
+    loadWebNoticePanel();
   }
 }
 
@@ -4703,4 +4729,21 @@ function getDatepickerMobileViewContent(){
 		</div>
 	</div>`;
 	return html;
+}
+
+function getRecentNoticeSystemActivityModal(){
+  var html = 
+  `<div class="modal fade" id="nmsModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg" id="nmsModalDialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="nmsModalTitle">Detail</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body" id="nmsModalBody"></div>
+        <div class="modal-footer" id="nmsModalFooter"></div>
+      </div>
+    </div>
+  </div>`;
+  return html;
 }

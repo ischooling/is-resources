@@ -732,6 +732,9 @@ function applyChanges(src, keyId,userId,studentStandardId,roleModuleId,moduleId,
 					}else{
 						showMessageTheme2(1, data['message'],'',false);
 					}
+					if(typeof calculateTeacherProfileSectionPercentage === 'function'){
+						calculateTeacherProfileSectionPercentage();
+					}
 				}
 
 				return false;
@@ -1031,6 +1034,9 @@ function getBankDetailsByUserId(userId, onlyEdit){
 					placeholder: "Select an option",
 					minimumResultsForSearch: Infinity
 				});
+			}
+			if(typeof calculateTeacherProfileSectionPercentage === 'function'){
+				calculateTeacherProfileSectionPercentage();
 			}
 
 			$("#accountHolderCountryId").unbind().bind("change", function () {
@@ -1910,6 +1916,9 @@ function saveReference(id) {
 				$(`#ref${id}Phone`).text(`+${ref.isdCode}${ref.number}`);
 				$(`#ref${id}Designation`).text(ref.designation);
 				$(`#teacherReferencesModal${id}`).modal('hide');
+				if(typeof calculateTeacherProfileSectionPercentage === 'function'){
+					calculateTeacherProfileSectionPercentage();
+				}
 			}else{
 				showMessageTheme2(0, res.message);
 			}

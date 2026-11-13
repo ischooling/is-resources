@@ -58,14 +58,77 @@ async function loadScript(files) {
 
 var _scriptPromiseCache = {};
 
+var _SCRIPT_GLOBAL_CHECKS = {
+    "noticeWorkspaceContent.js": function () { return typeof renderNoticeWorkspaceContent === "function"; },
+    "noticeWorkspace.js": function () { return typeof renderWorkspace === "function"; },
+    "noticeComposeContent.js": function () { return typeof renderNoticeComposeContent === "function"; },
+    "noticeCompose.js": function () { return typeof renderCompose === "function"; },
+    "noticeDashboardContent.js": function () { return typeof renderNoticeDashboardContent === "function"; },
+    "noticeDashboard.js": function () { return typeof renderDashboard === "function"; },
+    "noticeTemplatesContent.js": function () { return typeof renderNoticeTemplatesContent === "function"; },
+    "noticeCommon.js": function () { return typeof toast === "function" && typeof inlineAttrs === "function"; },
+    "noticeConstants.js": function () { return typeof STATUS_MAP !== "undefined"; }
+};
+
+function scriptUrlMatchesFile(scriptSrc, src) {
+    if (!scriptSrc) {
+        return false;
+    }
+    var escaped = src.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp("(?:^|[/\\\\])" + escaped + "(?:\\?|#|$)").test(scriptSrc);
+}
+
+function scriptTagPresent(src, id) {
+    if (document.getElementById(id)) {
+        return true;
+    }
+    var scripts = document.getElementsByTagName("script");
+    for (var i = 0; i < scripts.length; i++) {
+        if (scriptUrlMatchesFile(scripts[i].getAttribute("src") || "", src)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function scriptGlobalsReady(src) {
+    var check = _SCRIPT_GLOBAL_CHECKS[src];
+    return check ? check() : true;
+}
+
+function removeScriptTagsForFile(src, id) {
+    var scripts = document.getElementsByTagName("script");
+    for (var i = scripts.length - 1; i >= 0; i--) {
+        var scriptSrc = scripts[i].getAttribute("src") || "";
+        if (scriptUrlMatchesFile(scriptSrc, src) || scripts[i].id === id) {
+            scripts[i].parentNode.removeChild(scripts[i]);
+        }
+    }
+    delete _scriptPromiseCache[id];
+}
+
+/** True when this file is present in the DOM and its globals are defined. */
+function scriptAlreadyLoaded(src, id) {
+    if (!scriptTagPresent(src, id)) {
+        return false;
+    }
+    if (scriptGlobalsReady(src)) {
+        return true;
+    }
+    removeScriptTagsForFile(src, id);
+    return false;
+}
+
 function loadScriptCall(role, src) {
     if (!src) return Promise.resolve();
 
     var id = src.split(".")[0] + "JS";
 
-    // Return cached promise if script is already loading or loaded
-    if (_scriptPromiseCache[id]) {
+    if (_scriptPromiseCache[id] && scriptTagPresent(src, id) && scriptGlobalsReady(src)) {
         return _scriptPromiseCache[id];
+    }
+    if (_scriptPromiseCache[id] && (!scriptGlobalsReady(src) || !scriptTagPresent(src, id))) {
+        removeScriptTagsForFile(src, id);
     }
 
     var promise = attemptLoadScript(role, src, id, 1);
@@ -83,6 +146,11 @@ function attemptLoadScript(role, src, id, attempt) {
         : BASE_URL + "/static/theme2/js/custom/" + src + "?t=" + Date.now();
 
     return new Promise((resolve, reject) => {
+        if (scriptAlreadyLoaded(src, id)) {
+            console.log("Script already loaded: " + src);
+            resolve();
+            return;
+        }
         function appendScript(url, onError) {
             var script = document.createElement("script");
             script.type = "text/javascript";

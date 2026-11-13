@@ -1231,6 +1231,7 @@ $(document).ready(function () {
     if (typeof SMSErrorLogger !== 'undefined') {
         $.ajaxSetup({ error: SMSErrorLogger.ajaxErrorHandler });
     }
+    $("body").append(getRecentNoticeSystemActivityModal())
 });
 function setPagePosition(position) {
   signupPage = position;

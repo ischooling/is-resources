@@ -6,7 +6,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
     PAGE_REQUEST = pageNo;
     MODULE_ID = moduleId;
     showAndHideDashboardAndAdditionalContent("main");
-    console.time();
+    console.time("page-" + pageNo);
     var pageRequest = {
         "home":{url:"",file:[{role:"",fileName:["schoolDashboardContent.js","schoolDashboard.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "attendance-report":{url:"",file:[{role:"",fileName:["AttendanceReportContent.js","AttendanceReport.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
@@ -17,7 +17,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
         "user-list":{url:"",file:[{role:"",fileName:["adminManageuserListContent.js","adminManageuserList.js","roleList.js","dashboardUserActivity.js","dashboardStudent.js","agilixbuzzApi.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         // JS-rendered module (ManageUserListContent.js) — shell + tabs built client-side;
         // the old JSP fragment endpoint (manage-profile-content?profileFor=common) is no longer fetched.
-        "manage-user-list":{url:"",file:[{role:"",fileName:["ManageUserListContent.js","ManageUserStudentContent.js","ManageUserTeacherContent.js","ManageUserParentContent.js","dashboardManageUser.js","dashboardUserActivity.js","dashboardStudentTeacherSession.js","studentProfileCompletingProcess.js","profileViewNewContent.js","profileViewNew.js","withdrawalRequestUser.js","appInstallPromptAdminToggle.js"]},{role:"",fileName:["dashboardStudent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "manage-user-list":{url:"",file:[{role:"",fileName:["ManageUserListContent.js","ManageUserStudentContent.js","ManageUserTeacherContent.js","ManageUserParentContent.js","dashboardManageUser.js","dashboardUserActivity.js","dashboardStudentTeacherSession.js","studentProfileCompletingProcess.js","profileViewNewContent.js","profileViewNew.js","quietHours.js","withdrawalRequestUser.js","appInstallPromptAdminToggle.js"]},{role:"",fileName:["dashboardStudent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         // JS-rendered Enrollment Tracker (Student Management) — cards + filters + chunked table + detail drawer.
         "enrollment-tracker":{url:"",file:[{role:"",fileName:["EnrollmentTrackerContent.js","masterContent.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "student-list":{url:"manage-profile-content?moduleId="+moduleId+"&profileFor=student&userClickFrom=list&registrationType=ONE_TO_ONE&themeType=theme2",file:[],type:"JSP",init: function () {$("#studentTab").show();$("#teacherTab").hide();$("#parentsTab").hide();$("#flexStudentTab").hide();$("#batchStudentTab").hide();},pageReqType:"IN"},
@@ -130,6 +130,19 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
         "teacher-class-schedule":{url:"",file:[{role:"",fileName:["feedbackContents.js","teacherClassScheduleContent.js","teacherClassSchedule.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "parent-attendance":{url:"",file:[{role:"",fileName:["attendaceByStudentIdContent.js","attendaceByStudentId.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
         "student-dashboard-management":{url:"",file:[{role:"",fileName:["dummyParentDashboardData.js","dummyStudentDashboardData.js","studentDashboardManagementContent.js","studentDashboardManagement.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        
+                                                                                                                              //NOTICE-MANAGEMENT-SYSTEM
+        "notice-dashboard":{url:"",file:[{role:"",fileName:["noticeHtmlEditor.js","noticeDashboardContent.js","noticeDashboard.js","noticeWorkspaceContent.js","noticeWorkspace.js","noticeComposeContent.js","noticeCompose.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "compose-notice":{url:"",file:[{role:"",fileName:["noticeHtmlEditor.js","noticeComposeContent.js","noticeCompose.js","noticeWorkspaceContent.js","noticeWorkspace.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "notice-workspace":{url:"",file:[{role:"",fileName:["noticeHtmlEditor.js","noticeWorkspaceContent.js","noticeWorkspace.js","noticeComposeContent.js","noticeCompose.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "notice-templates":{url:"",file:[{role:"",fileName:["noticeHtmlEditor.js","noticeTemplatesContent.js","noticeTemplates.js","noticeWorkspaceContent.js","noticeWorkspace.js","noticeComposeContent.js","noticeCompose.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "acknowledgment-ledger":{url:"",file:[{role:"",fileName:["noticeHtmlEditor.js","noticeAcknowledgmentLedgerContent.js","noticeAcknowledgmentLedger.js","noticeWorkspace.js","noticeComposeContent.js","noticeCompose.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "override-configuration":{url:"",file:[{role:"",fileName:["noticeHtmlEditor.js","noticeOverrideConfigurationContent.js","noticeOverrideConfiguration.js","noticeWorkspace.js","noticeComposeContent.js","noticeCompose.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        "my-notices":{url:"",file:[{role:"",fileName:["myNoticesContent.js","myNotices.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+        
+        
+        
+        
         // STUDENT PAGE CONFIG
         "batch-schedule":{url:"teacher-batch-time-schedule?moduleId="+moduleId+"&userId="+extraParam,file:[{role:"",fileName:["dashboardSchoolBatches.js"]},{role:"js",fileName:["timepicker.js"]}],funName:function(){},type:"JSP",pageReqType:"IN"},
         "student-handbook":{url:"",file:[{role:"",fileName:["studentHandbookContent.js","studentHandbook.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
@@ -328,7 +341,7 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
               await loadScript(requestType.file);
           }
           if(requestType.pageReqType == "IN"){
-              getContent(moduleId, pageNo, replaceDiv, extraParam, extraParam1);
+              await getContent(moduleId, pageNo, replaceDiv, extraParam, extraParam1);
           }else if(requestType.pageReqType == "EX"){
               getAsPost(requestType.urlSend);
           }else{
@@ -352,8 +365,8 @@ async function callDashboardPageSchool(moduleId, pageNo, replaceDiv, extraParam,
       console.warn("Invalid pageNo: " + pageNo);
       return false;
     }
-    
-    // console.timeEnd();
+
+    console.timeEnd("page-" + pageNo);
   }else{
     showMessageTheme2(0,"Your device is offline, please check your internet connection.","",true);
   }
@@ -457,8 +470,8 @@ async function callSchoolInneraction(actionType, arg0, replaceDiv, roleModuleId)
       "attendance":{url:"attendance-content"+arg0,file:[],type:"JSP",pageReqType:"IN"},
       "extention":{url:"student-acacdemic-year-extention?subjectId="+arg0+"&moduleId="+roleModuleId+"&extraSubjStatus="+replaceDiv,file:[],type:"JSP",pageReqType:"IN"},
       "edit-user":{url:"create-user-edit?userId="+arg0,file:[],type:"JSP",pageReqType:"IN"},
-      "1a":{url:"",file:[{role:"",fileName:["profileViewNewContent.js","profileViewNew.js","withdrawalRequestUser.js", "jquery.ckeditor.js","appInstallPromptAdminToggle.js"]},{role:"js",fileName:["ckeditor.js","circle-progress.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
-      "profile-view":{url:"",file:[{role:"",fileName:["profileViewNewContent.js","profileViewNew.js","withdrawalRequestUser.js", "jquery.ckeditor.js","appInstallPromptAdminToggle.js"]},{role:"js",fileName:["ckeditor.js","circle-progress.js"]}],funName:function(){},type:"JS",pageReqType:"IN"}
+      "1a":{url:"",file:[{role:"",fileName:["profileViewNewContent.js","profileViewNew.js","quietHours.js","withdrawalRequestUser.js", "jquery.ckeditor.js","appInstallPromptAdminToggle.js"]},{role:"js",fileName:["ckeditor.js","circle-progress.js"]}],funName:function(){},type:"JS",pageReqType:"IN"},
+      "profile-view":{url:"",file:[{role:"",fileName:["profileViewNewContent.js","profileViewNew.js","quietHours.js","withdrawalRequestUser.js", "jquery.ckeditor.js","appInstallPromptAdminToggle.js"]},{role:"js",fileName:["ckeditor.js","circle-progress.js"]}],funName:function(){},type:"JS",pageReqType:"IN"}
     };
     var requestType = pageRequest[actionType];
     if (requestType.type == "JSP") {
@@ -499,7 +512,7 @@ async function callInneraction(actionType, arg0) {
         customLoader(true);
         var pageRequest = 
         {
-            "1a":{url:"",file:[{role:"",fileName:["adminProfileContent.js","adminProfile.js","withdrawalRequestUser.js","appInstallPromptAdminToggle.js"]}],funName:function(){renderProfilePage(arg0);},type:"JS"},
+            "1a":{url:"",file:[{role:"",fileName:["adminProfileContent.js","adminProfile.js","quietHours.js","withdrawalRequestUser.js","appInstallPromptAdminToggle.js"]}],funName:function(){renderProfilePage(arg0);},type:"JS"},
         
         };
         var requestType = pageRequest[actionType];

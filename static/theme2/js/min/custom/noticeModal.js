@@ -1,0 +1,1 @@
+function openModal(o,l,d,t){noticeDestroyHtmlEditor("tplBody"),$("#nmsModalTitle").html(o),$("#nmsModalBody").html(l),$("#nmsModalFooter").html(d||"");var a=$("#nmsModalDialog"),m=!(!t||!t.wide);a.toggleClass("modal-xl",m),a.toggleClass("modal-lg",!m),$("#nmsModal").modal("show")}function closeModal(){noticeDestroyHtmlEditor("tplBody"),$("#nmsModal").modal("hide")}

@@ -1216,6 +1216,17 @@ function filterStudentPaymentReportForm(){
 						+'</div>'
 						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
 							+'<div class="form-group custom-field">'
+								+'<select name="emailStatus" id="emailStatus" class="form-control" title="Status of the student\'s profile email in SendGrid.">'
+									+'<option value="">Select Email Status</option>'
+									+'<option value="VERIFIED">Verified</option>'
+									+'<option value="NOT_VERIFIED">Not Verified</option>'
+									+'<option value="UNSUBSCRIBED">Unsubscribed</option>'
+								+'</select>'
+								+'<label>Email Status</label>'
+							+'</div>'
+						+'</div>'
+						+'<div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">'
+							+'<div class="form-group custom-field">'
 								+'<select id="userId" class="form-control selectReset multiple-select-option">'
 									+'<option value="">ALL</option>'
 									+getUserBasedOnCriteria('USER_LIST_BY_ROLE_SCHOOL', SCHOOL_ID, '', '')
@@ -1481,6 +1492,14 @@ function swatiBroadcastContentModal(data){
 		return html;
 }
 
+function paymentReportPhoneKey(value) {
+	return String(value || "").replace(/\D/g, "");
+}
+
+function paymentReportEmailKey(value) {
+	return String(value || "").trim().toLowerCase();
+}
+
 function swatiBroadcastSendMobileModal(data){
 	
 	var html =
@@ -1535,30 +1554,34 @@ function swatiBroadcastSendMobileModal(data){
 												</tr>
 											</thead>
 											<tbody>`;
+											var seenBroadcastUserIds = {};
+											var seenBroadcastPhones = {};
+											var broadcastRowCount = 0;
 											$.each($("input[name='student-move-another']:checked"), function(index, checkbox) {
-												var userId = $(checkbox).val(); 
+												var userId = $(checkbox).val();
+												if (!userId || seenBroadcastUserIds[userId]) {
+													return;
+												}
+												seenBroadcastUserIds[userId] = true;
 												var name = $(".student-name-" + userId).attr("studentname") || '';
 												var grade = $(".student-name-" + userId).attr("studentgrade") || '';
 												var parentName = $(".student-name-" + userId).attr("parentname") || '';
 
-												var phoneSet = new Set();
+												var phones = [];
 												$(".parent-phone-" + userId + ", .parent-phone-alt-" + userId +
 												", .student-phone-" + userId + ", .student-phone-alt-" + userId).each(function() {
-													
-													var num = $(this).attr("number")?.trim();
-
-													if (num && num !== "null null") {
-														let cleaned = num.replace(/[^0-9]/g, "");
-														if (cleaned.length > 3) { 
-															phoneSet.add(num);
-														}
+													var num = ($(this).attr("number") || "").trim();
+													var phoneKey = paymentReportPhoneKey(num);
+													if (!num || num === "null null" || phoneKey.length <= 3 || seenBroadcastPhones[phoneKey]) {
+														return;
 													}
+													seenBroadcastPhones[phoneKey] = true;
+													phones.push(num);
 												});
 
-												var phones = Array.from(phoneSet);
-
 												if (phones.length > 0) {
-													var count = index + 1;
+													broadcastRowCount += 1;
+													var count = broadcastRowCount;
 
 													html += `<tr id="esmsgcol_${userId}">
 																<td>
@@ -2127,6 +2150,7 @@ function gotoBackWatiModal(){
 
 function getSelectedUsersData() {
     var selectedUsers = [];
+    var seenSendPhones = {};
 
     $.each($("input[name='chk-users-lead']:checked"), function() {
         var row = $(this).closest("tr");
@@ -2138,16 +2162,19 @@ function getSelectedUsersData() {
         // collect hidden mobile numbers in this row
 
         row.find("input.mobileNo").each(function() {
-            var num = $(this).val()?.trim();
-            if (num) {
-				selectedUsers.push({
-					userId: userId,  
-					name: name,
-					grade:grade,
-					parentName: parentName,
-					mobileNo: num
-				});
+            var num = ($(this).val() || "").trim();
+            var phoneKey = paymentReportPhoneKey(num);
+            if (!num || !phoneKey || seenSendPhones[phoneKey]) {
+				return;
             }
+			seenSendPhones[phoneKey] = true;
+			selectedUsers.push({
+				userId: userId,
+				name: name,
+				grade:grade,
+				parentName: parentName,
+				mobileNo: num
+			});
         });  
     });
 
@@ -2872,8 +2899,15 @@ function emailBroadcastSendModal(data){
 												</tr>
 											</thead>
 											<tbody>`;
+											var seenEmailBroadcastUserIds = {};
+											var seenBroadcastEmails = {};
+											var emailBroadcastRowCount = 0;
 											$.each($("input[name='student-move-another']:checked"), function(index, checkbox) {
-                                                var userId = $(checkbox).val(); 
+                                                var userId = $(checkbox).val();
+												if (!userId || seenEmailBroadcastUserIds[userId]) {
+													return;
+												}
+												seenEmailBroadcastUserIds[userId] = true;
                                                 var name = $(".student-name-" + userId).attr("studentname") || '';
                                                 var grade = $(".student-name-" + userId).attr("studentgrade") || '';
                                                 var parentName = $(".student-name-" + userId).attr("parentname") || '';
@@ -2881,18 +2915,22 @@ function emailBroadcastSendModal(data){
 												var num2 = $(".student-phone-" + userId).attr("number")?.trim();
 												var isd = $(".student-phone-" + userId).attr("isdnumber")?.trim();
 
-                                                var emailSet = new Set();
+                                                var emails = [];
                                                 $(".parent-email-" + userId + ", .student-email-" + userId).each(function() {
-													var email = $(this).attr("useremail")?.trim();
-                                                    if (email && email !== "null") {
-                                                        emailSet.add(email);
+													var email = ($(this).attr("useremail") || "").trim();
+													var emailKey = paymentReportEmailKey(email);
+                                                    if (!email || email === "null" || email.indexOf("@") === -1 || seenBroadcastEmails[emailKey]) {
+                                                        return;
                                                     }
+													seenBroadcastEmails[emailKey] = true;
+													emails.push(email);
                                                 });
 
-                                                var emails = Array.from(emailSet);
-
                                                 if (emails.length > 0) {
-													var count = index + 1;
+													emailBroadcastRowCount += 1;
+													var count = emailBroadcastRowCount;
+													var primaryEmail = emails[0] || "";
+													var secondaryEmail = emails.length > 1 ? emails[1] : "";
 													
 													html+=`<tr id="esmsgcol_`+userId+`">
 															<td>
@@ -2901,8 +2939,8 @@ function emailBroadcastSendModal(data){
 																		name="chk-users-lead-email"
 																		id="` + userId + `"
 																		value="` + userId + `"
-																		data-email="` + emails[0] + `"
-																		data-parentemail="` + emails[1] + `"
+																		data-email="` + primaryEmail + `"
+																		data-parentemail="` + secondaryEmail + `"
 																		data-name="` + name + `"
 																		data-grade="` + grade + `"
 																		data-parentname="` + parentName + `"
@@ -3280,6 +3318,7 @@ function sendEmailNotification(templateName, subject, index, templateId){
 			return false;
 		}else{
 			let selectedUsers = [];
+			var seenSendEmails = {};
 			$("input[name='chk-users-lead-email']:checked").each(function () {
 				let email = $(this).data("email");
 				let parentemail = $(this).data("parentemail");
@@ -3294,29 +3333,34 @@ function sendEmailNotification(templateName, subject, index, templateId){
 
 				const isValidEmail = (str) => str && str.includes("@") && str.includes(".");
 
-				const userData = (mail) => ({
-					email: mail,
-					leadId: leadId,
-					name: name,
-					grade: grade,
-					leadVerifiedStatus: leadVerifiedStatus,
-					mobileNo: mobileNo,
-					phoneNumber: phoneNumber,
-					isdCode: isdCode,
-					parentName: parentName,
-				});
+				const userData = (mail) => {
+					var emailKey = paymentReportEmailKey(mail);
+					if (!emailKey || seenSendEmails[emailKey]) {
+						return;
+					}
+					seenSendEmails[emailKey] = true;
+					selectedUsers.push({
+						email: mail,
+						leadId: leadId,
+						name: name,
+						grade: grade,
+						leadVerifiedStatus: leadVerifiedStatus,
+						mobileNo: mobileNo,
+						phoneNumber: phoneNumber,
+						isdCode: isdCode,
+						parentName: parentName,
+					});
+				};
 
 				if (isValidEmail(email) && isValidEmail(parentemail)) {
-					if (email.toLowerCase() === parentemail.toLowerCase()) {
-						selectedUsers.push(userData(email));
-					} else {
-						selectedUsers.push(userData(email));
-						selectedUsers.push(userData(parentemail));
+					userData(email);
+					if (paymentReportEmailKey(email) !== paymentReportEmailKey(parentemail)) {
+						userData(parentemail);
 					}
 				} else if (isValidEmail(email)) {
-					selectedUsers.push(userData(email));
+					userData(email);
 				} else if (isValidEmail(parentemail)) {
-					selectedUsers.push(userData(parentemail));
+					userData(parentemail);
 				}
 			});
 			emailTemplateContent.users = selectedUsers;

@@ -160,6 +160,21 @@ function renderParentDemoOnlyPage(renderCallback) {
     return renderCallback();
 }
 
+async function ensureNoticeWorkspaceReady() {
+    if (typeof renderNoticeWorkspaceContent === "function" && typeof renderWorkspace === "function") {
+        return;
+    }
+    if (typeof loadScript === "function") {
+        await loadScript([{ role: "", fileName: [
+            "noticeWorkspaceContent.js", "noticeWorkspace.js",
+            "noticeComposeContent.js", "noticeCompose.js"
+        ]}]);
+    }
+    if (typeof renderNoticeWorkspaceContent !== "function") {
+        throw new Error("Notice workspace scripts failed to load.");
+    }
+}
+
 const contentHandlers = {
     'student-home': () => { CALENDAR_EVENT = false; rendereDashboardContent(isParent);},
     'student-addon': () => renderBuyExtraClasses(USER_ID),
@@ -336,6 +351,17 @@ const contentHandlers = {
     'student-video-library': () => initStudentVideoLibrary(),
     'certificate-management': () => initCertificateManagement(),
     'my-certificates': () => initMyCertificates(),
+    'notice-dashboard': () => renderNoticeDashboardContent(),
+    'compose-notice': () => renderNoticeComposeContent(),
+    'notice-workspace': async () => {
+        await ensureNoticeWorkspaceReady();
+        renderNoticeWorkspaceContent();
+    },
+    'notice-templates': () => renderNoticeTemplatesContent(),
+    'acknowledgment-ledger': () => renderAcknowledgmentLedgerPageContent(),
+    'override-configuration': () =>renderOverrideConfiguration(),
+    'my-notices': () => renderMyNotices(),
+    'student-feedback-received': () => initStudentFeedbackReceived(),
     'inbox': () => initInbox(),
     // Communication > Compose: the Inbox page with a new message open.
     'inbox-compose': () => initInbox({ compose: true }),

@@ -194,106 +194,106 @@ var html=
 	'<p class="m-0">'
 		+'<b>Account Details:- Bank Details</b>'
 	+'</p>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">Account Currency</label>'
 		+'<span class="field-value trans5s">'+bankDetails.accountCurrency+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">Account Number</label>'
 		+'<span class="field-value trans5s">'+bankDetails.accountNumber+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">IBAN (If Available)</label>'
 		+'<span class="field-value trans5s">'+bankDetails.iban+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">Account Type</label>'
 		+'<span class="field-value trans5s">'+bankDetails.accountCategory+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
-		+'<p class="m-0 label text-uppercase">Account Holder Name<i class="text-lowercase">&nbsp;(as per bank record)</i></p>'
+	+'<div class="Profile-field-row h-md">'
+		+'<h6 class="mb-1"><b>Account Holder Name</b><i>&nbsp;(as per bank record)</i></h6>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">First</label>'
 		+'<span class="field-value trans5s">'+bankDetails.accountHolderFirstName+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">Middle</label>'
 		+'<span class="field-value trans5s">'+bankDetails.accountHolderMiddleName+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">Last</label>'
 		+'<span class="field-value trans5s">'+bankDetails.accountHolderLastName+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">Account Holder Address</label>'
-		+'<p class="m-0 label text-uppercase">'+bankDetails.accountHolderAddress+'</p>'
+		+'<span class="field-value trans5s text-uppercase">'+bankDetails.accountHolderAddress+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">Country</label>'
 		+'<span class="field-value trans5s">'+bankDetails.accountHolderCountryName+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">State</label>'
 		+'<span class="field-value trans5s">'+bankDetails.accountHolderStateName+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">City</label>'
 		+'<span class="field-value trans5s">'+bankDetails.accountHolderCityName+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">Postal Code</label>'
 		+'<span class="field-value trans5s">'+bankDetails.accountHolderPostal+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">Phone No.</label>'
 		+'<span class="field-value trans5s">'+bankDetails.accountHolderPhone+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">Email-ID</label>'
 		+'<span class="field-value trans5s">'+bankDetails.accountHolderEmail+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">Bank Name</label>'
 		+'<span class="field-value trans5s">'+bankDetails.bankName+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">Bank Branch Name</label>'
 		+'<span class="field-value trans5s">'+bankDetails.bankBranchName+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">Bank Address</label>'
-		+'<p class="m-0 label text-uppercase">'+bankDetails.bankBranchAddress+'</p>'
+		+'<span class="field-value trans5s text-uppercase">'+bankDetails.bankBranchAddress+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">Country</label>'
 		+'<span class="field-value trans5s">'+bankDetails.bankCountryName+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">State</label>'
 		+'<span class="field-value trans5s">'+bankDetails.bankStateName+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">City</label>'
 		+'<span class="field-value trans5s">'+bankDetails.bankCityName+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">Postal Code</label>'
 		+'<span class="field-value trans5s">'+bankDetails.bankPostal+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">Bank Swift Code (If Applicable)</label>'
 		+'<span class="field-value trans5s">'+bankDetails.swiftCode+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">Bank IFSC Code (If Applicable)</label>'
 		+'<span class="field-value trans5s">'+bankDetails.bankIfsc+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">IBAN/Routing Number (If Applicable)</label>'
 		+'<span class="field-value trans5s">'+bankDetails.routeNumber+'</span>'
 	+'</div>'
-	+'<div class="Profile-field-row">'
+	+'<div class="Profile-field-row bar_count">'
 		+'<label class="label">Other Details</label>'
 		+'<span class="field-value trans5s">'+bankDetails.otherDetails+'</span>'
 	+'</div>';
@@ -478,4 +478,328 @@ function courseSelectionModal(data){
         </div>
     </div>`;
     return html;
+}
+
+$(function(){
+    var teacherProfileContent = $('#teacherProfileContentDiv');
+    var teacherProfileRightSection = teacherProfileContent.find('.profile-right-section');
+    var teacherProfileTabs = teacherProfileContent.find('.profile-selection-list-anchor');
+    var teacherProfileTabClickScroll = false;
+    var threshold = 116;
+
+    function setTeacherProfileActiveTab(sectionId){
+        teacherProfileTabs.removeClass('bg-light').addClass('bg-light-hover');
+        teacherProfileTabs.filter('[href="#' + sectionId + '"]')
+            .removeClass('bg-light-hover')
+            .addClass('bg-light');
+    }
+
+    teacherProfileTabs.off('click.teacherProfileSectionNav').on('click.teacherProfileSectionNav', function(e){
+        e.preventDefault();
+        teacherProfileTabClickScroll = true;
+
+        var target = this.hash;
+        var section = $(target);
+        if(section.length < 1){
+            teacherProfileTabClickScroll = false;
+            return;
+        }
+        setTeacherProfileActiveTab(section.attr('id'));
+
+        var container;
+        var scrollTopValue;
+        if($(window).outerWidth() > 991){
+            container = teacherProfileRightSection;
+            scrollTopValue = container.scrollTop() + section.position().top;
+            $('html, body').stop().animate({
+                scrollTop: 0
+            }, 600);
+        }else{
+            container = $('html, body');
+            scrollTopValue = section.offset().top - 60;
+        }
+
+        container.stop().animate({
+            scrollTop: scrollTopValue
+        }, 600, function(){
+            teacherProfileTabClickScroll = false;
+            setTeacherProfileActiveTab(section.attr('id'));
+        });
+    });
+
+    teacherProfileRightSection.off('scroll.teacherProfileSectionNav').on('scroll.teacherProfileSectionNav', function(){
+        if(teacherProfileTabClickScroll){
+            return;
+        }
+
+        var activeSectionId = null;
+        var teacherProfileSections = teacherProfileRightSection.find('.profile-section');
+        for(var i = 0; i < teacherProfileSections.length; i++){
+            var section = teacherProfileSections.eq(i);
+            var sectionTop = section.position().top;
+            var sectionHeight = section.outerHeight();
+            var sectionBottom = sectionTop + sectionHeight;
+
+            if(sectionTop <= threshold && sectionBottom > threshold){
+                activeSectionId = section.attr('id');
+                break;
+            }
+        }
+
+        if(activeSectionId){
+            setTeacherProfileActiveTab(activeSectionId);
+        }
+    });
+
+    $(window).off('scroll.teacherProfileSectionNav resize.teacherProfileSectionNav').on('scroll.teacherProfileSectionNav resize.teacherProfileSectionNav', function(){
+        if($(window).outerWidth() > 991 || teacherProfileTabClickScroll){
+            return;
+        }
+
+        var activeSectionId = null;
+        var teacherProfileSections = teacherProfileContent.find('.profile-right-section .profile-section');
+        for(var i = 0; i < teacherProfileSections.length; i++){
+            var section = teacherProfileSections.eq(i);
+            var sectionTop = section.offset().top - $(window).scrollTop();
+            var sectionHeight = section.outerHeight();
+            var sectionBottom = sectionTop + sectionHeight;
+
+            if(sectionTop <= threshold && sectionBottom > threshold){
+                activeSectionId = section.attr('id');
+                break;
+            }
+        }
+
+        if(activeSectionId){
+            setTeacherProfileActiveTab(activeSectionId);
+        }
+    });
+});
+
+// ---- Teacher Profile Completion Percentage ----
+// Mirrors the pattern used in profileViewNew.js (calculateSectionPercentage / circleBar /
+// getColorCodeAccordingToPercentage / calculatePercentage / personalInformationFieldFilledCount)
+// adapted for the teacher ProfileView.jsp edit-in-place DOM (see .Profile-field-row / .field-value).
+var OVER_ALL_COUNT = 0;
+var OVER_ALL_TOTAL = 0;
+var COUNT = 0;
+var TOTAL_COUNT = 0;
+var PERCENT = 0;
+
+function calculatePercentage(part, total) {
+    var percentage = 0;
+    if (total === 0) {
+        return 0;
+    }
+    percentage = part / total;
+    return percentage.toFixed(2);
+}
+
+function getColorCodeAccordingToPercentage(per, low, medium) {
+    return low == "" || low == undefined ? "red" : per < low ? "red" : medium == "" || medium == undefined ? "orange" : per < medium ? "orange" : "green";
+}
+
+function circleBar(elementID, barSize, per, colorCode, thickness, customPlacement) {
+    colorCode = getColorCodeAccordingToPercentage(per, 0.55, 0.95);
+    if ($.fn.circleProgress === undefined) {
+        return;
+    }
+    $("." + elementID).circleProgress({
+        value: per,
+        size: barSize,
+        lineCap: "round",
+        startAngle: 0.5 * Math.PI,
+        thickness: thickness,
+        fill: {
+            color: colorCode
+        }
+    }).on("circle-animation-progress", (function (e, i, n) {
+        if (customPlacement) {
+            $(this).closest(".circle-percentage").find("#circle-percentage-text").html("<span>" + parseInt(n * 100) + "%<span>");
+        } else {
+            $(this).find("small").html("<span class='font-12'>" + parseInt(n * 100) + "%</span>");
+        }
+    }));
+}
+
+// A ".Profile-field-row.bar_count" is considered "filled" when its visible display text
+// (i.e. the ".field-value"/plain text content, after stripping the label and the
+// edit-in-place controls that are only visible while editing) is non-empty and isn't one
+// of the "unfilled" placeholder tokens ("NA" / "N/A" / a "Select ..." prompt that leaked in).
+function isTeacherProfileFieldRowFilled($row) {
+    var $clone = $row.clone();
+    $clone.find('.field-input, .edit-field-btn, .save-field-btn, .cancel-field-btn, label.label, .upload-btn-wrapper').remove();
+    var text = $.trim($clone.text().replace(/\s+/g, ' '));
+    if (text === '') {
+        return false;
+    }
+    var lower = text.toLowerCase();
+    if (lower === 'na' || lower === 'n/a' || lower.indexOf('select ') === 0) {
+        return false;
+    }
+    return true;
+}
+
+// Mirrors the success signal used in bindFileUploadNew1 (jquery.commonFunction.js, uploadMethodType 3):
+// on successful upload #fileuploadNimgIcon's src is switched away from the no-image.jpg placeholder.
+function isTeacherFileUploadFilled(uploadIndex) {
+    var src = $('#fileupload' + uploadIndex + 'imgIcon').attr('src');
+    if (!src) {
+        return false;
+    }
+    return src.indexOf('no-image.jpg') === -1;
+}
+
+function teacherSectionFieldFilledCount(containerSelector, fileUploadIndexes) {
+    var count = 0;
+    var total = 0;
+    $(containerSelector + ' .bar_count').each(function () {
+        total++;
+        if (isTeacherProfileFieldRowFilled($(this))) {
+            count++;
+        }
+    });
+    $.each(fileUploadIndexes || [], function (i, uploadIndex) {
+        total++;
+        if (isTeacherFileUploadFilled(uploadIndex)) {
+            count++;
+        }
+    });
+    OVER_ALL_COUNT = OVER_ALL_COUNT + count;
+    OVER_ALL_TOTAL = OVER_ALL_TOTAL + total;
+    if (count > total) {
+        count = total;
+    }
+    return calculatePercentage(count, total);
+}
+
+// Personal Details: all fields in #teacher_personal_information except Middle Name and Address (residentialAddress).
+function personalDetailsFieldFilledCount() {
+    return teacherSectionFieldFilledCount('#teacher_personal_information', []);
+}
+
+// Basic Details: all fields in #tab-eg10-0, including the file uploads physically inside that section
+// (fileupload2 Highest degree, fileupload3 Proof of last work experience, fileupload4 CV,
+// fileupload6 Passport/National ID, fileupload7 Salary Slip, fileupload11 Internet Speed Test).
+function basicDetailsFieldFilledCount() {
+    return teacherSectionFieldFilledCount('#tab-eg10-0', [2, 3, 4, 6, 7, 11]);
+}
+
+// Bank Details: all fields in #tab-eg10-4. The bank fields themselves are rendered by
+// teacherBankDetailsView() (this file) into #profileViewOnlyContent, inside #tab-eg10-4;
+// fileupload5 (Address Proof) is the only upload physically inside this section.
+function bankDetailsFieldFilledCount() {
+    return teacherSectionFieldFilledCount('#tab-eg10-4', [5]);
+}
+
+// Employee Reference: Reference 1 & 2 (Name/Email/Phone/Designation) plus the two
+// recommendation letter uploads (fileupload9, fileupload10) physically inside #tab-eg10-7.
+function employeeReferenceFieldFilledCount() {
+    return teacherSectionFieldFilledCount('#tab-eg10-7', [9, 10]);
+}
+
+function teacherProfileContactVerificationMap() {
+    var el = document.getElementById("teacherProfileContactVerificationData");
+    if (!el || !el.textContent) {
+        return {};
+    }
+    try {
+        return JSON.parse(el.textContent);
+    } catch (e) {
+        return {};
+    }
+}
+
+function teacherProfileStatusChipHtml(variant, label) {
+    var safe = String(label || "").replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+    return (
+        '<span class="profile-status-chip profile-status-chip--' + variant + '">' +
+        '<span class="profile-status-chip__dot" aria-hidden="true"></span>' +
+        '<span class="profile-status-chip__label">' + safe + "</span></span>"
+    );
+}
+
+function teacherProfileEmailStatusChip(entry, otpVerified) {
+    // Server tag from SendGrid results (+ OTP): Verified / Not verified / Unsubscribed.
+    var emailStatus = entry && entry.emailStatus ? String(entry.emailStatus).toUpperCase() : "";
+    if (emailStatus === "UNSUBSCRIBED") {
+        return teacherProfileStatusChipHtml("progress", "Unsubscribed");
+    }
+    if (emailStatus === "VERIFIED") {
+        return teacherProfileStatusChipHtml("success", "Verified");
+    }
+    if (emailStatus === "NOT_VERIFIED") {
+        return teacherProfileStatusChipHtml("neutral", "Not verified");
+    }
+    if (otpVerified) {
+        return teacherProfileStatusChipHtml("success", "Verified");
+    }
+    if (entry && entry.formatStatus && entry.formatStatus !== "OK") {
+        return teacherProfileStatusChipHtml("review", "Incorrect email");
+    }
+    var status = ((entry && entry.deliverabilityStatus) || "UNKNOWN").toUpperCase();
+    if (status === "INVALID") {
+        return teacherProfileStatusChipHtml("danger", "Invalid");
+    }
+    if (status === "RISKY") {
+        return teacherProfileStatusChipHtml("progress", "Risky");
+    }
+    if (status === "VALID") {
+        return teacherProfileStatusChipHtml("success", "Deliverable");
+    }
+    return teacherProfileStatusChipHtml("neutral", "Not verified");
+}
+
+function teacherProfileEmailStatusBadgesHtml(verificationMap, emailValue) {
+    if (!emailValue) {
+        return "";
+    }
+    var entry = verificationMap && verificationMap.emailId ? verificationMap.emailId : {};
+    var otpVerified = entry && (entry.verifiedStatus === "Y" || entry.verifiedStatus === "y");
+    var chip = teacherProfileEmailStatusChip(entry, otpVerified);
+    return '<div class="profile-contact-status-labels profile-contact-status-chips">' + chip + "</div>";
+}
+
+function initTeacherProfileEmailVerificationChips() {
+    var map = teacherProfileContactVerificationMap();
+    $(".teacher-profile-email-status-wrap").each(function () {
+        var $wrap = $(this);
+        var emailValue = ($wrap.attr("data-email") || "").trim();
+        if (!emailValue) {
+            var $row = $wrap.closest(".Profile-field-row");
+            emailValue = ($row.find("#emailId").val() || $row.find("span.input-type-email").first().text() || "").trim();
+        }
+        $wrap.html(teacherProfileEmailStatusBadgesHtml(map, emailValue));
+    });
+}
+
+function refreshTeacherProfileEmailVerificationChips(verificationMap) {
+    var emailValue = ($("#emailId").val() || $(".teacher-profile-email-status-wrap").closest(".Profile-field-row").find("span.input-type-email").first().text() || "").trim();
+    var badgeHtml = teacherProfileEmailStatusBadgesHtml(verificationMap || teacherProfileContactVerificationMap(), emailValue);
+    $(".teacher-profile-email-status-wrap").html(badgeHtml || "");
+}
+
+function calculateTeacherProfileSectionPercentage() {
+    if ($('#profilePageView').length < 1) {
+        return;
+    }
+    OVER_ALL_COUNT = 0;
+    OVER_ALL_TOTAL = 0;
+
+    PERCENT = personalDetailsFieldFilledCount();
+    circleBar('teacher-personal-info-bar', '40', PERCENT, '#007fff', '4', false);
+
+    PERCENT = basicDetailsFieldFilledCount();
+    circleBar('teacher-basic-details-bar', '40', PERCENT, '#007fff', '4', false);
+
+    PERCENT = bankDetailsFieldFilledCount();
+    circleBar('teacher-bank-details-bar', '40', PERCENT, '#007fff', '4', false);
+
+    PERCENT = employeeReferenceFieldFilledCount();
+    circleBar('teacher-employee-reference-bar', '40', PERCENT, '#007fff', '4', false);
+
+    PERCENT = calculatePercentage(OVER_ALL_COUNT, OVER_ALL_TOTAL);
+    circleBar('profile-progress-bar', '77', PERCENT, '#fff', '5', true);
 }

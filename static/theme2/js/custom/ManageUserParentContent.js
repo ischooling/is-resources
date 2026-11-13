@@ -61,6 +61,10 @@ function getManageUserParentTabContent(meta) {
 								'<label>City</label>' +
 							'</div>' +
 							timeZoneFields +
+							'<div class="col-md-3 col-sm-6 col-12 custom-field">' +
+								'<select name="emailStatusFilter" id="emailStatusFilter" class="form-control">' + muEmailStatusOptionsHtml() + '</select>' +
+								'<label>Email Status</label>' +
+							'</div>' +
 							'<div class="col-md-12 col-sm-12 col-12 mt-2 text-right">' +
 								'<button class="btn btn-danger mr-2" onclick="advanceParentSearchReset(\'parentFilter\')"><i class="fa fa-undo"></i>&nbsp;Reset</button>' +
 								'<button class="btn btn-success" onclick="advanceParentSearchChunked(\'parentFilter\',\'' + meta.moduleId + '\');"><i class="fa fa-search"></i>&nbsp;Search</button>' +
@@ -141,6 +145,8 @@ function getCallRequestForAdvanceParentSearch(formId, moduleId) {
 	if (stateId) { dto.stateId = stateId; }
 	if (cityId) { dto.cityId = cityId; }
 	if (profileStatus) { dto.profileStatus = profileStatus; }
+	var emailStatus = $("#" + formId + " #emailStatusFilter").val();
+	if (emailStatus) { dto.emailStatus = emailStatus; }
 
 	return {
 		moduleId: moduleId,
@@ -207,6 +213,7 @@ function advanceParentSearchReset(formId) {
 	$("#" + formId + " #parentName").val("");
 	$("#" + formId + " #emailId").val("");
 	$("#" + formId + " #mobileNo").val("");
+	$("#" + formId + " #emailStatusFilter").val("").trigger("change");
 	$("#" + formId + " #parentCountryId").val("").trigger("change");
 	$("#" + formId + " #parentFilterStateId").val("").trigger("change");
 	$("#" + formId + " #parentFilterCityId").val("").trigger("change");
