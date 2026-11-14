@@ -405,11 +405,11 @@ function getManageUserStudentTabContent(meta) {
 								'<select name="emailStatusFilter" id="emailStatusFilter" class="form-control">' + muEmailStatusOptionsHtml() + '</select>' +
 								'<label>Student Email Status</label>' +
 							'</div>' +
-							'<div class="col-md-6 col-sm-12 col-12 mt-2 text-left">' +
+							'<div class="col-md-4 col-sm-12 col-12 mt-2 text-left">' +
 								addProfileFieldButton +
 								'<button class="btn btn-primary ml-2" onclick="profileSetting();"><i class="fa fa-cog"></i>&nbsp;Collect Student Info</button>' +
 							'</div>' +
-							'<div class="col-md-6 col-sm-12 col-12 mt-2 text-right">' +
+							'<div class="col-md-5 col-sm-12 col-12 mt-2 text-right">' +
 								'<button class="btn btn-danger  mr-2" onclick="muResetStudentFilterAndCards(\'studentFilter\')"><i class="fa fa-undo"></i>&nbsp;Reset</button>' +
 								'<button class="btn btn-success " onclick="advanceStudentSearchJson(\'studentFilter\',\'' + meta.moduleId + '\');"><i class="fa fa-search"></i>&nbsp;Search</button>' +
 							'</div>' +

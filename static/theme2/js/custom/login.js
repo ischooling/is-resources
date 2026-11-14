@@ -970,3 +970,120 @@ function checkonlineOfflineStatus() {
   }
   return false;
 }
+
+function getActualErrorMessage(responseData, xhr, error, fallback) {
+  var status = xhr && xhr.status ? parseInt(xhr.status, 10) : 0;
+  var textStatus = error && error.status ? error.status : '';
+  var hasTransportError = !!xhr || !!(error && error.status);
+  var transportDetails = [
+    xhr && xhr.statusText,
+    error && error.message,
+    typeof error === 'string' ? error : ''
+  ].join(' ');
+  var candidates = [];
+  var parsedResponse;
+
+  function clean(value) {
+    if (typeof value !== 'string') {
+      return '';
+    }
+    value = $.trim(value);
+    if (!value || value.length > 500 || value == 'null' || value == 'undefined' || value == '[object Object]') {
+      return '';
+    }
+    if (/^\s*[\[{]/.test(value) || /<[^>]+>/.test(value)) {
+      return '';
+    }
+    if (/(^|\n)\s*at\s+[^\n]+|exception in thread|select\s+.+\s+from|password|api[-_ ]?key|authorization\s*:/i.test(value)) {
+      return '';
+    }
+    return value;
+  }
+
+  function addObjectValues(value) {
+    var i;
+    if (!value || typeof value !== 'object') {
+      return;
+    }
+    candidates.push(value.message, value.MESSAGE, value.error);
+    if (typeof value.errors === 'string') {
+      candidates.push(value.errors);
+    } else if ($.isArray(value.errors)) {
+      for (i = 0; i < value.errors.length; i++) {
+        candidates.push(value.errors[i]);
+      }
+    }
+  }
+
+  if (typeof responseData === 'string') {
+    try {
+      parsedResponse = JSON.parse(responseData);
+    } catch (ignore) {
+      parsedResponse = null;
+    }
+    if (parsedResponse) {
+      addObjectValues(parsedResponse);
+    } else {
+      candidates.push(responseData);
+    }
+  } else {
+    addObjectValues(responseData);
+  }
+
+  if (xhr) {
+    addObjectValues(xhr.responseJSON);
+    if (xhr.responseText) {
+      try {
+        parsedResponse = JSON.parse(xhr.responseText);
+      } catch (ignoreText) {
+        parsedResponse = null;
+      }
+      if (parsedResponse) {
+        addObjectValues(parsedResponse);
+      } else {
+        candidates.push(xhr.responseText);
+      }
+    }
+  }
+
+  if (typeof error === 'string') {
+    candidates.push(error);
+  } else if (error) {
+    candidates.push(error.message);
+  }
+
+  if (/ERR_CONNECTION_REFUSED|connection refused|failed to fetch/i.test(transportDetails)) {
+    return 'Unable to connect to the server. Please check your connection and try again.';
+  }
+
+  var i;
+  for (i = 0; i < candidates.length; i++) {
+    var message = clean(candidates[i]);
+    if (message) {
+      return message;
+    }
+  }
+
+  if (textStatus == 'timeout' || status == 408 || status == 504) {
+    return 'The request timed out. Please try again.';
+  }
+  if (status == 401) {
+    return 'Your session has expired. Please login again.';
+  }
+  if (status == 403) {
+    return 'You do not have permission to perform this action.';
+  }
+  if (status == 404) {
+    return 'The requested resource was not found.';
+  }
+  if (status == 429) {
+    return 'Too many requests. Please wait a moment and try again.';
+  }
+  if (status >= 500) {
+    return 'A server error occurred. Please try again later.';
+  }
+  if (hasTransportError && (status == 0 || textStatus == 'error' || textStatus == 'parsererror')) {
+    return 'A network error occurred. Please check your connection and try again.';
+  }
+  return clean(fallback) || 'Something went wrong. Please try again.';
+}
