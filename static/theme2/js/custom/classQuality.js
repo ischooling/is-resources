@@ -7,7 +7,8 @@
 var cq = {
     from: '', to: '', tab: 'overview', canEdit: false, enabled: false,
     charts: {}, sessionsTable: null, teachersTable: null, teacherFilter: null, teacherReport: null,
-    detail: null, editing: false, dtab: 'facts', transcript: null, tagCatalog: [], draft: null, clipStop: null
+    detail: null, editing: false, dtab: 'facts', transcript: null, tagCatalog: [], draft: null, clipStop: null,
+    vc: null, vcTimer: null, ai: null, inCanEdit: false
 };
 
 function cqBase() {
@@ -78,6 +79,7 @@ function cqTab(name) {
     if (name === 'overview') cqLoadOverview();
     else if (name === 'sessions') cqLoadSessions();
     else if (name === 'teachers') cqLoadTeachers();
+    else if (name === 'camera') cqLoadCamera();
     else if (name === 'settings') cqLoadSettings();
 }
 
@@ -410,6 +412,7 @@ function cqCloseDetail(silent) {
     cq.detail = null;
     cq.editing = false;
     if (!silent && cq.tab === 'sessions') cqReloadSessions();
+    if (!silent && cq.tab === 'camera') cqCamFetch();
 }
 
 function cqBackLink() {
@@ -423,7 +426,12 @@ function cqRenderDetail() {
         '<div id="cqVerdict">' + cqVerdictPanel(d, false) + '</div>' +
         (d.canEdit ? '<div class="d-flex flex-wrap mb-4" style="gap:8px" id="cqActions">' + cqActionButtons() + '</div>' : '');
     $('#cqDetail').html(html);
+    clearTimeout(cq.vcTimer);
+    cq.vc = null;
+    cq.ai = null;
     cqDetailTab(cq.dtab);
+    // The camera tab loads the check itself; otherwise fetch it once for the card in the right column.
+    if (cq.dtab !== 'camera') cqVcLoad(function (v) { cqVcCard(v); cqVcPoll(v); });
 }
 
 /** Re-reads the session and redraws everything except the video, which keeps playing where it was. */
@@ -437,6 +445,7 @@ function cqRefreshDetail() {
         cq.editing = false;
         $('#cqDHead').html(cqDetailHead(cq.detail));
         $('#cqDRight').html(cqDetailRight(cq.detail));
+        if (cq.vc && cq.vc.id === id) cqVcCard(cq.vc.data);
         $('#cqVerdict').html(cqVerdictPanel(cq.detail, true));
         $('#cqNote').val(note || '');
         $('#cqActions').html(cqActionButtons());
@@ -499,7 +508,7 @@ function cqDetailRight(d) {
             ? '<div class="small text-muted mt-1">Changed by a reviewer · originally ' + Math.round(d.originalOverallScore) + '</div>' : '') +
         cqAiLine(d) +
         (d.aiSummary ? '<div class="cq-subhead">What happened</div><p class="mb-0">' + cqEsc(d.aiSummary) + '</p>' : '') +
-        '</div></div>' + cqAttentionCard(d) +
+        '</div></div><div id="cqVcCard"></div>' + cqAttentionCard(d) +
         '<div class="card mb-3"><div class="card-body" id="cqMetrics">' + cqMetrics(d) + '</div></div>';
 }
 
@@ -638,7 +647,8 @@ function cqHighlightsLabel(d) {
 function cqDetailTabs(d) {
     var people = (d.participants || []).filter(function (p) { return p.role === 'Student'; }).length;
     var tabs = [['facts', 'Session facts'], ['highlights', cqHighlightsLabel(d)], ['transcript', 'Transcript'],
-        ['chat', 'Chat'], ['students', 'Students' + (people ? ' ' + people : '')]];
+        ['chat', 'Chat'], ['students', 'Students' + (people ? ' ' + people : '')],
+        ['camera', '<i class="fa fa-magic mr-1"></i>AI insights']];
     return '<ul class="nav nav-tabs cq-dtabs" role="tablist">' + tabs.map(function (t) {
         return '<li class="nav-item"><a class="nav-link" href="javascript:void(0)" role="tab" data-dtab="' + t[0] + '" onclick="cqDetailTab(\'' + t[0] + '\')">' + t[1] + '</a></li>';
     }).join('') + '</ul><div class="cq-dpane" id="cqDPane" role="tabpanel"></div>';
@@ -655,6 +665,7 @@ function cqDetailTab(name) {
     else if (name === 'transcript') cqTranscriptPane(pane);
     else if (name === 'chat') cqChatPane(pane);
     else if (name === 'students') pane.html(cqAttendance(d));
+    else if (name === 'camera') cqVcPane(pane);
     else cqFactsPane(pane);
 }
 
@@ -1077,6 +1088,591 @@ function cqSeek(sec) {
     v.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
+/* ------------------------------------------------------------------ camera and background (video check) */
+
+var CQ_VC_BG = { VIRTUAL: 'Virtual', BLURRED: 'Blurred', REAL_ROOM: 'Real room' };
+var CQ_VC_BG_CELL = { v: 'virtual background', b: 'blurred background', r: 'real room behind them', u: 'background unclear' };
+var CQ_VC_CELL = { o: 'camera on', x: 'camera off', u: 'not clear', a: 'not in this frame' };
+var CQ_VC_ROLE = { TEACHER: 'Teacher', STUDENT: 'Student', OTHER: 'Not on the class list' };
+
+/**
+ * The saved check (or, before one, what a check would look at and cost) for the open session. Fetched once per
+ * session view; while a check runs it is fetched again each time.
+ */
+function cqVcLoad(ok, fail) {
+    var id = cq.detail && cq.detail.id;
+    if (!id) return;
+    if (cq.vc && cq.vc.id === id && cq.vc.data && cq.vc.data.state !== 'RUNNING') {
+        ok(cq.vc.data);
+        return;
+    }
+    cqGet('sessions/' + Number(id) + '/video-check', {}, function (res) {
+        if (!cq.detail || cq.detail.id !== id) return;
+        cq.vc = { id: id, data: res.data };
+        ok(res.data);
+    }, function (xhr) {
+        if (fail) fail(cqErr(xhr, 'The camera check could not be loaded.'));
+    });
+}
+
+/** The AI insights tab (data-dtab 'camera'): what the switched-on features found, and the video check inside it. */
+function cqVcPane(pane) {
+    pane.html('<div class="small text-muted py-2"><i class="fa fa-spinner fa-spin mr-1"></i>Loading AI insights…</div>');
+    cqInLoad(function (a) {
+        if (cq.dtab !== 'camera') return;
+        pane.html(cqInHtml(a));
+        cqVcCard(a.video);
+        cqVcPoll(a.video);
+    }, function (msg) {
+        pane.html('<div class="small text-danger py-2">' + cqEsc(msg) + '</div>');
+    });
+}
+
+/** While a check runs, look again every few seconds (only for the session still open). */
+function cqVcPoll(v) {
+    clearTimeout(cq.vcTimer);
+    if (!v || v.state !== 'RUNNING' || !cq.detail) return;
+    var id = cq.detail.id;
+    cq.vcTimer = setTimeout(function () {
+        if (!cq.detail || cq.detail.id !== id) return;
+        if (cq.dtab === 'camera') cqVcPane($('#cqDPane'));
+        else cqVcLoad(function (d) { cqVcCard(d); cqVcPoll(d); });
+    }, 6000);
+}
+
+function cqVcStart(btn) {
+    var label = $(btn).html();
+    $(btn).prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-1"></i>Starting…');
+    cqPost('sessions/' + Number(cq.detail.id) + '/video-check', {}, function (res) {
+        cqToast(true, res.message || 'Video check started.');
+        cq.vc = null;
+        cq.ai = null;
+        if (cq.dtab === 'camera') cqVcPane($('#cqDPane'));
+        else cqVcLoad(function (d) { cqVcCard(d); cqVcPoll(d); });
+    }, function (msg) {
+        $(btn).prop('disabled', false).html(label);
+        cqToast(false, msg);
+    });
+}
+
+function cqVcMoney(usd) {
+    if (usd == null) return '—';
+    var n = Number(usd);
+    if (n > 0 && n < 0.01) return '$' + n.toFixed(3);
+    return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function cqVcLevel(pct, minPct) {
+    if (pct == null) return 'cq-pending';
+    return pct >= (minPct || 75) ? 'cq-healthy' : (pct >= 40 ? 'cq-quick' : 'cq-critical');
+}
+
+/** A ring for a percentage, coloured like the health pills. */
+function cqVcRing(pct, minPct) {
+    var c = 2 * Math.PI * 19;
+    var dash = pct == null ? 0 : Math.max(0, Math.min(100, pct)) / 100 * c;
+    return '<svg class="' + cqVcLevel(pct, minPct) + '" width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">' +
+        '<circle cx="24" cy="24" r="19" fill="none" stroke="#eef0f3" stroke-width="6"/>' +
+        '<circle cx="24" cy="24" r="19" fill="none" style="stroke:var(--cq-c)" stroke-width="6" stroke-linecap="round" ' +
+        'stroke-dasharray="' + dash.toFixed(1) + ' ' + c.toFixed(1) + '" transform="rotate(-90 24 24)"/></svg>';
+}
+
+function cqVcInitials(name) {
+    var w = String(name || '?').trim().split(/\s+/);
+    return ((w[0] || '?').charAt(0) + (w.length > 1 ? w[w.length - 1].charAt(0) : '')).toUpperCase();
+}
+
+function cqVcHtml(v) {
+    if (v.result) return cqVcResultHtml(v, v.result);
+    if (v.state === 'RUNNING') {
+        return '<div class="cq-vc-intro"><div class="cq-vc-head"><i class="fa fa-spinner fa-spin mr-1"></i>Checking the video…</div>' +
+            '<div class="small text-muted">Started ' + cqEsc(v.runningSince || '') + '. Reading the moments from the recording and asking Claude. ' +
+            'This usually takes a minute or two; this tab updates by itself.</div></div>';
+    }
+    var html = '<div class="cq-vc-intro"><div class="cq-vc-head"><i class="fa fa-video-camera mr-1"></i>Check the class video with AI</div>' +
+        '<p class="small mb-2">Claude looks at ' + (v.plannedMoments ? '<b>' + Number(v.plannedMoments) + ' moments</b>' : 'moments') +
+        (v.video ? ' of the <b>' + cqEsc(v.video) + '</b> video' : ' of the recording') + ' (one every ' + Number(v.everyMinutes || 2) + ' min) and says, ' +
+        'for each person, whether their camera was on and what was behind them.</p>' +
+        '<div class="d-flex flex-wrap align-items-center" style="gap:12px">' +
+        (v.canCheck ? '<button type="button" class="btn btn-primary btn-sm" onclick="cqVcStart(this)"><i class="fa fa-video-camera mr-1"></i>Check video with AI</button>' : '') +
+        (v.estimateUsd != null ? '<span class="small">Estimated cost <b>about ' + cqVcMoney(v.estimateUsd) + '</b></span>' : '') +
+        '<span class="cq-vc-saved"><i class="fa fa-database mr-1"></i>Checked once, then saved: opening it again costs nothing</span></div>' +
+        (v.canCheck ? '' : '<div class="small text-muted mt-2"><i class="fa fa-info-circle mr-1"></i>' + cqEsc(v.blockedReason || '') + '</div>');
+    if (v.lastError) {
+        html += '<div class="alert alert-light border small mt-3 mb-0"><b>The last try did not finish</b>' + (v.lastErrorAt ? ' (' + cqEsc(v.lastErrorAt) + ')' : '') +
+            ': ' + cqEsc(v.lastError) + '<div class="text-muted mt-1">' + Number(v.failures || 0) + ' of 3 tries used.</div></div>';
+    }
+    return html + '<div class="small text-muted mt-3">Frames are sent to Claude and not stored. People are matched by the name Zoom shows on their tile, never by their face.</div></div>';
+}
+
+function cqVcResultHtml(v, r) {
+    var s = r.summary || {};
+    var total = (r.moments || []).length;
+    var html = '<div class="d-flex flex-wrap align-items-center mb-3" style="gap:8px"><div class="mr-auto">' +
+        '<div class="cq-vc-head mb-0">' + total + ' moments of the ' + cqEsc(r.video || 'recording') + ' video, one every ' + Number(r.everyMinutes || 0) + ' min</div>' +
+        '<div class="small text-muted">Checked' + (r.checkedBy ? ' by ' + cqEsc(r.checkedBy) : '') + (r.checkedAt ? ' on ' + cqEsc(r.checkedAt) : '') + '</div></div>' +
+        '<span class="cq-vc-saved"><i class="fa fa-database mr-1"></i>Saved result · opening it again costs nothing</span></div>';
+
+    html += '<div class="cq-vc-tiles">' +
+        '<div class="cq-vc-tile">' + cqVcRing(s.teacherCameraPct, s.studentMinPct) + '<div><div class="n">' + (s.teacherCameraPct != null ? s.teacherCameraPct + '%' : '—') +
+        '</div><div class="l">Teacher camera on</div></div></div>' +
+        '<div class="cq-vc-tile">' + cqVcRing(s.studentsCameraPct, s.studentMinPct) + '<div><div class="n">' + (s.studentsCameraPct != null ? s.studentsCameraPct + '%' : '—') +
+        '</div><div class="l">Students camera on (average)</div></div></div>' +
+        '<div class="cq-vc-tile"><div><div class="n">' + Number(s.studentsOn || 0) + ' <span class="l">of ' + Number(s.studentsSeen || 0) + '</span></div>' +
+        '<div class="l">Students with camera on ' + Number(s.studentMinPct || 0) + '%+ of the time</div></div></div>' +
+        '<div class="cq-vc-tile"><div><div class="n">' + (s.teacherBackground ? cqEsc(CQ_VC_BG[s.teacherBackground] || s.teacherBackground) + ' <span class="l">' + Number(s.teacherBackgroundPct) + '%</span>' : '—') +
+        '</div><div class="l">Teacher\'s background, mostly</div></div></div></div>';
+
+    var end = total ? (r.moments[total - 1] + r.moments[0]) : 0;
+    html += '<div class="cq-vc-grid small text-muted pb-1"><span>Person</span><div class="d-flex justify-content-between">' +
+        [0, 0.25, 0.5, 0.75, 1].map(function (f) { return '<span>' + cqClock(Math.round(end * f)) + '</span>'; }).join('') +
+        '</div><span>Camera · background</span></div>';
+    html += (r.people || []).map(function (p, i) { return cqVcRow(p, i, total, s.studentMinPct); }).join('');
+    html += '<div class="cq-vc-det" id="cqVcDet"><i class="fa fa-hand-pointer-o mr-1"></i>Click a square to see that moment and play the video from there.</div>';
+    html += '<div class="cq-vc-key small text-muted mt-2"><i class="o" style="margin-left:0"></i>Camera on<i class="x"></i>Camera off<i class="u"></i>Not clear<i class="a"></i>Not in the frame' +
+        '<i class="v" style="margin-left:20px"></i>Virtual<i class="b"></i>Blurred<i class="r"></i>Real room</div>';
+    html += '<div class="d-flex flex-wrap justify-content-between small text-muted mt-3 pt-2 border-top" style="gap:8px">' +
+        '<span>Camera on % = moments with the camera on ÷ moments that person was in the video. Unclear moments are left out.</span>' +
+        '<span>This check cost <b class="text-body">' + cqVcMoney(r.costUsd) + '</b>' +
+        (r.inputTokens != null ? ' · ' + Number(r.inputTokens).toLocaleString() + ' tokens in, ' + Number(r.outputTokens || 0).toLocaleString() + ' out' : '') +
+        (r.model ? ' · ' + cqEsc(r.model) : '') + '</span></div>';
+    if (r.note) html += '<div class="small text-muted mt-1"><i class="fa fa-comment-o mr-1"></i>Claude\'s note: ' + cqEsc(r.note) + '</div>';
+    return html;
+}
+
+function cqVcRow(p, i, total, minPct) {
+    var cells = String(p.cells || '');
+    var who = CQ_VC_ROLE[p.role] || p.role || '';
+    var seen = p.seen ? p.seen + ' of ' + total + ' moments' : 'not seen in the video';
+    var html = '<div class="cq-vc-grid cq-vc-row"><div class="d-flex align-items-center" style="gap:10px;min-width:0">' +
+        '<span class="cq-vc-av' + (p.role === 'TEACHER' ? ' t' : '') + '">' + cqEsc(cqVcInitials(p.name)) + '</span>' +
+        '<div style="min-width:0"><div class="font-weight-bold text-truncate" title="' + cqEsc(p.name) + '">' + cqEsc(p.name) + '</div>' +
+        '<div class="small text-muted">' + cqEsc(who) + ' · ' + cqEsc(seen) + '</div></div></div><div class="cq-vc-cells">';
+    for (var k = 0; k < cells.length; k++) {
+        var c = cells.charAt(k);
+        var text = cqClock((cqVc().moments || [])[k] || 0) + ': ' + (CQ_VC_CELL[c] || c);
+        html += '<button type="button" class="cq-vc-cell ' + cqEsc(c) + '" title="' + cqEsc(p.name + ' at ' + text) + '" aria-label="' +
+            cqEsc(p.name + ' at ' + text) + '" onclick="cqVcCell(' + i + ',' + k + ')"></button>';
+    }
+    var bgTotal = (p.virtualCount || 0) + (p.blurredCount || 0) + (p.realRoomCount || 0);
+    var bar = bgTotal ? [['v', p.virtualCount], ['b', p.blurredCount], ['r', p.realRoomCount]].filter(function (x) { return x[1]; })
+        .map(function (x) { return '<span class="' + x[0] + '" style="width:' + (x[1] * 100 / bgTotal).toFixed(1) + '%"></span>'; }).join('') : '';
+    html += '</div><div><div class="d-flex align-items-baseline" style="gap:6px"><span class="cq-vc-pct ' + cqVcLevel(p.cameraOnPct, minPct) + '">' +
+        (p.cameraOnPct != null ? p.cameraOnPct + '%' : '—') + '</span><span class="small text-muted">camera on</span></div>' +
+        '<div class="cq-vc-bgbar">' + bar + '</div><div class="small text-muted">' +
+        (p.background ? cqEsc(CQ_VC_BG[p.background] || p.background) + ' ' + Number(p.backgroundPct) + '%' : 'No background seen') + '</div></div></div>';
+    return html;
+}
+
+function cqVc() {
+    return (cq.vc && cq.vc.data && cq.vc.data.result) || {};
+}
+
+/** One square: say what was seen and play that moment. */
+function cqVcCell(i, k) {
+    var r = cqVc();
+    var p = (r.people || [])[i];
+    if (!p) return;
+    var sec = (r.moments || [])[k] || 0;
+    var c = String(p.cells || '').charAt(k);
+    var b = String(p.backgroundCells || '').charAt(k);
+    $('#cqVcDet').html('<i class="fa fa-play-circle mr-1"></i><b>' + cqEsc(p.name) + '</b> at ' + cqClock(sec) + ': ' + cqEsc(CQ_VC_CELL[c] || c) +
+        (c === 'o' && CQ_VC_BG_CELL[b] ? ', ' + cqEsc(CQ_VC_BG_CELL[b]) : '') + '. Playing the ' + cqEsc(r.video || 'recording') + ' video from ' + cqClock(sec) + '.');
+    cqVcJump(sec);
+}
+
+/** Plays the layout the check read (switching the player to it when needed) from that second. */
+function cqVcJump(sec) {
+    var r = cqVc();
+    var recs = cq.detail ? cqPlayable(cq.detail) : [];
+    var video = document.getElementById('cqVideo');
+    for (var i = 0; i < recs.length; i++) {
+        if (recs[i].id === r.recordingId && video && video.getAttribute('src') !== recs[i].url) {
+            video.src = recs[i].url;
+            video.addEventListener('loadedmetadata', function () { cqSeek(sec); }, { once: true });
+            $('#cqDetail [aria-label="Recording layout"] .btn').removeClass('active').eq(i).addClass('active');
+            return;
+        }
+    }
+    cqSeek(sec);
+}
+
+/** The small card under the score: the class at a glance, or the way to start a check. */
+function cqVcCard(v) {
+    var box = $('#cqVcCard');
+    if (!box.length) return;
+    if (!v || (!v.result && v.state !== 'RUNNING' && !v.canCheck)) {
+        box.empty();
+        return;
+    }
+    var body;
+    if (v.result) {
+        var s = v.result.summary || {};
+        body = '<div class="d-flex flex-wrap" style="gap:18px"><div><div class="h5 mb-0 ' + cqVcLevel(s.teacherCameraPct, s.studentMinPct) + '" style="color:var(--cq-c)">' +
+            (s.teacherCameraPct != null ? s.teacherCameraPct + '%' : '—') + '</div><div class="small text-muted">Teacher camera on</div></div>' +
+            '<div><div class="h5 mb-0 ' + cqVcLevel(s.studentsCameraPct, s.studentMinPct) + '" style="color:var(--cq-c)">' + (s.studentsCameraPct != null ? s.studentsCameraPct + '%' : '—') +
+            '</div><div class="small text-muted">Students camera on</div></div>' +
+            '<div><div class="h5 mb-0">' + (s.teacherBackground ? cqEsc(CQ_VC_BG[s.teacherBackground] || s.teacherBackground) : '—') + '</div><div class="small text-muted">Teacher background</div></div></div>' +
+            '<a href="javascript:void(0)" class="small" onclick="cqDetailTab(\'camera\')">See everyone</a>';
+    } else if (v.state === 'RUNNING') {
+        body = '<div class="small"><i class="fa fa-spinner fa-spin mr-1"></i>Checking the video…</div>';
+    } else {
+        body = '<div class="small text-muted mb-2">Not checked yet' + (v.estimateUsd != null ? ' · about ' + cqVcMoney(v.estimateUsd) : '') + '</div>' +
+            '<a href="javascript:void(0)" class="small" onclick="cqDetailTab(\'camera\')"><i class="fa fa-video-camera mr-1"></i>Check camera and background</a>';
+    }
+    box.html('<div class="card mb-3"><div class="card-body"><h6><i class="fa fa-video-camera mr-1"></i>Camera and background</h6>' + body + '</div></div>');
+}
+
+/* ------------------------------------------------------------------ AI insights tab */
+
+var CQ_IN_LIGHT = { DARK: 'Too dark', BACKLIT: 'Backlit', CUT_OFF: 'Face cut off', FROZEN: 'Video frozen', BLACK: 'Black screen' };
+var CQ_IN_SCREEN = { SLIDES: 'Slides', WHITEBOARD: 'Whiteboard', DOCUMENT: 'Document', VIDEO: 'Video', OTHER: 'Other', NOTHING: 'Not sharing' };
+
+/**
+ * GET sessions/{id}/ai-insights, kept for the session view like the video check; fetched again while the video
+ * check runs. Its video part also feeds cqVc() (the squares) and the right-column card.
+ */
+function cqInLoad(ok, fail) {
+    var id = cq.detail && cq.detail.id;
+    if (!id) return;
+    if (cq.ai && cq.ai.id === id && cq.ai.data && !(cq.ai.data.video && cq.ai.data.video.state === 'RUNNING')) {
+        ok(cq.ai.data);
+        return;
+    }
+    cqGet('sessions/' + Number(id) + '/ai-insights', {}, function (res) {
+        if (!cq.detail || cq.detail.id !== id) return;
+        var a = res.data || {};
+        cq.ai = { id: id, data: a };
+        cq.vc = a.video ? { id: id, data: a.video } : null;
+        ok(a);
+    }, function (xhr) {
+        if (fail) fail(cqErr(xhr, 'AI insights could not be loaded.'));
+    });
+}
+
+function cqInHtml(a) {
+    var f = a.features || {};
+    if (a.blockedReason) {
+        return '<div class="alert alert-warning mb-0"><i class="fa fa-exclamation-triangle mr-1"></i>' + cqEsc(a.blockedReason) +
+            ' <a href="javascript:void(0)" onclick="cqTab(\'settings\')">Open Settings</a></div>';
+    }
+    var v = a.video || null, r = v && v.result ? v.result : null;
+    var anyVideo = f.cam || f.bg || f.frame || f.light || f.dist || f.tiles || f.share || f.safe;
+    var sub = r ? (r.moments || []).length + ' moments of the ' + cqEsc(r.video || 'recording') + ' video, one every ' + Number(r.everyMinutes || 0) + ' min · checked' +
+        (r.checkedBy ? ' by ' + cqEsc(r.checkedBy) : '') + (r.checkedAt ? ' on ' + cqEsc(r.checkedAt) : '')
+        : 'Only the features switched on in Settings are shown.';
+    var html = '<div class="d-flex flex-wrap align-items-center mb-3" style="gap:8px"><div class="mr-auto"><div class="cq-vc-head mb-0">AI insights for this class</div>' +
+        '<div class="small text-muted">' + sub + '</div></div>' +
+        (r ? '<span class="cq-vc-saved"><i class="fa fa-database mr-1"></i>Saved · opening again costs $0</span>' : '') + '</div>';
+    if (v && !r && anyVideo) html += '<div class="mb-3">' + cqVcHtml(v) + '</div>';
+    var body = cqInTiles(a, f, r) + cqInPeople(a, f, r) + cqInFrameCard(f, r) + cqInScreenCard(f, r) + cqInTranscriptCard(f, a.transcript);
+    if (!body && !(v && !r && anyVideo)) body = '<div class="small text-muted py-2">Nothing to show for this session yet.</div>';
+    return html + body + cqInCostStrip(a, f, r);
+}
+
+function cqInTile(ring, n, label, sub) {
+    return '<div class="cq-vc-tile">' + (ring || '') + '<div><div class="n">' + n + '</div><div class="l">' + label + '</div>' +
+        (sub ? '<div class="l">' + sub + '</div>' : '') + '</div></div>';
+}
+
+/** Summary tiles, one per switched-on feature that has something to show. */
+function cqInTiles(a, f, r) {
+    var s = (r && r.summary) || {}, fc = (r && r.frameChecks) || {}, sc = (r && r.screen) || null;
+    var tiles = '';
+    if (f.cam && r) {
+        var inFrame = f.frame && fc.teacherInFrame != null ? 'in frame ' + Number(fc.teacherInFrame) + ' of ' + Number(fc.teacherCheckedMoments || 0) : '';
+        tiles += cqInTile(cqVcRing(s.teacherCameraPct, s.studentMinPct), s.teacherCameraPct != null ? Number(s.teacherCameraPct) + '%' : '—', 'Teacher camera on', inFrame);
+        tiles += cqInTile(cqVcRing(s.studentsCameraPct, s.studentMinPct), s.studentsCameraPct != null ? Number(s.studentsCameraPct) + '%' : '—', 'Students camera on (average)',
+            Number(s.studentsOn || 0) + ' of ' + Number(s.studentsSeen || 0) + ' at ' + Number(s.studentMinPct || 0) + '%+');
+    }
+    if (f.bg && r) {
+        tiles += cqInTile('', s.teacherBackground ? cqEsc(CQ_VC_BG[s.teacherBackground] || s.teacherBackground) + ' <span class="l">' + Number(s.teacherBackgroundPct || 0) + '%</span>' : '—',
+            'Teacher\'s background, mostly');
+    }
+    if (f.talk) {
+        var t = (a.people || []).filter(function (p) { return p && p.role === 'TEACHER' && p.talkPct != null; })[0];
+        if (t) tiles += cqInTile(cqVcRing(Number(t.talkPct)).replace(/class="[^"]*"/, 'class="cq-pending"'), Number(t.talkPct) + '%', 'Teacher talk time');
+    }
+    if (f.share && sc && sc.available && sc.sharedPct != null) {
+        tiles += cqInTile('', Number(sc.sharedPct) + '%', 'Screen shared');
+    }
+    if (f.light && fc.lighting) {
+        var n = fc.lighting.length;
+        tiles += cqInTile('', '<span class="' + (n ? 'cq-quick' : 'cq-healthy') + '" style="color:var(--cq-c)">' + n + '</span>', 'Video and light', n ? 'issue' + (n === 1 ? '' : 's') + ' seen' : 'no issues seen');
+    }
+    return tiles ? '<div class="cq-vc-tiles">' + tiles + '</div>' : '';
+}
+
+function cqInKey(name) {
+    return String(name || '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+/** Everyone in the class: the video check's people and the no-AI talk / time figures, matched by name. */
+function cqInPeople(a, f, r) {
+    var showCam = !!(f.cam && r), showBg = !!(f.bg && r), showTalk = !!f.talk, showAtt = !!f.att;
+    if (!showCam && !showBg && !showTalk && !showAtt) return '';
+    var list = [], byKey = {};
+    if (r && (showCam || showBg)) {
+        (r.people || []).forEach(function (p, i) {
+            if (!p) return;
+            var e = { name: p.name, role: p.role, vi: i, vp: p };
+            list.push(e);
+            if (!byKey[cqInKey(p.name)]) byKey[cqInKey(p.name)] = e;
+        });
+    }
+    if (showTalk || showAtt) {
+        (a.people || []).forEach(function (p) {
+            if (!p) return;
+            var e = byKey[cqInKey(p.name)];
+            if (e && !e.tp) {
+                e.tp = p;
+                if (!e.role) e.role = p.role;
+                return;
+            }
+            e = { name: p.name, role: p.role, tp: p };
+            list.push(e);
+            byKey[cqInKey(p.name)] = byKey[cqInKey(p.name)] || e;
+        });
+    }
+    if (!list.length) return '';
+    var total = r ? (r.moments || []).length : 0;
+    var minPct = r && r.summary ? r.summary.studentMinPct : null;
+    var cols = [showCam ? 'minmax(150px, 210px)' : 'minmax(0, 1fr)'];
+    if (showCam) cols.push('minmax(0, 1fr)');
+    if (showCam || showBg) cols.push('130px');
+    if (showTalk || showAtt) cols.push('150px');
+    var grid = ' style="grid-template-columns:' + cols.join(' ') + '"';
+    var head = '<div class="cq-vc-grid small text-muted pb-1"' + grid + '><span>Person</span>';
+    if (showCam) {
+        var end = total ? (r.moments[total - 1] + r.moments[0]) : 0;
+        head += '<div class="d-flex justify-content-between">' + [0, 0.25, 0.5, 0.75, 1].map(function (x) { return '<span>' + cqClock(Math.round(end * x)) + '</span>'; }).join('') + '</div>';
+    }
+    if (showCam || showBg) head += '<span>' + (showCam && showBg ? 'Camera · background' : showCam ? 'Camera' : 'Background') + '</span>';
+    if (showTalk || showAtt) head += '<span>' + (showTalk && showAtt ? 'Talk · in class' : showTalk ? 'Talk' : 'In class') + '</span>';
+    var html = '<div class="cq-in-card"><div class="cq-in-title"><i class="fa fa-users mr-1"></i>Everyone in the class</div>' + head + '</div>';
+    html += list.map(function (e) { return cqInPersonRow(e, grid, total, minPct, showCam, showBg, showTalk, showAtt); }).join('');
+    if (showCam) {
+        html += '<div class="cq-vc-det" id="cqVcDet"><i class="fa fa-hand-pointer-o mr-1"></i>Click a square to see that moment and play the video from there.</div>';
+    }
+    if (showCam || showBg) {
+        html += '<div class="cq-vc-key small text-muted mt-2">' +
+            (showCam ? '<i class="o" style="margin-left:0"></i>Camera on<i class="x"></i>Camera off<i class="u"></i>Not clear<i class="a"></i>Not in the frame' : '') +
+            (showBg ? '<i class="v"' + (showCam ? ' style="margin-left:20px"' : ' style="margin-left:0"') + '></i>Virtual<i class="b"></i>Blurred<i class="r"></i>Real room' : '') + '</div>';
+    }
+    if (showCam) html += '<div class="small text-muted mt-2">Camera on % = moments with the camera on ÷ moments that person was in the video. Unclear moments are left out.</div>';
+    return html + '</div>';
+}
+
+function cqInPersonRow(e, grid, total, minPct, showCam, showBg, showTalk, showAtt) {
+    var p = e.vp, t = e.tp;
+    var bits = [CQ_VC_ROLE[e.role] || e.role || ''];
+    if (showCam) bits.push(p ? (p.seen ? Number(p.seen) + ' of ' + total + ' moments' : 'not seen in the video') : 'not in the video check');
+    var html = '<div class="cq-vc-grid cq-vc-row"' + grid + '><div class="d-flex align-items-center" style="gap:10px;min-width:0">' +
+        '<span class="cq-vc-av' + (e.role === 'TEACHER' ? ' t' : '') + '">' + cqEsc(cqVcInitials(e.name)) + '</span>' +
+        '<div style="min-width:0"><div class="font-weight-bold text-truncate" title="' + cqEsc(e.name) + '">' + cqEsc(e.name) + '</div>' +
+        '<div class="small text-muted">' + cqEsc(bits.filter(Boolean).join(' · ')) + '</div></div></div>';
+    if (showCam) {
+        if (p) {
+            var cells = String(p.cells || ''), moments = (cqVc().moments || []);
+            html += '<div class="cq-vc-cells">';
+            for (var k = 0; k < cells.length; k++) {
+                var c = cells.charAt(k);
+                var text = cqClock(moments[k] || 0) + ': ' + (CQ_VC_CELL[c] || c);
+                html += '<button type="button" class="cq-vc-cell ' + cqEsc(c) + '" title="' + cqEsc(p.name + ' at ' + text) + '" aria-label="' +
+                    cqEsc(p.name + ' at ' + text) + '" onclick="cqVcCell(' + Number(e.vi) + ',' + k + ')"></button>';
+            }
+            html += '</div>';
+        } else {
+            html += '<div class="small text-muted">Not seen in the video</div>';
+        }
+    }
+    if (showCam || showBg) {
+        html += '<div>';
+        if (p && showCam) {
+            html += '<div class="d-flex align-items-baseline" style="gap:6px"><span class="cq-vc-pct ' + cqVcLevel(p.cameraOnPct, minPct) + '">' +
+                (p.cameraOnPct != null ? Number(p.cameraOnPct) + '%' : '—') + '</span><span class="small text-muted">camera on</span></div>';
+        }
+        if (p && showBg) {
+            var bgTotal = (p.virtualCount || 0) + (p.blurredCount || 0) + (p.realRoomCount || 0);
+            var bar = bgTotal ? [['v', p.virtualCount], ['b', p.blurredCount], ['r', p.realRoomCount]].filter(function (x) { return x[1]; })
+                .map(function (x) { return '<span class="' + x[0] + '" style="width:' + (Number(x[1]) * 100 / bgTotal).toFixed(1) + '%"></span>'; }).join('') : '';
+            html += '<div class="cq-vc-bgbar">' + bar + '</div><div class="small text-muted">' +
+                (p.background ? cqEsc(CQ_VC_BG[p.background] || p.background) + ' ' + Number(p.backgroundPct || 0) + '%' : 'No background seen') + '</div>';
+        }
+        if (!p) html += '<span class="text-muted">—</span>';
+        html += '</div>';
+    }
+    if (showTalk || showAtt) {
+        html += '<div>';
+        if (showTalk) {
+            var pct = t && t.talkPct != null ? Math.max(0, Math.min(100, Number(t.talkPct))) : null;
+            html += '<div class="d-flex align-items-baseline" style="gap:6px"><b>' + (pct != null ? pct + '%' : '—') + '</b><span class="small text-muted">talk' +
+                (t && t.talkSeconds != null ? ' · ' + cqEsc(cqTalkTime(t.talkSeconds)) : '') + '</span></div>' +
+                '<div class="cq-in-bar"><span style="width:' + (pct || 0) + '%"></span></div>';
+        }
+        if (showAtt) {
+            var mins = t && t.inClassSeconds != null ? Math.round(Number(t.inClassSeconds) / 60) : null;
+            html += '<div class="small text-muted">' + (mins != null ? mins + ' min in class' : 'Time in class not known') +
+                (t && t.attendancePct != null ? ' · ' + Number(t.attendancePct) + '%' : '') + '</div>';
+        }
+        html += '</div>';
+    }
+    return html + '</div>';
+}
+
+/** A list of seen moments; each time plays the video from there. jump = use the video check's layout. */
+function cqInMoments(list, labels, jump) {
+    return '<ul class="cq-in-list">' + list.map(function (m) {
+        var at = Number(m && m.at) || 0;
+        return '<li><a href="javascript:void(0)" class="cq-in-at" onclick="' + (jump ? 'cqVcJump' : 'cqSeek') + '(' + at + ')"><i class="fa fa-play-circle mr-1"></i>' + cqClock(at) + '</a>' +
+            '<span>' + (m && m.kind ? '<b>' + cqEsc(labels[m.kind] || m.kind) + '</b>' + (m.note ? ' · ' : '') : '') + cqEsc((m && m.note) || '') + '</span></li>';
+    }).join('') + '</ul>';
+}
+
+function cqInFrameCard(f, r) {
+    var fc = r && r.frameChecks;
+    if (!fc) return '';
+    var html = '';
+    if (f.frame && fc.teacherInFrame != null) {
+        var of = Number(fc.teacherCheckedMoments || 0), n = Number(fc.teacherInFrame);
+        html += '<div class="cq-fact"><span>Teacher in frame</span><b class="' + (of && n < of ? 'cq-down' : '') + '">' + n + ' of ' + of +
+            ' <span class="small text-muted font-weight-normal">moments with the camera on</span></b></div>';
+    }
+    if (f.light && fc.lighting) {
+        html += '<div class="cq-subhead">Lighting and framing</div>' + (fc.lighting.length ? cqInMoments(fc.lighting, CQ_IN_LIGHT, true)
+            : '<div class="small text-muted"><i class="fa fa-check mr-1 cq-up"></i>No lighting or framing problems seen.</div>');
+    }
+    if (f.dist && fc.distractions) {
+        html += '<div class="cq-subhead">Background distractions</div>' + (fc.distractions.length ? cqInMoments(fc.distractions, {}, true)
+            : '<div class="small text-muted"><i class="fa fa-check mr-1 cq-up"></i>No distractions seen behind the teacher.</div>');
+    }
+    if (f.tiles && fc.tileNames) {
+        html += '<div class="cq-subhead">Tile names</div>' + (fc.tileNames.length
+            ? '<div class="small mb-1">These tiles did not show a person\'s name:</div><div>' + fc.tileNames.map(function (x) { return '<span class="cq-tag">' + cqEsc(x) + '</span>'; }).join('') + '</div>'
+            : '<div class="small text-muted"><i class="fa fa-check mr-1 cq-up"></i>Every tile showed a person\'s name.</div>');
+    }
+    return html ? '<div class="cq-in-card"><div class="cq-in-title"><i class="fa fa-user-circle-o mr-1"></i>Frame checks</div>' + html + '</div>' : '';
+}
+
+function cqInScreenCard(f, r) {
+    if (!(f.share || f.safe) || !r || !r.screen) return '';
+    var s = r.screen;
+    var html = '<div class="cq-in-card"><div class="cq-in-title"><i class="fa fa-desktop mr-1"></i>Screen sharing</div>';
+    if (!s.available) return html + '<div class="small text-muted">No shared-screen video for this session.</div></div>';
+    if (f.share) {
+        var segs = (s.segments || []).filter(function (m) { return m; }).slice().sort(function (x, y) { return (Number(x.at) || 0) - (Number(y.at) || 0); });
+        var step = Number(r.everyMinutes || 2) * 60;
+        var classSec = cq.detail && cq.detail.actualMinutes ? Number(cq.detail.actualMinutes) * 60 : 0;
+        var len = Math.max(classSec, segs.length ? (Number(segs[segs.length - 1].at) || 0) + step : 0, 1);
+        if (s.sharedPct != null) html += '<div class="mb-2"><span class="h5 mb-0">' + Number(s.sharedPct) + '%</span> <span class="small text-muted">of the class had something shared</span></div>';
+        if (segs.length) {
+            html += '<div class="cq-in-strip">' + segs.map(function (m, i) {
+                var from = Math.min(len, Number(m.at) || 0), to = i + 1 < segs.length ? Math.min(len, Number(segs[i + 1].at) || 0) : len;
+                var kind = CQ_IN_SCREEN[m.kind] ? m.kind : 'OTHER';
+                var label = cqClock(from) + ' ' + CQ_IN_SCREEN[kind] + (m.note ? ': ' + m.note : '');
+                return '<button type="button" class="cq-in-k-' + kind + '" style="left:' + (from * 100 / len).toFixed(2) + '%;width:' + (Math.max(0, to - from) * 100 / len).toFixed(2) +
+                    '%" title="' + cqEsc(label) + '" aria-label="' + cqEsc(label) + '" onclick="cqSeek(' + Number(from) + ')"></button>';
+            }).join('') + '</div><div class="d-flex justify-content-between small text-muted"><span>0:00</span><span>' + cqClock(len / 2) + '</span><span>' + cqClock(len) + '</span></div>';
+        }
+        var kinds = s.kinds || {};
+        var keys = Object.keys(kinds).filter(function (k) { return kinds[k] != null; });
+        if (keys.length) {
+            html += '<div class="cq-vc-key small text-muted mt-1">' + keys.map(function (k, i) {
+                var cls = CQ_IN_SCREEN[k] ? k : 'OTHER';
+                return '<i class="cq-in-k-' + cls + '"' + (i === 0 ? ' style="margin-left:0"' : '') + '></i>' + cqEsc(CQ_IN_SCREEN[k] || k) + ' ' + Number(kinds[k]) + '%';
+            }).join('') + '</div>';
+        }
+    }
+    if (f.safe && s.privateContent) {
+        html += '<div class="cq-subhead">Shared-screen safety</div>' + (s.privateContent.length
+            ? '<div class="small cq-down mb-1"><i class="fa fa-exclamation-triangle mr-1"></i>Private material showed on the shared screen ' + s.privateContent.length + ' time' + (s.privateContent.length === 1 ? '' : 's') + ':</div>' +
+              cqInMoments(s.privateContent, {}, false)
+            : '<div class="small text-muted"><i class="fa fa-check mr-1 cq-up"></i>Nothing private seen on the shared screen.</div>');
+    }
+    if (s.material) html += '<div class="small mt-2"><b>Taught from the screen:</b> ' + cqEsc(s.material) + '</div>';
+    return html + '</div>';
+}
+
+function cqInTranscriptCard(f, t) {
+    if (!(f.sum || f.unans || f.tips || f.cov || f.quiz) || !t) return '';
+    var html = '<div class="cq-in-card"><div class="cq-in-title"><i class="fa fa-file-text-o mr-1"></i>From the transcript' +
+        (t.available && t.scoredAt ? ' <span class="small text-muted font-weight-normal">· AI scoring ' + cqEsc(t.scoredAt) + '</span>' : '') + '</div>';
+    if (!t.available) {
+        return html + '<div class="small text-muted"><i class="fa fa-info-circle mr-1"></i>Score with AI first: these come from the AI scoring of the transcript. ' +
+            'Use Score with AI in the panel on the right.</div></div>';
+    }
+    var body = '';
+    if (f.sum && (t.parentSummary != null || t.homework != null)) {
+        body += '<div class="cq-subhead">For parents</div>' + (t.parentSummary ? '<p class="mb-1">' + cqEsc(t.parentSummary) + '</p>' : '') +
+            (t.homework != null ? '<div class="small"><b>Homework:</b> ' + (t.homework ? cqEsc(t.homework) : '<span class="text-muted">none set</span>') + '</div>' : '');
+    }
+    if (f.unans && t.unanswered) {
+        body += '<div class="cq-subhead">Unanswered questions</div>' + (t.unanswered.length ? '<ul class="cq-in-list">' + t.unanswered.map(function (q) {
+            var at = Number(q && q.at) || 0;
+            return '<li><a href="javascript:void(0)" class="cq-in-at" onclick="cqSeek(' + at + ')"><i class="fa fa-play-circle mr-1"></i>' + cqClock(at) + '</a>' +
+                '<span>' + (q && q.who ? '<b>' + cqEsc(q.who) + '</b>: ' : '') + cqEsc((q && q.text) || '') + '</span></li>';
+        }).join('') + '</ul>' : '<div class="small text-muted"><i class="fa fa-check mr-1 cq-up"></i>Every question got an answer.</div>');
+    }
+    if (f.tips && t.coachingTips) {
+        body += '<div class="cq-subhead">Coaching tips</div>' + (t.coachingTips.length
+            ? '<ul class="pl-3 mb-0 small">' + t.coachingTips.map(function (x) { return '<li>' + cqEsc(x) + '</li>'; }).join('') + '</ul>'
+            : '<div class="small text-muted">No tips this time.</div>');
+    }
+    if (f.cov && t.topicsCovered) {
+        body += '<div class="cq-subhead">Topics covered</div>' + (t.topicsCovered.length
+            ? '<div>' + t.topicsCovered.map(function (x) { return '<span class="cq-tag">' + cqEsc(x) + '</span>'; }).join('') + '</div>'
+            : '<div class="small text-muted">No topics found.</div>');
+    }
+    if (f.quiz && t.quiz && t.quiz.length) {
+        body += '<div class="cq-subhead d-flex align-items-center">Practice quiz <button type="button" class="btn btn-link btn-sm p-0 ml-auto" aria-expanded="false" ' +
+            'onclick="cqInQuizToggle(this)">Show answers</button></div><ol class="pl-3 mb-0 small">' + t.quiz.map(function (q) {
+                return '<li class="mb-1">' + cqEsc((q && q.question) || '') + '<div class="cq-in-ans" hidden><i class="fa fa-check mr-1"></i>' + cqEsc((q && q.answer) || '') + '</div></li>';
+            }).join('') + '</ol>';
+    }
+    return body ? html + body + '</div>' : '';
+}
+
+function cqInQuizToggle(btn) {
+    var answers = $(btn).closest('.cq-in-card').find('.cq-in-ans');
+    var show = answers.first().prop('hidden');
+    answers.prop('hidden', !show);
+    $(btn).text(show ? 'Hide answers' : 'Show answers').attr('aria-expanded', String(!!show));
+}
+
+/** What this tab cost: the saved video check, and the note that transcript extras ride on AI scoring. */
+function cqInCostStrip(a, f, r) {
+    var parts = [];
+    if (r) {
+        parts.push('This check cost <b class="text-body">' + cqVcMoney(r.costUsd) + '</b>' +
+            (r.inputTokens != null ? ' · ' + Number(r.inputTokens).toLocaleString() + ' tokens in, ' + Number(r.outputTokens || 0).toLocaleString() + ' out' : '') +
+            (r.model ? ' · ' + cqEsc(r.model) : ''));
+    } else if (a.estimateUsd != null) {
+        parts.push('Checking the video would cost about <b class="text-body">' + cqVcMoney(a.estimateUsd) + '</b>');
+    }
+    var split = a.videoCostSplit || {};
+    var splitKeys = Object.keys(split);
+    if (r && splitKeys.length) {
+        parts.push('By part (estimated from tokens, adds up to the real cost): ' + splitKeys.map(function (k) {
+            return cqEsc(CQ_IN_PART_NAMES[k] || k) + ' ' + cqVcMoney(split[k]);
+        }).join(' · '));
+    }
+    if (f.sum || f.unans || f.tips || f.cov || f.quiz) parts.push('Transcript insights come with the AI scoring call, at no extra check');
+    if (f.talk || f.att) parts.push('Talking time and time in class use no AI');
+    var html = parts.length ? '<div class="d-flex flex-wrap justify-content-between small text-muted mt-3 pt-2 border-top" style="gap:8px">' +
+        parts.map(function (x) { return '<span>' + x + '</span>'; }).join('') + '</div>' : '';
+    if (r && r.note) html += '<div class="small text-muted mt-1"><i class="fa fa-comment-o mr-1"></i>Claude\'s note: ' + cqEsc(r.note) + '</div>';
+    return html;
+}
+
+/** The extra line in Settings → AI scoring. */
+function cqVcUsageLine(u) {
+    var n = Number(u.videoChecks || 0);
+    var cost = u.videoCostUsd != null ? Number(u.videoCostUsd) : 0;
+    return '<div class="small mt-2"><i class="fa fa-video-camera mr-1"></i>Video checks this month: <b>' + n + '</b> · ' + cqVcMoney(cost) +
+        (n ? ' · about ' + cqVcMoney(cost / n) + ' a check' : '') +
+        (u.videoFailed ? ' · ' + Number(u.videoFailed) + ' failed' : '') + '. A checked session keeps its saved result and is never sent again.</div>';
+}
+
 function cqAttendance(d) {
     var a = d.attendance || {};
     var people = d.participants || [];
@@ -1359,9 +1955,13 @@ function cqRenderSettings(s) {
     var html = (s.canEdit ? '' : '<div class="alert alert-light border small">You can view these settings. Changing them needs edit rights on Class Quality.</div>') +
         cqBackfillCard(s.canEdit) +
         '<div class="card mb-3"><div class="card-body"><h6>Module and attendance rules</h6><div class="small text-muted mb-2">Rules run after each recording; changes apply to sessions checked from now on.</div>';
-    var aiRules = [];
+    var aiRules = [], featureRules = {};
     (s.rules || []).forEach(function (r) {
         var id = 'cqRule_' + r.key;
+        if (r.key.indexOf('AI_FEATURE_') === 0) {
+            featureRules[r.key] = r;
+            return;
+        }
         if (r.key.indexOf('AI_') === 0) {
             aiRules.push(r);
             return;
@@ -1379,7 +1979,7 @@ function cqRenderSettings(s) {
         }
         html += cqRuleRow(r, dis);
     });
-    html += '</div></div>' + cqAiCard(aiRules, dis) + cqTagSettings(s) + '<div class="card mb-3"><div class="card-body"><h6>Session scoring</h6><div class="small text-muted mb-2">' +
+    html += '</div></div>' + cqAiCard(aiRules, dis) + cqInSettingsCard(featureRules, s.metrics || [], s.canEdit) + cqTagSettings(s) + '<div class="card mb-3"><div class="card-body"><h6>Session scoring</h6><div class="small text-muted mb-2">' +
         'Metrics that make up the overall score, and their weights. Changes apply to sessions scored from now on, so past scores stay comparable.</div>';
     var lastCat = null, demoHeading = false;
     (s.metrics || []).forEach(function (m) {
@@ -1397,8 +1997,8 @@ function cqRenderSettings(s) {
         var noData = CQ_NO_DATA[m.code] && !m.activated ? CQ_NO_DATA[m.code] : null;
         if (noData) sources += ' <span class="cq-chip">' + cqEsc(noData) + '</span>';
         html += '<div class="cq-row"><div class="d-flex" style="gap:10px;min-width:0"><div class="custom-control custom-switch">' +
-            '<input type="checkbox" class="custom-control-input" id="' + id + '"' + (m.activated ? ' checked' : '') + (noData ? ' disabled' : dis) +
-            ' onchange="cqSaveMetric(' + Number(m.id) + ', {activated: this.checked ? \'Y\' : \'N\'}, this)"><label class="custom-control-label" for="' + id + '"><span class="sr-only">' + cqEsc(m.name) + ' on</span></label></div>' +
+            '<input type="checkbox" class="custom-control-input" id="' + id + '" data-cq-metric="' + Number(m.id) + '"' + (m.activated ? ' checked' : '') + (noData ? ' disabled' : dis) +
+            ' onchange="cqInSaveMetric(' + Number(m.id) + ', this)"><label class="custom-control-label" for="' + id + '"><span class="sr-only">' + cqEsc(m.name) + ' on</span></label></div>' +
             '<div style="min-width:0"><b>' + cqEsc(m.name) + '</b> <span class="cq-chip ' + (m.sourceType === 'AI' ? 'ai' : 'rule') + '">' + (m.sourceType === 'AI' ? 'AI' : 'Rule-based') + '</span> ' +
             sources + (m.scoredBy === 'SMS' ? ' <span class="cq-chip rule">' + (CQ_TRANSCRIPT_METRICS[m.code] ? 'Worked out from the transcript' : 'Our attendance data') + '</span>' : '') +
             (m.notTrue30 ? ' <span class="cq-chip" style="background:#fdecef;color:var(--cq-critical)" title="Times reviewers marked this metric not true in the last 30 days">Marked not true ×' + Number(m.notTrue30) + ' (30 days)</span>' : '') +
@@ -1407,6 +2007,9 @@ function cqRenderSettings(s) {
             cqEsc(m.weight) + '"' + dis + ' onchange="cqSaveMetric(' + Number(m.id) + ', {weight: Number(this.value)}, this)"></div></div>';
     });
     $('#cqPane-settings').html(html + '</div></div>');
+    cqInEstimate();
+    cqInRealCosts();
+    cqRangeInit('cqBf', 'MONTH');
     cqBackfillLoad();
     cqAiUsageLoad();
 }
@@ -1435,6 +2038,137 @@ function cqAiCard(rules, dis) {
         rules.map(function (r) { return cqRuleRow(r, dis); }).join('') + '</div></div>';
 }
 
+/* ------------------------------------------------------------------ AI insights switches (settings) */
+
+/*
+ * Every AI insights feature. f = the key in AiInsightsView.features; rule = its SETTINGS key (Y/N), or metric = the
+ * metric code whose switch it is (Camera on, Virtual background). one / grp = extra USD per 60-minute class for a
+ * 1:1 class / a group of 8. Mirrors ClassQualitySettingsStore.AI_FEATURE_*.
+ */
+var CQ_IN_GROUPS = [['video', 'From the class video'], ['screen', 'From the shared screen'], ['transcript', 'From the transcript'], ['free', 'No AI, always free']];
+var CQ_IN_FEATURES = [
+    { f: 'cam', g: 'video', metric: 'CAMERA_ON', name: 'Camera on', desc: 'Who had their camera on, moment by moment.', one: 0.02, grp: 0.08 },
+    { f: 'bg', g: 'video', metric: 'VIRTUAL_BACKGROUND', name: 'Virtual background', desc: 'Real room, blurred or virtual background behind each person.', one: 0.01, grp: 0.04 },
+    { f: 'frame', g: 'video', rule: 'AI_FEATURE_TEACHER_IN_FRAME', name: 'Teacher in frame', desc: 'Whether the teacher is actually in front of the camera.', one: 0.01, grp: 0.01 },
+    { f: 'light', g: 'video', rule: 'AI_FEATURE_LIGHTING', name: 'Lighting and framing', desc: 'Dark, backlit, cut-off, frozen or black video.', one: 0.01, grp: 0.01 },
+    { f: 'dist', g: 'video', rule: 'AI_FEATURE_DISTRACTIONS', name: 'Background distractions', desc: 'People, noise sources or clutter seen behind the teacher.', one: 0.01, grp: 0.01 },
+    { f: 'tiles', g: 'video', rule: 'AI_FEATURE_TILE_NAMES', name: 'Tile names', desc: 'Tiles named after a device ("iPhone 12") instead of a person.', one: 0.01, grp: 0.01 },
+    { f: 'share', g: 'screen', rule: 'AI_FEATURE_SCREEN_SHARING', name: 'Screen sharing', desc: 'How much of the class had something shared, and what kind.', one: 0.08, grp: 0.08 },
+    { f: 'safe', g: 'screen', rule: 'AI_FEATURE_SCREEN_SAFETY', name: 'Shared-screen safety', desc: 'Private chats, other tabs or personal details on the shared screen.', one: 0.01, grp: 0.01 },
+    { f: 'sum', g: 'transcript', rule: 'AI_FEATURE_PARENT_SUMMARY', name: 'Parent summary and homework', desc: 'A short note for parents and the homework that was set.', one: 0.01, grp: 0.01 },
+    { f: 'unans', g: 'transcript', rule: 'AI_FEATURE_UNANSWERED', name: 'Unanswered questions', desc: 'Questions students asked that the teacher did not answer.', one: 0.01, grp: 0.01 },
+    { f: 'tips', g: 'transcript', rule: 'AI_FEATURE_COACHING_TIPS', name: 'Coaching tips', desc: 'A few concrete things the teacher could do better next time.', one: 0.01, grp: 0.01 },
+    { f: 'cov', g: 'transcript', rule: 'AI_FEATURE_LESSON_COVERAGE', name: 'Lesson coverage', desc: 'The topics the class actually covered.', one: 0.01, grp: 0.01 },
+    { f: 'quiz', g: 'transcript', rule: 'AI_FEATURE_PRACTICE_QUIZ', name: 'Practice quiz', desc: 'A few questions on what was taught, with answers.', one: 0.01, grp: 0.01 },
+    { f: 'talk', g: 'free', rule: 'AI_FEATURE_TALK_TIME', name: 'Talking time', desc: 'Each person\'s share of the talking, from the transcript.', one: 0, grp: 0 },
+    { f: 'att', g: 'free', rule: 'AI_FEATURE_TIME_IN_CLASS', name: 'Time in class', desc: 'Minutes each person was in the class, and their attendance.', one: 0, grp: 0 }
+];
+var CQ_IN_VIDEO_BASE = { one: 0.15, grp: 0.20 };
+var CQ_IN_SCREEN_BASE = 0.08;
+var CQ_IN_MONTH_SESSIONS = 300 * 30;
+
+/** "+$0.02 · +$0.08" (1:1 · group of 8), or "Free". */
+function cqInCost(one, grp) {
+    if (!one && !grp) return 'Free';
+    return '+' + cqVcMoney(one) + ' · +' + cqVcMoney(grp);
+}
+
+/**
+ * The "AI insights" card. The AI_FEATURE_* rules save with cqSaveRule; Camera on and Virtual background are the
+ * CAMERA_ON / VIRTUAL_BACKGROUND metrics, found by code in settings.metrics and saved with cqSaveMetric.
+ */
+function cqInSettingsCard(rules, metrics, canEdit) {
+    var byCode = {};
+    cq.inCanEdit = !!canEdit;
+    metrics.forEach(function (m) { if (m && m.code) byCode[m.code] = m; });
+    var dis = canEdit ? '' : ' disabled';
+    var html = '<div class="card mb-3" id="cqInCard"><div class="card-body"><h6>AI insights</h6><div class="small text-muted mb-2">' +
+        'What the session view\'s AI insights tab shows. Cost per 60-minute class: 1:1 · group of 8.</div>';
+    CQ_IN_GROUPS.forEach(function (g) {
+        var rows = CQ_IN_FEATURES.filter(function (x) { return x.g === g[0]; });
+        html += '<div class="cq-cat">' + cqEsc(g[1]) + '</div>';
+        rows.forEach(function (x) {
+            var id = 'cqIn_' + x.f, input;
+            if (x.metric) {
+                var m = byCode[x.metric];
+                input = m ? '<input type="checkbox" class="custom-control-input" id="' + id + '" data-cq-feat="' + x.f + '" data-cq-metric="' + Number(m.id) + '"' +
+                    (m.activated ? ' checked' : '') + dis + ' onchange="cqInSaveMetric(' + Number(m.id) + ', this)">'
+                    : '<input type="checkbox" class="custom-control-input" id="' + id + '" data-cq-feat="' + x.f + '" disabled>';
+            } else {
+                var r = rules[x.rule];
+                input = '<input type="checkbox" class="custom-control-input" id="' + id + '" data-cq-feat="' + x.f + '"' +
+                    (r && r.value === 'Y' ? ' checked' : '') + (r ? dis : ' disabled') +
+                    ' onchange="cqInSaveFeature(\'' + x.rule + '\', this)">';
+            }
+            var missing = x.metric ? !byCode[x.metric] : !rules[x.rule];
+            html += '<div class="cq-row"><div style="min-width:0"><label class="mb-0 font-weight-bold" for="' + id + '">' + cqEsc(x.name) + '</label>' +
+                '<div class="small text-muted">' + cqEsc(x.desc) + (missing ? ' <span class="cq-chip">Not available</span>' : '') + '</div></div>' +
+                '<div class="d-flex align-items-center" style="gap:14px"><span class="cq-in-cost">' + cqEsc(cqInCost(x.one, x.grp)) + '</span>' +
+                '<div class="custom-control custom-switch">' + input + '<label class="custom-control-label" for="' + id + '"><span class="sr-only">' + cqEsc(x.name) + ' on</span></label></div></div></div>';
+        });
+    });
+    html += '<div class="cq-in-est" id="cqInEst"></div>' +
+        '<ul class="small text-muted mb-0 mt-2 pl-3">' +
+        '<li>Any video feature reads the 30 gallery frames once.</li>' +
+        '<li>Transcript features ride on AI scoring; with scoring off they are not produced.</li>' +
+        '<li>Saved sessions keep what was on when checked.</li></ul>';
+    return html + '</div></div>';
+}
+
+/** Which features are switched on in the card right now. */
+function cqInSwitches() {
+    var on = {};
+    $('#cqInCard [data-cq-feat]').each(function () { on[$(this).attr('data-cq-feat')] = this.checked; });
+    return on;
+}
+
+/** Cost per 60-minute class for the switches given: { one: 1:1 class, grp: group of 8 }. */
+function cqInCostFor(on) {
+    var one = 0, grp = 0;
+    if (on.cam || on.bg || on.frame || on.light || on.dist || on.tiles) {
+        one += CQ_IN_VIDEO_BASE.one;
+        grp += CQ_IN_VIDEO_BASE.grp;
+    }
+    if (on.share || on.safe) {
+        one += CQ_IN_SCREEN_BASE;
+        grp += CQ_IN_SCREEN_BASE;
+    }
+    CQ_IN_FEATURES.forEach(function (x) {
+        if (!on[x.f] || x.f === 'share') return;
+        one += x.one;
+        grp += x.grp;
+    });
+    return { one: one, grp: grp };
+}
+
+/** Redraws the live estimate under the switches. */
+function cqInEstimate() {
+    var box = $('#cqInEst');
+    if (!box.length) return;
+    var c = cqInCostFor(cqInSwitches());
+    box.html('<div class="cq-cam-cost mt-3 mb-0">' +
+        '<div><div class="small text-muted">1:1 class</div><div class="n">' + cqVcMoney(c.one) + '</div></div>' +
+        '<div><div class="small text-muted">Group of 8</div><div class="n">' + cqVcMoney(c.grp) + '</div></div>' +
+        '<div><div class="small text-muted">A month at 300 sessions a day (1:1)</div><div class="n">' + cqVcMoney(c.one * CQ_IN_MONTH_SESSIONS) + '</div></div></div>' +
+        '<div class="small text-muted mt-1">Estimate per 60-minute class with the switches above.</div>');
+}
+
+function cqInSaveFeature(key, el) {
+    cqInEstimate();
+    cqSaveRule(key, el.checked ? 'Y' : 'N', el);
+}
+
+/** A metric's on/off switch (in Session scoring or in AI insights): keeps both in step, then saves. */
+function cqInSaveMetric(id, el) {
+    var on = !!el.checked;
+    $('#cqPane-settings [data-cq-metric="' + Number(id) + '"]').not(el).each(function () {
+        this.checked = on;
+        if (on && cq.inCanEdit) this.disabled = false;
+    });
+    cqInEstimate();
+    cqSaveMetric(Number(id), { activated: on ? 'Y' : 'N' }, el);
+}
+
 function cqAiUsageLoad() {
     if (!$('#cqAiUsage').length) return;
     cqGet('settings/ai-usage', {}, function (res) {
@@ -1448,7 +2182,8 @@ function cqAiUsageLoad() {
             '<div><div class="h5 mb-0' + (u.failed ? ' cq-down' : '') + '">' + Number(u.failed || 0) + '</div><div class="small text-muted">Failed</div></div>' +
             '<div><div class="h5 mb-0">' + cost + '</div><div class="small text-muted">Estimated cost this month</div></div>' +
             '<div><div class="h5 mb-0">' + Number(u.todayAutomatic || 0) + ' / ' + Number(u.dailyMax || 0) + '</div><div class="small text-muted">Automatic today (all schools)</div></div>' +
-            '</div><div class="small text-muted mt-1">Model ' + cqEsc(u.model || '') + '. Cost is an estimate from list prices; the Anthropic Console shows the bill.</div>');
+            '</div><div class="small text-muted mt-1">Model ' + cqEsc(u.model || '') + '. Cost is an estimate from list prices; the Anthropic Console shows the bill.</div>' +
+            cqVcUsageLine(u));
     }, function (xhr) {
         $('#cqAiUsage').html('<div class="small text-danger">' + cqEsc(cqErr(xhr, 'AI usage could not be loaded.')) + '</div>');
     });
@@ -1502,14 +2237,10 @@ function cqSaveKinds(el) {
 var cqBackfillTimer = null;
 
 function cqBackfillCard(canEdit) {
-    var to = new Date(), from = new Date();
-    from.setDate(to.getDate() - 29);
     return '<div class="card mb-3"><div class="card-body"><h6>Build from existing data</h6>' +
         '<div class="small text-muted mb-2">Runs the attendance checks over past sessions so the dashboard has history. Newest sessions first; ' +
         'safe to run again (sessions already checked are refreshed). A month usually takes under a minute. Up to 184 days per run.</div>' +
-        (canEdit ? '<div class="d-flex flex-wrap align-items-end mb-2" style="gap:8px">' +
-            '<div><label class="small mb-0" for="cqBfFrom">From</label><input type="date" id="cqBfFrom" class="form-control form-control-sm cq-date" value="' + cqDateStr(from) + '"></div>' +
-            '<div><label class="small mb-0" for="cqBfTo">To</label><input type="date" id="cqBfTo" class="form-control form-control-sm cq-date" value="' + cqDateStr(to) + '"></div>' +
+        (canEdit ? '<div class="d-flex flex-wrap align-items-end mb-2" style="gap:8px">' + cqRangeFields('cqBf') +
             '<button type="button" class="btn btn-primary btn-sm" id="cqBfStart" onclick="cqBackfillStart()"><i class="fa fa-play mr-1"></i>Start</button>' +
             '<button type="button" class="btn btn-outline-danger btn-sm" id="cqBfStop" onclick="cqBackfillStop()" hidden><i class="fa fa-stop mr-1"></i>Stop</button>' +
             '<span id="cqBfError" class="text-danger small"></span></div>' : '') +
@@ -1604,4 +2335,406 @@ function cqSaveMetric(id, change, el) {
         cqToast(false, msg);
         cqLoadSettings();
     });
+}
+
+/* ------------------------------------------------------------------ date range dropdown (shared) */
+
+var CQ_RANGES = [['TODAY', 'Today'], ['YESTERDAY', 'Yesterday'], ['WEEK', 'This week'], ['MONTH', 'This month'], ['CUSTOM', 'Custom']];
+
+/** Dates dropdown with From and To boxes; ids are prefix + Range / From / To. */
+function cqRangeFields(prefix) {
+    return '<div class="cq-range"><label class="small mb-0 d-block" for="' + prefix + 'Range">Dates</label><select id="' + prefix +
+        'Range" class="form-control form-control-sm">' + CQ_RANGES.map(function (r) {
+            return '<option value="' + r[0] + '">' + r[1] + '</option>';
+        }).join('') + '</select></div>' +
+        '<div class="cq-range"><label class="small mb-0 d-block" for="' + prefix + 'From">From</label><input type="date" id="' + prefix + 'From" class="form-control form-control-sm cq-date"></div>' +
+        '<div class="cq-range"><label class="small mb-0 d-block" for="' + prefix + 'To">To</label><input type="date" id="' + prefix + 'To" class="form-control form-control-sm cq-date"></div>';
+}
+
+/** Today / Yesterday / This week (last 7 days) / This month (from the 1st) as [from, to]; null for Custom. */
+function cqRangeDates(key) {
+    var to = new Date(), from = new Date();
+    if (key === 'TODAY') return [from, to];
+    if (key === 'YESTERDAY') { from.setDate(from.getDate() - 1); return [from, new Date(from)]; }
+    if (key === 'WEEK') { from.setDate(to.getDate() - 6); return [from, to]; }
+    if (key === 'MONTH') { from.setDate(1); return [from, to]; }
+    return null;
+}
+
+/** A preset fills From and To; Custom empties them; typing a date switches the dropdown to Custom. */
+function cqRangeInit(prefix, preset, onChange) {
+    var sel = $('#' + prefix + 'Range');
+    if (!sel.length) return;
+    function apply(first) {
+        var r = cqRangeDates(sel.val());
+        $('#' + prefix + 'From').val(r ? cqDateStr(r[0]) : '');
+        $('#' + prefix + 'To').val(r ? cqDateStr(r[1]) : '');
+        if (onChange && r && first !== true) onChange();
+    }
+    sel.val(preset || 'MONTH').on('change', function () { apply(false); });
+    $('#' + prefix + 'From, #' + prefix + 'To').on('change', function () {
+        sel.val('CUSTOM');
+        if (onChange && $('#' + prefix + 'From').val() && $('#' + prefix + 'To').val()) onChange();
+    });
+    apply(true);
+}
+
+/* ------------------------------------------------------------------ multi-select dropdown (shared) */
+
+/** A button that opens a list of checkboxes; options = [[value, label]]. */
+function cqMulti(id, label, options, selected) {
+    return '<div class="cq-ms" id="' + id + '"><label class="small mb-0 d-block">' + cqEsc(label) + '</label>' +
+        '<button type="button" class="btn btn-sm btn-outline-secondary cq-ms-btn" aria-haspopup="true" aria-expanded="false" onclick="cqMultiToggle(\'' + id + '\')"><span></span><i class="fa fa-chevron-down"></i></button>' +
+        '<div class="cq-ms-panel" hidden>' + options.map(function (o) {
+            return '<label><input type="checkbox" value="' + cqEsc(o[0]) + '"' + (selected.indexOf(o[0]) >= 0 ? ' checked' : '') + '> ' + cqEsc(o[1]) + '</label>';
+        }).join('') + '<div class="cq-ms-foot"><a href="javascript:void(0)" onclick="cqMultiAll(\'' + id + '\', true)">Select all</a>' +
+        '<a href="javascript:void(0)" onclick="cqMultiAll(\'' + id + '\', false)">Clear</a></div></div></div>';
+}
+
+function cqMultiVals(id) {
+    return $('#' + id + ' input:checked').map(function () { return this.value; }).get();
+}
+
+function cqMultiLabel(id) {
+    var all = $('#' + id + ' input'), on = $('#' + id + ' input:checked');
+    var text = on.length === all.length ? 'All' : on.length === 0 ? 'None' : on.length === 1 ? $.trim(on.parent().text()) : on.length + ' selected';
+    $('#' + id + ' .cq-ms-btn span').text(text);
+}
+
+function cqMultiToggle(id) {
+    var panel = $('#' + id + ' .cq-ms-panel'), open = panel.prop('hidden');
+    $('#cqRoot .cq-ms-panel').prop('hidden', true);
+    $('#cqRoot .cq-ms-btn').attr('aria-expanded', 'false');
+    panel.prop('hidden', !open);
+    $('#' + id + ' .cq-ms-btn').attr('aria-expanded', String(open));
+}
+
+function cqMultiAll(id, on) {
+    $('#' + id + ' input').prop('checked', on);
+    cqMultiLabel(id);
+    $('#' + id).trigger('cqchange');
+}
+
+$(document).on('click', function (e) {
+    if (!$(e.target).closest('.cq-ms').length) $('#cqRoot .cq-ms-panel').prop('hidden', true);
+});
+
+/* ------------------------------------------------------------------ camera data via AI (tab) */
+
+var CQ_CAM_KINDS = [['ONE_TO_ONE', '1:1 class'], ['CUSTOM', 'Custom class'], ['GROUP', 'Group class'], ['DEMO', 'Demo'],
+    ['PTM', 'Parent–teacher meeting'], ['ACTIVITY', 'Activity']];
+var CQ_CAM_STATUS = [['SAVED', 'Saved'], ['NOT_CHECKED', 'Not checked'], ['CHECKING', 'Checking'], ['FAILED', 'Failed'], ['NO_VIDEO', 'No video']];
+var CQ_CAM_LABEL = { SAVED: 'Saved', NOT_CHECKED: 'Not checked', CHECKING: 'Checking…', FAILED: 'Failed', NO_VIDEO: 'No video' };
+var cqCam = { start: 0, length: 25, page: null, run: null, timer: null, lastProcessed: -1, confirm: false, mode: 'dates', idPage: null };
+var CQ_CAM_ID_RESULT = { NOT_FOUND: 'Not found', NOT_IN_CLASS_QUALITY: 'Not a checked class', INVALID: 'Not a valid ID' };
+var CQ_CAM_ID_HINT = { NOT_FOUND: 'no LENS session with this ID', NOT_IN_CLASS_QUALITY: 'interview, training, staff meeting, or not built in Class Quality yet',
+    INVALID: 'IDs are letters and digits, like 6afaa284084089e6bd42e044' };
+
+function cqLoadCamera() {
+    var pane = $('#cqPane-camera');
+    if (!$('#cqCamFilters').length) {
+        pane.html('<div class="card mb-3"><div class="card-body">' +
+            '<div class="btn-group btn-group-sm mb-3" role="group" aria-label="Pick sessions"><button type="button" class="btn btn-outline-primary active" id="cqCamModeDates" ' +
+            'onclick="cqCamMode(\'dates\')">By dates</button><button type="button" class="btn btn-outline-primary" id="cqCamModeIds" onclick="cqCamMode(\'ids\')">By session ID</button></div>' +
+            '<div class="cq-cam-filters" id="cqCamFilters">' + cqRangeFields('cqCam') +
+            cqMulti('cqCamKinds', 'Class type', CQ_CAM_KINDS, ['ONE_TO_ONE', 'CUSTOM', 'GROUP', 'DEMO']) +
+            cqMulti('cqCamStatus', 'Camera data', CQ_CAM_STATUS, ['SAVED', 'NOT_CHECKED', 'CHECKING', 'FAILED', 'NO_VIDEO']) +
+            '<span id="cqCamErr" class="text-danger small"></span></div>' +
+            '<div id="cqCamIdsBox" hidden><label class="small text-muted mb-1" for="cqCamIds">LENS session IDs, separated by commas (up to 50)</label>' +
+            '<textarea id="cqCamIds" class="form-control form-control-sm" rows="3" style="font-family:monospace" placeholder="6afaa284084089e6bd42e044, 6af464c26ed9b74a9427072e"></textarea>' +
+            '<div class="d-flex flex-wrap align-items-center justify-content-between mt-2" style="gap:8px"><span class="small text-muted">The ID from a LENS link (entityId=…) ' +
+            'or LENS_SESSION.SESSION_ID. Commas, spaces and line breaks are all fine.</span><span><span id="cqCamIdsErr" class="text-danger small mr-2"></span>' +
+            '<button type="button" class="btn btn-sm btn-outline-primary" onclick="cqCamFindIds()"><i class="fa fa-search mr-1"></i>Find sessions</button></span></div></div>' +
+            '</div></div>' +
+            '<div id="cqCamStats"></div><div id="cqCamCost"></div><div id="cqCamRun"></div>' +
+            '<div class="card mb-3"><div class="card-body" id="cqCamList"></div></div>');
+        cqRangeInit('cqCam', 'YESTERDAY', function () { cqCam.start = 0; cqCamFetch(); });
+        ['cqCamKinds', 'cqCamStatus'].forEach(function (id) {
+            cqMultiLabel(id);
+            $('#' + id).on('change cqchange', function () { cqMultiLabel(id); cqCam.start = 0; cqCamFetch(); });
+        });
+    }
+    cqCamFetch();
+    cqCamRunLoad();
+}
+
+function cqCamFilter() {
+    var f = { from: $('#cqCamFrom').val(), to: $('#cqCamTo').val(), kinds: cqMultiVals('cqCamKinds'), statuses: cqMultiVals('cqCamStatus') };
+    if (!f.from || !f.to) return { error: 'Choose a start and an end date.' };
+    if (f.from > f.to) return { error: 'The start date must be on or before the end date.' };
+    if (!f.kinds.length) return { error: 'Choose at least one class type.' };
+    return f;
+}
+
+/** By dates or By session ID; each keeps its own list, the run box follows the mode. */
+function cqCamMode(mode) {
+    cqCam.mode = mode;
+    cqCam.confirm = false;
+    $('#cqCamModeDates').toggleClass('active', mode === 'dates');
+    $('#cqCamModeIds').toggleClass('active', mode === 'ids');
+    $('#cqCamFilters').prop('hidden', mode !== 'dates');
+    $('#cqCamIdsBox').prop('hidden', mode !== 'ids');
+    $('#cqCamStats, #cqCamCost').prop('hidden', mode !== 'dates');
+    if (mode === 'ids') {
+        cqCam.idPage = null;
+        $('#cqCamList').html('<div class="small text-muted">Paste the session IDs above and click Find sessions.</div>');
+        cqCamRenderRun();
+        $('#cqCamIds').trigger('focus');
+    } else {
+        cqCamFetch();
+    }
+}
+
+function cqCamFindIds(quiet) {
+    var text = $.trim($('#cqCamIds').val() || '');
+    $('#cqCamIdsErr').text('');
+    if (!text) {
+        if (!quiet) $('#cqCamIdsErr').text('Paste at least one session ID.');
+        return;
+    }
+    if (!quiet) $('#cqCamList').html('<div class="small text-muted"><i class="fa fa-spinner fa-spin mr-1"></i>Looking up the sessions…</div>');
+    cqGet('camera-data/by-ids', { ids: text }, function (res) {
+        cqCam.idPage = res.data;
+        cqCamRenderIds(res.data);
+        cqCamRenderRun();
+    }, function (xhr) {
+        $('#cqCamIdsErr').text(cqErr(xhr, 'The sessions could not be looked up.'));
+        $('#cqCamList').empty();
+    });
+}
+
+function cqCamRenderIds(p) {
+    var items = p.items || [];
+    var html = '<div class="font-weight-bold mb-2">' + items.length + ' ID' + (items.length === 1 ? '' : 's') + ' · ' + Number(p.found) + ' found' +
+        (p.toCheck ? ' · ' + p.toCheck + ' to check' : '') + '</div>' +
+        '<div class="cq-table-wrap"><table class="table table-sm mb-0 cq-cam-table"><thead><tr><th>Session ID</th><th>Date</th><th>Teacher</th><th>Class</th><th>Type</th>' +
+        '<th>Camera data</th><th class="text-right">Cost</th><th></th></tr></thead><tbody>' + items.map(function (it) {
+            var id = '<td><code>' + cqEsc(it.sessionKey) + '</code></td>';
+            if (it.row) return '<tr>' + id + cqCamRow(it.row).replace(/^<tr>/, '');
+            return '<tr>' + id + '<td colspan="7"><span class="cq-cam-badge FAILED">' + cqEsc(CQ_CAM_ID_RESULT[it.result] || it.result) + '</span> <span class="small text-muted">' +
+                cqEsc(CQ_CAM_ID_HINT[it.result] || '') + '</span></td></tr>';
+        }).join('') + '</tbody></table></div>';
+    $('#cqCamList').html(html);
+}
+
+function cqCamFetch() {
+    if (!$('#cqCamList').length) return;
+    if (cqCam.mode === 'ids') { cqCamFindIds(true); return; }
+    var f = cqCamFilter();
+    $('#cqCamErr').text(f.error || '');
+    if (f.error) return;
+    if (!f.statuses.length) {
+        $('#cqCamList').html('<div class="small text-muted">Pick at least one camera-data status to list sessions.</div>');
+        f.statuses = CQ_CAM_STATUS.map(function (s) { return s[0]; });
+    }
+    var statuses = cqMultiVals('cqCamStatus');
+    cqGet('camera-data', { from: f.from, to: f.to, kinds: f.kinds.join(','), statuses: f.statuses.join(','), start: cqCam.start, length: cqCam.length }, function (res) {
+        cqCam.page = res.data;
+        cqCamRenderSummary(res.data.summary);
+        if (statuses.length) cqCamRenderList(res.data);
+        cqCamRenderRun();
+    }, function (xhr) {
+        $('#cqCamList').html('<div class="small text-danger">' + cqEsc(cqErr(xhr, 'The list could not be loaded.')) + '</div>');
+    });
+}
+
+function cqCamRenderSummary(s) {
+    $('#cqCamStats').html('<div class="cq-cam-stats">' +
+        cqCamStat(s.sessions, 'Sessions', '') + cqCamStat(s.saved, 'Camera data saved', 'color:var(--cq-healthy)') +
+        cqCamStat(s.notChecked, 'Not checked', '') + cqCamStat(s.failed, 'Failed', s.failed ? 'color:var(--cq-critical)' : '') +
+        cqCamStat(s.noVideo, 'No video / archived', 'color:#868e96') + '</div>');
+    $('#cqCamCost').html('<div class="cq-cam-cost">' +
+        '<div><div class="small text-muted">Spent so far</div><div class="n">' + cqVcMoney(s.spentUsd) + '</div><div class="small text-muted">' +
+        Number(s.saved) + ' saved check' + (s.saved === 1 ? '' : 's') + ' in this filter</div></div>' +
+        '<div><div class="small text-muted">Projected for the rest</div><div class="n">≈ ' + cqVcMoney(s.projectedUsd) + '</div><div class="small text-muted">' +
+        Number(s.toCheck) + ' to check × ' + cqVcMoney(s.averageUsd) + (s.averageFromChecks ? ' (your average per check)' : ' (estimate)') + '</div></div>' +
+        '<div><div class="small text-muted">Projected total for this filter</div><div class="n">≈ ' + cqVcMoney(s.projectedTotalUsd) + '</div><div class="small text-muted">' +
+        'Saved checks are never paid for again</div></div></div>');
+}
+
+function cqCamStat(n, label, style) {
+    return '<div class="cq-cam-stat"><div class="n" style="' + style + '">' + Number(n || 0) + '</div><div class="small text-muted">' + cqEsc(label) + '</div></div>';
+}
+
+function cqCamRenderList(p) {
+    var rows = p.rows || [];
+    if (!rows.length) {
+        $('#cqCamList').html('<div class="small text-muted">No sessions match these filters.</div>');
+        return;
+    }
+    var html = '<div class="cq-table-wrap"><table class="table table-sm mb-2 cq-cam-table"><thead><tr><th>Date</th><th>Teacher</th><th>Class</th><th>Type</th>' +
+        '<th>Camera data</th><th class="text-right">Cost</th><th></th></tr></thead><tbody>' + rows.map(cqCamRow).join('') + '</tbody></table></div>';
+    var last = Math.min(p.start + rows.length, p.filtered);
+    html += '<div class="d-flex align-items-center justify-content-between small text-muted"><span>' + (p.start + 1) + '–' + last + ' of ' + p.filtered + '</span>' +
+        '<span><button type="button" class="btn btn-sm btn-outline-secondary mr-1"' + (p.start === 0 ? ' disabled' : '') + ' onclick="cqCamPage(-1)">Previous</button>' +
+        '<button type="button" class="btn btn-sm btn-outline-secondary"' + (last >= p.filtered ? ' disabled' : '') + ' onclick="cqCamPage(1)">Next</button></span></div>';
+    $('#cqCamList').html(html);
+}
+
+function cqCamRow(r) {
+    var detail = '';
+    if (r.status === 'SAVED') {
+        detail = 'Teacher ' + (r.teacherCameraPct != null ? r.teacherCameraPct + '%' : '—') + ' · Students ' + (r.studentsCameraPct != null ? r.studentsCameraPct + '%' : '—') +
+            (r.teacherBackground ? ' · ' + cqEsc(CQ_VC_BG[r.teacherBackground] || r.teacherBackground) : '');
+    } else if (r.status === 'NOT_CHECKED' || r.status === 'FAILED') {
+        detail = (r.status === 'FAILED' ? r.failures + ' of 3 tries · ' : '') + (r.estimateUsd != null ? '≈ ' + cqVcMoney(r.estimateUsd) : '');
+    }
+    var action = '';
+    if (r.status === 'SAVED') action = '<a href="javascript:void(0)" onclick="cqCamView(' + Number(r.id) + ')">View</a>';
+    else if (cq.canEdit && (r.status === 'NOT_CHECKED' || (r.status === 'FAILED' && r.failures < 3))) {
+        action = '<a href="javascript:void(0)" onclick="cqCamCheckOne(' + Number(r.id) + ', this)">' + (r.status === 'FAILED' ? 'Retry' : 'Check') + '</a>';
+    }
+    return '<tr><td class="text-nowrap">' + cqEsc(r.sessionStart || '') + '</td><td>' + cqEsc(r.teacherName || '') + '</td><td>' + cqEsc(r.title || '') + '</td>' +
+        '<td class="text-nowrap">' + cqEsc(r.kindLabel || '') + '</td><td><span class="cq-cam-badge ' + cqEsc(r.status) + '">' + cqEsc(CQ_CAM_LABEL[r.status] || r.status) +
+        '</span> <span class="small text-muted">' + detail + '</span></td><td class="text-right">' + (Number(r.costUsd) > 0 ? cqVcMoney(r.costUsd) : '—') + '</td>' +
+        '<td class="text-right text-nowrap">' + action + '</td></tr>';
+}
+
+function cqCamPage(dir) {
+    cqCam.start = Math.max(0, cqCam.start + dir * cqCam.length);
+    cqCamFetch();
+}
+
+/** Opens the session on its Camera and background tab. */
+function cqCamView(id) {
+    cq.dtab = 'camera';
+    cqOpenSession(id);
+}
+
+function cqCamCheckOne(id, link) {
+    $(link).replaceWith('<span class="small text-muted"><i class="fa fa-spinner fa-spin"></i></span>');
+    cqPost('sessions/' + Number(id) + '/video-check', {}, function (res) {
+        cqToast(true, res.message || 'Started.');
+        setTimeout(cqCamFetch, 1500);
+    }, function (msg) {
+        cqToast(false, msg);
+        cqCamFetch();
+    });
+}
+
+/* ---- the run */
+
+function cqCamRunLoad() {
+    clearTimeout(cqCam.timer);
+    cqGet('camera-data/run', {}, function (res) {
+        cqCam.run = res.data;
+        cqCamRenderRun();
+        var r = cqCam.run;
+        if (r && r.status === 'RUNNING') {
+            if (r.processed !== cqCam.lastProcessed) {
+                cqCam.lastProcessed = r.processed;
+                cqCamFetch();
+            }
+            cqCam.timer = setTimeout(function () {
+                if (cq.tab === 'camera' && !$('#cqPane-camera').prop('hidden')) cqCamRunLoad();
+            }, 5000);
+        } else if (cqCam.lastProcessed >= 0) {
+            cqCam.lastProcessed = -1;
+            cqCamFetch();
+        }
+    }, function () { /* the list still works without the run box */ });
+}
+
+function cqCamRenderRun() {
+    var box = $('#cqCamRun');
+    if (!box.length) return;
+    var r = cqCam.run, s = cqCam.page && cqCam.page.summary;
+    if (r && r.status === 'RUNNING') {
+        box.html('<div class="cq-cam-run"><div style="flex:1;min-width:240px"><div class="font-weight-bold"><i class="fa fa-spinner fa-spin mr-1"></i>Checking ' +
+            Math.min(r.processed + 1, r.total) + ' of ' + r.total + (r.current ? ' · ' + cqEsc(r.current) : '') + '</div>' +
+            '<div class="progress my-2" style="height:6px"><div class="progress-bar bg-success" style="width:' + Number(r.percent) + '%"></div></div>' +
+            '<div class="small text-muted">' + r.checked + ' checked · ' + r.alreadySaved + ' already saved · ' + r.skipped + ' skipped · ' + r.failed + ' failed · spent ' +
+            cqVcMoney(r.spentUsd) + ' so far · ' + cqEsc(r.from) + ' to ' + cqEsc(r.to) + (r.startedBy ? ' · started by ' + cqEsc(r.startedBy) : '') +
+            (r.stopRequested ? ' · stopping after this one…' : '') + '</div></div>' +
+            (cq.canEdit && !r.stopRequested ? '<button type="button" class="btn btn-sm btn-outline-danger" onclick="cqCamStop(this)"><i class="fa fa-stop mr-1"></i>Stop after this one</button>' : '') +
+            '</div>');
+        return;
+    }
+    var html = '';
+    if (cqCam.mode === 'ids') s = cqCam.idPage ? { toCheck: cqCam.idPage.toCheck, runMax: cqCam.idPage.runMax, averageUsd: cqCam.idPage.averageUsd,
+        sessions: cqCam.idPage.found } : null;
+    if (cq.canEdit && s && s.toCheck > 0) {
+        var n = Math.min(s.toCheck, s.runMax);
+        html += '<div class="cq-cam-run"><div style="flex:1;min-width:240px"><div class="font-weight-bold">Check ' + n + ' session' + (n === 1 ? '' : 's') + ', one at a time</div>' +
+            '<div class="small text-muted">About ' + cqVcMoney(s.averageUsd * n) + ' · a few minutes each' + (s.toCheck > s.runMax ? ' · ' + s.toCheck + ' to check, ' + s.runMax + ' per run (setting)' : '') +
+            (cqCam.mode === 'ids' ? ' · only the session IDs you listed' : '') + ' · sessions with saved camera data are skipped</div></div>' +
+            (cqCam.confirm ? '<span class="small">Spend about ' + cqVcMoney(s.averageUsd * n) + '?</span><button type="button" class="btn btn-sm btn-primary" onclick="cqCamStart(this)">Yes, start</button>' +
+                '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="cqCam.confirm=false;cqCamRenderRun()">Cancel</button>'
+                : '<button type="button" class="btn btn-sm btn-primary" onclick="cqCam.confirm=true;cqCamRenderRun()"><i class="fa fa-play mr-1"></i>Start checking</button>') + '</div>';
+    } else if (s && s.sessions > 0 && s.toCheck === 0) {
+        html += '<div class="cq-cam-run small text-muted"><i class="fa fa-check-circle mr-1" style="color:var(--cq-healthy)"></i>Every session here already has camera data, or has no video to check. Nothing to send.</div>';
+    }
+    if (r && r.status !== 'RUNNING') {
+        html += '<div class="small text-muted mb-3">Last run: <b>' + cqEsc(r.status) + '</b> · ' + cqEsc(r.from) + ' to ' + cqEsc(r.to) + ' · ' + cqEsc(r.kinds || '') +
+            (r.finishedAt ? ' · finished ' + cqEsc(r.finishedAt) : '') + (r.message ? ' · ' + cqEsc(r.message) : '') + '</div>';
+    }
+    box.html(html);
+}
+
+function cqCamStart(btn) {
+    if (cqCam.mode === 'ids') {
+        $(btn).prop('disabled', true);
+        cqPost('camera-data/start-ids', { ids: $('#cqCamIds').val() }, function (res) {
+            cqCam.confirm = false;
+            cqToast(true, res.message || 'Started.');
+            cqCamRunLoad();
+        }, function (msg) {
+            cqCam.confirm = false;
+            cqToast(false, msg);
+            cqCamRenderRun();
+        });
+        return;
+    }
+    var f = cqCamFilter();
+    if (f.error) { $('#cqCamErr').text(f.error); return; }
+    $(btn).prop('disabled', true);
+    cqPost('camera-data/start', { from: f.from, to: f.to, kinds: f.kinds }, function (res) {
+        cqCam.confirm = false;
+        cqToast(true, res.message || 'Started.');
+        cqCamRunLoad();
+    }, function (msg) {
+        cqCam.confirm = false;
+        cqToast(false, msg);
+        cqCamRenderRun();
+    });
+}
+
+function cqCamStop(btn) {
+    $(btn).prop('disabled', true);
+    cqPost('camera-data/stop', {}, function (res) {
+        cqToast(true, res.message || 'Stopping.');
+        cqCamRunLoad();
+    }, function (msg) {
+        $(btn).prop('disabled', false);
+        cqToast(false, msg);
+    });
+}
+
+/* ------------------------------------------------------------------ AI insights: real costs */
+
+var CQ_IN_PART_NAMES = { videoFrames: 'Reading the class video', screenFrames: 'Reading the shared screen', cam: 'Camera on',
+    bg: 'Virtual background', frame: 'Teacher in frame', light: 'Lighting and framing', dist: 'Background distractions',
+    tiles: 'Tile names', share: 'Screen sharing', safe: 'Shared-screen safety' };
+
+/**
+ * Settings → AI insights: beside each video feature's estimate, its real average share of this school's saved checks
+ * (last 90 days), and a line with the real average video check and scoring call. Saved calls only, no AI.
+ */
+function cqInRealCosts() {
+    if (!$('#cqInCard').length) return;
+    cqGet('settings/ai-costs', {}, function (res) {
+        var c = res.data || {};
+        (c.video || []).forEach(function (x) {
+            var cell = $('#cqIn_' + x.feature).closest('.cq-row').find('.cq-in-cost');
+            if (!cell.length) return;
+            cell.find('.cq-in-real').remove();
+            cell.append('<div class="small cq-in-real" style="color:var(--cq-healthy)">' + (x.checks ? 'real ' + cqVcMoney(x.averageUsd) +
+                ' avg · ' + Number(x.checks) + ' check' + (x.checks === 1 ? '' : 's') : 'no real checks yet') + '</div>');
+        });
+        $('#cqInReal').remove();
+        $('#cqInEst').after('<div class="small mt-2" id="cqInReal"><i class="fa fa-database mr-1"></i>Real costs, last ' + Number(c.days || 90) + ' days: ' +
+            (c.videoChecks ? 'video check ' + cqVcMoney(c.videoAverageUsd) + ' avg over ' + Number(c.videoChecks) : 'no video checks yet') + ' · ' +
+            (c.scoringChecks ? 'AI scoring call (carries the transcript features) ' + cqVcMoney(c.scoringAverageUsd) + ' avg over ' + Number(c.scoringChecks)
+                : 'no AI scoring calls yet') + '. Every call\'s tokens and cost are saved in AI_API_CALL.</div>');
+    }, function () { /* estimates still show */ });
 }
