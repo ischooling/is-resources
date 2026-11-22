@@ -554,6 +554,9 @@ function getPublishMonthlyPaySlip(teacherId,startDate,endDate,publishDate,modeOf
 	publishPaySlipDTO['teacherId'] = teacherId;
 	publishPaySlipDTO['publishDate'] = publishDate;
 	publishPaySlipDTO['modeOfTransfer'] = modeOfPayment;
+	// Who is publishing: sent in the (encrypted) payload so the server can record createdBy/updatedBy even when
+	// the request carries only a visitor token (no signed-in session). USER_ID is the signed-in admin's id.
+	publishPaySlipDTO['userId'] = (typeof USER_ID !== 'undefined' && USER_ID) ? USER_ID : $("#userId").val();
 	authentication['hash'] = getHash();
 	authentication['schoolId'] = SCHOOL_ID;
 	authentication['schoolUUID'] = SCHOOL_UUID;
@@ -571,7 +574,7 @@ function publishMonthlyPaySlip(teacherId,startDate,endDate,modeOfPayment){
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
-		url : getURLFor('/dashboard','publish-teacher-monthly-pay-slip'),
+		url : getURLFor('dashboard','publish-teacher-monthly-pay-slip'),
 		data : JSON.stringify(getPublishMonthlyPaySlip(teacherId,startDate,endDate,publishDate,modeOfPayment)),
 		dataType : 'json',
 		cache : false,
