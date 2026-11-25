@@ -5,7 +5,7 @@
  */
 
 var cq = {
-    from: '', to: '', tab: 'overview', canEdit: false, enabled: false,
+    from: '', to: '', tab: 'overview', canEdit: false, enabled: false, videoEnabled: false,
     charts: {}, sessionsTable: null, teachersTable: null, teacherFilter: null, teacherReport: null,
     detail: null, editing: false, dtab: 'facts', transcript: null, tagCatalog: [], draft: null, clipStop: null,
     vc: null, vcTimer: null, ai: null, inCanEdit: false
@@ -22,6 +22,7 @@ function cqInit() {
     cqGet('status', {}, function (res) {
         cq.canEdit = !!res.canEdit;
         cq.enabled = !!res.enabled;
+        cq.videoEnabled = !!res.videoEnabled;
         $('#cqRoot .cq-edit-only').prop('hidden', !cq.canEdit);
         cqLoadTags();
         $('#cqBanner').html(cq.enabled ? '' :
@@ -2690,6 +2691,7 @@ function cqCamRenderIds(p) {
     var html = '<div class="font-weight-bold mb-2">' + items.length + ' ID' + (items.length === 1 ? '' : 's') + ' · ' + Number(p.found) + ' found' +
         (p.toCheck ? ' · ' + p.toCheck + ' to check' : '') + '</div>' +
         '<div class="cq-table-wrap"><table class="table table-sm mb-0 cq-cam-table"><thead><tr><th>Session ID</th><th>Date</th><th>Teacher</th><th>Class</th><th>Type</th>' +
+        '<th class="text-right">Min</th><th class="text-right">Students</th>' +
         '<th>Camera data</th><th class="text-right">Cost</th><th></th></tr></thead><tbody>' + items.map(function (it) {
             var id = '<td><code>' + cqEsc(it.sessionKey) + '</code></td>';
             if (it.row) return '<tr>' + id + cqCamRow(it.row).replace(/^<tr>/, '');
@@ -2751,6 +2753,7 @@ function cqCamRenderList(p) {
         return;
     }
     var html = '<div class="cq-table-wrap"><table class="table table-sm mb-2 cq-cam-table"><thead><tr><th>Date</th><th>Teacher</th><th>Class</th><th>Type</th>' +
+        '<th class="text-right">Min</th><th class="text-right">Students</th>' +
         '<th>Camera data</th><th class="text-right">Cost</th><th></th></tr></thead><tbody>' + rows.map(cqCamRow).join('') + '</tbody></table></div>';
     var last = Math.min(p.start + rows.length, p.filtered);
     html += '<div class="d-flex align-items-center justify-content-between small text-muted"><span>' + (p.start + 1) + '–' + last + ' of ' + p.filtered + '</span>' +
@@ -2773,7 +2776,10 @@ function cqCamRow(r) {
         action = '<a href="javascript:void(0)" onclick="cqCamCheckOne(' + Number(r.id) + ', this)">' + (r.status === 'FAILED' ? 'Retry' : 'Check') + '</a>';
     }
     return '<tr><td class="text-nowrap">' + cqEsc(r.sessionStart || '') + '</td><td>' + cqEsc(r.teacherName || '') + '</td><td>' + cqEsc(r.title || '') + '</td>' +
-        '<td class="text-nowrap">' + cqEsc(r.kindLabel || '') + '</td><td><span class="cq-cam-badge ' + cqEsc(r.status) + '">' + cqEsc(CQ_CAM_LABEL[r.status] || r.status) +
+        '<td class="text-nowrap">' + cqEsc(r.kindLabel || '') + '</td>' +
+        '<td class="text-right">' + (r.durationMinutes != null ? r.durationMinutes : '—') + '</td>' +
+        '<td class="text-right">' + (r.studentCount != null ? r.studentCount : '—') + '</td>' +
+        '<td><span class="cq-cam-badge ' + cqEsc(r.status) + '">' + cqEsc(CQ_CAM_LABEL[r.status] || r.status) +
         '</span> <span class="small text-muted">' + detail + '</span></td><td class="text-right">' + (Number(r.costUsd) > 0 ? cqVcMoney(r.costUsd) : '—') + '</td>' +
         '<td class="text-right text-nowrap">' + action + '</td></tr>';
 }
@@ -2848,9 +2854,12 @@ function cqCamRenderRun() {
         html += '<div class="cq-cam-run"><div style="flex:1;min-width:240px"><div class="font-weight-bold">Check ' + n + ' session' + (n === 1 ? '' : 's') + ', one at a time</div>' +
             '<div class="small text-muted">About ' + cqVcMoney(cost) + ' · a few minutes each' + (s.toCheck > s.runMax ? ' · ' + s.toCheck + ' to check, ' + s.runMax + ' per run (setting)' : '') +
             (cqCam.mode === 'ids' ? ' · only the session IDs you listed' : '') + ' · sessions with saved camera data are skipped</div></div>' +
-            (cqCam.confirm ? '<span class="small">Spend about ' + cqVcMoney(cost) + '?</span><button type="button" class="btn btn-sm btn-primary" onclick="cqCamStart(this)">Yes, start</button>' +
-                '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="cqCam.confirm=false;cqCamRenderRun()">Cancel</button>'
-                : '<button type="button" class="btn btn-sm btn-primary" onclick="cqCam.confirm=true;cqCamRenderRun()"><i class="fa fa-play mr-1"></i>Start checking</button>') + '</div>';
+            (cq.videoEnabled
+                ? (cqCam.confirm ? '<span class="small">Spend about ' + cqVcMoney(cost) + '?</span><button type="button" class="btn btn-sm btn-primary" onclick="cqCamStart(this)">Yes, start</button>' +
+                    '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="cqCam.confirm=false;cqCamRenderRun()">Cancel</button>'
+                    : '<button type="button" class="btn btn-sm btn-primary" onclick="cqCam.confirm=true;cqCamRenderRun()"><i class="fa fa-play mr-1"></i>Start checking</button>')
+                : '<span class="small text-muted"><i class="fa fa-lock mr-1"></i>AI Insights is off. Turn it on in <a href="javascript:void(0)" onclick="cqTab(\'settings\')">Settings</a> to run checks.</span>'
+            ) + '</div>';
     } else if (s && s.sessions > 0 && s.toCheck === 0) {
         html += '<div class="cq-cam-run small text-muted"><i class="fa fa-check-circle mr-1" style="color:var(--cq-healthy)"></i>Every session here already has camera data, or has no video to check. Nothing to send.</div>';
     }

@@ -18,6 +18,7 @@ async function teacherScreeningProfileOnloadFunction(){
         theme: "bootstrap4",
         minimumResultsForSearch: Infinity
     });
+    initScreeningLanguageAvailabilityFilters("teacherScreeningFilterForm");
     $("#teacherScreeningFilterForm #filterGrades").select2({
         placeholder: "Select Grades",
         theme:"bootstrap4",
@@ -84,7 +85,8 @@ function bindTeacherScreeningData(responseData) {
                             source 
                             ? `<br/><p class="bg-success rounded p-1 w-fit-content mt-1 text-white">${source}</p>`
                             : ""
-                        }                            
+                        }
+                        ${renderScreeningLanguageAvailability(teacher)}
                     </td>
                     <td>${teacher.country} | ${teacher.state} | ${teacher.city}</td>
                     <td>${teacher.lastSalary ? teacher.currency + ' ' + teacher.lastSalary : ''}</td>
@@ -180,6 +182,7 @@ async function loadTeacherScreeningData() {
         payload['employeeType'] = $("#teacherScreeningFilterForm #filterEmployeeType").val();
         payload['standards'] = $("#teacherScreeningFilterForm #filterGrades").val();
         payload['subjects'] = $("#teacherScreeningFilterForm #filterCourses").val();
+        Object.assign(payload, readScreeningLanguageAvailabilityFilters("teacherScreeningFilterForm"));
         payload['pageNo'] = CURRENT_PAGE_TEACHER_SCREENING;
         payload['pageSize'] = $("#teacherScreeningFilterForm #pageSize").val().trim();
         var responseData = await getDashboardDataBasedUrlAndPayloadWithParentUrl(true, true, 'get-teacher-interview-data', payload, '/teacher/signup');
@@ -203,6 +206,7 @@ function resetTeacherScreening() {
     $('#teacherScreeningFilterForm #filterEmployeeType').val('').trigger('change');
     $('#teacherScreeningFilterForm #filterGrades').val('').trigger('change');
     $('#teacherScreeningFilterForm #filterCourses').val('').trigger('change');
+    resetScreeningLanguageAvailabilityFilters("teacherScreeningFilterForm");
     CURRENT_PAGE_TEACHER_SCREENING = 1;
     $('#teacherScreeningFilterForm #pageSize').val('10')
 }

@@ -114,6 +114,7 @@ function teacherScreeningFilter(){
                     </div>
                 </div>
             </div>
+            ${screeningLanguageAvailabilityFilterHtml(true)}
             <div class="d-flex justify-content-end mt-3">
                 <button type="button" class="btn btn-danger" onclick="resetTeacherScreening();"><i class="fa fa-undo"></i>&nbsp;Reset</button>
                 <button type="button" class="btn btn-success ml-2" onclick="applyFilterTeacherScreening();"><i class="fa fa-search"></i>&nbsp;Search</button>

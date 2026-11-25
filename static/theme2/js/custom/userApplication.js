@@ -70,6 +70,7 @@ async function userApplicationProfileOnloadFunction(){
         theme: "bootstrap4",
         minimumResultsForSearch: Infinity
     });
+    initScreeningLanguageAvailabilityFilters("userScreeningFilterForm");
     $("#userScreeningFilterForm #filterGrades").val("").trigger("change");
     $("#userScreeningFilterForm #filterCourses").val("").trigger("change");
     USER_APPLICATION_SORT_STATE.sortBy = "";
@@ -140,7 +141,7 @@ function bindUserApplicationData(responseData) {
                     </td>
                     <td>${user.country} | ${user.state} | ${user.city}</td>
                     <td>${user.lastSalary ? user.currency + ' ' + user.lastSalary : ''}<br>${user.lastOrgName || ''}</td>
-                    <td>${user.appliedUserRole || ''}${user.employeeType ? ` | ${user.employeeType}` : ''}</td>
+                    <td>${user.appliedUserRole || ''}${user.employeeType ? ` | ${user.employeeType}` : ''}${renderScreeningLanguageAvailability(user)}</td>
                     <td>
                         ${user?.attachments?.uploadDocumentUserResumeURL ? 
                             `<a href="javascript:void(0)"  class="btn btn-sm btn-outline-primary" onclick="viewResumeAndPhoto(\'${user?.attachments?.uploadDocumentUserResumeURL}\','viewApplicantsAttachementModal')">View Resume</a>`
@@ -389,6 +390,7 @@ async function loadUserApplicationData(isToday, callFrom, isTeaching) {
         payload['country'] = USER_APPLICATION_FILTER_STATE.filterValues.country || "";
         payload['status'] = USER_APPLICATION_FILTER_STATE.filterValues.status || "";
         payload['employeeType'] = USER_APPLICATION_FILTER_STATE.filterValues.employeeType || "";
+        Object.assign(payload, USER_APPLICATION_FILTER_STATE.filterValues.languageAvailability || {});
         // Sorting filter se alag chalti hai — S.No. header icons se control hoti hai.
         var sortBy = USER_APPLICATION_SORT_STATE.sortBy;
         if (sortBy === "id") {
@@ -455,6 +457,7 @@ function resetUserApplication() {
     $('#userScreeningFilterForm #filterCountryId').val('0').trigger('change');
     $("#filterAppliedUserRole").val("").trigger("change");
     $("#filterEmployeeType").val("").trigger("change");
+    resetScreeningLanguageAvailabilityFilters("userScreeningFilterForm");
     $("#applicantsStatus").val("").trigger("change");
     CURRENT_PAGE_USER_APPLICATION = 1;
     $('#userScreeningFilterForm #pageSize').val('10');
@@ -476,6 +479,7 @@ function updateFormState() {
         startDate: $("#userScreeningFilterForm #filterStartDate").val(),
         endDate:  $("#userScreeningFilterForm #filterEndDate").val(),
         assignTo:  $("#userScreeningFilterForm #filterAssignedTo").val(),
+        languageAvailability: readScreeningLanguageAvailabilityFilters("userScreeningFilterForm"),
     };
 }
 

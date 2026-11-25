@@ -271,6 +271,7 @@ function userScreeningFilter(){
                     </div>
                 </div>
             </div>
+            ${screeningLanguageAvailabilityFilterHtml(false)}
             <div class="d-flex justify-content-end mt-3">
                 <button type="button" class="btn btn-danger" onclick="resetUserApplication();"><i class="fa fa-undo"></i>&nbsp;Reset</button>
                 <button type="button" class="btn btn-success ml-2" onclick="applyFilterUserApplication();"><i class="fa fa-search"></i>&nbsp;Search</button>
@@ -1432,5 +1433,127 @@ function getVerificationOtherRolesModalContent(data) {
 				</div>
 			</div>
 		</div>`;
+    return html;
+}
+
+/* ---------------------------------------------------------------------------
+   Teacher languages + part-time availability (filters and list display).
+   Shared by the all-applicants list (userApplication*) and the teacher list
+   (teacherScreeningProfile*). Values match LANGUAGE_MASTER / the website form.
+--------------------------------------------------------------------------- */
+var SCREENING_LANGUAGE_OPTIONS = ["English", "Hindi", "Arabic", "Spanish", "French", "Portuguese", "Mandarin", "Urdu",
+    "Bengali", "Tamil", "Telugu", "Marathi", "Gujarati", "Punjabi", "Malayalam", "Kannada", "German", "Italian",
+    "Russian", "Japanese", "Korean", "Turkish", "Indonesian", "Malay", "Filipino", "Swahili", "Persian"];
+var SCREENING_DAY_OPTIONS = [["MON", "Mon"], ["TUE", "Tue"], ["WED", "Wed"], ["THU", "Thu"], ["FRI", "Fri"], ["SAT", "Sat"], ["SUN", "Sun"]];
+
+function screeningEscape(value) {
+    return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+function screeningTimeLabel(hhmm) {
+    var parts = String(hhmm || "").split(":");
+    var h = parseInt(parts[0], 10), m = parseInt(parts[1], 10);
+    if (isNaN(h) || isNaN(m)) return "";
+    return ((h % 12) || 12) + ":" + String(m).padStart(2, "0") + " " + (h < 12 ? "AM" : "PM");
+}
+
+function screeningTimeOptions() {
+    var html = `<option value=""></option>`;
+    for (var mins = 0; mins < 24 * 60; mins += 30) {
+        var value = String(Math.floor(mins / 60)).padStart(2, "0") + ":" + String(mins % 60).padStart(2, "0");
+        html += `<option value="${value}">${screeningTimeLabel(value)}</option>`;
+    }
+    return html;
+}
+
+function screeningViewerTimezone() {
+    try { return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"; } catch (e) { return "UTC"; }
+}
+
+/* nested=true wraps each field as col > .custom-field (teacher list markup). */
+function screeningLanguageAvailabilityFilterHtml(nested) {
+    function col(cls, inner) {
+        return nested
+            ? `<div class="${cls}"><div class="custom-field">${inner}</div></div>`
+            : `<div class="${cls} custom-field">${inner}</div>`;
+    }
+    var colCls = "col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12";
+    return `<div class="row mt-3">
+        ${col(colCls, `<select id="filterLanguages" multiple="" class="form-control">
+                ${SCREENING_LANGUAGE_OPTIONS.map(l => `<option value="${l}">${l}</option>`).join("")}
+            </select>
+            <label>Languages</label>`)}
+        ${col(colCls, `<select id="filterMinLevel" class="form-control">
+                <option value=""></option>
+                <option value="Basic">Basic or higher</option>
+                <option value="Fluent">Fluent or higher</option>
+                <option value="Native">Native</option>
+            </select>
+            <label>Language Level</label>`)}
+        ${col(colCls, `<select id="filterAvailableDays" multiple="" class="form-control">
+                ${SCREENING_DAY_OPTIONS.map(d => `<option value="${d[0]}">${d[1]}</option>`).join("")}
+            </select>
+            <label>Available On (Part-Time)</label>`)}
+        <div class="${colCls}">
+            <div class="d-flex gap-5">
+                <div class="custom-field flex-fill"><select id="filterAvailableFrom" class="form-control">${screeningTimeOptions()}</select><label>Free From</label></div>
+                <div class="custom-field flex-fill"><select id="filterAvailableTo" class="form-control">${screeningTimeOptions()}</select><label>Free To</label></div>
+            </div>
+            <small class="text-muted">Your time (${screeningEscape(screeningViewerTimezone())})</small>
+        </div>
+    </div>`;
+}
+
+function initScreeningLanguageAvailabilityFilters(formId) {
+    var f = "#" + formId;
+    $(`${f} #filterLanguages`).select2({ placeholder: "Select Languages", theme: "bootstrap4", allowClear: true, multiple: true });
+    $(`${f} #filterMinLevel`).select2({ placeholder: "Any Level", theme: "bootstrap4", minimumResultsForSearch: Infinity, allowClear: true });
+    $(`${f} #filterAvailableDays`).select2({ placeholder: "Any Day", theme: "bootstrap4", allowClear: true, multiple: true });
+    $(`${f} #filterAvailableFrom`).select2({ placeholder: "From", theme: "bootstrap4", allowClear: true });
+    $(`${f} #filterAvailableTo`).select2({ placeholder: "To", theme: "bootstrap4", allowClear: true });
+}
+
+function readScreeningLanguageAvailabilityFilters(formId) {
+    var f = "#" + formId;
+    var from = $(`${f} #filterAvailableFrom`).val() || "";
+    var to = $(`${f} #filterAvailableTo`).val() || "";
+    return {
+        languages: $(`${f} #filterLanguages`).val() || [],
+        minLevel: $(`${f} #filterMinLevel`).val() || "",
+        availableDays: $(`${f} #filterAvailableDays`).val() || [],
+        // Both ends needed; "To" must be after "From" (backend ignores it otherwise).
+        availableFrom: from && to && to > from ? from : "",
+        availableTo: from && to && to > from ? to : "",
+        viewerTimezone: screeningViewerTimezone()
+    };
+}
+
+function resetScreeningLanguageAvailabilityFilters(formId) {
+    var f = "#" + formId;
+    ["#filterLanguages", "#filterMinLevel", "#filterAvailableDays", "#filterAvailableFrom", "#filterAvailableTo"]
+        .forEach(id => $(`${f} ${id}`).val(null).trigger("change"));
+}
+
+/* Part-Time days/time line + language badges for one applicant row. */
+function renderScreeningLanguageAvailability(applicant) {
+    var html = "";
+    var a = applicant && applicant.availability;
+    if (a && a.days) {
+        var dayLabels = String(a.days).split(",").map(d => {
+            var match = SCREENING_DAY_OPTIONS.find(x => x[0] === d);
+            return match ? match[1] : d;
+        }).join(", ");
+        html += `<div class="mt-1 font-12"><i class="fa fa-clock-o"></i> ${screeningEscape(dayLabels)} · `
+            + `${screeningEscape(screeningTimeLabel(a.startTime))}–${screeningEscape(screeningTimeLabel(a.endTime))} `
+            + `<span class="text-muted">(${screeningEscape(a.timezone)})</span></div>`;
+    }
+    var langs = (applicant && applicant.speakingLanguages) || [];
+    if (langs.length) {
+        html += `<div class="mt-1">` + langs.map(l =>
+            `<span class="badge badge-light border mr-1 mb-1 font-11" style="text-transform:none;letter-spacing:0;font-weight:500;">${screeningEscape(l.language)} (${screeningEscape(l.proficiency)})</span>`
+        ).join("") + `</div>`;
+    }
     return html;
 }

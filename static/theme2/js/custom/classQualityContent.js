@@ -55,7 +55,7 @@ function getClassQualityContent(title) {
             <li class="nav-item"><a class="nav-link active" href="javascript:void(0)" data-tab="overview" onclick="cqTab('overview')">Overview</a></li>
             <li class="nav-item"><a class="nav-link" href="javascript:void(0)" data-tab="sessions" onclick="cqTab('sessions')">Sessions</a></li>
             <li class="nav-item"><a class="nav-link" href="javascript:void(0)" data-tab="teachers" onclick="cqTab('teachers')">Teacher reports</a></li>
-            <li class="nav-item"><a class="nav-link" href="javascript:void(0)" data-tab="camera" onclick="cqTab('camera')"><i class="fa fa-video-camera mr-1"></i>Camera data via AI</a></li>
+            <li class="nav-item"><a class="nav-link" href="javascript:void(0)" data-tab="camera" onclick="cqTab('camera')"><i class="fa fa-video-camera mr-1"></i>AI Insights</a></li>
             <li class="nav-item"><a class="nav-link" href="javascript:void(0)" data-tab="settings" onclick="cqTab('settings')">Settings</a></li>
         </ul>
 
