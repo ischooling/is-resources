@@ -97,12 +97,12 @@ function announcementModalContent(data){
             <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">`;
                     html+=
-                    `<div class="modal-header bg-primary-gradient text-white pt-2 pb-2 flex-wrap">
-                        <h5 class="modal-title font-weight-bold">
+                    `<div class="modal-header bg-primary-gradient text-white pt-2 pb-2 flex-wrap" style="position: relative;">
+                        <h5 class="modal-title font-weight-bold" style="padding-right: 45px; word-break: break-word;">
                             <img src="${PATH_FOLDER_IMAGE2}announcements_Icon.png" class="mr-2" width="35px"/>
                             ${data.announcement.announceTitle}
                         </h5>
-                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="position: absolute; top: 0; right: 0; margin: 0;">
                             <span aria-hidden="true">&times;</span>
                         </button>
                         <div class="border  rounded-10 mt-3 p-2 w-100" style="background-color: rgba(255, 255, 255, 0.1);border-color:rgba(255, 255, 255, 0.3) !important">

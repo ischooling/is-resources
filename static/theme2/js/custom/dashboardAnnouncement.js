@@ -245,7 +245,12 @@ function updateSchoolAnnounce(userId,announceId,controllType,moduleId) {
 				showMessageTheme2(0, data['message']);
 			} else {
 				showMessageTheme2(1, data['message']);
-				setTimeout(function (){callDashboardPageSchool(moduleId,'school-announce-list');},1000);
+				if (typeof window.refreshAnnouncementList === 'function' && $('#announceListTableContainer').length) {
+					// Stay on the list: re-run the current search with the same filters / page
+					window.refreshAnnouncementList();
+				} else {
+					setTimeout(function (){callDashboardPageSchool(moduleId,'school-announce-list');},1000);
+				}
 			}
 			return false;
 		}
