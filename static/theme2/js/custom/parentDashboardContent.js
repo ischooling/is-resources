@@ -68,8 +68,13 @@ async function renderParentDashboardContent(){
 function renderParentChildSelectionScreen(){
     hideParentChildPickerChrome();
     $('#dashboardContentInHTML').html(getParentChildSelectionContent(STUDENT_LIST));
+    // Contact check first; the app-install popup follows once it is closed (or has nothing to show).
     if(typeof initAppInstallNotification === 'function'){
-        initAppInstallNotification();
+        if(typeof contactCheckThen === 'function'){
+            contactCheckThen(function(){ initAppInstallNotification(); });
+        }else{
+            initAppInstallNotification();
+        }
     }
 }
 

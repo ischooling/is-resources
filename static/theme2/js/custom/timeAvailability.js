@@ -4786,7 +4786,8 @@ function getColorByEntityType(entityType){
 	if(entityType=='COUNSELORMEET' 
 		|| entityType=='CUSTOM' 
 		
-		|| entityType=='PTM' 
+		|| entityType=='PTM'
+		|| entityType=='DEMO_TRANSLATION'
 		|| entityType=='MEETINS'|| entityType=='MEETINGS'){
 		actualEntityType='STUDENT_DOUBT_SESSION';
 	}else if(entityType=='REQUESTDEMO' 

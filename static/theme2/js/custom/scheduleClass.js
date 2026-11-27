@@ -116,17 +116,6 @@ function toggleFilter(elementID){
 	$('#'+elementID).stop().slideToggle();
 }
 
-function updateClassroomSession(moduleId, role, formId){
-	if($('#meetingResult').val()=="N/A" || $('#meetingResult').val()==""){
-		showMessage(true, 'Please Choose Mark Session');
-	}else{
-		if($('#meetingResult').val()=="Cancelled"){
-			showWarningMessage('Are you sure you want to cancel class? Once cancelled, you would not be able to change class status again.', 'submitMeetingForStudentSessionSlots("updateMeetingResultForm","SCHOOL","UPDATE",'+moduleId+', "STUDENT_DOUBT_SESSION", \''+role+'\')')
-		}else{
-			submitMeetingForStudentSessionSlots(formId,"SCHOOL","UPDATE",moduleId, "STUDENT_DOUBT_SESSION", role);
-		}
-	}
-}
 function validateRequestForSubmitMeetingForStudentSessionSlots(formId,moduleId,controllType){
 	//	if(controllType=='ADD'){
 	//		if($('#standardId').val()==0 || $('#standardId').val()==undefined){
@@ -182,49 +171,6 @@ function validateRequestForSubmitMeetingForStudentSessionSlots(formId,moduleId,c
 		return true;
 	}
 
-
-function meetingResultModal(meetingId, userId,meetingresult, meetingCurStatus, role,showClassCancelOption, classType){
-	$('#updateMeetingResultModal').modal('show');
-	$('#updateMeetingResultForm #userId').val(userId);
-	$('#updateMeetingResultForm #meetingId').val(meetingId);
-	$('#updateMeetingResultForm #meetingCurStatus').val(meetingCurStatus);
-	var classStartDateTime = new Date($(".markSession"+meetingId).attr("data-start-dateTime"));
-
-	html='<option value="" selected>Select Status</option>';
-	var isPTM = (classType == 'PTM' || classType == 'Parent Teacher Meeting');
-	if (isPTM) {
-		html += '<option value="Missed by Student">Missed by Student</option>';
-		html += '<option value="Completed">Completed</option>';
-		// PTM only: every teacher can cancel; for the others the existing cancel-rights flag applies
-		if (showClassCancelOption == 'Y' || 'TEACHER' == role) {
-			html += '<option value="Cancelled">Cancel Meeting</option>';
-		}
-	} else {
-		html+='<option value="Reschedule Session">Reschedule Class</option>';
-		html+='<option value="Missed by Student">Missed by Student</option>';
-		if('TEACHER'==role){
-		}else{
-			html+='<option value="Missed by Teacher">Missed by Teacher</option>';
-		}
-		html+='<option value="Completed">Completed</option>';
-		if (showClassCancelOption == 'Y' && 'TEACHER' != role) {
-			html += '<option value="Cancelled">Cancel Class</option>';
-		}
-	}
-	$('#updateMeetingResultForm #meetingResult').html(html);
-	if(new Date() > classStartDateTime){
-		$('#updateMeetingResultForm #meetingResult option[value="Cancelled"]').remove();
-	}
-//	$('#updateMeetingResultForm #meetingResult option:selected').val(meetingresult);
-	if(meetingresult==''){
-		if($('#updateMeetingResultForm #meetingResult option:selected').val().trim()==''){
-		}else{
-			$('#updateMeetingResultForm #meetingResult').val($('#updateMeetingResultForm #meetingResult option:selected').text());
-		}
-	}else{
-		$('#updateMeetingResultForm #meetingResult').val(meetingresult);
-	}
-}
 
 function meetingUrlModalTeacher(meetingId,userId,meetingUrl,mailSendStatus,urlRemarks){
 	if(meetingUrl=='N/A'){

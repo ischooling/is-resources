@@ -998,10 +998,10 @@ function callForRequestDemoForm(formId, moduleId, folderName, domainName) {
       } else {
         var url = "";
         if (ENVIRONMENT == "uat") {
-          url = "http://164.52.208.63:8070/common/book-a-demo-thank-you";
+          url = "http://65.2.161.149:8070/common/book-a-demo-thank-you";
         } else if (ENVIRONMENT == "uat2") {
           url =
-            "http://164.52.208.63:8080/common/book-a-demo-thank-you";
+            "http://65.2.161.149:8080/common/book-a-demo-thank-you";
         } else if (ENVIRONMENT == "dev") {
           url = "http://localhost:8080/common/book-a-demo-thank-you";
         } else {

@@ -121,7 +121,7 @@ function getClassroomBody(result, userId, role, resetMeetingRights, showClassCan
 		resetClassroomSessionContent='';
 		meetingResultContent='';
 		if(v.meetingResult!=''){
-			meetingResultContent='<strong>'+(v.meetingResult=="Reschedule Session"?'Reschedule Class':v.meetingResult)+'</strong><br/>';
+			meetingResultContent='<strong>'+(v.meetingResult=="Reschedule Session"?'Reschedule Class':v.meetingResult)+'</strong><br/>'+classStatusInfoHtml(v);
 			if(v.meetingResult != "Cancelled"){
 				updateClassroomSessionContent='<a id="updateStatus'+v.meetingId+'" href="javascript:void(0);" onclick="meetingResultModal('+v.meetingId+','+userId+',\''+v.meetingResult+'\',\''+v.meetingCurStatus+'\',\''+role+'\',\''+showClassCancelOption+'\',\''+v.meetingType+'\')">Change</a>';
 				if(resetMeetingRights=='Y'){
@@ -262,7 +262,7 @@ function getClassroomBody(result, userId, role, resetMeetingRights, showClassCan
 					+'<td class="joinView'+v.meetingId+'">'+joinClass+'</td>';
 				}
 				var classDateTime = v.adminTimezone.split("-")
-				html+='<td class="markSession'+v.meetingId+'" data-showClassCancelOption="'+showClassCancelOption+'" data-start-dateTime="'+classDateTime[0]+'">'+markSession+'</td>';
+				html+='<td class="markSession'+v.meetingId+'" data-showClassCancelOption="'+showClassCancelOption+'" data-start-dateTime="'+classDateTime[0]+'" data-minutes-to-start="'+v.minutesToStart+'" data-loaded-at="'+Date.now()+'" data-meeting-type="'+v.meetingType+'">'+markSession+(role!='TEACHER' && role!='STUDENT' && role!='PARENT' ? '<br/><a href="javascript:void(0);" onclick="showClassHistory(\'class\', '+v.meetingId+')"><i class="fa fa-history"></i> History</a>' : '')+'</td>';
 				// if('TEACHER'!=role){
 				// 	html+='<td>'+v.classStatus+'</td>';
 				// }
@@ -382,6 +382,7 @@ function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 							+'<option value="STUDENT_DOUBT_SESSION">One Day Class</option>'
 							+'<option value="PTM">PTM</option>'
 							+'<option value="CUSTOM">CUSTOM</option>'
+							+'<option value="DEMO_TRANSLATION">DEMO/TRANSLATION</option>'
 						+'</select>'
 						+'<label for="classCreateFor">Select Class For</label>');
 				html+=classroomFilterField('col-md-3 col-sm-3 col-xs-12',
@@ -438,6 +439,19 @@ function getClassroomSessionFilter(roleAndModule, schoolId, userId, role){
 							+'<option value="Reschedule Session">Reschedule Class</option>'
 							+'<option value="Missed by Student">Missed by Student</option>'
 							+'<option value="Missed by Teacher">Missed by Teacher</option>'
+							+'<option value="Cancelled">Cancelled</option>'
+						+'</select>'
+						+'<label for="markStatus">Class Status</label>');
+				}
+				if(role=='TEACHER'){
+					html+=classroomFilterField('col-md-3 col-sm-3 col-xs-12',
+						'<select name="markStatus" id="markStatus" class="form-control-field">'
+							+'<option value="">Select Class Status</option>'
+							+'<option value="NU">Not Updated</option>'
+							+'<option value="Completed">Completed</option>'
+							+'<option value="Reschedule Session">Reschedule Class</option>'
+							+'<option value="Missed by Student">Missed by Student</option>'
+							+'<option value="Cancelled">Cancelled</option>'
 						+'</select>'
 						+'<label for="markStatus">Class Status</label>');
 				}
@@ -576,8 +590,12 @@ function getUpdateManageMeetingResultModal(roleAndModule, role){
 						+'<div class="col-md-12 col-sm-12 col-12">'
 							+'<div class="form-group">'
 								+'<label>Update Class Status</label> '
-								+'<select class="form-control" name="meetingResult" id="meetingResult" required>'
+								+'<select class="form-control" name="meetingResult" id="meetingResult" required onchange="toggleMeetingReason()">'
 								+'</select>'
+							+'</div>'
+							+'<div class="form-group meeting-reason-group" style="display:none;">'
+								+'<label>Reason <span class="text-danger">*</span></label>'
+								+'<textarea class="form-control" name="meetingReason" id="meetingReason" rows="3" maxlength="1000"></textarea>'
 							+'</div>'
 						+'</div>'
 					+'</div>'
@@ -841,4 +859,13 @@ function dataExtraPagging(datalimit, moduleId){
 		html+='</ul>';
 	}
 	return html;
+}
+
+
+function classStatusInfoHtml(v) {
+	if (!v || !v.statusBy) {
+		return '';
+	}
+	var e = function (t) { return $('<div>').text(t == null ? '' : t).html(); };
+	return '<small style="display:block;line-height:1.3;color:#212529">By ' + e(v.statusBy) + '<br/>' + e(v.statusAt) + (v.statusReason ? '<br/>Reason: ' + e(v.statusReason) : '') + '</small>';
 }

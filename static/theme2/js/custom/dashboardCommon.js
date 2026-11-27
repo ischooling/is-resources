@@ -408,7 +408,8 @@ function enrollOnBehalfOf(btn) {
 			contentType: APPLICATION_JSON_VALUE,
 			data: JSON.stringify({
 				parentId: parentId,
-				sessionUserId: UNIQUEUUID,
+				sessionUserId: USER_ID,
+				rollNo: (commonProfileDTO.hasPartialChild === "Y" && commonProfileDTO.partialChildRollNo) || "",
 				location: (locationData != undefined && locationData != '') ? JSON.stringify(locationData) : ""
 			}),
 			dataType: "json",
@@ -421,7 +422,7 @@ function enrollOnBehalfOf(btn) {
 					// step is a hint — useAddWizardResume re-checks it against the child's
 					// real progress and corrects it if this guess is stale.
 					var addEnrollStep = addEnrollmentStepSlug(res.data && res.data.signupPage);
-					var addEnrollPath = "/" + SCHOOL_UUID + "/add-enrollment/" + parentId + "/" + UNIQUEUUID
+					var addEnrollPath = "/" + SCHOOL_UUID + "/add-enrollment/" + parentId + "/" + USER_ID
 						+ "/step/" + addEnrollStep;
 					var enrollUrl;
 					if (res.ssoToken) {
@@ -431,7 +432,7 @@ function enrollOnBehalfOf(btn) {
 							+ "&next=" + encodeURIComponent(addEnrollPath)
 							+ "&ae=Y";
 					} else {
-						enrollUrl = NEXTJS_APP_URL + SCHOOL_UUID + "/add-enrollment/" + parentId + "/" + UNIQUEUUID
+						enrollUrl = NEXTJS_APP_URL + SCHOOL_UUID + "/add-enrollment/" + parentId + "/" + USER_ID
 							+ "/step/" + addEnrollStep;
 					}
 					if (newTab) {

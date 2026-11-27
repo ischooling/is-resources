@@ -7957,6 +7957,10 @@ async function renderMissingFieldsModal(missingFieldsData, scheduleSourceData) {
     var html = getProfileModalHiddenFieldsHtml(data) + missingFieldsHtml;
     var allowClose = canCloseProfileModal(scheduleSourceData, missingFieldsData);
 
+    // Never on top of the contact-check popup: wait until it is closed.
+    if (typeof isContactCheckOpen === 'function' && isContactCheckOpen()) {
+        await contactCheckClosed();
+    }
     if ($("#profileFielddModal").length < 1) {
         $("body").append(getChunkProfileDataByUserModalContent());
     }
@@ -8803,7 +8807,8 @@ var getProfileDateInterVal = function () {
         if (ACTIVITY_CLASS_START_TIME.length > 0) {
             if (getFlag()) {
                 if(missingFields != undefined){
-                    if (!$('#profileFielddModal').hasClass("show") && hasMissingProfileFields(missingFields)) {
+                    if (!$('#profileFielddModal').hasClass("show") && hasMissingProfileFields(missingFields)
+                        && !(typeof isContactCheckOpen === 'function' && isContactCheckOpen())) {
                         var currentProfileModalBodyHtml = removeEmptyProfileModalSections($("#profileFielddModal .modal-body #requestProfileForm").html());
                         $("#profileFielddModal .modal-body #requestProfileForm").html(currentProfileModalBodyHtml);
                         if (hasRenderableProfileModalContent(currentProfileModalBodyHtml)) {

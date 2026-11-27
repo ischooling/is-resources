@@ -77,6 +77,12 @@ function submitSchoolHoliday(formId) {
 	fdata['schoolId']=SCHOOL_ID;
 	fdata['enrollType']=$("#"+formId+" #enrollType").val();
 	fdata['holidayFor']=$("#"+formId+" #holidayFor").val();
+	if(fdata['holidayFor']=='ALL'){
+		fdata['enrollType']='ALL';
+		fdata['standardId']=[];
+		fdata['batchId']=[];
+		fdata['studentId']=[];
+	}
 	fdata['holidayType']=$("#"+formId+" #holidayType").val();
 	
 	if($("#" + formId + " #enrollType").val()=='BATCH'){
@@ -92,7 +98,7 @@ function submitSchoolHoliday(formId) {
 	}else{
 		fdata['lmsPlatform']='37,39,41';
 	}
-	if($("#" + formId + " #holidayFor").val()=='TEACHER'){
+	if($("#" + formId + " #holidayFor").val()=='TEACHER' || $("#" + formId + " #holidayFor").val()=='ALL'){
 		fdata['lmsPlatform']='37,38,39,40,41';
 	}
 	fdata['holidayHome']= $("#"+formId+" #holidayHome").val();
@@ -100,7 +106,14 @@ function submitSchoolHoliday(formId) {
 	if(editor1!=undefined){
 		fdata['holidayRemark']= editor1.getData().trim();
 	}
-	
+	checkHolidayBookedClasses({
+		holidayFor: fdata['holidayFor'], enrollType: fdata['enrollType'], lmsPlatform: fdata['lmsPlatform'],
+		standardId: fdata['standardId'], batchId: fdata['batchId'], studentId: fdata['studentId'],
+		holidayDates: fdata['holidayStartDate']
+	}, function(){ saveSchoolHoliday(formId, fdata); });
+}
+
+function saveSchoolHoliday(formId, fdata) {
 	$.ajax({
 		type : "POST",
 		contentType : APPLICATION_JSON_VALUE,
@@ -559,13 +572,13 @@ function getFullCalendar(CALENDAR_EVENT_ARRAY, viewName, formId, userId, UNIQUEU
 					element.find('.fc-time').html(customTimeHtml);
 					var customEventTitleHtml =``;
 					if(!event.id.startsWith("activity", 0)){
-						if(event.category.startsWith("BATCH", 0) || event.eventType.startsWith("CUSTOM", 0) || event.eventType.startsWith("PTM", 0) || event.eventType.startsWith("SYS-TRAINING", 0)){
+						if(event.category.startsWith("BATCH", 0) || event.eventType.startsWith("CUSTOM", 0) || event.eventType.startsWith("PTM", 0) || event.eventType.startsWith("DEMO_TRANSLATION", 0) || event.eventType.startsWith("SYS-TRAINING", 0)){
 							customEventTitleHtml+=`<div class="text-dark text-center font-weight-bold mt-1 class-title">${event.title}</div>`;
 						}else{
 							customEventTitleHtml=`<div class="text-dark text-center font-weight-bold mt-1 class-title">${event.eventTitle}</div>`;
 						}
 						if(event.name != ""){
-							if(!event.category.startsWith("BATCH", 0) && !event.eventType.startsWith("PTM", 0) && !event.eventType.startsWith("SYS-TRAINING", 0)){
+							if(!event.category.startsWith("BATCH", 0) && !event.eventType.startsWith("PTM", 0) && !event.eventType.startsWith("DEMO_TRANSLATION", 0) && !event.eventType.startsWith("SYS-TRAINING", 0)){
 								var assignedPersonName = $.trim(((event.salutation && event.salutation !== "undefined" && event.salutation !== "null") ? event.salutation + ". " : "") + (event.name || ""));
 								customEventTitleHtml+=`<div class="text-dark pt-2 font-weight-semi-bold text-center assign-teacher-wrapper w-100">
 									<div>
@@ -825,7 +838,7 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 				<img src='${info.icon}' width="30" />
 			</div>
 			<div>`;
-				if(info.category.startsWith("GROUP", 0) || (info.eventType.startsWith("BATCH", 0) && info.category.startsWith("CLASS", 0)) ||  info.eventType.startsWith("CUSTOM", 0) || info.eventType.startsWith("PTM", 0) || info.eventType.startsWith("SYS-TRAINING", 0)){
+				if(info.category.startsWith("GROUP", 0) || (info.eventType.startsWith("BATCH", 0) && info.category.startsWith("CLASS", 0)) ||  info.eventType.startsWith("CUSTOM", 0) || info.eventType.startsWith("PTM", 0) || info.eventType.startsWith("DEMO_TRANSLATION", 0) || info.eventType.startsWith("SYS-TRAINING", 0)){
 					tooltipHTML+=`<h5 class="font-weight-bold font-16">${info.title}</h5>`;
 				}else{
 					tooltipHTML+=`<h5 class="font-weight-bold font-16">${element.find(".fc-title .class-title").text()}</h5>`;
@@ -865,7 +878,7 @@ async function updateEventIcons(info, element, todayClassArray, viewName, activi
 					`<ul class="vertical-nav-menu" id="main-nav1">${activitiesList}</ul>`;
 				}else{
 					if(info.name != ""){
-						if(!info.category.startsWith("BATCH", 0) && !info.eventType.startsWith("PTM", 0) && !info.eventType.startsWith("SYS-TRAINING", 0)){
+						if(!info.category.startsWith("BATCH", 0) && !info.eventType.startsWith("PTM", 0) && !info.eventType.startsWith("DEMO_TRANSLATION", 0) && !info.eventType.startsWith("SYS-TRAINING", 0)){
 							tooltipHTML+=
 							`<p class="mb-0">${USER_ROLE == "TEACHER"?'Student Name: ':'Teacher: '}</p>
 							<strong>${element.find(".assign-teacher-name").text()}</strong>`;

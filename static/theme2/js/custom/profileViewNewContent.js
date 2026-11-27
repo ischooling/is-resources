@@ -67,9 +67,16 @@ async function renderStudentProfilePage(extraParam) {
             mountAppInstallPromptAdminToggle($("#appInstallPromptMount"), PROFILE_RESPONSE_DATA.userId,
                 PROFILE_RESPONSE_DATA.appInstallPromptEnabled, true);
         }
+        if (PROFILE_RESPONSE_DATA.userId && typeof SpecialHelp !== "undefined") {
+            SpecialHelp.mountAdmin("#specialHelpAdminMount", PROFILE_RESPONSE_DATA.userId,
+                [PROFILE_RESPONSE_DATA.firstName, PROFILE_RESPONSE_DATA.lastName].filter(Boolean).join(" "));
+        }
         checkJoinedSports(data[4]);
         profileViewPageLoadEvent(data);
         initProfileContactVerificationForProfilePage();
+        if (typeof mountContactCheckSummary === "function") {
+            mountContactCheckSummary("#contactCheckSummaryMount");
+        }
         if (PROFILE_RESPONSE_DATA.userId && typeof initProfileQuietHoursSection === "function") {
             initProfileQuietHoursSection(PROFILE_RESPONSE_DATA.userId, {
                 summarySelector: "#profileQuietHoursSummary",
@@ -174,6 +181,10 @@ function getStudentProfilePageContent(data) {
                     <div class="col-xl-9 col-lg-8 col-md-12 col-sm-12 col-12 overflow-y-auto overflow-x-hidden profile-right-section position-relative" style="will-change:scroll-position">
                             <input type="hidden" id="timezoneInput" value="${data[0].timezoneName}" />`;
     html += personalInformation(data[0]);
+    // "My contact details" (contactCheck.js): only on the signed-in student's or parent's own page view.
+    if (USER_ROLE == "STUDENT" || USER_ROLE == "PARENT") {
+        html += `<div class="full" id="contactCheckSummaryMount"></div>`;
+    }
     html += guardianInformation(data[1]);
     html += academicInformation(data[2]);
     html += classesPreferredTimingInformation(data[3].prefTimeList, data[3].customFields)
@@ -497,6 +508,7 @@ function personalInformation(data) {
                     <div class="col-12">
                         ${addressElement(data.address)}
                     </div>
+                    <div class="col-12" id="specialHelpAdminMount"></div>
                     <div class="col-12 mt-2">
                         ${hobbiesContent(data.hobbies)}
                     </div>

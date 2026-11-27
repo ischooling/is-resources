@@ -1424,6 +1424,13 @@ function bindEmailLogProblems() {
 	$('#elProblemsClose').on('click', function () {
 		dialog.close();
 	});
+	// "Contact problems": the page for every channel, opened through its own menu entry (so only for admins who have it).
+	var contactProblemsLink = $('#main-nav a[onclick*="\'contact-problems\'"]').first();
+	$('#elContactProblemsRow').prop('hidden', contactProblemsLink.length === 0);
+	$('#elContactProblemsOpen').on('click', function () {
+		dialog.close();
+		contactProblemsLink.trigger('click');
+	});
 	$('#elProblemsForm').on('submit', function (e) {
 		e.preventDefault();
 		loadEmailLogProblems(1);

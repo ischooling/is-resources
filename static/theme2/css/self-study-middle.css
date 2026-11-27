@@ -1,0 +1,8 @@
+/*
+ * Self-Study Dashboard revamp — Middle School (6-8) band, "Quest Academy / Discovery Lab".
+ *
+ * Shell file for Phase 5 (see student-self-study-dashboard-innovation-plan.html, §17).
+ * Additive only — reuse classes/tokens from new-theme-style.css, never override them.
+ * Not yet linked from DashboardHeaderResourcePage.jsp; wire it in when Phase 5 adds
+ * real rules here, gated on [data-grade-band="MIDDLE"] set in Dashboard.jsp.
+ */

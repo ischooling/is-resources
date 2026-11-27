@@ -995,6 +995,14 @@ async function checkOutlookActivatedOnDashboard() {
 }
 
 async function renderProfileDataInModal(dashboardData){
+    // Contact check first: the profile-completing popup starts once it is closed (or has nothing to show).
+    if (typeof contactCheckThen === 'function') {
+        contactCheckThen(function () { startProfileDataInModal(dashboardData); });
+        return;
+    }
+    startProfileDataInModal(dashboardData);
+}
+function startProfileDataInModal(dashboardData){
     getMissingDataByUser(dashboardData.payload).then(function(){
         // Use a namespaced .off().on() so this handler is not stacked on every
         // renderProfileDataInModal call (which would re-run intl-tel init and

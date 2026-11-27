@@ -268,6 +268,7 @@ async function callUserLoginFun(formId, moduleId, loginType) {
 				customLoader(true);
 				// The user this tab's page was for, before this sign-in (session-out "continue" modal).
 				var tabAccount = typeof UNIQUEUUID === 'string' ? UNIQUEUUID : '';
+				console.log('login response :: ', data);
 				UNIQUEUUID=data['uniqueId']
 				var redirectUrl = data['redirectUrl'];
 				console.log('redirectUrl :: '+redirectUrl)

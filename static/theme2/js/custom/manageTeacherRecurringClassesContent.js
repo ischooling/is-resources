@@ -97,10 +97,12 @@ async function getRecurringClassesContentTeacher(titlle, roleAndModule, schoolId
                 +'</div>'
             +'</div>'
         +'</div>'
-	$('#dashboardContentInHTML').html(html);		
+	$('#dashboardContentInHTML').html(html);
+    if(!$('#remarksresetDelete1').length && typeof getWaringContent1 === 'function'){
+        getWaringContent1();
+    }
     getSessionMasterList('recurringClassFilter','activeSession', false)
     await getTeacherAssignedGrade('recurringClassFilter', USER_ID)
-    $("#activeSession").val('0').trigger('change');
     $(".filterDates").datepicker("destroy");
     $('.filterDates').datepicker({
         autoclose: true,
@@ -177,10 +179,14 @@ function getRecurringClassesBodyData(dataList){
                 html+='<div class="btn-group">'
                         +'<button type="button" class="btn btn-primary  dropdown-toggle  btn-sm"'
                             +'data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"'
-                            +'data-toggle="tooltip" title="Action"'
+                            +'data-toggle="tooltip" title="Action">'
                             +'<i class="fa fa-ellipsis-v"></i>'
                         +'</button>'
                         +'<div class="dropdown-menu">';
+                    html+= '<a href="javascript:void(0);" class="dropdown-item"'
+                        +'onclick="return sendRecurringWarning(\'Are you sure you want to inactivate this recurring class? Its upcoming classes will be removed and the class count given back.\', \'teacherDeleteRecurring(\\\''+v.id+'\\\')\')">'
+                        +'<i class=\'fa fa-circle inactive m-r-10\'></i>&nbsp;Inactive'
+                        +'</a>';
                     if(v.mailSent == 'Y'){
                         html+= '<a href="javascript:void(0);" class="dropdown-item"'
                             +'onclick="return sendRecurringWarning(\'Are you sure you want to resend mail?\', \'recurringMail(\\\''+v.id+'\\\',\\\''+v.moduleId+'\\\')\')">'

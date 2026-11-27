@@ -19,13 +19,13 @@ function getStudentLoginHistoryContent(pageData){
     <div class="full">
         <div class="row mb-3">
             <div class="col-xl-4 col-lg-4 col-md-6 col-12 mb-3">
-                ${getStudentLoginSummaryCard("First Login", pageData.summary.firstLoginDate, pageData.summary.firstLoginTime, "calendar-check-o", "success")}
+                ${getStudentLoginSummaryCard("First Log in", pageData.summary.firstLoginDate, pageData.summary.firstLoginTime, "calendar-check-o", "success")}
             </div>
             <div class="col-xl-4 col-lg-4 col-md-6 col-12 mb-3">
-                ${getStudentLoginSummaryCard("Last Login | Duration", pageData.summary.lastLogin, pageData.summary.lastLoginDuration, "clock-o", "warning")}
+                ${getStudentLoginSummaryCard("Last Log in | Duration", pageData.summary.lastLogin, pageData.summary.lastLoginDuration, "clock-o", "warning")}
             </div>
             <div class="col-xl-4 col-lg-4 col-md-6 col-12 mb-3">
-                ${getStudentLoginSummaryCard("Total Login | Duration", "Till Now", pageData.summary.totalLoginDuration, "line-chart", "primary")}
+                ${getStudentLoginSummaryCard("Total Log in | Duration", "Till Now", pageData.summary.totalLoginDuration, "line-chart", "primary")}
             </div>
         </div>
 

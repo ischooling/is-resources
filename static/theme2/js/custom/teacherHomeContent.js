@@ -787,6 +787,15 @@ function meetingStatusUpdateModal(data){
 	return html;
 }
 
+function toggleBulkStatusReason(select){
+	var reason = $(select).closest('td').find('.statusReason');
+	if($(select).val() == 'Reschedule Session'){
+		reason.show();
+	}else{
+		reason.val('').hide();
+	}
+}
+
 function meetingStatusUpdateModalBodyContent(data){
 	var html=``;
 	if(data.classDetails != '' && data.classDetails.classDetails.length>0){
@@ -797,16 +806,16 @@ function meetingStatusUpdateModalBodyContent(data){
                 <td>
                     <span class="full">Start: ${v.meetingStartDateTime}</span>
 					<span class="full">End: ${v.meetingEndDateTime}</span>
-					<span class="full">Type: ${v.meetingType == 'PTM' ? 'Parent Teacher Meeting' : 'One Day Class'}</span>
+					<span class="full">Type: ${v.meetingType == 'PTM' ? 'Parent Teacher Meeting' : v.meetingType == 'DEMO_TRANSLATION' ? 'Demo/Translation Class' : 'One Day Class'}</span>
                 </td>
 				<td style="vertical-align: top;">
 					<span class="full">Name: ${v.attendeName}</span>
 					<span class="full">Course: ${v.subjectName}</span>
 				</td>
 				<td>
-                    <select class="form-control status" name="meetingResult${i}" id="meetingResult${i}" required="">
+                    <select class="form-control status" name="meetingResult${i}" id="meetingResult${i}" required="" onchange="toggleBulkStatusReason(this)">
                         <option value="" selected="">Select Status</option>
-                        ${v.meetingType == 'PTM' ? `
+                        ${v.meetingType == 'PTM' || v.meetingType == 'DEMO_TRANSLATION' ? `
                         <option value="Missed by Student">Missed by Student</option>
                         <option value="Completed">Completed</option>
                         ` : `
@@ -815,6 +824,7 @@ function meetingStatusUpdateModalBodyContent(data){
                         <option value="Completed">Completed</option>
                         `}
                     </select>
+                    <textarea class="form-control mt-1 statusReason" rows="2" maxlength="1000" placeholder="Reason for reschedule" style="display:none;"></textarea>
                 </td>
             </tr>`;
 		});

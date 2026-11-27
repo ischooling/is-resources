@@ -3764,6 +3764,7 @@ function updateBulkClassStatus() {
 		return false;
 	}else{
 		var data=[];
+		var reasonMissing=false;
 		$("#teacherMeetingStatus #teacherMeetingStatusTable > tbody > tr").each(function(i){
 			var demoStatus = $(this).find(".status").val();
 			if(demoStatus!=''){
@@ -3772,9 +3773,21 @@ function updateBulkClassStatus() {
 				ddata['userId']=$(this).attr("data-userId");
 				ddata['schoolId']=SCHOOL_ID;
 				ddata['status']=demoStatus;
+				ddata['reason']=$.trim($(this).find(".statusReason").val() || '');
+				if(demoStatus=='Reschedule Session' && ddata['reason']==''){
+					reasonMissing=true;
+				}
 				data.push(ddata);
 			}
 		});
+		if(reasonMissing){
+			$("#teacherMeetingStatusErrorTxt").text('Please enter the reason for every rescheduled class.');
+			$("#teacherMeetingStatusErrorTxt").show();
+			setTimeout(function(){
+				$("#teacherMeetingStatusErrorTxt").hide();
+			},3000);
+			return false;
+		}
 	}
 	if(!classSaveFlag){
 		$("#teacherMeetingStatus #teacherMeetingStatusTable > tbody > tr:nth-child("+rowIndex+")").css({"background-color":"#f6c85a"});

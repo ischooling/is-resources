@@ -3,7 +3,7 @@ function getRecurringClassesData(formId, elementId) {
 	$.ajax({
 		type: "POST",
 		contentType: APPLICATION_JSON_VALUE,
-		url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/dashboard/teacher-recurring-class-content/",
+		url: BASE_URL + CONTEXT_PATH + SCHOOL_UUID + "/dashboard/teacher-recurring-class-content",
 		data: JSON.stringify(getRecurringBody(formId)),
 		dataType: 'json',
 		global: false,
@@ -50,7 +50,8 @@ function getActiveSessionReset(formId) {
     $("#" + formId + " #createdBy").val('').trigger('change');
     $("#" + formId + " #pageSize").val('25');
     $("#" + formId + " #studentEmailSearch").val('');
-	$("#" + formId + " #activeSession").val('0').trigger('change');
+	var currentSession = $("#" + formId + " #activeSession option[selected]").val();
+	$("#" + formId + " #activeSession").val(currentSession || '0').trigger('change');
 }
 
 function getRecurringBody(formId) {
@@ -75,6 +76,25 @@ function toggleFilter(elementId){
 	$('#'+elementId).stop().slideToggle();
 }
 
+function teacherDeleteRecurring(recurringClassId) {
+	$.ajax({
+		type : "POST",
+		contentType : APPLICATION_JSON_VALUE,
+		url : getURLForHTML('dashboard','recurring-update'),
+		data : JSON.stringify({controllType: 'INACTIVATE', recurringClassId: recurringClassId, schoolId: SCHOOL_ID, userId: USER_ID}),
+		dataType : 'json',
+		success : function(data) {
+			if (data['status'] == '1') {
+				showMessageTheme2(1, 'Recurring class inactivated.');
+				getRecurringClassesData('recurringClassFilter', 'recurringClassesTable');
+			} else {
+				showMessageTheme2(0, data['message']);
+			}
+			return false;
+		}
+	});
+}
+
 function recurringMail(recurringClassId,moduleId) {
 	hideMessage('');
 	var data={};
@@ -92,7 +112,7 @@ function recurringMail(recurringClassId,moduleId) {
 				showMessage(true, data['message']);
 			} else {
 				showMessage(false, data['message']);
-				setTimeout(function (){callDashboardPageSchool(moduleId,'teacher-recurring-class-content');},1000);
+				setTimeout(function (){getRecurringClassesData('recurringClassFilter', 'recurringClassesTable');},1000);
 			}
 			return false;
 		}

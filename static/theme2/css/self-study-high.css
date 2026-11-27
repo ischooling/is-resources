@@ -1,0 +1,9 @@
+/*
+ * Self-Study Dashboard revamp — High School (9-12) band, "Future-Ready Learning Hub".
+ *
+ * Shell file for Phase 6 (see student-self-study-dashboard-innovation-plan.html, §17).
+ * Additive only — reuse classes/tokens from new-theme-style.css, never override them.
+ * Dark-mode-first per the plan's §8 design system. Not yet linked from
+ * DashboardHeaderResourcePage.jsp; wire it in when Phase 6 adds real rules here, gated
+ * on [data-grade-band="HIGH"] set in Dashboard.jsp.
+ */

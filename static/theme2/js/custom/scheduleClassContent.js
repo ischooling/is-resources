@@ -34,6 +34,11 @@ function getMeetingTitle(){
 	var meetingSubject =  stname + " | " + subjectName;
 	
 	$('#classroomSessionFilter #meetingSubject').val(meetingSubject);
+	var subjectId = $('#classroomSessionFilter #subjectIds').val();
+	var studentUserId = $('#classroomSessionFilter #studentName option:selected').attr('data-studentid');
+	if($('#classroomSessionFilter #meetingFor').val()=='RM' && subjectId && studentUserId && typeof callTeacherBySubject === 'function'){
+		callTeacherBySubject('classroomSessionFilter', subjectId, studentUserId, 'RM', '');
+	}
 	refreshScheduleCustomFields('classroomSessionFilter');
 	// getTeacherList('classroomSessionFilter');
 }
@@ -47,7 +52,7 @@ function getRequestForSubmitMeetingForStudentSessionSlotsNew(formId,moduleId,con
 	var mTitle = $('#'+formId+' #meetingSubject').val();
 	var mType ='STUDENT_DOUBT_SESSION';
 	var mFor=$('#'+formId+' #meetingFor').val();
-	if(mFor=="PTM"){
+	if(mFor=="PTM" || mFor=="DEMO_TRANSLATION"){
 		mType =mFor;
 	}
 	if(formId=='recurringClass'){
@@ -81,7 +86,7 @@ function getRequestForSubmitMeetingForStudentSessionSlotsNew(formId,moduleId,con
 		 mType = $('#classroomSessionFilter #meetingType').val();
 		var studentStandardId = $('#classroomSessionFilter #studentName').val();
 		var stndard = $('#classroomSessionFilter #standardId').val();
-		if(mFor=="PTM" || mFor=="CUSTOM" ){
+		if(mFor=="PTM" || mFor=="CUSTOM" || mFor=="DEMO_TRANSLATION"){
 			mType =mFor;
 		}
 		if(mType==null || mType==undefined || mType=='0' ||mType=='' ){
@@ -91,7 +96,7 @@ function getRequestForSubmitMeetingForStudentSessionSlotsNew(formId,moduleId,con
 		meetingSlotDTO['studentStandardId'] = studentStandardId;
 		meetingSlotDTO['standardId'] = stndard;
 		meetingSlotDTO['timezone'] = $("#classroomSessionFilter #countryTimezone").val();
-		meetingSlotDTO['durationMins'] = $('#classroomSessionFilter #duration').val();
+		meetingSlotDTO['durationMins'] = mFor=="PTM" ? 15 : $('#classroomSessionFilter #duration').val();
 		meetingSlotDTO['subjectId'] = $("#classroomSessionFilter #subjectIds").val();
 		authentication['userId'] = $("#classroomSessionFilter #userId").val().trim();
 	}
@@ -120,6 +125,10 @@ function getRequestForSubmitMeetingForStudentSessionSlotsNew(formId,moduleId,con
 	authentication['userType'] = moduleId;
 	
 	request['authentication'] = authentication;
+	if(typeof ADMIN_CREATE_OVER_LIMIT !== 'undefined' && ADMIN_CREATE_OVER_LIMIT){
+		meetingSlotDTO['createOverLimit'] = true;
+		meetingSlotDTO['overLimitReason'] = adminOverLimitReason();
+	}
 	request['meetingSlotsDTO'] = meetingSlotDTO;
 	return request;
 }
@@ -214,7 +223,7 @@ function meetingSlotModalForValidateScheduleClass(formId,moduleId){
 				showMessageTheme2(0, "Student Name required")
 				return false;
 			}
-			if($('#classroomSessionFilter #meetingFor').val()!='PTM'){
+			if($('#classroomSessionFilter #meetingFor').val()!='PTM' && $('#classroomSessionFilter #meetingFor').val()!='DEMO_TRANSLATION'){
 				if(cName==undefined || cName==null ||  cName==0 || cName==''){
 					$(".meetingSlotAdd").prop("disabled", false);
 					showMessageTheme2(0, "Course Name required");
@@ -308,8 +317,13 @@ function meetingSlotModalForValidateScheduleClass(formId,moduleId){
 				var showValidatemessage=true;
 				var notAvailabileClassCount=0;
 				$('.meetingSlotAdd').html('<i class="fa fa-check"></i> Create Class');
+				$('#recurringClassShowModel .proceedRecurringClassbtn').hide();
+				var plannedRows = recurringclass.some(function(r){ return !!r['bookingStatus']; });
 				for(var i=0;i<recurringclass.length;i++){
-					if(recurringclass[i]['slotAvailable']!='Available' || recurringclass[i]['classBookedStatus']=='NA'){
+					var bookingStatus = recurringclass[i]['bookingStatus'];
+					var bookableByPlan = bookingStatus=='Can be booked';
+					var rowBlocked = bookingStatus ? !bookableByPlan : (recurringclass[i]['slotAvailable']!='Available' || recurringclass[i]['classBookedStatus']=='NA');
+					if(rowBlocked){
 						//$("#teacherAvailabilityWarningTitle").html(``);
 						htmlRecu = htmlRecu +"<tr class='text-danger'>";
 						if(recurringclass[i]['slotAvailable']!='Available'){
@@ -337,35 +351,34 @@ function meetingSlotModalForValidateScheduleClass(formId,moduleId){
 					htmlRecu +="</td>";
 					htmlRecu = htmlRecu +" <td>"+recurringclass[i]['slotAvailable']+"</td>";
 					var reason =recurringclass[i]['slotAvailableReason'];
+					if(recurringclass[i]['slotAvailable']=='Available' && (reason==null || reason=='' || reason=='NA' || reason=='N/A')){
+						reason='Available';
+					}
 					if(reason!=null && reason!='' && reason!='NA' && reason!=undefined){
 						htmlRecu = htmlRecu +" <td>"+reason.replaceAll("~","<br>")+"</td>";
 					}else{
 						htmlRecu = htmlRecu +" <td>"+reason+"</td>";
 					}
-					if(totalAvailableClass == 0){
+					var weekClassStatus =recurringclass[i]['classBookedStatus'];
+					if(bookableByPlan && (totalAvailableClass == 0 || weekClassStatus=="NA")){
+						htmlRecu = htmlRecu +" <td>Booked from "+(typeof escapeTeacherText === 'function' ? escapeTeacherText(recurringclass[i]['drawsFrom']||'other balance') : (recurringclass[i]['drawsFrom']||'other balance'))+"</td>";
+					}else if(totalAvailableClass == 0 || weekClassStatus=="NA"){
 						htmlRecu = htmlRecu +" <td>Student does not have any classes to book</td>";
 					}else{
-						var weekClassStatus =recurringclass[i]['classBookedStatus'];
-						if(weekClassStatus=="NA"){
-							htmlRecu = htmlRecu +" <td> Student does not have any classes to book</td>";
-						}else{
-							htmlRecu = htmlRecu +" <td>"+weekClassStatus+"</td>";
-						}
+						htmlRecu = htmlRecu +" <td>"+weekClassStatus+"</td>";
 					}
 					
 					htmlRecu = htmlRecu +"</tr>";
-					if(recurringclass[i]['slotAvailable']!='Available' || recurringclass[i]['classBookedStatus']=='NA'){
+					if(rowBlocked){
 						validRecurringClass=false;
 						
 						if(recurringclass[i]['classBookedStatus']=='NA'){
 							showValidatemessage=false;
 						}
 					}
-					if(USER_ROLE != 'TEACHER'){
-						if(saveForcefullyIfClassCountExceeds == 'Y' && recurringclass[i]['classBookedStatus']=='NA' && recurringclass[i]['slotAvailable']=='Available'){
-							validRecurringClass = true;
-							$('.meetingSlotAdd').html('<i class="fa fa-check"></i> Create Class anyway');
-						}
+					if(!plannedRows && saveForcefullyIfClassCountExceeds == 'Y' && recurringclass[i]['classBookedStatus']=='NA' && recurringclass[i]['slotAvailable']=='Available'){
+						validRecurringClass = true;
+						$('.meetingSlotAdd').html('<i class="fa fa-check"></i> Create Class anyway');
 					}
 				}
 				if(validRecurringClass){
@@ -380,19 +393,28 @@ function meetingSlotModalForValidateScheduleClass(formId,moduleId){
 					}
 				}
 				$("#trRecurring").html(htmlRecu);
+				if(typeof enhanceTeacherValidation === 'function'){
+					enhanceTeacherValidation(recurringclass, {oneDay: true, formId: formId, moduleId: moduleId, meetingType: meetingType});
+				}
 				if(USER_ROLE != 'TEACHER'){
-					if(totalAvailableClass<=0 && saveForcefullyIfClassCountExceeds=='N'){
+					if(!plannedRows && totalAvailableClass<=0 && saveForcefullyIfClassCountExceeds=='N'){
 						$('.meetingSlotAdd').hide();
 						$(".validator-message-count").show()
 					}else{
 						$(".validator-message-count").hide()
+					}
+					if(typeof adminOverLimitControls === 'function'){
+						adminOverLimitControls(recurringclass, true);
+					}
+					if(typeof tidyAdminValidation === 'function'){
+						tidyAdminValidation(recurringclass, true);
 					}
 				}
 
 				if(meetingTypeValue==null || meetingTypeValue==undefined || meetingTypeValue==''){
 					meetingTypeValue ="ODM";
 				}
-				if(meetingTypeValue == "ODM" || meetingTypeValue == "PTM"  ){
+				if(meetingTypeValue == "ODM" || meetingTypeValue == "PTM" || meetingTypeValue == "DEMO_TRANSLATION"){
 					if(formId!='classroomSessionFilter'){
 						$("#meetingType").val(meetingTypeValue);
 					}
@@ -476,7 +498,7 @@ function meetingSlotModalForScheduleClass(formId,moduleId){
 		// }
 
 	}else{
-		if(meetingFor=="PTM" || meetingFor == "CUSTOM"){
+		if(meetingFor=="PTM" || meetingFor == "CUSTOM" || meetingFor == "DEMO_TRANSLATION"){
 			meetingType =meetingFor;
 		}
 		if(meetingType==null || meetingType==undefined || meetingType=='0' ||meetingType=='' ){
@@ -590,22 +612,27 @@ function showHideMeetingCreationForm(data, moduleId){
 	$("#startTimeHours").val('');
 	$("#startTimeMins").val('');
 	$("#customTitle").val('');
-	if(data=="ODM" || data=="PTM" || data=="CUSTOM"){
+	if(data=="ODM" || data=="PTM" || data=="CUSTOM" || data=="DEMO_TRANSLATION"){
 		$('#showMeetingModalDiv').show()
 		$('#manageSessionContentDiv').hide();
 		$(".countryTimezoneWrapper, .meetingDateWrapper, .startTimeHoursWrapper, .durationWrapper").show();
 		$(".hide-on-odm").hide();
-		if(data=="PTM"){
+		if(data=="PTM" || data=="DEMO_TRANSLATION"){
 			$('#classroomSessionFilter #courseNameDiv').hide();
 		}else{
 			$('#classroomSessionFilter #courseNameDiv').show();
 		}
+		if(data=="DEMO_TRANSLATION"){
+			$('#classroomSessionFilter #duration').val('30');
+		}
+		applyPtmDateAndDuration(data=="PTM");
 		if(data=="CUSTOM"){
 			$('#classroomSessionFilter #customTitleDiv').show();
 		}else{
 			$('#classroomSessionFilter #customTitleDiv').hide();
 		}
 	}else{
+		applyPtmDateAndDuration(false);
 		$('#classroomSessionFilter #customTitleDiv').hide();
 		$('#manageSessionContentDiv').show();
 		$('#showMeetingModalDiv').hide();
@@ -700,7 +727,7 @@ function getScheduleSessionFilter(roleAndModule, schoolId, userId, role){
 				html+=getScheduleCustomField(
 					'col-lg-3 col-md-4 col-sm-6 col-12',
 					'Type of Class',
-					getScheduleSelect('meetingFor', 'meetingFor', '<option value="ODM" selected>One Day Class</option><option value="PTM">Book a PTM</option><option value="CUSTOM">Create Custom Class</option>', 'onchange="showHideMeetingCreationForm(this.value, '+roleAndModule.moduleId+')"'),
+					getScheduleSelect('meetingFor', 'meetingFor', '<option value="ODM" selected>One Day Class</option><option value="RM">Recurring Class</option><option value="PTM">Book a PTM</option><option value="CUSTOM">Create Custom Class</option>' + (role=='TEACHER' ? '' : '<option value="DEMO_TRANSLATION">Book a Demo/Translation Class</option>'), 'onchange="showHideMeetingCreationForm(this.value, '+roleAndModule.moduleId+')"'),
 					'id="meetingTypeDiv"'
 				);
 				html+=getScheduleCustomField(
@@ -752,6 +779,9 @@ function getScheduleSessionFilter(roleAndModule, schoolId, userId, role){
 							: getScheduleTextInput('subjectIds', 'subjectIds', '', 'maxlength="40" onkeydown="return M.isChars(event);"'),
 						'id="courseNameDiv"'
 					);
+					if(role=='TEACHER'){
+						html+='<div class="col-12" id="teacherFormBalanceTiles"></div>';
+					}
 					if(role!='TEACHER'){
 						html+=getScheduleCustomField(
 							'col-lg-3 col-md-4 col-sm-6 col-12',
@@ -788,6 +818,7 @@ function getScheduleSessionFilter(roleAndModule, schoolId, userId, role){
 							+'<button class="btn btn-primary mr-1 validationBtn" onclick="return meetingSlotModalForValidateScheduleClass(\'classroomSessionFilter\','+roleAndModule.moduleId+');">Validate Class</button>'
 							+'<button class="btn btn-danger" type="button" onclick="resetRecurring(\'classroomSessionFilter\','+roleAndModule.moduleId+')"><i class="fa fa-undo"></i>&nbsp;Reset</button>'
 						+'</div>'
+						+(USER_ROLE == 'TEACHER' ? '<div class="col-12 mt-3">'+teacherBookingRulesCard()+'</div>' : '')
 			+'</div>'
 		+'</form>'
 	+'</div>'
@@ -957,8 +988,12 @@ function getUpdateMeetingResultModal(roleAndModule, role){
 						+'<div class="col-md-12 col-sm-12 col-12">'
 							+'<div class="form-group">'
 								+'<label>Update Class Status</label> '
-								+'<select class="form-control" name="meetingResult" id="meetingResult" required>'
+								+'<select class="form-control" name="meetingResult" id="meetingResult" required onchange="toggleMeetingReason()">'
 								+'</select>'
+							+'</div>'
+							+'<div class="form-group meeting-reason-group" style="display:none;">'
+								+'<label>Reason <span class="text-danger">*</span></label>'
+								+'<textarea class="form-control" name="meetingReason" id="meetingReason" rows="3" maxlength="1000"></textarea>'
 							+'</div>'
 						+'</div>'
 					+'</div>'
@@ -1116,8 +1151,9 @@ function validateOneDayMeetingByTeacherModal(moduleId){
 						+'</div>'
 						+'<div class="modal-body">'
 							+'<div class="col-12" id="teacherAvailabilityWarningTitle"></div>'
+							+'<div class="col-12 p-0" id="teacherBookingTiles"></div>'
 							+'<div class="col-lg-12 col-md-12 col-sm-12 col-12 p-0">'
-								+'<div class="full">'
+								+'<div class="full tb-scroll" style="max-height:55vh;overflow:auto;">'
 									+'<table class="table table-bordered nowrap" >'
 										+'<thead>'
 											+'<tr>'
@@ -1126,15 +1162,20 @@ function validateOneDayMeetingByTeacherModal(moduleId){
 												+'<th class="" style="font-weight: bold">Class Timings</th>'
 												+'<th class="" style="font-weight: bold">Slot Available</th>'
 												+'<th class="" style="font-weight: bold">Reason for Availability</th>'
-												+'<th class="" style="font-weight: bold">Student\'s Weekly Class Status</th>'
+												+'<th class="" style="font-weight: bold">Student Class Count Status</th>'
+												+'<th class="" style="font-weight: bold">Booking Status</th>'
+												+'<th class="" style="font-weight: bold">Draws from</th>'
 											+'</tr>'
 										+'</thead>'
 										+'<tbody id="trRecurring"></tbody>'
 									+'</table>'
 								+'</div>'
+								+'<div class="full" id="teacherBookingFooter"></div>'
 								+'<div class="full">'
+									+'<button class="btn btn-sm btn-primary float-right ml-2" id="teacherNotifyAdminBtn" style="display:none" disabled onclick="teacherNotifyAdmin();"><i class="fa fa-paper-plane"></i>&nbsp;Notify admin</button>'
 									+'<p class="font-weight-bold validator-message">A class has already been scheduled for this time. Please either reschedule the existing class through "Class Status" or choose a different time.</p>'
 									+'<button class="btn btn-sm btn-success meetingSlotAdd float-right" style="display:none" onclick="booksclassOutsideAvailabilityConfirmationModal(\'\',\'classroomSessionFilter\','+moduleId+');"><i class="fa fa-check"></i>&nbsp;<span>Save</span></button>'
+									+'<button class="btn btn-sm btn-success proceedRecurringClassbtn float-right" style="display:none" onclick="booksclassOutsideAvailabilityConfirmationModal(\'hide-on-odm\',\'classroomSessionFilter\','+moduleId+');"><i class="fa fa-check"></i>&nbsp;<span>Save</span></button>'
 								+'</div>'
 							+'</div>'
 						+'</div>'
@@ -1174,4 +1215,167 @@ function copyMeetingLink(){
 function createClassButtonHide(){
 	console.log('hide');
 	$(".meetingSlotAdd").hide();
+}
+
+function lockPtmDuration() {
+	if ($('#classroomSessionFilter #meetingFor').val() == 'PTM') {
+		var d = $('#classroomSessionFilter #duration');
+		if (d.val() != '15') {
+			d.val('15');
+		}
+		d.prop('disabled', true);
+	}
+}
+
+$(document).on('change input', '#classroomSessionFilter select, #classroomSessionFilter input', lockPtmDuration);
+$(document).ajaxComplete(function () {
+	setTimeout(lockPtmDuration, 0);
+});
+
+var PTM_ONLY_SATURDAY = false;
+
+// Styling for the eligible (selectable) calendar days. Injected once so the
+// green highlight ships with this behaviour instead of depending on a CSS build.
+(function injectPtmDatepickerStyles() {
+	if (document.getElementById('ptmEligibleDatepickerStyles')) {
+		return;
+	}
+	var css =
+		// Eligible AND bookable Saturday — vivid green pill.
+		'.datepicker td.day.ptm-eligible:not(.disabled){background:#e6f7ec !important;color:#1e7e34 !important;font-weight:600;border-radius:6px;}'
+		+ '.datepicker td.day.ptm-eligible:not(.disabled):hover{background:#28a745 !important;color:#fff !important;}'
+		+ '.datepicker td.day.ptm-eligible:not(.disabled).active,.datepicker td.day.ptm-eligible:not(.disabled).active:hover,.datepicker td.day.ptm-eligible:not(.disabled).active.focused{background:#1e7e34 !important;color:#fff !important;}'
+		// Eligible but not bookable (holiday or past date) — muted green so it reads as blocked; the holiday marker stays visible on top.
+		+ '.datepicker td.day.ptm-eligible.disabled,.datepicker td.day.ptm-eligible.disabled:hover{background:#eef7f0 !important;color:#a9ccb5 !important;font-weight:400 !important;border-radius:6px;}';
+	var style = document.createElement('style');
+	style.id = 'ptmEligibleDatepickerStyles';
+	style.type = 'text/css';
+	style.appendChild(document.createTextNode(css));
+	(document.head || document.getElementsByTagName('head')[0]).appendChild(style);
+})();
+
+// Decides, per calendar day, whether it is selectable and how it is marked.
+// During PTM only Saturdays are eligible and are highlighted green via the
+// `ptm-eligible` class. Returning undefined restores normal (non-PTM) behaviour.
+function ptmBeforeShowDay(date) {
+	if (!PTM_ONLY_SATURDAY) {
+		return;
+	}
+	if (date.getDay() === 6) {
+		// Mark Saturdays eligible (green) but do NOT force-enable them: this way a
+		// holiday or past Saturday stays disabled (shown muted green) through the
+		// datepicker's own datesDisabled / startDate handling, instead of becoming
+		// clickable because beforeShowDay overrode it.
+		return { classes: 'ptm-eligible' };
+	}
+	return { enabled: false };
+}
+
+function getMeetingDatePicker() {
+	var picker = $('#classroomSessionFilter #meetingDate');
+	if (!picker.length) {
+		picker = $('#meetingDate');
+	}
+	return picker;
+}
+
+// (Re)initialises the meeting-date picker so bootstrap-datepicker renders the
+// eligible-day highlighting and disabling itself through beforeShowDay. This
+// replaces the old MutationObserver that re-disabled cells after every render,
+// which fought the prev/next month navigation and never highlighted anything.
+// The bundled bootstrap-datepicker only treats a click as a month change when
+// the clicked cell's className is EXACTLY "prev"/"next" (a full-string switch).
+// On this page the arrow cell carries an extra class / nested icon, so that
+// match fails and the arrows do nothing (day cells use looser matching, so they
+// keep working). We drive the navigation ourselves in the capture phase, which
+// works no matter what extra markup sits on the arrow.
+function bindRobustMonthNav(picker) {
+	var dp = picker.data('datepicker');
+	if (!dp || !dp.picker || !dp.picker.length) {
+		return;
+	}
+	var pickerEl = dp.picker[0];
+	if (pickerEl.__ptmNavBound) {
+		return;
+	}
+	pickerEl.__ptmNavBound = true;
+	// navStep per view: days=1 month, months=1 year, years=10 yrs, decades=100.
+	var NAV_STEP = [1, 1, 10, 100];
+	pickerEl.addEventListener('click', function (e) {
+		var cell = e.target.closest ? e.target.closest('.prev, .next') : null;
+		if (!cell || !pickerEl.contains(cell)) {
+			return;
+		}
+		e.preventDefault();
+		e.stopPropagation();
+		e.stopImmediatePropagation();
+		var dir = cell.classList.contains('prev') ? -1 : 1;
+		var step = (NAV_STEP[dp.viewMode] || 1) * dir;
+		if (dp.viewMode === 0) {
+			dp.viewDate = dp.moveMonth(dp.viewDate, step);
+		} else {
+			dp.viewDate = dp.moveYear(dp.viewDate, step);
+		}
+		dp.fill();
+	}, true);
+}
+
+function reinitMeetingDatePicker() {
+	var picker = getMeetingDatePicker();
+	if (!picker.length) {
+		return;
+	}
+	var current = picker.val();
+	if (picker.data('datepicker')) {
+		picker.datepicker('destroy');
+	}
+	picker.datepicker({
+		autoclose: true,
+		format: 'M dd, yyyy',
+		beforeShowDay: ptmBeforeShowDay
+	});
+	if (current) {
+		picker.datepicker('update', current);
+	}
+	bindRobustMonthNav(picker);
+}
+
+// Attach the robust prev/next handler to EVERY #meetingDate picker the moment it
+// opens — this covers the recurring-class form and the very first open (before
+// any PTM reinit runs), where the bundled arrow handler is otherwise dead here.
+// bindRobustMonthNav is idempotent per picker element, so this never double-binds.
+$(document).on('show', '#meetingDate', function () {
+	bindRobustMonthNav($(this));
+});
+
+function applyPtmDateAndDuration(isPtm) {
+	var duration = $('#classroomSessionFilter #duration');
+	// Drives ptmBeforeShowDay (green highlight + non-Saturday disabling); without
+	// this the flag stays false and no eligible-day styling is applied.
+	PTM_ONLY_SATURDAY = isPtm;
+	if (isPtm) {
+		duration.val('15').prop('disabled', true);
+	} else if (duration.prop('disabled')) {
+		duration.prop('disabled', false);
+		if (duration.val() == '15') {
+			duration.val('50');
+		}
+	}
+	if (!document.getElementById('ptmSaturdayStyle')) {
+		$('<style id="ptmSaturdayStyle"></style>').text('body.ptm-saturday-only .datepicker-days td.day:not(:nth-child(7)){opacity:.3;pointer-events:none;cursor:not-allowed}').appendTo('head');
+	}
+	$('body').toggleClass('ptm-saturday-only', !!isPtm);
+	var picker = getMeetingDatePicker();
+	if (isPtm && picker.data('datepicker')) {
+		var chosen = picker.datepicker('getDate');
+		if (chosen && chosen.getDay() !== 6) {
+			$('#classroomSessionFilter #meetingDate').val('');
+		}
+	}
+	reinitMeetingDatePicker();
+}
+
+
+if (!window.__ptmDurationTimer) {
+	window.__ptmDurationTimer = setInterval(lockPtmDuration, 300);
 }

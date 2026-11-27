@@ -217,7 +217,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
         var title = rawEvent.eventTitle;
         if (!title && eventType !== "class") {
             title = rawEvent.title || "";
-        }else if(rawEvent.category == "CLASS" && (rawEvent.eventType == "CUSTOM" || rawEvent.eventType == "PTM" || rawEvent.eventType == "BATCH")){
+        }else if(rawEvent.category == "CLASS" && (rawEvent.eventType == "CUSTOM" || rawEvent.eventType == "PTM" || rawEvent.eventType == "DEMO_TRANSLATION" || rawEvent.eventType == "BATCH")){
             title = rawEvent.title
         }else if(title && rawEvent.category == "BATCH"){
             title = rawEvent.title || "";
@@ -240,7 +240,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
         // }
         var normalized = $.extend({}, rawEvent, {
             id: rawEvent.id || rawEvent.eventId || ("event-" + Math.random().toString(36).slice(2)),
-            title: ((rawEvent.category == "CLASS" && (rawEvent.eventType == "PTM" || rawEvent.eventType == "CUSTOM" || rawEvent.eventType == "BATCH")) ? title : rawEvent.category != "CLASS"?title:""),
+            title: ((rawEvent.category == "CLASS" && (rawEvent.eventType == "PTM" || rawEvent.eventType == "CUSTOM" || rawEvent.eventType == "DEMO_TRANSLATION" || rawEvent.eventType == "BATCH")) ? title : rawEvent.category != "CLASS"?title:""),
             start: startMoment ? startMoment.format() : rawEvent.start,
             end: endMoment ? endMoment.format() : rawEvent.end,
             name: "",
@@ -1538,11 +1538,11 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                         }
                         ${USER_ROLE == "STUDENT" ? getEventSubtitle(event):`<b class="${getStatusLabel(status) == "PAST"?"text-black-50":"text-dark"}">${getEventSubtitle(event)}</b>`}${getStatusLabel(status) == "PAST" && (event.eventKind != "assignment" && event.eventKind != "activity") ?`&nbsp;<label class="m-0 font-weight-semi-bold" style="color:${getDisplayStatusColor(getEventDisplayStatus(event), event.eventKind, event.courseId)}">${joinStatusLabel}</label>`:""}
                         ${
-                            (event.category !="BATCH" && event.category == "CLASS" && event.eventType != "CUSTOM" && event.eventType != "PTM") ? 
+                            (event.category !="BATCH" && event.category == "CLASS" && event.eventType != "CUSTOM" && event.eventType != "PTM" && event.eventType != "DEMO_TRANSLATION") ?
                                 `<span class="full font-weight-semi-bold ${getStatusLabel(status) == "PAST"?"text-black-50":"text-dark"}">
                                     ${USER_ROLE == "TEACHER" ? `Student Name: ${event.origName}`:`${event.eventType == "SYS-TRAINING" ? `Admin Name: ${event.salutation}&nbsp;${event.origName}`:`${(event.category == "BATCH" || event.category == "CLASS" || event.eventType == "CUSTOM")? `<span class="full font-weight-semi-bold ${getStatusLabel(status) == "PAST"?"text-black-50":"text-dark"}">${USER_ROLE == "STUDENT" ? `Teacher Name:&nbsp;${event.salutation}.&nbsp;${event.origName}`:``}</span>`:``}`}`} 
                                 </span>`:
-                            `${(event.category == "BATCH" || event.category == "CLASS" || event.eventType == "CUSTOM") && event.eventType != "PTM" ? `<span class="full font-weight-semi-bold ${getStatusLabel(status) == "PAST"?"text-black-50":"text-dark"}">${USER_ROLE == "STUDENT" ? `Teacher Name:&nbsp;${event.salutation}.&nbsp;${event.origName}`:`${event.category != "BATCH"? `Student Name:&nbsp;${event.origName}`:``}`}</span>`:``}`
+                            `${(event.category == "BATCH" || event.category == "CLASS" || event.eventType == "CUSTOM") && event.eventType != "PTM" && event.eventType != "DEMO_TRANSLATION" ? `<span class="full font-weight-semi-bold ${getStatusLabel(status) == "PAST"?"text-black-50":"text-dark"}">${USER_ROLE == "STUDENT" ? `Teacher Name:&nbsp;${event.salutation}.&nbsp;${event.origName}`:`${event.category != "BATCH"? `Student Name:&nbsp;${event.origName}`:``}`}</span>`:``}`
                         }
                         
                     </div>
@@ -2274,7 +2274,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
                     console.log(response);
                     html+=`<div id="classWaringMessage" class="full text-center mb-4">
                         <h5 class="font-18 text-left mb-2" style="color:${getColorCode}">${response.className}</h5>
-                        ${((eventType == "CUSTOM" || eventType == "PTM") ? '<h6 class="font-weight-semi-bold mb-3 text-left text-dark">' + escapeHtml(classTitle) + '</h6>':"")}
+                        ${((eventType == "CUSTOM" || eventType == "PTM" || eventType == "DEMO_TRANSLATION") ? '<h6 class="font-weight-semi-bold mb-3 text-left text-dark">' + escapeHtml(classTitle) + '</h6>':"")}
                         <ul class="full p-0 m-0">
                                 ${/*
                                     <li class="d-flex flex-wrap mb-1">
@@ -2688,7 +2688,7 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
         var body =
             (event.category == "BATCH" ? '<h4 class="font-weight-semi-bold mb-3 text-center" style="color:' + colorCode + '">' + event.batchName + '</h4>':'' )+
             '<h5 class="font-weight-semi-bold mb-3" style="color:' + colorCode + '">' + escapeHtml(title) + '</h5>' +
-            (((event.category == "CLASS" && event.eventType == "CUSTOM") || (event.category == "CLASS" && event.eventType == "PTM")) ? '<h6 class="font-weight-semi-bold mb-3 text-dark">' + escapeHtml(event.title) + '</h6>':"")+
+            (((event.category == "CLASS" && event.eventType == "CUSTOM") || (event.category == "CLASS" && (event.eventType == "PTM" || event.eventType == "DEMO_TRANSLATION"))) ? '<h6 class="font-weight-semi-bold mb-3 text-dark">' + escapeHtml(event.title) + '</h6>':"")+
             
             '<ul class="full p-0 m-0 list-unstyled">' +
                 // row("Course", courseName) +
@@ -3273,7 +3273,11 @@ var FEEDBACK_EVENT_MAP = (typeof FEEDBACK_EVENT_MAP !== "undefined" && FEEDBACK_
         getRequestForNewSchoolCalendar: getRequestForNewSchoolCalendar,
         callSchoolCalendarNew: callSchoolCalendarNew,
         getLiveClassAttendanceStatus: getLiveClassAttendanceStatus,
-        initializeDashboardCalendarNew: initializeDashboardCalendarNew
+        initializeDashboardCalendarNew: initializeDashboardCalendarNew,
+        // Self-Study dashboard revamp (Phase 4, Oct 2026): read-only accessor so band-specific
+        // widgets (e.g. elementaryHome.js) can reuse the already-fetched course/assignment data
+        // instead of re-fetching it. Callers must treat the returned object as read-only.
+        getStudentCalendarState: function() { return studentCalendarState; }
     };
     // Grouped namespace access: window.dashboardCalendarNew.<fnName>(...)
     window.dashboardCalendarNew = __dashboardCalendarInternals;

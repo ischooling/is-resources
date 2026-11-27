@@ -241,7 +241,12 @@ function getApprovedTeacherListHtml(teahcerRequestList){
 									}else{
 										html+=`<a class="dropdown-item"   href="javascript:void(0);" onclick="return showWarningMessage('Are you sure you want to activate create custom class Option?','activateInactiveBookaClassForPtmAndCustom(\\\'teacherOfficialMailForm\\\',\\\'TEACHER\\\',\\\'CUSTOM\\\',\\\'${teacherRequest.teacherId}\\\',\\\'${moduleId}\\\',\\\'Y\\\') '); "><i class="fa fa-edit"></i>&nbsp;Activate Create Custom Class Option</a>`;
 									}
-									html+=`<a class="dropdown-item" onclick="callTeacherAddBufferAvailaibilitylModal('${teacherRequest.teacherId}','${teacherRequest.userId}','${teacherRequest.bufferHoursToAddAvailability == undefined ? "" : teacherRequest.bufferHoursToAddAvailability}');" href="javascript:void(0);"><i class="fa fa-edit"></i>&nbsp; Add/Edit Buffer Hours to Add Availability</a>`;
+									if(teacherRequest.showRecurringOption == 'Y'){
+										html+=`<a class="dropdown-item"   href="javascript:void(0);" onclick="return showWarningMessage('Are you sure you want to inactive recurring class Option?','activateInactiveBookaClassForPtmAndCustom(\\\'teacherOfficialMailForm\\\',\\\'TEACHER\\\',\\\'RECURRING\\\',\\\'${teacherRequest.teacherId}\\\',\\\'${moduleId}\\\',\\\'N\\\') '); "><i class="fa fa-edit"></i>&nbsp;Inactive Recurring Class Option</a>`;
+									}else{
+										html+=`<a class="dropdown-item"   href="javascript:void(0);" onclick="return showWarningMessage('Are you sure you want to activate recurring class Option?','activateInactiveBookaClassForPtmAndCustom(\\\'teacherOfficialMailForm\\\',\\\'TEACHER\\\',\\\'RECURRING\\\',\\\'${teacherRequest.teacherId}\\\',\\\'${moduleId}\\\',\\\'Y\\\') '); "><i class="fa fa-edit"></i>&nbsp;Activate Recurring Class Option</a>`;
+									}
+																		html+=`<a class="dropdown-item" onclick="callTeacherAddBufferAvailaibilitylModal('${teacherRequest.teacherId}','${teacherRequest.userId}','${teacherRequest.bufferHoursToAddAvailability == undefined ? "" : teacherRequest.bufferHoursToAddAvailability}');" href="javascript:void(0);"><i class="fa fa-edit"></i>&nbsp; Add/Edit Buffer Hours to Add Availability</a>`;
 
 								}
 							html+=`</div>

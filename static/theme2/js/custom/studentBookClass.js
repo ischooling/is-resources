@@ -243,7 +243,9 @@ async function bookingSlotModalNew(
   roleModuleId,
   studentStandardId,
   teacherAssignFlag,
-  weekLeftClassCount
+  weekLeftClassCount,
+  assignedTeacherCount,
+  skipDemand
 ) {
   if (!teacherAssignFlag) {
     showMessageTheme2(2, "You do not have a teacher assigned yet", "", true);
@@ -257,6 +259,9 @@ async function bookingSlotModalNew(
       true
     );
     return false;
+  }
+  if (!skipDemand && typeof demandBookingOpen === "function" && !(typeof isDummyStudentMode === "function" && isDummyStudentMode())) {
+    return demandBookingOpen(subjectId, roleModuleId, studentStandardId, weekLeftClassCount);
   }
   var data = {};
   data["userId"] = USER_ID;
@@ -545,11 +550,12 @@ function callForStudentBookClassSlots(formId, moduleId, roleModuleId) {
   }
   bookClassSubmitInProgress = true;
   setBookClassConfirmButtonsDisabled(true);
+  var bookRequest = getRequestForStudentBookClassSlots(formId, moduleId);
   $.ajax({
     type: "POST",
     contentType: APPLICATION_JSON_VALUE,
     url: getURLForHTML("dashboard", "student-book-session-slots-submit-new"),
-    data: JSON.stringify(getRequestForStudentBookClassSlots(formId, moduleId)),
+    data: JSON.stringify(bookRequest),
     dataType: "json",
     cache: false,
     timeout: 600000,
@@ -559,6 +565,9 @@ function callForStudentBookClassSlots(formId, moduleId, roleModuleId) {
         setBookClassConfirmButtonsDisabled(false);
         showMessageTheme2(0, data["message"], "", false);
       } else {
+        if (typeof demandLinkBooking === "function") {
+          demandLinkBooking(bookRequest.meetingSlotDTO.meetingDate);
+        }
          showMessageTheme2(1, data["message"], "", false);
         $("#weeklyBookClassConfirmationModal").modal("hide");
         setTimeout(function () { renderBookClassContent(

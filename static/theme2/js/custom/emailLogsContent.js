@@ -312,6 +312,10 @@ function emailLogProblemsContent() {
 		+ '<p class="el-muted mb-3">Addresses your school\'s emails could not reach, newest problem first. '
 		+ 'SendGrid stops sending to an address after it bounces, so these people may be missing every email until the address is corrected. '
 		+ 'Emails the nightly archive has moved are not counted here.</p>'
+		// Shown by emailLogs.js only when this admin has the Contact problems page in the menu.
+		+ '<p class="mb-3" id="elContactProblemsRow" hidden><button type="button" class="btn btn-outline-primary btn-sm" id="elContactProblemsOpen">'
+		+ '<i class="fa fa-address-book-o" aria-hidden="true"></i>&nbsp;Contact problems (email, mobile, WhatsApp, app)</button>'
+		+ ' <span class="el-muted">Ask these people to correct their details.</span></p>'
 		+ '<form id="elProblemsForm" class="form-row align-items-end" novalidate>'
 		+ '<div class="form-group col-md-3"><label for="elProblemsFrom">From</label><input type="date" id="elProblemsFrom" class="form-control"></div>'
 		+ '<div class="form-group col-md-3"><label for="elProblemsTo">To</label><input type="date" id="elProblemsTo" class="form-control"></div>'

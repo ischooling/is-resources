@@ -642,6 +642,16 @@ function advanceStudentSearchReset(formId) {
 	$("#" + formId + " #filterProfileFieldValue")
 		.val("")
 		.trigger("change");
+	// Manage User List already holds the session list (meta.sessions) it built this dropdown from, so restore
+	// it from there. Re-fetching SESSIONS-LIST through /common/masters (a public route that only sees a signed-in
+	// user when X-Account is sent) answered "REQUEST KEY IS NOT AVAILABLE IN REQUEST DATA BODY OR INVALID".
+	if (typeof __manageUserListMeta !== "undefined" && __manageUserListMeta
+		&& __manageUserListMeta.sessions && typeof muStudentSessionOptions === "function") {
+		$("#" + formId + " #activeSession")
+			.html(muStudentSessionOptions(__manageUserListMeta.sessions))
+			.trigger("change");
+		return;
+	}
 	getSessionMasterList(formId, 'activeSession', false);
 }
 

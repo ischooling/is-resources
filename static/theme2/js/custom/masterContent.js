@@ -1587,6 +1587,7 @@ function getTeacherAssignedGrade(formId, userId) {
 
                         const showPTM = result[0].extra2;
                         const showCustom = result[0].extra3;
+                        const showDemo = result[0].extra5;
 
                         // Grade list
                         $.each(result, function (k, v) {
@@ -1607,6 +1608,16 @@ function getTeacherAssignedGrade(formId, userId) {
 
                         if (showCustom === "N") {
                             $("#meetingFor option[value='CUSTOM']").remove();
+                        }
+
+                        if (showDemo !== "Y") {
+                            $("#meetingFor option[value='DEMO_TRANSLATION']").remove();
+                        } else if ($("#meetingFor option[value='DEMO_TRANSLATION']").length === 0 && $("#meetingFor").length) {
+                            $("#meetingFor").append('<option value="DEMO_TRANSLATION">Book a Demo/Translation Class</option>');
+                        }
+
+                        if (result[0].extra4 !== "Y") {
+                            $("#meetingFor option[value='RM']").remove();
                         }
                     }
 
@@ -4746,4 +4757,44 @@ function getRecentNoticeSystemActivityModal(){
     </div>
   </div>`;
   return html;
+}
+
+function showClassHistory(kind, id) {
+	var esc = function (v) { return $('<div>').text(v == null ? '' : String(v)).html(); };
+	$('#classHistoryModal').remove();
+	$('body').append('<div class="modal fade" id="classHistoryModal" tabindex="-1" role="dialog"><div class="modal-dialog modal-xl" role="document"><div class="modal-content">'
+		+ '<div class="modal-header py-2 bg-primary text-white"><h5 class="modal-title">' + (kind == 'recurring' ? 'Recurring class history' : 'Class history') + '</h5>'
+		+ '<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>'
+		+ '<div class="modal-body" style="max-height:70vh;overflow:auto"><p class="text-muted mb-0">Loading…</p></div></div></div></div>');
+	$('#classHistoryModal').modal('show');
+	$.ajax({
+		type: 'POST',
+		contentType: APPLICATION_JSON_VALUE,
+		url: getURLForHTML('dashboard', kind == 'recurring' ? 'recurring-history' : 'class-history'),
+		data: JSON.stringify(kind == 'recurring' ? { recurringId: id } : { meetingId: id }),
+		dataType: 'json',
+		global: false,
+		success: function (response) {
+			var body = $('#classHistoryModal .modal-body');
+			if (response.status != '1') {
+				body.html('<p class="text-danger mb-0">' + esc(response.message || 'Could not load the history.') + '</p>');
+				return;
+			}
+			var rows = response.rows || [];
+			if (!rows.length) {
+				body.html('<p class="mb-0">No history recorded for this ' + (kind == 'recurring' ? 'recurring class' : 'class') + ' yet.</p>');
+				return;
+			}
+			var html = '<table class="table table-bordered table-sm mb-0" style="font-size:13px"><thead><tr>'
+				+ (kind == 'recurring' ? '<th>Class</th>' : '') + '<th>When</th><th>What happened</th><th>By</th><th>Reason</th><th>Class count</th><th>Count returned</th></tr></thead><tbody>';
+			$.each(rows, function (i, r) {
+				html += '<tr>' + (kind == 'recurring' ? '<td style="white-space:nowrap">' + esc(r.classTime) + '</td>' : '')
+					+ '<td style="white-space:nowrap">' + esc(r.at) + '</td><td>' + esc(r.action) + '</td><td>' + esc(r.by) + '</td><td>' + esc(r.reason) + '</td><td>' + esc(r.bucket) + '</td><td>' + esc(r.countReturned) + '</td></tr>';
+			});
+			body.html(html + '</tbody></table>');
+		},
+		error: function () {
+			$('#classHistoryModal .modal-body').html('<p class="text-danger mb-0">Could not load the history.</p>');
+		}
+	});
 }
